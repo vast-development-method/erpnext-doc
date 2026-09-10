@@ -123,3 +123,9 @@ Submission failure must leave progress, stock, financial entries and closure fla
 ## Acceptance obligations
 
 Verify every numeric row above; close and reopen one row; close all rows; block reopening an all-closed parent; block processing a newly closed source through an older draft; preserve closed rows omitted from an edit request; clear closure on amendment; preserve original return progress; test allowance boundaries and role override; and run two competing submissions against the same remaining quantity.
+
+## Financial and physical closure invariants
+
+Row closure must preserve actual received, delivered, billed and returned contributions while changing the remaining commitment selected by the parent policy. For a ten-unit purchase order received six units at 12.00, closing the last four units leaves warehouse quantity six and received stock value 72.00. If the six units are already invoiced, supplier debt remains 72.00 until settled or credited. If they are not invoiced, the 72.00 received-but-unbilled clearing balance remains. A close operation that credits inventory or debits supplier payable merely to make the order look completed is incorrect.
+
+The local calculation catalog now records the exact threshold, zero-value, all-excluded and all-closed cases as data. Its `closed_order_preserves_posted_effects` example separates ordered quantity ten, actual quantity six, closed parent, sixty percent actual progress, released commitment four and unchanged recognized stock or liability. This cross-check prevents a reader from equating a closed business status with one hundred percent physical performance or financial settlement.

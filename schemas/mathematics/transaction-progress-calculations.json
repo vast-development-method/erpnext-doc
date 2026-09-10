@@ -1,5 +1,5 @@
 {
-  "catalog_version": "1.0",
+  "catalog_version": "2.0",
   "title": "Transaction progress and row closure calculations",
   "evidence_level": "source reviewed with independently derived arithmetic cases",
   "reference_execution": "not performed",
@@ -20,11 +20,6 @@
         "Clamp each completed magnitude to its own expected magnitude.",
         "If sum of expected magnitudes is zero, return zero.",
         "Divide sum of clamped magnitudes by sum of expected magnitudes, multiply by one hundred, and round to six decimal places."
-      ],
-      "source_artifact": "source-artifact-0d529ad6588b0d95c1d7",
-      "source_lines": [
-        674,
-        744
       ],
       "examples": [
         {
@@ -116,7 +111,39 @@
             false
           ],
           "percentage": "0.000000"
+        },
+        {
+          "expected": [
+            "5"
+          ],
+          "completed": [
+            "0"
+          ],
+          "closed": [
+            false
+          ],
+          "explicitly_excluded": [
+            true
+          ],
+          "percentage": "100.000000",
+          "reason": "Explicit exclusion leaves no calculation rows"
+        },
+        {
+          "expected": [
+            "10"
+          ],
+          "completed": [
+            "6"
+          ],
+          "closed": [
+            true
+          ],
+          "percentage": "60.000000",
+          "reason": "All closed falls back to actual performance"
         }
+      ],
+      "specification_links": [
+        "../../docs/domains/transaction-progress-and-row-closure.md"
       ]
     },
     {
@@ -126,11 +153,6 @@
       "zero_expected": "percentage check skipped by the reviewed calling guard",
       "zero_item_allowance": "falls back to global allowance",
       "override": "configured authorised role receives warning instead of the excess rejection",
-      "source_artifact": "source-artifact-0d529ad6588b0d95c1d7",
-      "source_lines": [
-        490,
-        547
-      ],
       "examples": [
         {
           "expected": "100",
@@ -145,7 +167,112 @@
           "allowance_percentage": "5",
           "overflow_percentage": "5.02",
           "exceeds_threshold": true
+        },
+        {
+          "expected": "100",
+          "completed": "105.009",
+          "allowance_percentage": "5",
+          "overflow_percentage": "5.009",
+          "exceeds_threshold": false
+        },
+        {
+          "expected": "100",
+          "completed": "105.010",
+          "allowance_percentage": "5",
+          "overflow_percentage": "5.010",
+          "exceeds_threshold": false
+        },
+        {
+          "expected": "100",
+          "completed": "105.011",
+          "allowance_percentage": "5",
+          "overflow_percentage": "5.011",
+          "exceeds_threshold": true
         }
+      ],
+      "specification_links": [
+        "../../docs/domains/transaction-progress-and-row-closure.md"
+      ]
+    },
+    {
+      "identifier": "absolute_no_allowance_boundary",
+      "procedure": [
+        "Restrict candidates to completed values greater than expected values",
+        "Reject when completed minus expected is strictly greater than 0.01"
+      ],
+      "specification_links": [
+        "../../docs/domains/transaction-progress-and-row-closure.md#over-fulfilment-and-overbilling"
+      ],
+      "examples": [
+        {
+          "expected": "100",
+          "completed": "100.01",
+          "rejected": false
+        },
+        {
+          "expected": "100",
+          "completed": "100.011",
+          "rejected": true
+        }
+      ]
+    },
+    {
+      "identifier": "completion_label_boundary",
+      "procedure": [
+        "Common helper: less than 0.001 is not completed",
+        "Common helper: at least 99.999999 is fully completed",
+        "Other values are partly completed",
+        "Separate zero-value billing helper uses strictly greater than 99.999999 for full billing"
+      ],
+      "specification_links": [
+        "../../docs/domains/transaction-progress-and-row-closure.md#parent-percentage-formula"
+      ],
+      "examples": [
+        {
+          "percentage": "0.000999",
+          "common_status": "not completed",
+          "zero_value_billing_status": "not billed"
+        },
+        {
+          "percentage": "0.001",
+          "common_status": "partly completed",
+          "zero_value_billing_status": "partly billed"
+        },
+        {
+          "percentage": "99.999999",
+          "common_status": "fully completed",
+          "zero_value_billing_status": "partly billed"
+        },
+        {
+          "percentage": "100",
+          "common_status": "fully completed",
+          "zero_value_billing_status": "fully billed"
+        }
+      ]
+    },
+    {
+      "identifier": "closed_order_preserves_posted_effects",
+      "specification_links": [
+        "../../docs/domains/transaction-progress-and-row-closure.md#financial-and-physical-closure-invariants"
+      ],
+      "given": {
+        "ordered_quantity": "10",
+        "received_quantity": "6",
+        "unit_cost": "12.00",
+        "all_rows_closed": true
+      },
+      "expected": {
+        "released_outstanding_commitment": "4",
+        "actual_receipt_percentage": "60.000000",
+        "warehouse_quantity": "6",
+        "received_value": "72.00",
+        "parent_status": "Closed",
+        "closure_financial_postings": [],
+        "closure_physical_stock_movements": []
+      },
+      "conditional_obligations": [
+        "If received units were invoiced, supplier debt remains 72.00 before payment or credit",
+        "If received units were unbilled, receipt clearing remains credit 72.00"
       ]
     }
   ]

@@ -1,14 +1,14 @@
 {
   "catalog_name": "Inventory, fulfilment and manufacturing mathematical contracts",
-  "catalog_version": "1.0",
-  "scope": "Source-inspected current business behavior; no historical migration or infrastructure prescription.",
-  "verification_status": "Worked arithmetic checked independently. Source test definitions inspected where referenced; complete source application suites not executed.",
-  "calculation_count": 28,
+  "catalog_version": "2.0",
+  "scope": "Self-contained quantity, valuation, fulfilment, manufacturing and quality decision contracts. Business arithmetic is independent of implementation language and storage engine.",
+  "verification_status": "Arithmetic fixtures checked independently against these formulas; business branches reviewed in supplied implementation. Full application transaction suites and simultaneous posting scenarios have not been executed.",
+  "calculation_count": 40,
   "calculations": [
     {
       "calculation_identifier": "stock_quantity_conversion",
       "name": "Transaction quantity to stock quantity",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "transaction_quantity",
@@ -37,15 +37,17 @@
           "stock_quantity": 24
         }
       },
-      "evidence": [
-        "source-artifact-146c20ebd9bfc657547a lines 422–492",
-        "source-artifact-3936ec050b9bd26d0830 lines 1596–1625"
-      ]
+      "definition_reference": "../../docs/domains/products-units-and-packaging.md#stock-units-and-commercial-units",
+      "record_contracts": [
+        "../data/record-types/item.json",
+        "../data/record-types/unit_of_measure_conversion_detail.json"
+      ],
+      "decision_procedure": "Read the factor stored on the transaction row; multiply its commercial quantity by that factor; apply the destination quantity precision and the stock unit whole-number restriction. Never infer the factor from price or parcel size."
     },
     {
       "calculation_identifier": "stock_unit_transaction_price",
       "name": "Price per stock unit",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "transaction_unit_price",
@@ -73,14 +75,17 @@
           "stock_unit_price": 5
         }
       },
-      "evidence": [
-        "source-artifact-f302674e14d1fb05503a lines 407–418"
-      ]
+      "definition_reference": "../../docs/domains/products-units-and-packaging.md#stock-units-and-commercial-units",
+      "record_contracts": [
+        "../data/record-types/item_price.json",
+        "../data/record-types/unit_of_measure_conversion_detail.json"
+      ],
+      "decision_procedure": "Divide the price per selected transaction unit by stock units per that unit. Preserve document currency. Quantity times transaction price must equal converted stock quantity times unrounded stock-unit price."
     },
     {
       "calculation_identifier": "packed_component_quantity",
       "name": "Bundle component stock requirement",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "component_quantity_per_parent_stock_unit",
@@ -108,14 +113,18 @@
           "component_stock_quantity": 12
         }
       },
-      "evidence": [
-        "source-artifact-7ae54f496d9cd22e7217 lines 265–276"
-      ]
+      "definition_reference": "../../docs/domains/products-units-and-packaging.md#product-bundle-composition",
+      "record_contracts": [
+        "../data/record-types/product_bundle.json",
+        "../data/record-types/product_bundle_item.json",
+        "../data/record-types/packed_item.json"
+      ],
+      "decision_procedure": "Resolve the selected eligible composition version; multiply each component quantity by the parent stock quantity. Retain the commercial parent row and component reference, including duplicate components belonging to different parents."
     },
     {
       "calculation_identifier": "packing_net_weight",
       "name": "Net weight of a packing slip",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "rows",
@@ -143,14 +152,17 @@
           "net_weight": 3
         }
       },
-      "evidence": [
-        "source-artifact-1cd7d081b87ba2e621af lines 62–212"
-      ]
+      "definition_reference": "../../docs/domains/products-units-and-packaging.md#packing-slips-and-case-numbering",
+      "record_contracts": [
+        "../data/record-types/packing_slip.json",
+        "../data/record-types/packing_slip_item.json"
+      ],
+      "decision_procedure": "Require a common row weight unit. Fill absent row weights from product defaults, multiply packed row quantities by unit weights, sum and round the total to two decimal places. Inclusive case count does not multiply row quantity."
     },
     {
       "calculation_identifier": "shipment_weight",
       "name": "Total shipment parcel weight",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "parcels",
@@ -178,15 +190,17 @@
           "total_weight": 13.6
         }
       },
-      "evidence": [
-        "source-artifact-1442bc18403ecb8c85b4 lines 83–132",
-        "source-artifact-c8f7a1a3201289d23abc lines 20–57"
-      ]
+      "definition_reference": "../../docs/domains/products-units-and-packaging.md#shipment-parcels-and-dimensions",
+      "record_contracts": [
+        "../data/record-types/shipment.json",
+        "../data/record-types/shipment_parcel.json"
+      ],
+      "decision_procedure": "Require every parcel weight to be positive. Sum weight times count only for positive-count parcel rows. Do not derive volumetric weight or alter commercial stock quantity."
     },
     {
       "calculation_identifier": "projected_inventory_quantity",
       "name": "Projected inventory quantity",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "actual_quantity",
@@ -250,14 +264,16 @@
           "projected_quantity": 90
         }
       },
-      "evidence": [
-        "source-artifact-f3019fa86bf90715e1a7 lines 40–94"
-      ]
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#reservations-projected-stock-and-availability",
+      "record_contracts": [
+        "../data/record-types/bin.json"
+      ],
+      "decision_procedure": "Add physical quantity and eligible inbound planning counters, then subtract the four outbound planning counters. Explicit reservations are a separate physical-claim measure and must not be subtracted a second time here."
     },
     {
       "calculation_identifier": "available_quantity_to_reserve",
       "name": "Unclaimed physical stock",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "actual_quantity",
@@ -293,14 +309,17 @@
           "available_quantity": 47
         }
       },
-      "evidence": [
-        "source-artifact-b1dc48719460ed10d39e lines 726–781"
-      ]
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#reservations-projected-stock-and-availability",
+      "record_contracts": [
+        "../data/record-types/bin.json",
+        "../data/record-types/stock_reservation_entry.json"
+      ],
+      "decision_procedure": "Within a protected product-and-warehouse state, subtract each active claim remainder from actual stock. The remainder deducts delivered, transferred and consumed quantities from reserved quantity."
     },
     {
       "calculation_identifier": "allowed_reservation_quantity",
       "name": "Maximum claim against a source row",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "available_quantity",
@@ -341,14 +360,17 @@
           "allowed_quantity": 20
         }
       },
-      "evidence": [
-        "source-artifact-b1dc48719460ed10d39e lines 563–690"
-      ]
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#reservations-projected-stock-and-availability",
+      "record_contracts": [
+        "../data/record-types/stock_reservation_entry.json",
+        "../data/record-types/sales_order_item.json"
+      ],
+      "decision_procedure": "Convert source delivered quantity to stock units where needed. Compare source remaining demand with warehouse availability, choose the smaller and compare proposed reservation at reservation quantity precision."
     },
     {
       "calculation_identifier": "moving_average_positive_receipt",
       "name": "Moving average receipt while previous inventory is positive",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "previous_quantity",
@@ -390,15 +412,16 @@
           "next_rate": 5
         }
       },
-      "evidence": [
-        "source-artifact-9dde27288d6d3f0994cd lines 1716–1804",
-        "source-artifact-9dde27288d6d3f0994cd lines 1005–1215"
-      ]
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#moving-average-precise-branches",
+      "record_contracts": [
+        "../data/record-types/stock_ledger_entry.json"
+      ],
+      "decision_procedure": "For positive preceding stock and a positive receipt, add receipt value to carried value and divide by resulting quantity. Preserve rate precision and round the carried company-currency amount at its own precision."
     },
     {
       "calculation_identifier": "moving_average_explicit_issue_rate",
       "name": "Moving average issue with specified outgoing rate",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "previous_quantity",
@@ -441,14 +464,16 @@
           "next_rate": 4.5
         }
       },
-      "evidence": [
-        "source-artifact-9dde27288d6d3f0994cd lines 1716–1804"
-      ]
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#moving-average-precise-branches",
+      "record_contracts": [
+        "../data/record-types/stock_ledger_entry.json"
+      ],
+      "decision_procedure": "For a nonzero remainder, subtract issue quantity valued at its explicit outgoing rate from prior value, then divide by remaining quantity. This may change the remaining average, especially for a purchase return."
     },
     {
       "calculation_identifier": "stock_value_difference",
       "name": "Monetary change caused by a stock ledger row",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "next_stock_value",
@@ -476,14 +501,16 @@
           "stock_value_difference": -30
         }
       },
-      "evidence": [
-        "source-artifact-9dde27288d6d3f0994cd lines 1005–1215"
-      ]
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#persistent-model-and-conservation",
+      "record_contracts": [
+        "../data/record-types/stock_ledger_entry.json"
+      ],
+      "decision_procedure": "First determine and round next inventory value under the selected method; force zero value at zero physical balance; subtract previously carried rounded value. Financial inventory movement follows this difference, not selling price."
     },
     {
       "calculation_identifier": "standard_inventory_value",
       "name": "Inventory carried at effective standard",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "next_quantity",
@@ -513,16 +540,17 @@
           "stock_value": 1000
         }
       },
-      "evidence": [
-        "source-artifact-88fa2add755bfc5588cb lines 32–314",
-        "source-artifact-9dde27288d6d3f0994cd lines 57–102",
-        "source-artifact-9dde27288d6d3f0994cd lines 1005–1215"
-      ]
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#standard-cost-and-effective-dating",
+      "record_contracts": [
+        "../data/record-types/item_standard_cost.json",
+        "../data/record-types/stock_ledger_entry.json"
+      ],
+      "decision_procedure": "Select the approved standard effective on the posting date. Multiply the resulting quantity by that standard, independently of purchase or actual manufacturing cost. Recognise price or manufacturing variance separately."
     },
     {
       "calculation_identifier": "manufacturing_standard_variance",
       "name": "Manufacturing variance under standard cost",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "consumed_material_value",
@@ -557,14 +585,18 @@
           "manufacturing_variance": 80
         }
       },
-      "evidence": [
-        "source-artifact-246cf4f12ac2a5d0bc90 lines 496–590"
-      ]
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md#execution-sequence-and-financial-conservation",
+      "record_contracts": [
+        "../data/record-types/stock_entry.json",
+        "../data/record-types/stock_entry_detail.json",
+        "../data/record-types/item_standard_cost.json"
+      ],
+      "decision_procedure": "For a qualifying finished row, subtract actual posted standard inventory value from its intended actual incoming amount, including allocated material, additional and landed cost. Positive variance is an expense debit and negative variance an expense credit."
     },
     {
       "calculation_identifier": "landed_charge_apportionment",
       "name": "Automatic landed charge distribution",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "total_charges",
@@ -607,14 +639,17 @@
           ]
         }
       },
-      "evidence": [
-        "source-artifact-0384b50b0a0419065d6e lines 304–371"
-      ]
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#landed-cost-allocation",
+      "record_contracts": [
+        "../data/record-types/landed_cost_voucher.json",
+        "../data/record-types/landed_cost_item.json"
+      ],
+      "decision_procedure": "Sum the selected quantity or amount basis. Reject a zero total. Calculate each proportional share, round it at its field precision, and allocate the full residual to the final item row in preserved order."
     },
     {
       "calculation_identifier": "manual_landed_charge_tolerance",
       "name": "Manual landed allocation reconciliation threshold",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "difference",
@@ -644,14 +679,17 @@
           "comparison_threshold": 0.02
         }
       },
-      "evidence": [
-        "source-artifact-0384b50b0a0419065d6e lines 304–371"
-      ]
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#landed-cost-allocation",
+      "record_contracts": [
+        "../data/record-types/landed_cost_voucher.json",
+        "../data/record-types/landed_cost_item.json"
+      ],
+      "decision_procedure": "Validate nonzero manual total, subtract allocated charges from required charges, and round the difference at company-currency precision. Absorb the difference into the final row only when its absolute amount is strictly below two smallest currency units."
     },
     {
       "calculation_identifier": "putaway_whole_pack_capacity",
       "name": "Putaway quantity constrained to whole commercial units",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "pending_stock_quantity",
@@ -686,14 +724,17 @@
           "stock_units_allocated": 12
         }
       },
-      "evidence": [
-        "source-artifact-598fd7f1fda59f4050a8 lines 88–200"
-      ]
+      "definition_reference": "../../docs/domains/procurement-and-fulfilment.md#warehouse-capacity-and-concurrent-allocation",
+      "record_contracts": [
+        "../data/record-types/putaway_rule.json",
+        "../data/record-types/purchase_receipt_item.json"
+      ],
+      "decision_procedure": "Subtract current stock from capacity converted to stock units. Take the smaller of free capacity and pending stock quantity, divide by the row factor, and floor to a whole transaction quantity when the selected unit requires integers."
     },
     {
       "calculation_identifier": "quotation_remaining_order_quantity",
       "name": "Unordered quantity mapped from quotation",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "quoted_stock_quantity",
@@ -733,14 +774,17 @@
           "remaining_transaction_quantity": 1
         }
       },
-      "evidence": [
-        "source-artifact-3e85e2f3fd51c063d2fe lines 15–146"
-      ]
+      "definition_reference": "../../docs/domains/procurement-and-fulfilment.md#quotation-and-conversion-to-an-order",
+      "record_contracts": [
+        "../data/record-types/quotation_item.json",
+        "../data/record-types/sales_order_item.json"
+      ],
+      "decision_procedure": "Subtract stock already ordered and stock already mapped into the current draft from quoted stock, clamp negative remainder to zero, then divide by the original factor. Apply the selected-alternative and unit-price row eligibility rules separately."
     },
     {
       "calculation_identifier": "order_quantity_billable_after_returns",
       "name": "Billable order quantity after returns and replacement delivery",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "ordered_quantity",
@@ -775,14 +819,17 @@
           "billable_quantity": 8
         }
       },
-      "evidence": [
-        "source-artifact-141c781627874ac461f9 lines 436–558"
-      ]
+      "definition_reference": "../../docs/domains/procurement-and-fulfilment.md#billing-quantity-after-returns-and-replacement-delivery",
+      "record_contracts": [
+        "../data/record-types/sales_order_item.json",
+        "../data/record-types/sales_invoice_item.json"
+      ],
+      "decision_procedure": "Use returned quantity to reduce the original billable requirement unless actual replacement delivery supports a larger billable quantity; cap it at original ordered quantity before subtracting existing billing and current draft mapping."
     },
     {
       "calculation_identifier": "remaining_quantity_to_pick",
       "name": "Pick requirement without double subtracting delivered stock",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "ordered_quantity",
@@ -822,14 +869,17 @@
           "remaining_quantity_to_pick": 4
         }
       },
-      "evidence": [
-        "source-artifact-141c781627874ac461f9 lines 1033–1081"
-      ]
+      "definition_reference": "../../docs/domains/procurement-and-fulfilment.md#picking-and-explicit-reservation-routes",
+      "record_contracts": [
+        "../data/record-types/sales_order_item.json",
+        "../data/record-types/pick_list_item.json"
+      ],
+      "decision_procedure": "Convert already-picked stock into the order unit. Subtract the greater of picked and delivered quantities from ordered quantity, because delivery may already be included in picking. Do not subtract both independently."
     },
     {
       "calculation_identifier": "maximum_receivable_order_quantity",
       "name": "Purchase order receiving allowance",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "ordered_quantity",
@@ -858,14 +908,17 @@
           "maximum_receivable_quantity": 105
         }
       },
-      "evidence": [
-        "source-artifact-0a7930220e6f93cf26a5 lines 26–107"
-      ]
+      "definition_reference": "../../docs/domains/procurement-and-fulfilment.md#purchasing-and-receipt-generation",
+      "record_contracts": [
+        "../data/record-types/purchase_order_item.json",
+        "../data/record-types/purchase_receipt_item.json"
+      ],
+      "decision_procedure": "Increase original ordered quantity by the permitted percentage. This is an upper acceptance limit; ordinary receipt mapping proposes outstanding original demand first, and proposes allowance remainder only once original demand is fulfilled."
     },
     {
       "calculation_identifier": "formulation_component_quantity",
       "name": "Recipe percentage converted to component entry unit",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "component_percentage",
@@ -901,14 +954,17 @@
           "component_quantity": 50000
         }
       },
-      "evidence": [
-        "source-artifact-546756d7a5c2be6c875f lines 762–837"
-      ]
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md#recipe-quantities-and-formulation-percentages",
+      "record_contracts": [
+        "../data/record-types/bill_of_materials.json",
+        "../data/record-types/bill_of_materials_item.json"
+      ],
+      "decision_procedure": "Resolve the sole optional balance percentage, require total percentage within tolerance of one hundred, resolve a valid dimensional conversion, multiply batch quantity by component percentage and unit factor, and round at the component quantity field."
     },
     {
       "calculation_identifier": "recursive_component_quantity",
       "name": "Nested material requirement",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "child_component_stock_quantity",
@@ -943,14 +999,17 @@
           "leaf_component_quantity": 12
         }
       },
-      "evidence": [
-        "source-artifact-029ebcbfcd4b7f0c8dd7 lines 18–127"
-      ]
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md#multilevel-explosion-and-phantom-components",
+      "record_contracts": [
+        "../data/record-types/bill_of_materials.json",
+        "../data/record-types/bill_of_materials_explosion_item.json"
+      ],
+      "decision_procedure": "Divide child component stock quantity by child output quantity and multiply by required subassembly stock quantity. Repeat down acyclic recipe links. Keep operation identity when grouping leaf demand; never round an intermediate per-unit quotient prematurely."
     },
     {
       "calculation_identifier": "operation_cost_from_minutes",
       "name": "Cost of an operation duration",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "hourly_cost",
@@ -978,15 +1037,18 @@
           "operation_cost": 60
         }
       },
-      "evidence": [
-        "source-artifact-5fb9c53ceb985c689b0e lines 138–300",
-        "source-artifact-9c7f0004d538d7c3edba lines 64–194"
-      ]
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md#planned-material-and-operation-cost",
+      "record_contracts": [
+        "../data/record-types/bill_of_materials_operation.json",
+        "../data/record-types/work_order_operation.json",
+        "../data/record-types/job_card_time_log.json"
+      ],
+      "decision_procedure": "Convert recorded minutes to hours before multiplying by the hourly rate. Recipe per-batch and output-based rules are additional scaling steps, while actual work-order cost retains the amount already consumed by prior receipts."
     },
     {
       "calculation_identifier": "primary_manufactured_material_rate",
       "name": "Primary output material-derived rate after secondary allocations",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "consumed_material_cost",
@@ -1029,15 +1091,17 @@
           "primary_material_value": 720
         }
       },
-      "evidence": [
-        "source-artifact-2f9493ae5d1a4b74cb21 lines 585–725",
-        "source-artifact-2f9493ae5d1a4b74cb21 lines 788–947"
-      ]
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md#secondary-outputs-scrap-and-repacking",
+      "record_contracts": [
+        "../data/record-types/stock_entry_detail.json",
+        "../data/record-types/bill_of_materials_secondary_item.json"
+      ],
+      "decision_procedure": "Value own-cost secondary outputs first; deduct them once from actual consumed material cost. Apply the primary allocation percentage to that residual pool and divide by actual primary stock quantity. Actual zero cost does not trigger a historical-price fallback."
     },
     {
       "calculation_identifier": "manufactured_entry_final_rate",
       "name": "Stock entry valuation rate including charges",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "basic_rate",
@@ -1078,14 +1142,16 @@
           "row_value": 810
         }
       },
-      "evidence": [
-        "source-artifact-2f9493ae5d1a4b74cb21 lines 947–976"
-      ]
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md#secondary-outputs-scrap-and-repacking",
+      "record_contracts": [
+        "../data/record-types/stock_entry_detail.json"
+      ],
+      "decision_procedure": "After the basic material rate is known, add the row additional and landed costs divided by row stock quantity. Manufacture and repack allocate ordinary additional charges only to eligible primary finished rows."
     },
     {
       "calculation_identifier": "recipe_process_loss",
       "name": "Expected process loss quantity",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "recipe_quantity",
@@ -1114,14 +1180,17 @@
           "process_loss_quantity": 3
         }
       },
-      "evidence": [
-        "source-artifact-546756d7a5c2be6c875f lines 1118–1143"
-      ]
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md#process-loss-and-yield",
+      "record_contracts": [
+        "../data/record-types/bill_of_materials.json",
+        "../data/record-types/stock_entry.json"
+      ],
+      "decision_procedure": "Multiply recipe output by loss percentage; validate allowed percentage and whole-number quantity constraints. At manufacture the completed quantity equals actual finished quantity plus process loss, with no fabricated stock receipt for loss."
     },
     {
       "calculation_identifier": "quality_reading_mean",
       "name": "Arithmetic mean of entered observations",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "observations",
@@ -1148,14 +1217,17 @@
           "mean": 12
         }
       },
-      "evidence": [
-        "source-artifact-f6270a13e7c3b6eb791d lines 271–417"
-      ]
+      "definition_reference": "../../docs/domains/quality-and-maintenance.md#numerical-formulas-and-measurement-precision",
+      "record_contracts": [
+        "../data/record-types/quality_inspection.json",
+        "../data/record-types/quality_inspection_reading.json"
+      ],
+      "decision_procedure": "Interpret supplied finite numeric observations using their applicable number format, exclude blank observations, divide their sum by count, and provide zero when none exists. Individual missing formula variables can still be zero."
     },
     {
       "calculation_identifier": "negative_stock_guard",
       "name": "Precision-dependent negative stock rejection",
-      "evidence_status": "Observed in inspected source",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
       "operands": [
         {
           "name": "previous_quantity",
@@ -1198,9 +1270,506 @@
           "reject": true
         }
       },
-      "evidence": [
-        "source-artifact-9dde27288d6d3f0994cd lines 1387–1406"
-      ]
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#serial-and-batch-allocations",
+      "record_contracts": [
+        "../data/record-types/stock_ledger_entry.json",
+        "../data/record-types/stock_reservation_entry.json"
+      ],
+      "decision_procedure": "Subtract protected stock reservations after applying signed movement quantity, round at stock quantity precision, and reject only a negative amount whose absolute size strictly exceeds the documented threshold. Tracked identity validation remains independent."
+    },
+    {
+      "calculation_identifier": "standard_purchase_price_variance",
+      "name": "Purchase price variance under standard cost",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
+      "operands": [
+        {
+          "name": "full_incoming_transaction_amount",
+          "meaning_and_unit": "Actual intended received amount in company currency",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "posted_standard_inventory_value",
+          "meaning_and_unit": "Positive posted inventory value in company currency",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        }
+      ],
+      "expression": "full_incoming_transaction_amount − posted_standard_inventory_value",
+      "result_unit": "Company currency",
+      "rounding_and_sequence": "Round at financial posting precision. Positive variance debits the dedicated purchase price variance account; do not post it again when the later invoice only clears the receipt.",
+      "conditions_and_failures": [
+        "Round at financial posting precision. Positive variance debits the dedicated purchase price variance account; do not post it again when the later invoice only clears the receipt."
+      ],
+      "worked_example": {
+        "inputs": {
+          "full_incoming_transaction_amount": 200,
+          "posted_standard_inventory_value": 130
+        },
+        "expected": {
+          "purchase_price_variance": 70
+        }
+      },
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#standard-cost-and-effective-dating",
+      "record_contracts": [
+        "../data/record-types/item_standard_cost.json",
+        "../data/record-types/purchase_receipt_item.json"
+      ],
+      "decision_procedure": "Round at financial posting precision. Positive variance debits the dedicated purchase price variance account; do not post it again when the later invoice only clears the receipt."
+    },
+    {
+      "calculation_identifier": "standard_rate_revaluation",
+      "name": "On-hand inventory revaluation after a standard change",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
+      "operands": [
+        {
+          "name": "on_hand_quantity",
+          "meaning_and_unit": "Effective on-hand stock units",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "new_standard_rate",
+          "meaning_and_unit": "New company-currency standard per stock unit",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "previous_standard_rate",
+          "meaning_and_unit": "Previous company-currency standard per stock unit",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        }
+      ],
+      "expression": "on_hand_quantity × (new_standard_rate − previous_standard_rate)",
+      "result_unit": "Company currency",
+      "rounding_and_sequence": "Use the validated effective date and current on-hand quantity; zero quantity change. The corresponding revaluation posting balances the financial value movement.",
+      "conditions_and_failures": [
+        "Use the validated effective date and current on-hand quantity; zero quantity change. The corresponding revaluation posting balances the financial value movement."
+      ],
+      "worked_example": {
+        "inputs": {
+          "on_hand_quantity": 10,
+          "new_standard_rate": 130,
+          "previous_standard_rate": 100
+        },
+        "expected": {
+          "inventory_value_increase": 300
+        }
+      },
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#standard-cost-and-effective-dating",
+      "record_contracts": [
+        "../data/record-types/item_standard_cost.json",
+        "../data/record-types/stock_reconciliation.json"
+      ],
+      "decision_procedure": "Use the validated effective date and current on-hand quantity; zero quantity change. The corresponding revaluation posting balances the financial value movement."
+    },
+    {
+      "calculation_identifier": "count_reconciliation_adjustment",
+      "name": "Absolute inventory count adjustment",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
+      "operands": [
+        {
+          "name": "counted_quantity",
+          "meaning_and_unit": "counted quantity",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "prior_effective_quantity",
+          "meaning_and_unit": "prior effective quantity",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "selected_rate",
+          "meaning_and_unit": "selected rate",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        }
+      ],
+      "expression": "counted_quantity − prior_effective_quantity; target_value = counted_quantity × selected_rate",
+      "result_unit": "Stock units and company currency",
+      "rounding_and_sequence": "This ordinary nondimension, nonbatch case sets an absolute target rather than adding the counted quantity. Compare value against previously carried value.",
+      "conditions_and_failures": [
+        "This ordinary nondimension, nonbatch case sets an absolute target rather than adding the counted quantity. Compare value against previously carried value."
+      ],
+      "worked_example": {
+        "inputs": {
+          "counted_quantity": 8,
+          "prior_effective_quantity": 10,
+          "selected_rate": 5
+        },
+        "expected": {
+          "signed_quantity_adjustment": -2,
+          "target_inventory_value": 40
+        }
+      },
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#persistent-model-and-conservation",
+      "record_contracts": [
+        "../data/record-types/stock_reconciliation.json",
+        "../data/record-types/stock_reconciliation_item.json"
+      ],
+      "decision_procedure": "This ordinary nondimension, nonbatch case sets an absolute target rather than adding the counted quantity. Compare value against previously carried value."
+    },
+    {
+      "calculation_identifier": "landed_cost_remaining_inventory_increment",
+      "name": "Additional landed cost retained after partial consumption",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
+      "operands": [
+        {
+          "name": "landed_cost_increment",
+          "meaning_and_unit": "landed cost increment",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "remaining_received_quantity",
+          "meaning_and_unit": "remaining received quantity",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "original_received_quantity",
+          "meaning_and_unit": "original received quantity",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        }
+      ],
+      "expression": "landed_cost_increment × remaining_received_quantity ÷ original_received_quantity",
+      "result_unit": "Company currency",
+      "rounding_and_sequence": "Applicable to one isolated receipt with no other cost layers, returns or intervening valuation changes. Repost historical issues and dependent transfers; the example is not a universal shortcut for mixed layers.",
+      "conditions_and_failures": [
+        "Applicable to one isolated receipt with no other cost layers, returns or intervening valuation changes. Repost historical issues and dependent transfers; the example is not a universal shortcut for mixed layers."
+      ],
+      "worked_example": {
+        "inputs": {
+          "landed_cost_increment": 20,
+          "remaining_received_quantity": 4,
+          "original_received_quantity": 10
+        },
+        "expected": {
+          "remaining_inventory_increment": 8,
+          "previous_issue_cost_increment": 12
+        }
+      },
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#landed-cost-after-stock-has-been-sold",
+      "record_contracts": [
+        "../data/record-types/landed_cost_voucher.json",
+        "../data/record-types/stock_ledger_entry.json"
+      ],
+      "decision_procedure": "Applicable to one isolated receipt with no other cost layers, returns or intervening valuation changes. Repost historical issues and dependent transfers; the example is not a universal shortcut for mixed layers."
+    },
+    {
+      "calculation_identifier": "pending_billable_quantity",
+      "name": "Invoice quantity after prior billing and current draft allocation",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
+      "operands": [
+        {
+          "name": "billable_after_returns",
+          "meaning_and_unit": "billable after returns",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "submitted_billed_quantity",
+          "meaning_and_unit": "submitted billed quantity",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "quantity_already_in_target",
+          "meaning_and_unit": "quantity already in target",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        }
+      ],
+      "expression": "maximum(round(billable_after_returns − submitted_billed_quantity − quantity_already_in_target, quantity_precision), 0)",
+      "result_unit": "Transaction units",
+      "rounding_and_sequence": "Use the billable-after-returns calculation before subtracting existing invoices. Unit-price rows and permitted overbilling amounts have separate eligibility contracts.",
+      "conditions_and_failures": [
+        "Use the billable-after-returns calculation before subtracting existing invoices. Unit-price rows and permitted overbilling amounts have separate eligibility contracts."
+      ],
+      "worked_example": {
+        "inputs": {
+          "billable_after_returns": 10,
+          "submitted_billed_quantity": 6,
+          "quantity_already_in_target": 1
+        },
+        "expected": {
+          "pending_billable_quantity": 3
+        }
+      },
+      "definition_reference": "../../docs/domains/procurement-and-fulfilment.md#billing-quantity-after-returns-and-replacement-delivery",
+      "record_contracts": [
+        "../data/record-types/sales_order_item.json",
+        "../data/record-types/sales_invoice_item.json"
+      ],
+      "decision_procedure": "Use the billable-after-returns calculation before subtracting existing invoices. Unit-price rows and permitted overbilling amounts have separate eligibility contracts."
+    },
+    {
+      "calculation_identifier": "remaining_returnable_quantity",
+      "name": "Cumulative reference return quantity",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
+      "operands": [
+        {
+          "name": "original_returnable_quantity",
+          "meaning_and_unit": "original returnable quantity",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "effective_previous_return_quantity",
+          "meaning_and_unit": "effective previous return quantity",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        }
+      ],
+      "expression": "original_returnable_quantity − effective_previous_return_quantity",
+      "result_unit": "Consistent reference quantity units",
+      "rounding_and_sequence": "Use stock quantity for stock-updating returns and transaction quantity for invoices without stock update. Preserve separate accepted and rejected return limits and all predecessor links.",
+      "conditions_and_failures": [
+        "Use stock quantity for stock-updating returns and transaction quantity for invoices without stock update. Preserve separate accepted and rejected return limits and all predecessor links."
+      ],
+      "worked_example": {
+        "inputs": {
+          "original_returnable_quantity": 24,
+          "effective_previous_return_quantity": 6
+        },
+        "expected": {
+          "remaining_returnable_quantity": 18
+        }
+      },
+      "definition_reference": "../../docs/domains/procurement-and-fulfilment.md#returns-cancellation-and-incomplete-commitments",
+      "record_contracts": [
+        "../data/record-types/purchase_receipt_item.json",
+        "../data/record-types/delivery_note_item.json"
+      ],
+      "decision_procedure": "Use stock quantity for stock-updating returns and transaction quantity for invoices without stock update. Preserve separate accepted and rejected return limits and all predecessor links."
+    },
+    {
+      "calculation_identifier": "actual_finished_yield",
+      "name": "Usable output after process loss",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
+      "operands": [
+        {
+          "name": "completed_quantity",
+          "meaning_and_unit": "completed quantity",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "process_loss_quantity",
+          "meaning_and_unit": "process loss quantity",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        }
+      ],
+      "expression": "completed_quantity − process_loss_quantity",
+      "result_unit": "Finished stock units",
+      "rounding_and_sequence": "Compare at stock movement quantity precision. The loss is not a separately valued inventory output.",
+      "conditions_and_failures": [
+        "Compare at stock movement quantity precision. The loss is not a separately valued inventory output."
+      ],
+      "worked_example": {
+        "inputs": {
+          "completed_quantity": 100,
+          "process_loss_quantity": 3
+        },
+        "expected": {
+          "finished_quantity": 97
+        }
+      },
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md#process-loss-and-yield",
+      "record_contracts": [
+        "../data/record-types/stock_entry.json",
+        "../data/record-types/stock_entry_detail.json"
+      ],
+      "decision_procedure": "Compare at stock movement quantity precision. The loss is not a separately valued inventory output."
+    },
+    {
+      "calculation_identifier": "yield_adjusted_material_rate",
+      "name": "Material rate on usable output after loss",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
+      "operands": [
+        {
+          "name": "consumed_material_value",
+          "meaning_and_unit": "consumed material value",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "secondary_output_value",
+          "meaning_and_unit": "secondary output value",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "actual_finished_quantity",
+          "meaning_and_unit": "actual finished quantity",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        }
+      ],
+      "expression": "(consumed_material_value − secondary_output_value) ÷ actual_finished_quantity",
+      "result_unit": "Company currency per finished stock unit",
+      "rounding_and_sequence": "Applicable to one fully allocated primary output with positive usable quantity. Standard-cost valuation supersedes this actual rate for carrying value and records a variance.",
+      "conditions_and_failures": [
+        "Applicable to one fully allocated primary output with positive usable quantity. Standard-cost valuation supersedes this actual rate for carrying value and records a variance."
+      ],
+      "worked_example": {
+        "inputs": {
+          "consumed_material_value": 970,
+          "secondary_output_value": 0,
+          "actual_finished_quantity": 97
+        },
+        "expected": {
+          "material_rate": 10
+        }
+      },
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md#yield-and-rejected-output-example",
+      "record_contracts": [
+        "../data/record-types/stock_entry_detail.json"
+      ],
+      "decision_procedure": "Applicable to one fully allocated primary output with positive usable quantity. Standard-cost valuation supersedes this actual rate for carrying value and records a variance."
+    },
+    {
+      "calculation_identifier": "remaining_operation_cost",
+      "name": "Actual operating cost available for later production",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
+      "operands": [
+        {
+          "name": "eligible_actual_operation_cost",
+          "meaning_and_unit": "eligible actual operation cost",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "operation_cost_already_capitalised",
+          "meaning_and_unit": "operation cost already capitalised",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        }
+      ],
+      "expression": "eligible_actual_operation_cost − operation_cost_already_capitalised",
+      "result_unit": "Company currency",
+      "rounding_and_sequence": "Allocate only the eligible remaining portion to subsequent output and cap allocation at available cost. Preserve the consumed-cost references across retries.",
+      "conditions_and_failures": [
+        "Allocate only the eligible remaining portion to subsequent output and cap allocation at available cost. Preserve the consumed-cost references across retries."
+      ],
+      "worked_example": {
+        "inputs": {
+          "eligible_actual_operation_cost": 120,
+          "operation_cost_already_capitalised": 40
+        },
+        "expected": {
+          "available_operation_cost": 80
+        }
+      },
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md#operating-costs-and-capacity",
+      "record_contracts": [
+        "../data/record-types/work_order_operation.json",
+        "../data/record-types/job_card_time_log.json",
+        "../data/record-types/stock_entry_detail.json"
+      ],
+      "decision_procedure": "Allocate only the eligible remaining portion to subsequent output and cap allocation at available cost. Preserve the consumed-cost references across retries."
+    },
+    {
+      "calculation_identifier": "customer_subcontract_service_quantity",
+      "name": "Service quantity for customer-owned manufacture",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
+      "operands": [
+        {
+          "name": "finished_quantity",
+          "meaning_and_unit": "finished quantity",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "subcontracting_conversion_factor",
+          "meaning_and_unit": "subcontracting conversion factor",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        }
+      ],
+      "expression": "finished_quantity × subcontracting_conversion_factor",
+      "result_unit": "Service transaction units",
+      "rounding_and_sequence": "Service quantity differs from finished stock quantity. Multiply service quantity by service rate for invoicing amount and preserve the referenced sales-order row.",
+      "conditions_and_failures": [
+        "Service quantity differs from finished stock quantity. Multiply service quantity by service rate for invoicing amount and preserve the referenced sales-order row."
+      ],
+      "worked_example": {
+        "inputs": {
+          "finished_quantity": 20,
+          "subcontracting_conversion_factor": 0.5
+        },
+        "expected": {
+          "service_quantity": 10
+        }
+      },
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md#manufacturing-service-performed-for-a-customer",
+      "record_contracts": [
+        "../data/record-types/subcontracting_inward_order_service_item.json"
+      ],
+      "decision_procedure": "Service quantity differs from finished stock quantity. Multiply service quantity by service rate for invoicing amount and preserve the referenced sales-order row."
+    },
+    {
+      "calculation_identifier": "quality_all_readings_in_range",
+      "name": "Inclusive numerical range acceptance",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
+      "operands": [
+        {
+          "name": "observations",
+          "meaning_and_unit": "observations",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "lower_bound",
+          "meaning_and_unit": "lower bound",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        },
+        {
+          "name": "upper_bound",
+          "meaning_and_unit": "upper bound",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        }
+      ],
+      "expression": "supplied_reading_count > 0 and every supplied reading >= lower_bound and <= upper_bound",
+      "result_unit": "Acceptance decision",
+      "rounding_and_sequence": "Ignore blank observations for range evaluation. Every supplied value must pass; an accepted mean does not override an out-of-range observation.",
+      "conditions_and_failures": [
+        "Ignore blank observations for range evaluation. Every supplied value must pass; an accepted mean does not override an out-of-range observation."
+      ],
+      "worked_example": {
+        "inputs": {
+          "observations": [
+            10,
+            12,
+            14
+          ],
+          "lower_bound": 11,
+          "upper_bound": 13
+        },
+        "expected": {
+          "accepted": false,
+          "mean": 12
+        }
+      },
+      "definition_reference": "../../docs/domains/quality-and-maintenance.md#quality-records-and-decision-model",
+      "record_contracts": [
+        "../data/record-types/quality_inspection_reading.json"
+      ],
+      "decision_procedure": "Ignore blank observations for range evaluation. Every supplied value must pass; an accepted mean does not override an out-of-range observation."
+    },
+    {
+      "calculation_identifier": "quality_review_state_precedence",
+      "name": "Overall quality review state",
+      "evidence_status": "Reviewed business decision; independent numerical acceptance available in this repository",
+      "operands": [
+        {
+          "name": "row_states",
+          "meaning_and_unit": "row states",
+          "numeric_representation": "Exact decimal quantity or amount; booleans, lists and state text retain their stated meaning"
+        }
+      ],
+      "expression": "Open when no rows or any row Open; otherwise Failed when any row Failed; otherwise Passed",
+      "result_unit": "Review state",
+      "rounding_and_sequence": "Evaluate unresolved objectives before final failure. Objective target text does not independently calculate the row state.",
+      "conditions_and_failures": [
+        "Evaluate unresolved objectives before final failure. Objective target text does not independently calculate the row state."
+      ],
+      "worked_example": {
+        "inputs": {
+          "row_states": [
+            "Failed",
+            "Open"
+          ]
+        },
+        "expected": {
+          "review_state": "Open"
+        }
+      },
+      "definition_reference": "../../docs/domains/quality-and-maintenance.md#quality-procedures-objectives-and-review-decisions",
+      "record_contracts": [
+        "../data/record-types/quality_review.json",
+        "../data/record-types/quality_review_objective.json"
+      ],
+      "decision_procedure": "Evaluate unresolved objectives before final failure. Objective target text does not independently calculate the row state."
     }
   ],
   "ordered_layer_procedures": [
@@ -1229,10 +1798,13 @@
           }
         ]
       },
-      "evidence": [
-        "source-artifact-09b661db83d498d60156 lines 16–267",
-        "source-artifact-60fc0d3219f1096c48b2 lines 16–206"
-      ]
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#ordered-cost-layers",
+      "state_invariants": [
+        "The sum of layer quantities equals carried stock quantity at the applicable tolerance.",
+        "The sum of layer quantity multiplied by rate equals carried inventory value before company-currency rounding.",
+        "An issue consumes only its required quantity, carries any unconsumed part of a layer forward and uses negative remainder handling only when the negative-stock policy permits it."
+      ],
+      "acceptance_reference": "inventory-acceptance-cases.json"
     },
     {
       "name": "Last in first out",
@@ -1259,24 +1831,52 @@
           }
         ]
       },
-      "evidence": [
-        "source-artifact-09b661db83d498d60156 lines 16–267"
-      ]
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md#ordered-cost-layers",
+      "state_invariants": [
+        "The sum of layer quantities equals carried stock quantity at the applicable tolerance.",
+        "The sum of layer quantity multiplied by rate equals carried inventory value before company-currency rounding.",
+        "An issue consumes only its required quantity, carries any unconsumed part of a layer forward and uses negative remainder handling only when the negative-stock policy permits it."
+      ],
+      "acceptance_reference": "inventory-acceptance-cases.json"
     }
   ],
   "deliberately_unresolved_decisions": [
     {
       "name": "Carrier dimensional weight",
       "observed": "Parcel dimensions and mass exist; inspected shipment helper only sums physical weight.",
-      "proposed_extension": "Configure and validate each carrier dimensional-weight divisor and rounding rule independently."
+      "proposed_extension": "Configure and validate each carrier dimensional-weight divisor and rounding rule independently.",
+      "definition_reference": "../../docs/domains/products-units-and-packaging.md#shipment-parcels-and-dimensions"
     },
     {
       "name": "Asset maintenance end-date condition",
       "observed": "A supplied end date together with a nonempty next due date clears that due date in inspected helper.",
       "required_follow_up": "Executable reference scenario and explicit decision whether to preserve observed condition or adopt intended upper-bound comparison.",
-      "evidence": [
-        "source-artifact-c65f632ea7a7ac1fdac5 lines 97–175"
-      ]
+      "definition_reference": "../../docs/domains/quality-and-maintenance.md#asset-maintenance-and-due-date-records"
+    }
+  ],
+  "internal_specifications": [
+    "../../docs/domains/inventory-and-valuation.md",
+    "../../docs/domains/products-units-and-packaging.md",
+    "../../docs/domains/manufacturing-and-subcontracting.md",
+    "../../docs/domains/procurement-and-fulfilment.md",
+    "../../docs/domains/quality-and-maintenance.md"
+  ],
+  "acceptance_catalog": "inventory-acceptance-cases.json",
+  "verification_boundaries": [
+    {
+      "decision": "Stock movement order when both posting timestamp and creation timestamp are equal",
+      "known_rule": "Business posting timestamp then creation timestamp determines ordinary order.",
+      "required_decision": "Preserve a further stable discriminator or obtain a reference fixture before claiming equivalence for exact ties."
+    },
+    {
+      "decision": "Generic fallback buying-price selection with several eligible records",
+      "known_rule": "Product valuation rate and product standard selling rate precede the matching buying-price fallback.",
+      "required_decision": "Use the pricing contract for full commercial selection; this fallback path alone does not establish a unique preference among several matching prices."
+    },
+    {
+      "decision": "Simultaneous reservations and movements",
+      "known_rule": "Shared product-and-warehouse mutations are serialised and source limits are checked at configured precision.",
+      "required_decision": "Run concurrent submissions and retry-after-commit scenarios against the replacement before declaring the operational guarantee met."
     }
   ]
 }
