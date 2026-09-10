@@ -1,0 +1,73 @@
+{
+  "catalog_kind": "external_record_boundary_contracts",
+  "scope": "Minimal consumed shapes for optional services whose complete record definitions are outside the integrated record inventory. The contracts preserve local callers and references without claiming an implementation of the optional service.",
+  "payment_gateway": {
+    "identifier": "external_record_payment_gateway",
+    "required_fields": {
+      "identity": "stable configured payment-provider identity"
+    },
+    "capabilities": [
+      "Resolve the provider-specific payment initiation behavior.",
+      "Validate payment currency and amount according to provider settings.",
+      "Create a payment session or payment resource address for a payment request.",
+      "Return an explicit failure when the provider cannot create a session."
+    ],
+    "local_record_contract": "record-types/payment_gateway_account.json",
+    "local_accounting_rule": "A payment gateway account links the provider identity to a company ledger account. Its currency is taken from that ledger account. Selecting a default clears the default flag on other gateway accounts for the same company; when no other default exists the current account becomes default.",
+    "availability_rule": "Optional provider-package absence must be reported by the payment boundary when that provider capability is invoked."
+  },
+  "loan": {
+    "identifier": "external_record_loan",
+    "required_fields": {
+      "identity": "stable loan identity",
+      "company": "company record identity",
+      "applicant": "employee record identity",
+      "record_state": "posted record state",
+      "repay_from_salary": "Boolean eligibility flag",
+      "status": "loan business status; closed loans are excluded",
+      "loan_product": "external loan-product identity",
+      "is_term_loan": "Boolean term-loan flag",
+      "loan_account": "loan principal ledger account identity",
+      "interest_income_account": "interest-income ledger account identity"
+    },
+    "amount_service": {
+      "inputs": [
+        "loan identity",
+        "salary ending date used as value date"
+      ],
+      "outputs": [
+        "payable amount",
+        "interest amount",
+        "payable principal amount"
+      ]
+    },
+    "behavior_contract": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary"
+  },
+  "loan_product": {
+    "identifier": "external_record_loan_product",
+    "required_fields": {
+      "identity": "stable product identity carried through payroll deduction and repayment"
+    },
+    "scope": "Payroll preserves the product identity. Product pricing, interest calculation policy, and full lending lifecycle are owned by the optional loan service."
+  },
+  "loan_repayment": {
+    "identifier": "external_record_loan_repayment",
+    "request_fields": {
+      "loan": "loan identity",
+      "employee": "employee identity",
+      "company": "company identity",
+      "posting_date": "repayment posting date",
+      "loan_product": "loan product identity",
+      "repayment_type": "normal repayment",
+      "interest_amount": "interest deduction amount",
+      "principal_amount": "principal deduction amount",
+      "amount_paid": "total deduction amount",
+      "payment_account": "payroll payable ledger account",
+      "employee_wise_accounting": "Boolean accounting option",
+      "value_date": "salary ending date"
+    },
+    "create_rule": "Save and post the repayment, then retain the returned repayment identity on the salary loan row.",
+    "cancel_rule": "When reversing the salary loan consequence, invoke cancellation of the related repayment according to the payroll cancellation order.",
+    "behavior_contract": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary"
+  }
+}

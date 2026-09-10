@@ -1,0 +1,51 @@
+{
+  "catalog_kind": "remote_operation_semantics",
+  "purpose": "Interpret exposed operation records as transport bindings to named language-neutral decision procedures.",
+  "request_contract": {
+    "operation_identity": "Each exposed operation identifier resolves to the same procedure_identifier in the decision contract catalogs. Names shared by different owners remain distinct operations.",
+    "arguments": "Bind named and positional inputs by the declared name and position. Reject an omitted required argument. Supply the declared default only for omission; explicit null is a supplied value.",
+    "type_unions": "A union permits any one of its declared member shapes. An optional member adds null; it does not imply arbitrary text conversion.",
+    "variadic_bindings": "Variadic positional arguments retain their order. Variadic named arguments retain their names. The operation procedure determines which additional names are accepted.",
+    "transport_verbs": "Enforce the declared allowed verb set before executing business behavior. Generic registration defaults do not imply that every verb is safe to cache or retry.",
+    "anonymous_registration": "An anonymous registration allows invocation without a logged-in session at the transport gate only. The operation may require a separate token, signature, challenge, or object-level authorization.",
+    "permissions": "Apply session permissions, object permissions, field restrictions, and any explicit procedure checks. An observed access helper name is not an exhaustive authorization model.",
+    "transaction": "State-changing service effects follow the enclosing request transaction contract, including rollback on unhandled failures and any explicitly declared commit boundary."
+  },
+  "response_contract": {
+    "return_shapes": "Return-shape records describe values returned along recorded branches. A mapping identifies named members; ordered collections preserve order; no_value is a successful result without a business value.",
+    "computed_result": "Resolve a computed result by executing the linked procedure and its referenced record or helper contract. Do not infer a scalar type from a variable name.",
+    "errors": "Business validation, permission denial, missing record, conflict, and external service failures remain distinct outcomes. Apply the documented remote error envelope after the procedure decides the outcome.",
+    "binary_or_download": "Download and generated-document responses use the report and export contract, including content kind, filename, encoding, authorization, and cleanup."
+  },
+  "retry_contract": {
+    "read_only": "A successful read can be repeated subject to changing data and access.",
+    "write": "Do not automatically repeat a write after a transport timeout unless the operation defines a stable request identity or an observable existing-result lookup. A timeout may occur after commit.",
+    "background_work": "For queued work, retain the job identity and expose its terminal success or failure; queue acceptance does not mean the accounting effect is posted."
+  },
+  "acceptance_examples": [
+    {
+      "case": "omitted_optional_argument",
+      "declared_default": 5,
+      "input_present": false,
+      "bound_value": 5
+    },
+    {
+      "case": "explicit_null_is_not_omission",
+      "declared_default": 5,
+      "input_present": true,
+      "input_value": null,
+      "bound_value": null
+    },
+    {
+      "case": "anonymous_registration_still_checks_record",
+      "anonymous_registration": true,
+      "procedure_permission_denied": true,
+      "outcome": "permission_denied"
+    },
+    {
+      "case": "write_timeout",
+      "commit_outcome_known": false,
+      "automatic_unkeyed_retry_allowed": false
+    }
+  ]
+}

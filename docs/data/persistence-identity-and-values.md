@@ -1,6 +1,6 @@
 # Persistence, identity, and values
 
-This specification defines the common record contract used by the business domains. It separates logical meaning from a particular storage engine. A replacement can choose its physical organization, but records must retain their identity, relationships, value semantics, order, and financial precision. References identify the reviewed source artifacts without requiring source-specific names in the implementation vocabulary.
+This specification defines the common record contract used by the business domains. It separates logical meaning from a particular storage engine. A replacement can choose its physical organization, but records must retain their identity, relationships, value semantics, order, and financial precision. All linked definitions and worked decision procedures are included in this repository.
 
 ## Record kinds and ownership
 
@@ -12,7 +12,7 @@ A singleton document has one logical instance per tenant, conventionally identif
 
 A virtual document has metadata and document operations but provides its own retrieval, creation, update, deletion, listing, counting, and statistics. A virtual document is not evidence of a missing table. The base persistence layer does not independently save its children. Computed fields and computed child tables also have no ordinary stored column or owned-row persistence requirement; their values are recalculated through declared providers. Computed child caches are reset after saves.
 
-Evidence: source-artifact-1fd0d520ab1c4b24593c lines 8–96; source-artifact-1c79c95fe9c8ab1bc9d4 lines 812–944; source-artifact-1369c9744914030ba553 lines 10–93; source-artifact-0f25eaf4b484dd77cdbb lines 90–255.
+The ownership key is therefore the complete parent tuple plus child identity, and the storage provider must select the appropriate record family before saving. The [common storage families](physical-data-catalog.md#common-storage-families) describe the corresponding persistence obligations.
 
 ## Field catalogue interpretation
 
@@ -37,7 +37,7 @@ Each field declaration must preserve its full semantic name, label, storage role
 
 The reviewed primary storage mapping uses precision 21 and scale 9 for money, quantity-like fractional values, percentages, and duration: at most twelve digits before and nine after the decimal point. Rating uses precision 3 and scale 2. Default short text and references are 140 characters. These are observed storage defaults, not proof that all domain values use nine decimal places in calculations. Explicit field lengths and supported storage adapters can alter physical details. The catalogue must distinguish adapter-specific facts from logical requirements. The ordinary numeric length validator uses a symmetric absolute-value limit of 2,147,483,647 for a standard integer and 9,223,372,036,854,775,807 for a large integer. It rejects the extra negative endpoint that a signed storage type might otherwise represent. A declared integer length above eleven selects the large-integer validation range. Singleton values bypass this length validator, so these are normal-record validation limits rather than an unconditional limit on every setting.
 
-Evidence: source-artifact-1fd0d520ab1c4b24593c lines 8–96; source-artifact-82fc1279b9f86a256be5 lines 171–223; source-artifact-67374161a6df47b4eb7f lines 88–110; source-artifact-0f25eaf4b484dd77cdbb lines 45–49; source-artifact-0f25eaf4b484dd77cdbb lines 1284–1320.
+Implement field-kind normalization separately from business validation. The [absence and normalization table](#absence-empty-values-and-normalization) specifies the cases where blank text, null, zero, arrays, and masked values differ.
 
 ## Identity generation and amendment lineage
 
@@ -47,7 +47,7 @@ A number series is scoped by its resolved prefix. Reading its current value take
 
 An amendment references a cancelled predecessor. Its naming policy can use the normal naming rules or a predecessor-based suffix; successive amendments advance that suffix. The predecessor remains a separate record. Amendment creation validates predecessor cancellation and copies attachment references into new attachment records. A document identifier and its human-facing title must remain separate when the title can change. Renaming is an explicit identity operation with reference maintenance, not an ordinary edit of a display label.
 
-Evidence: source-artifact-c869f513562448905114 lines 144–286; source-artifact-c869f513562448905114 lines 289–445; source-artifact-c869f513562448905114 lines 512–592; source-artifact-1c79c95fe9c8ab1bc9d4 lines 812–944.
+Identity allocation is a transactional operation with explicit concurrency and amendment rules. An identity change additionally follows the [rename and merge contract](#identity-change-and-merge); changing a label alone does not migrate references.
 
 ## References and value validation
 
@@ -55,7 +55,7 @@ A fixed reference resolves the declared target type. A dynamic reference first r
 
 Required text is checked for meaningful content. Formatted text containing an image can satisfy required content even without plain text. A required table must contain rows. Child records require parent identity and parent type. Required Boolean fields are treated as having a value even when false. Selection values are stripped and compared with declared options where selection checking applies. Validation also includes data formats, nonnegative and minimum/maximum constraints, length, rating normalization, constant fields, content sanitization, and protected secret persistence. Import invokes its own value preparation and therefore must be specified separately from interactive field validation.
 
-Evidence: source-artifact-0f25eaf4b484dd77cdbb lines 979–1190; source-artifact-1c79c95fe9c8ab1bc9d4 lines 1082–1198.
+A reference is valid only after its selected type, actual identity, applicable lifecycle state, and fetched-value policy have been evaluated. Permission evaluation remains independent under [identity and permissions](../runtime/identity-permissions-and-tenancy.md).
 
 ## Numeric precision resolution
 
@@ -65,7 +65,7 @@ Storage precision, calculation precision, and display precision are distinct. Do
 
 The generic numeric coercion helper removes commas from strings, interprets a valid number, treats an absent or unconvertible value as zero, and rounds only when precision is supplied. An unknown rounding policy raises an error rather than silently yielding zero. This helper is not a universal authorization to accept malformed financial input: a caller can perform stricter validation before invoking it. The conversion of `1,500.5` to 1500.5 is a tested behavior; it is not locale-aware interpretation of all punctuation conventions.
 
-Evidence: source-artifact-444b5a1f4b08e77b3ae8 lines 960–985; source-artifact-0f25eaf4b484dd77cdbb lines 1431–1490; source-artifact-91eb5c3685f0ea77eecb lines 1134–1174; source-artifact-d73c03767a0981db604f lines 1710–1800.
+For each amount or quantity, record its currency or unit, effective precision, conversion direction, and rounding boundary. The [worked quantity and currency examples](#exact-quantities-and-currency-examples) demonstrate why a universal two-place rounding step is insufficient.
 
 ## Exact rounding policies
 
@@ -87,15 +87,17 @@ All three actively selectable rounding policies are retained. Their descriptive 
 
 The first two policies must be idempotent at a fixed precision and sign-symmetric over their supported finite inputs. The reviewed tests include 9,750,000 at nine places remaining unchanged and half ties above \(2^{50}\). These cases prevent an apparently reasonable numerical correction from creating money.
 
-Evidence: source-artifact-91eb5c3685f0ea77eecb lines 1253–1392; source-artifact-6e027c5d8c38cd20566f lines 551–557; source-artifact-d73c03767a0981db604f lines 1710–1800.
+The table above defines concrete expected outputs for the three policies. Preserve the selected policy with the test configuration, then verify idempotence, signed half ties, and large values before using the implementation in financial calculations.
 
 ## Smallest currency fraction and guarded arithmetic
 
-For a configured smallest fraction \(f\), compute remainder \(r\) at the requested precision. If \(r>f/2\), increase the amount by \(f-r\); otherwise decrease it by \(r\). Equality therefore chooses the lower step under this helper. If no smallest fraction exists, use whole-unit rounding under the configured policy. Finally round to the requested precision. For positive values and fraction 0.05, 1.02 becomes 1.00 and 1.03 becomes 1.05; a precisely represented half remainder chooses the lower step. Negative values require the documented remainder convention, not an assumed mirror of positive values.
+For a configured smallest fraction \(f\), compute remainder \(r\) at the requested precision. If \(r>f/2\), increase the amount by \(f-r\); otherwise decrease it by \(r\). Equality therefore chooses the lower step under this helper. If no smallest fraction exists, use whole-unit rounding under the configured policy. Finally round to the requested precision. For positive values and fraction 0.05, 1.02 becomes 1.00 and 1.03 becomes 1.05; a precisely represented half remainder chooses the lower step.
+
+For positive fraction \(f\), the remainder uses the divisor's sign: before precision rounding, \(r_0=x-f\lfloor x/f\rfloor\) lies in \([0,f)\), including when amount \(x\) is negative. The calculation scales both operands by \(10^p\) before taking the remainder when precision \(p\ne0\), unscales it, then applies the configured rounding to \(p\) places. Use that rounded remainder for the half-fraction comparison. At fraction 0.05 and precision three, the exact-decimal cases 1.025 and −1.025 become 1.000 and −1.050 respectively; 1.020 and −1.020 become 1.000 and −1.000. Thus exact half ties in this helper are not a sign-symmetric operation. At coarser precision, rounding the remainder can change the comparison, so the requested precision is a required input.
 
 The guarded division helper returns zero when its denominator is zero and otherwise rounds the quotient to the requested precision. Callers that require a nonzero conversion factor must reject zero before using it. A zero result from this helper does not mean that a zero conversion factor is a valid business input.
 
-Evidence: source-artifact-91eb5c3685f0ea77eecb lines 1253–1392.
+A zero-denominator helper result is not a valid unit conversion. The consuming command must first reject any zero factor forbidden by its business rules, as explained in the [quantity examples](#exact-quantities-and-currency-examples).
 
 ## Acceptance obligations
 
@@ -108,3 +110,55 @@ Evidence: source-artifact-91eb5c3685f0ea77eecb lines 1253–1392.
 7. Create a new amendment only from a cancelled predecessor and retain both records and their lineage.
 
 These are foundation obligations. The domain catalogues must additionally supply every domain-specific uniqueness constraint, conversion factor, rounding boundary, and numeric tolerance; a field inventory alone cannot establish those rules.
+
+## Absence, empty values, and normalization
+
+The operation first resolves effective metadata and its own stricter input rules; persistence normalization then prepares only declared values. Normalization is not a substitute for financial validation.
+
+| Input or field condition | Normal persistence behavior | Required distinction |
+| --- | --- | --- |
+| Boolean choice containing an integral truthy value | Store one; otherwise zero | False satisfies ordinary Boolean requiredness |
+| Integer value needing coercion | Apply integral coercion | A specialized business command can reject malformed input before this stage |
+| Fractional numeric value needing coercion | Apply numeric coercion | Absence or invalid numeric text can become zero in this generic helper |
+| Empty date, date-time, or time text | Store absence | Do not silently substitute today's date |
+| Unique field with blank or whitespace-only text | Store absence | Blank uniqueness differs from uniqueness of meaningful text |
+| Nonnullable field still absent after coercion | Use declared nonempty default, otherwise the field-kind nonnull default | This is storage fallback, not a domain-approved financial default |
+| Structured field supplied as object or list | Serialize valid structure compactly | A structured array is valid only for a structured or collection field |
+| List supplied to an ordinary scalar field | Reject | Do not stringify the list into a plausible scalar |
+| Computed field | Evaluate only when requested and permitted; omit from ordinary persistence | Cached evaluation does not become a stored business fact |
+| Mask placeholder in a permitted representation | Preserve its display type during serialization; restore the real value for save | Numeric masked fields must not become numeric zero |
+| Absent owned collection on initialized new document | Initialize an empty collection | Update overlay omission and explicit collection replacement remain different |
+
+Serialization can explicitly omit null values. That option changes the representation, not the meaning of stored absence. A copied unsaved document can therefore omit a field that a normal read returns as null. Consumers must not infer that every missing field is unknown metadata; it can be withheld by permissions, omitted by serialization, or absent by value.
+
+The generic nonnull fallback is empty text for text-like, reference, date, date-time, and time fields, and zero for numeric and Boolean kinds. Collections do not obtain a meaningful scalar fallback from this helper. A domain requiring a real posting date must still reject an empty date instead of treating the storage fallback as a valid date.
+
+## New-document defaults
+
+For eligible linked fields other than the user-identity link, a default allowed record from user restrictions takes priority. Otherwise an allowed user default is considered. A linked user default is populated only if its target exists. If no user default is selected, a field's static default is considered, except that the title field is excluded from ordinary static default population.
+
+A declared current-user default resolves to the acting principal. A declared current-date default resolves to today's calendar date. A selection without another applicable default uses its first declared option, which can be an intentionally blank option. A referenced-record default resolves a value from the designated parent or default reference, subject to user restrictions; it only fills an unpopulated destination. Current time and current date-time defaults are evaluated for the new document, not frozen in a reusable template. Child construction also receives its parent type, parent identity, and collection identity.
+
+Defaults are initial proposals. The [creation lifecycle](../runtime/document-lifecycle-and-transactions.md#creation-order) still applies permission, link, required-value, state, and business validation. A selected default company cannot override a user restriction on that company. Changing a default tomorrow does not alter a saved invoice today.
+
+## Exact quantities and currency examples
+
+Let \(q\) be commercial quantity, \(c\) stock units per commercial unit, and \(s\) stock quantity. Then \(s=q c\). The inverse \(q=s/c\) requires \(c\ne0\), and a business operation that requires a positive factor must enforce \(c>0\). A pack of six has \(c=6\): five packs produce thirty stock units. A return of one pack is six returned stock units and retains its original row, valuation, and rate context. A size label alone supplies no conversion factor.
+
+Let \(a\) be an amount in transaction currency, \(r\) company-currency units per transaction-currency unit, and \(b\) its company-currency value. The direction is \(b=a r\), followed by the domain's prescribed rounding boundary. If \(a=125.50\) and \(r=18.40\), the unrounded product is 2309.20. An inverse quotation uses \(1/r\); substituting that inverse without changing the formula is incorrect. Taxes, discounts, and rounded totals can add additional separately documented boundaries.
+
+For \(R_p\), the configured rounding operation to \(p\) decimal places, generally \(R_p(x)+R_p(y)\ne R_p(x+y)\). At two places with away-from-zero half rounding, 0.005 and 0.005 round individually to 0.01 and 0.01, whose sum is 0.02; rounding their sum yields 0.01. The operation contract must therefore declare whether rounding occurs at row level, tax level, account-currency conversion, or final total. Mathematical precision does not eliminate the need to preserve those business boundaries.
+
+## Identity change and merge
+
+An ordinary rename changes the root identifier, child parent references, fixed references, matching dynamic references, attachment associations, version references, and protected-secret association. It executes before-rename and after-rename behavior and publishes an identity-change notification after commit. A title change can be a normal document save when the title field is distinct from identity.
+
+A merge is an explicit operation into an existing surviving identity. It reassigns references and assignments, invokes domain merge behavior, records a merge comment, and deletes the old record through its deletion contract. It is not an instruction to concatenate arbitrary financial rows, add unrelated balances, or silently overwrite a coincidentally matching name. Domain validation determines which types can merge and what happens to overlapping business attributes.
+
+Queued rename can return the old identity while work remains pending. A client must observe completion and reload the resulting identity. Distinguish a successfully queued change from a completed reference migration. Concurrent rename, a conflicting destination, a dynamic reference with another selected type, a linked child, and a protected secret all require explicit regression cases.
+
+## Calendar dates and local timestamps
+
+A calendar date, a local date-time, a time of day, and a duration have different semantics. The common current-date-time helper resolves the configured system timezone and returns its local wall-clock date-time without an embedded timezone offset. The replacement must therefore retain the effective timezone context instead of silently interpreting every stored timestamp as universal time. This distinction affects modification timestamps, scheduled eligibility, attendance, service deadlines, and report cut-offs.
+
+Keep fractional seconds where the field and transport support them, particularly for optimistic modification checks. A posting date is a business calendar date and is not obtained by shifting midnight through a user's display timezone. For exchanges requiring unambiguous instants, an adapter may attach the resolved offset or another explicit timezone representation; that mapping must preserve the original local-time business meaning. Time arithmetic must separately state whether it measures wall-clock elapsed time, actual elapsed time, or a working calendar.

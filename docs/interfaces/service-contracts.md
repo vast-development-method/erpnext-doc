@@ -2,13 +2,15 @@
 
 This document defines transport-independent services of the record platform. Domain services build on them to perform business operations such as invoice submission, stock transfer, payment allocation, payroll posting, and customer conversion. Service identity is a complete semantic name; a transport adapter can map that identity to its chosen route without placing implementation-module names in the business model.
 
+The [remote transport contracts](remote-transport-contracts.md) define method admission and response profiles. The [record lifecycle](../runtime/document-lifecycle-and-transactions.md) defines persistence and transaction effects. The [record type index](../../schemas/data/record-type-index.json) identifies record definitions. These three contracts apply together; a generated list of callable names does not supersede any of them.
+
 ## Shared invocation context
 
 Every invocation has a tenant, acting identity, operation name, request arguments, effective configuration, and transaction context. Mutations may carry an expected modification timestamp. Responses distinguish a service return value, updated authorized documents, user-facing messages, errors, progress, and durable completion state. A void return is different from a missing record and different from an empty result set.
 
 Errors need stable semantic categories: authentication required or expired, permission denied, record absent, invalid name or duplicate identity, missing required value, invalid reference, reference to a cancelled transaction, invalid structural transition, stale document, immutable submitted field, locked document, unsupported content, throttling, and unexpected failure. Do not reduce all domain errors to false or zero. A numeric helper returning zero for malformed input does not define the error behavior of an invoice service.
 
-Evidence: source-artifact-4cd1b832463b23b11169 lines 24–170; source-artifact-ad3e1733ffa0140eec53 lines 22–110; source-artifact-d0463fd237b31eada484 lines 39–67.
+The [operation contract matrix](#operation-contract-matrix) defines the invocation result and authority of each common service; the [transport failure mappings](remote-transport-contracts.md#success-and-failure-representations) preserve distinguishable failure classes.
 
 ## Record retrieval and discovery
 
@@ -18,7 +20,7 @@ Evidence: source-artifact-4cd1b832463b23b11169 lines 24–170; source-artifact-a
 
 **Read effective metadata.** Return the effective type declaration for an authenticated principal admitted to the general authenticated-user role. This operation is not the same as read permission on every record of that type. Discovery additionally lists registered callable capabilities and their declared arguments. A neutral catalogue describes their behavior; it need not expose executable source bodies or internal module paths.
 
-Evidence: source-artifact-70f793c473898fecc4cc lines 24–189; source-artifact-70f793c473898fecc4cc lines 192–271; source-artifact-70f793c473898fecc4cc lines 568–651.
+Permission-filtered discovery returns only its defined representation and does not grant mutation rights. List continuation is computed from an extra permitted row, while count remains a separate query.
 
 ## Document creation, copy, update, and deletion
 
@@ -30,7 +32,7 @@ Evidence: source-artifact-70f793c473898fecc4cc lines 24–189; source-artifact-7
 
 **Delete document.** Invoke document deletion and its permissions, reference checks, domain deletion rules, and deletion events. The transport acknowledges acceptance with status 202. That status alone does not imply background deletion; this particular operation performs the call synchronously before returning. Submitted cancellation and deletion are distinct operations.
 
-Evidence: source-artifact-70f793c473898fecc4cc lines 192–271; source-artifact-1c79c95fe9c8ab1bc9d4 lines 691–768; source-artifact-1c79c95fe9c8ab1bc9d4 lines 812–944.
+The [typed request example](#typed-neutral-request-example) demonstrates complete child-membership replacement and expected-version input. Deletion follows the separate [deletion and recovery contract](../runtime/document-lifecycle-and-transactions.md#deletion-and-recovery-contract).
 
 ## Business action invocation
 
@@ -40,7 +42,7 @@ Evidence: source-artifact-70f793c473898fecc4cc lines 192–271; source-artifact-
 
 **Invoke named service.** Resolve the operation override, optionally select a configured server-side operation, verify exposure and allowed method, bind validated arguments, and invoke the service. Named operations do not inherit a universal record permission rule because they might span records or return calculations. Each must enforce its documented authorization. Registry membership supplies reachability, not complete business authorization.
 
-Evidence: source-artifact-70f793c473898fecc4cc lines 24–189; source-artifact-70f793c473898fecc4cc lines 192–271; source-artifact-70f793c473898fecc4cc lines 568–651; source-artifact-66f1c84f2539463cb381 lines 580–655.
+An exposed action must still satisfy current-state, field, workflow, and domain rules. Its returned modified document can be an unsaved calculation; persistence must be established by the action's declared success boundary.
 
 ## Bulk modifications
 
@@ -50,7 +52,7 @@ The default asynchronous threshold is twenty items. The comparison is strictly g
 
 Inline or worker execution makes a savepoint per item and records success or failure. The result includes successful identifiers, failed items with errors, attempted total, success count, and failure count. Every attempted item belongs to exactly one result category. These operations permit partial success; they do not promise all-or-nothing behavior across the entire batch. Callback and external-effect behavior around savepoint rollback is specified in the background consistency document.
 
-Evidence: source-artifact-70f793c473898fecc4cc lines 24–189; source-artifact-70f793c473898fecc4cc lines 274–562.
+The [partial-success example](#partial-success-example) defines which successful items survive a failed item and why outer transaction failure differs from per-payload import failure.
 
 ## Operational import
 
@@ -60,7 +62,7 @@ Insert builds a new document, applies import values, uses normal insertion, and 
 
 Import must retain an audit reference to its import record and distinguish insert from update outcomes. It must not bypass all permissions simply because it is a bulk operation. Generic outgoing-event suppression during import is an observable difference from interactive entry.
 
-Evidence: source-artifact-831cef801a36881fee0d lines 132–284; source-artifact-831cef801a36881fee0d lines 355–444; source-artifact-ac9f4042fec42828bb99 lines 5–117.
+The [import modes and outcomes](../data/fresh-initialisation-and-data-exchange.md#import-modes-and-durable-outcomes) and [resume calculation](../data/fresh-initialisation-and-data-exchange.md#resume-and-status-calculation) provide the complete common import decision procedure.
 
 ## Report and attachment services
 
@@ -68,10 +70,67 @@ A report invocation takes report identity, filters, optional custom columns, tre
 
 Attachment creation takes target type, optional target identifier and field, filename, content or external location, privacy, folder, and optional upload processing. Default privacy is private. Upload can reuse an authorized existing file, create a temporary target attachment, or invoke an explicitly exposed custom upload handler. An intermediate chunk may return no completed file; only final assembly produces a saved attachment. An attachment is a business record with permissions and parent association, not merely a path on disk.
 
-Evidence: source-artifact-e9e5a0c9d8b9908522c7 lines 27–88; source-artifact-e9e5a0c9d8b9908522c7 lines 279–333; source-artifact-9d66d61a7b7d9a437d11 lines 130–261.
+Use the [report execution procedure](reporting-and-exports.md#report-execution-procedure) and [attachment assembly boundary](remote-transport-contracts.md#attachment-assembly-boundary-example) to distinguish accepted preparation from a completed report or saved file.
 
 ## Acceptance obligations
 
 A conforming adapter must demonstrate defaults, errors, and partial-success boundaries rather than merely exposing a matching list of names. Required scenarios include a twenty-one-item batch, stale update with and without an expected version, restricted child-field read, masked value round trip, unsaved calculation that does not persist, copy without insertion, forbidden submitted edit, import with one failed payload after successes, report access without export permission, and a multipart upload that returns no completed attachment before final assembly.
 
 No generic service contract implies compatibility with every literal route or implementation identifier in the source. Literal transport renaming and behavioral compatibility are separate declarations. Domain operations must additionally describe their exact arguments, derivations, records written, accounting effects, preconditions, and acceptance scenarios.
+
+## Operation contract matrix
+
+| Operation | Required input | Successful result | Primary authority and transaction boundary |
+| --- | --- | --- | --- |
+| Read document | Record type and identity | Authorized document with permitted children | Read permission; no ordinary business commit |
+| List documents | Record type; optional fields, filters, order, offset, limit, grouping | Ordered permitted rows and, in the newer profile, continuation flag | Permission-aware query; no implicit full count |
+| Count documents | Record type and supported filters | Permitted record count | Same relevant row restrictions as the counting query |
+| Read effective metadata | Record type | Effective definition | Authenticated metadata discovery policy |
+| Create document | Record type and supplied business values | Created document | Create permission and insertion lifecycle; commit on successful mutating request |
+| Copy document | Record type and identity; copy-field policy | Unsaved copy | Read permission; does not submit or allocate a persisted replacement identity |
+| Update document | Record type, identity, field overlay, optional expected revision | Saved permitted representation | Write permission plus current lifecycle and field restrictions |
+| Delete document | Record type and identity | Deletion acknowledgement after call completes | Delete rules, or parent write/save for the newer child-deletion path |
+| Invoke stored action | Record reference, exposed action, accepted arguments | Action result and profile-specific updated document representation | Preliminary read/write gate plus the action's stronger business checks |
+| Calculate supplied document | Complete supplied document, exposed action, arguments | Calculated result and authorized in-memory document | Persistence is determined by the action, not implied by returned values |
+| Bulk update or delete | Ordered item list and type context | Per-item results or accepted background work identity | Per-item savepoint followed by outer transaction completion |
+| Import records | Import mode, target type, mapped payloads, optional submit setting | Durable payload outcomes and import status | Per-payload successful commit |
+| Run report | Report identity, filters, options | Columns, rows, summaries, totals, or prepared-result metadata | Report and linked-record permission pipeline |
+| Export report | Report input plus format and selection options | File result or queued export notice | Additional export authority and report rerun semantics |
+| Create attachment | Content or location, filename, target context, privacy | Saved attachment after complete upload | Target write or declared guest-upload policy |
+
+## Typed neutral request example
+
+The following object is a semantic contract example, not a mandated network route or an implementation program. Identifiers use comprehensive business names. Monetary and quantity values use explicit decimal text to preserve exact input during interchange; a compatibility adapter maps that representation to its selected wire profile.
+
+```json
+{
+  "operation": "update document",
+  "record_type": "customer invoice",
+  "record_identifier": "invoice-000042",
+  "expected_modification_time": "2026-01-15T10:00:00.100000",
+  "changes": {
+    "remarks": "Customer collection arranged",
+    "items": [
+      {
+        "record_identifier": "invoice-item-000087",
+        "product": "example-product",
+        "commercial_quantity": "5",
+        "commercial_unit": "pack of six",
+        "stock_units_per_commercial_unit": "6"
+      }
+    ]
+  }
+}
+```
+
+This request replaces the loaded item collection with the declared membership. It is valid only if the invoice's state and field rules allow those changes. A submitted invoice's mutable remarks do not authorize replacing its financial rows. The service must reject the invalid combined mutation rather than accept the remarks while quietly changing the rows. Whether invalid unauthorized fields are restored or rejected follows the distinction between field permission restoration and submitted-value validation in the [lifecycle](../runtime/document-lifecycle-and-transactions.md).
+
+## Partial-success example
+
+A batch updates three drafts: the first is valid, the second references a missing warehouse, and the third is valid. The completed result has attempted count three, successful count two, and failed count one. The second item retains its original database state. The outer request can succeed because partial success is its contract. If the outer transaction itself subsequently fails, both otherwise successful items can still roll back; returning an item result inside processing is not an independent commit.
+
+By contrast, an operational import commits each successful payload. If the third payload fails after the first two commit, those first two remain durable. A client must choose the operation based on the required boundary, not merely because both accept a list.
+
+## Domain-command completeness rule
+
+A domain command is implementable only when its contract names its input meanings and defaults; permission and workflow conditions; reference and date constraints; calculation order and rounding; created, updated, and reversed records; source-row and ledger lineage; concurrency and repeat-request behavior; success boundary; failure categories; and exact acceptance outcomes. A service entry that supplies only a callable name or argument signature is discovery information. It cannot establish the missing domain behavior.

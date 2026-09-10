@@ -10,7 +10,7 @@ This distinction is financially important. A job that depends on a newly created
 
 Job identifiers are scoped to the tenant. Optional deduplication requires an explicit identifier. It suppresses enqueueing when an existing job is queued or running. A completed or otherwise existing job may be removed and re-enqueued with that identity. Thus this is active-work deduplication, not permanent exactly-once processing. Business operations such as posting a payroll payment or applying an external settlement need their own durable transaction-reference checks.
 
-Evidence: source-artifact-b1ad771a8c35d6eebd3d lines 84–218; source-artifact-1c79c95fe9c8ab1bc9d4 lines 2317–2372.
+The [work-state table](#work-state-and-financial-meaning) distinguishes accepted work from committed business facts. The [crash cases](#crash-acceptance-cases) include the gap between commit and after-commit enqueue.
 
 ## Execution and retry
 
@@ -20,7 +20,7 @@ The internal retry path handles a declared retry request and recognized deadlock
 
 The source contains a significant identity discrepancy on this internal retry branch. It destroys local context, then recursively executes without forwarding the original user argument; reconnect defaults to the administrative identity. Static analysis therefore indicates that a later attempt can run under a different user. This has not been dynamically reproduced. A replacement must record its deliberate decision: reproduce a measured compatibility requirement if truly necessary, or retain the initiating identity as an explicit security correction. Do not silently describe all retries as proven to preserve identity.
 
-Evidence: source-artifact-b1ad771a8c35d6eebd3d lines 250–328; source-artifact-66f1c84f2539463cb381 lines 372–424; source-artifact-66f1c84f2539463cb381 lines 472–479.
+The [retry schedule](#retry-schedule-and-duplicate-boundaries) defines six maximum internal executions and separates retryable concurrency failures from ordinary business rejection. Acting identity must be checked on every attempt.
 
 ## Tracked submission and document locking
 
@@ -30,7 +30,7 @@ Queueing locks the referenced document. A normal save checks the lock and reject
 
 Manual unlocking exists, but the source comments identify a possible mismatch between a queue record and another submission lock for the same reference. A neutral contract should expose unlock as an administrative recovery operation with its own acceptance cases. It must not state that unlocking cancels work already executing. Recovering a stuck lock requires checking current document state, active job state, and whether any financial consequences committed.
 
-Evidence: source-artifact-e609b7de6b102f041400 lines 58–192; source-artifact-1c79c95fe9c8ab1bc9d4 lines 2317–2372; source-artifact-1c79c95fe9c8ab1bc9d4 lines 812–944.
+The [recovery procedure](#recovery-decision-procedure) requires inspecting document state, worker state, locks, and actual posting consequences before unlocking or retrying.
 
 ## Scheduled business work
 
@@ -38,7 +38,7 @@ Scheduled operation definitions include enabled/stopped state, frequency or cale
 
 Scheduled effects must remain tied to their business definitions: recurring invoices, subscription periods, stock reposting, payroll-related reminders, scheduled reports, and notification dispatch are not interchangeable. A schedule firing twice must not create duplicate financial records when the domain defines a unique period or source reference. The generic scheduler's job deduplication alone cannot provide that guarantee.
 
-Evidence: source-artifact-91af98c5f0f2b358f1ed lines 58–206.
+A repeated scheduling opportunity is not permission to create a second period-specific financial record. Apply durable domain identity in addition to active-work queue deduplication.
 
 ## Real-time updates and progress
 
@@ -48,7 +48,7 @@ Progress messages can publish before the business transaction commits. A task-sc
 
 Document and document-type subscriptions check access; task-progress subscriptions have the separate source limitation described in the identity document. Live messages are not authorization tokens. Any event containing a record reference must still lead to a permission-checked read.
 
-Evidence: source-artifact-3d8f5f8af4a5a70b7faf lines 31–136; source-artifact-af5a18ab59f29558dded lines 36–138; source-artifact-1c79c95fe9c8ab1bc9d4 lines 1773–1960.
+An immediate progress event is not a committed completion event. A client that misses live delivery must recover through an authorized read of the authoritative business record.
 
 ## Outgoing event delivery
 
@@ -60,7 +60,7 @@ An enabled signing option computes a keyed hash over the exact serialized payloa
 
 External delivery can be duplicated even when a local job is deduplicated: a remote server might accept a request and the local client might time out before seeing the response. Receiver-side business reference deduplication is necessary for exactly-once business effects. It is an acceptance obligation for each integration, not a guarantee supplied by generic outgoing-event delivery.
 
-Evidence: source-artifact-ac9f4042fec42828bb99 lines 5–117; source-artifact-c92b91c9ae73e577a3db lines 155–352; source-artifact-c92b91c9ae73e577a3db lines 20–25.
+The [retry schedule and duplicate boundaries](#retry-schedule-and-duplicate-boundaries) define delay, retained payload, and receiver duplicate handling independently from local queue identity.
 
 ## Partial success and savepoint limitations
 
@@ -68,7 +68,7 @@ Bulk transport operations use a savepoint for each item and collect successes an
 
 Savepoint rollback does not invoke full-rollback callbacks or undo filesystem writes. A callback registered while processing an item may need separate cancellation if that item later fails. Acceptance testing must inspect resulting external events and attachments, not just table contents. The source's savepoint mechanism alone does not establish per-item atomicity for non-database effects.
 
-Evidence: source-artifact-67374161a6df47b4eb7f lines 1190–1250; source-artifact-70f793c473898fecc4cc lines 274–562; source-artifact-831cef801a36881fee0d lines 132–284; source-artifact-c53dbe3cd685497ce317 lines 246–370.
+The [transaction failure table](document-lifecycle-and-transactions.md#failure-boundary-table) and [import outcomes](../data/fresh-initialisation-and-data-exchange.md#import-modes-and-durable-outcomes) distinguish savepoint rollback, per-payload commit, and full rollback.
 
 ## Acceptance obligations
 
@@ -80,3 +80,47 @@ Evidence: source-artifact-67374161a6df47b4eb7f lines 1190–1250; source-artifac
 6. Fail one bulk item after scheduling an outgoing event and verify whether that event survives the savepoint rollback. Record the measured behavior and any correction explicitly.
 7. Make an outgoing receiver accept a request while the sender times out; verify that retry does not duplicate the receiving business transaction.
 8. Force a queued submission to fail and verify failed tracking, unchanged submitted state, discoverable error, and recoverable lock behavior.
+
+## Work state and financial meaning
+
+| State or observation | Meaning | What it does not establish |
+| --- | --- | --- |
+| Accepted job reference | Work was accepted for processing | The target document is submitted |
+| Queued submission record | A document action is tracked and locked | A worker is healthy or the action has committed |
+| Running task progress | An attempt is reporting activity | Progress is durable or confidential by default |
+| Finished submission | The requested action completed through its transaction path | Every external notification was delivered |
+| Failed submission | Failure detail is recorded | The record may be retried without inspecting current state |
+| Delivered outgoing request | Sender observed an accepted response | The receiver executed exactly one business effect |
+| Exhausted outgoing delivery | Configured retries ended unsuccessfully | The receiver never accepted an earlier attempt |
+| Recalculation pending | Derived results are unfinished | Provisional balances can be presented as final |
+
+Generic job status and document-submission status use different state sets. Preserve both when both exist. A failed delivery is not a cancelled invoice; a queued valuation operation is not an unsubmitted stock document.
+
+## Retry schedule and duplicate boundaries
+
+For an internal transient execution failure, let \(k\) be the number of retries already used. Retry only while \(k<5\), rolling back the failed attempt before reconnecting and re-executing. The delay for the next retry is \(k+1\) seconds. An operation can therefore execute at most six times under this internal policy. Permission and ordinary business validation failures do not join that policy merely because a caller would like to retry them.
+
+For outgoing event delivery, retry delays by retry number are five minutes, thirty minutes, two hours, five hours, and ten hours, with subsequent retries using ten hours. If the configured maximum is two retries, there can be one initial attempt and two later attempts. The payload, headers, and destination retained in the delivery record are reused; a new document edit does not automatically replace that retry payload.
+
+| Duplicate scenario | Baseline behavior | Required business protection |
+| --- | --- | --- |
+| Same job identity while queued or running | Optional active deduplication suppresses another enqueue | Use the same intended identity consistently |
+| Same job identity after completion | Another execution can be accepted | Check durable business references before creating another posting |
+| Receiver accepted, response lost | Outgoing sender can retry | Receiver detects an already applied external transaction |
+| Successful import payload encountered on resume | Persisted import log can suppress it | Preserve the original input-row grouping and result identity |
+| Scheduler tick repeated after interruption | Queue checks can suppress active duplicate work | Period-specific document uniqueness must guard recurring financial creation |
+
+## Recovery decision procedure
+
+1. Identify tenant, initiating actor, document reference, requested action, job reference, and last durable outcome. Do not use a display notification as the only evidence of completion.
+2. Read current document state and related financial or stock consequences under suitable permissions. Determine whether work never began, failed and rolled back, or committed with a missing acknowledgement.
+3. Inspect worker state and locks. A manual unlock does not stop an executing worker; concurrent retry can otherwise post or modify the same business facts twice.
+4. Reconcile external operations through their durable business reference. If the receiver accepted the operation, record that outcome before authorizing another attempt.
+5. For safe retries, preserve the intended user and configuration policy, respect the domain's idempotency rules, and record the new attempt. For irreversible external effects, execute a separately authorized business reversal instead of pretending to roll back the network.
+6. Rebuild affected projections and verify their reconciliation totals. Close the operational failure only when its business state and user-facing state agree.
+
+## Crash acceptance cases
+
+Inject a failure before enqueue, after business commit but before enqueue, during worker execution, immediately after worker commit, after a remote receiver commits but before its response, and during report-file publication. Record persisted business state, queue state, lock state, failure log, and next permitted recovery action for each case. The commit-callback mechanism alone does not guarantee recovery in the commit-to-enqueue crash gap. A durable outbox is an explicitly proposed enterprise reliability addition for integrations that require eventual delivery; its records must be committed with the business transaction and consumed idempotently.
+
+The exact per-payload import boundaries are defined in [fresh initialisation and data exchange](../data/fresh-initialisation-and-data-exchange.md#import-modes-and-durable-outcomes). Savepoint semantics and financial closure are defined in [document lifecycle and transactions](document-lifecycle-and-transactions.md#failure-boundary-table).
