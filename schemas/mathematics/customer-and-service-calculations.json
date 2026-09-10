@@ -1,0 +1,587 @@
+{
+  "catalog_name": "Customer and service calculations",
+  "calculations": [
+    {
+      "calculation_identifier": "commercial-product-discount",
+      "expression": "product_amount = quantity * rate; discount_amount = product_amount * discount_percentage / 100; net_amount = product_amount - discount_amount",
+      "inputs": [
+        "quantity",
+        "rate",
+        "discount_percentage"
+      ],
+      "example": {
+        "inputs": {
+          "quantity": "12",
+          "rate": "25",
+          "discount_percentage": "10"
+        },
+        "expected": {
+          "product_amount": "300",
+          "discount_amount": "30",
+          "net_amount": "270"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-9dbe99a3c18eb4acc088",
+          "first_line": 108,
+          "last_line": 193
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "Interactive calculation observed; authoritative noninteractive total validation needs separate evidence.",
+        "A genuine zero net amount from a full discount must not fall back to gross."
+      ]
+    },
+    {
+      "calculation_identifier": "commercial-probability-weighted-forecast",
+      "expression": "forecast_contribution = expected_value * probability_percentage / 100 * stored_exchange_rate",
+      "inputs": [
+        "expected_value",
+        "probability_percentage",
+        "stored_exchange_rate",
+        "stage_category"
+      ],
+      "example": {
+        "inputs": {
+          "expected_value": "10000",
+          "probability_percentage": "40",
+          "stored_exchange_rate": "1.2",
+          "stage_category": "ongoing"
+        },
+        "expected": {
+          "forecast_contribution": "4800"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-9947effccf4036a33db7",
+          "first_line": 776,
+          "last_line": 835
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "This expression applies to categories other than lost. Missing exchange rate is treated as one; missing probability is zero."
+      ]
+    },
+    {
+      "calculation_identifier": "lost-opportunity-forecast-contribution",
+      "expression": "forecast_contribution = expected_value * stored_exchange_rate",
+      "inputs": [
+        "expected_value",
+        "stored_exchange_rate",
+        "stage_category"
+      ],
+      "example": {
+        "inputs": {
+          "expected_value": "10000",
+          "stored_exchange_rate": "1.2",
+          "stage_category": "lost"
+        },
+        "expected": {
+          "forecast_contribution": "12000"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-9947effccf4036a33db7",
+          "first_line": 776,
+          "last_line": 835
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "Counterintuitive source-observed behaviour; excluding lost value would be an explicit specification change."
+      ]
+    },
+    {
+      "calculation_identifier": "project-task-count-completion",
+      "expression": "completion_percentage = round(100 * (completed_task_count + cancelled_task_count) / total_task_count, 2)",
+      "inputs": [
+        "completed_task_count",
+        "cancelled_task_count",
+        "total_task_count"
+      ],
+      "example": {
+        "inputs": {
+          "completed_task_count": 2,
+          "cancelled_task_count": 1,
+          "total_task_count": 4
+        },
+        "expected": {
+          "completion_percentage": "75"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-fbb290b930b6e27bd40d",
+          "first_line": 262,
+          "last_line": 415
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "No tasks yields zero for calculated methods; explicit completion without tasks switches to manual at 100."
+      ]
+    },
+    {
+      "calculation_identifier": "project-weighted-completion",
+      "expression": "weight_share = round(task_weight / total_task_weight, 2), or 0 when total_task_weight is zero; completion_percentage = round(sum(task_progress_percentage * weight_share), 2)",
+      "inputs": [
+        "task_progress_percentages",
+        "task_weights"
+      ],
+      "example": {
+        "inputs": {
+          "task_progress_percentages": [
+            "50",
+            "100"
+          ],
+          "task_weights": [
+            "1",
+            "3"
+          ]
+        },
+        "expected": {
+          "completion_percentage": "87.5"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-fbb290b930b6e27bd40d",
+          "first_line": 262,
+          "last_line": 415
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "Each weight share is rounded to two decimal places before multiplication.",
+        "Zero denominator yields zero weight share.",
+        "Three equal fully completed tasks yield 99 percent, not 100."
+      ]
+    },
+    {
+      "calculation_identifier": "time-cost-and-billable-amount",
+      "expression": "costing_amount = actual_hours * costing_rate; billing_amount = billing_hours * billing_rate",
+      "inputs": [
+        "actual_hours",
+        "billing_hours",
+        "costing_rate",
+        "billing_rate"
+      ],
+      "example": {
+        "inputs": {
+          "actual_hours": "2.5",
+          "billing_hours": "3",
+          "costing_rate": "40",
+          "billing_rate": "80"
+        },
+        "expected": {
+          "costing_amount": "100",
+          "billing_amount": "240"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-c22a3364aa56314f9e13",
+          "first_line": 46,
+          "last_line": 137
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "Billing hours exceeding actual hours warns and does not reject.",
+        "Zero billing hours on a billable row default to actual hours; nonbillable rows have zero billing hours."
+      ]
+    },
+    {
+      "calculation_identifier": "remaining-time-invoice-rate",
+      "expression": "remaining_hours = billable_hours - billed_hours; remaining_amount = billable_amount - billed_amount; effective_rate = remaining_amount / remaining_hours",
+      "inputs": [
+        "billable_hours",
+        "billed_hours",
+        "billable_amount",
+        "billed_amount"
+      ],
+      "example": {
+        "inputs": {
+          "billable_hours": "10",
+          "billed_hours": "4",
+          "billable_amount": "1000",
+          "billed_amount": "360"
+        },
+        "expected": {
+          "remaining_hours": "6",
+          "remaining_amount": "640",
+          "effective_rate_fraction": {
+            "numerator": "320",
+            "denominator": "3"
+          }
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-8595348130b8e717250e",
+          "first_line": 453,
+          "last_line": 500
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "Reject when no billable hours or all hours billed. Apply invoice field precision after deriving rate; the exact effective rate is expressed as a reduced fraction to avoid inventing output precision."
+      ]
+    },
+    {
+      "calculation_identifier": "project-gross-margin",
+      "expression": "expense_amount = labour_cost + purchase_cost + consumed_material_cost; gross_margin = billed_amount - expense_amount; margin_percentage = 100 * gross_margin / billed_amount when billed_amount is nonzero, otherwise 0",
+      "inputs": [
+        "labour_cost",
+        "purchase_cost",
+        "consumed_material_cost",
+        "billed_amount"
+      ],
+      "example": {
+        "inputs": {
+          "labour_cost": "200",
+          "purchase_cost": "100",
+          "consumed_material_cost": "50",
+          "billed_amount": "500"
+        },
+        "expected": {
+          "expense_amount": "350",
+          "gross_margin": "150",
+          "margin_percentage": "30"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-fbb290b930b6e27bd40d",
+          "first_line": 262,
+          "last_line": 415
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "Management aggregate, not a claim to reconcile to all general-ledger expense."
+      ]
+    },
+    {
+      "calculation_identifier": "working-time-response-deadline",
+      "expression": "deadline = consume_service_seconds(start_timestamp, target_seconds, weekday_windows, holiday_dates)",
+      "inputs": [
+        "start_timestamp",
+        "target_seconds",
+        "weekday_windows",
+        "holiday_dates"
+      ],
+      "example": {
+        "inputs": {
+          "start_timestamp": "2026-09-11T16:30:00",
+          "target_seconds": 7200,
+          "weekday_windows": {
+            "Monday": {
+              "opening": "09:00:00",
+              "closing": "17:00:00"
+            },
+            "Tuesday": {
+              "opening": "09:00:00",
+              "closing": "17:00:00"
+            },
+            "Wednesday": {
+              "opening": "09:00:00",
+              "closing": "17:00:00"
+            },
+            "Thursday": {
+              "opening": "09:00:00",
+              "closing": "17:00:00"
+            },
+            "Friday": {
+              "opening": "09:00:00",
+              "closing": "17:00:00"
+            }
+          },
+          "holiday_dates": [
+            "2026-09-14"
+          ]
+        },
+        "expected": {
+          "deadline": "2026-09-15T10:30:00"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-733b02ac52ccc485b539",
+          "first_line": 74,
+          "last_line": 357
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "Opening boundary included; closing boundary excluded.",
+        "No timezone offset is assumed by this local calendar example.",
+        "Empty positive-capacity calendar lacks a terminating source guarantee."
+      ]
+    },
+    {
+      "calculation_identifier": "issue-resolution-target-hold-extension",
+      "expression": "resolution_deadline = calendar_deadline + round(total_hold_seconds) wall-clock seconds",
+      "inputs": [
+        "calendar_deadline",
+        "total_hold_seconds"
+      ],
+      "example": {
+        "inputs": {
+          "calendar_deadline": "2026-09-15T10:30:00",
+          "total_hold_seconds": 7200
+        },
+        "expected": {
+          "resolution_deadline": "2026-09-15T12:30:00"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-a18b25de73c21aa2c3e9",
+          "first_line": 786,
+          "last_line": 913
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "Accumulated hold is not consumed through the business calendar again."
+      ]
+    },
+    {
+      "calculation_identifier": "regional-charge-on-charge",
+      "expression": "taxable_charge = referenced_charge_amount; tax_amount = referenced_charge_amount * tax_percentage / 100",
+      "inputs": [
+        "referenced_charge_amount",
+        "tax_percentage"
+      ],
+      "example": {
+        "inputs": {
+          "referenced_charge_amount": "200",
+          "tax_percentage": "15"
+        },
+        "expected": {
+          "taxable_charge": "200",
+          "tax_amount": "30"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-964d56c03fb16fe32936",
+          "first_line": 143,
+          "last_line": 303
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "Additional exported charge row has quantity one; exact external serialization remains separate."
+      ]
+    },
+    {
+      "calculation_identifier": "equal-task-weight-rounding",
+      "expression": "weight_share = round(1 / 3, 2); completion_percentage = round(100 * weight_share + 100 * weight_share + 100 * weight_share, 2)",
+      "inputs": [
+        "task_progress_percentages",
+        "task_weights"
+      ],
+      "example": {
+        "inputs": {
+          "task_progress_percentages": [
+            "100",
+            "100",
+            "100"
+          ],
+          "task_weights": [
+            "1",
+            "1",
+            "1"
+          ]
+        },
+        "expected": {
+          "weight_share": "0.33",
+          "completion_percentage": "99"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-91eb5c3685f0ea77eecb",
+          "first_line": 1364,
+          "last_line": 1377
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "Called by the project completion calculation; intermediate rounding is part of observed behaviour."
+      ]
+    },
+    {
+      "calculation_identifier": "zero-weight-project-completion",
+      "expression": "weight_share = 0 when total_task_weight is zero; completion_percentage = round(sum(task_progress_percentage * weight_share), 2)",
+      "inputs": [
+        "task_progress_percentages",
+        "task_weights"
+      ],
+      "example": {
+        "inputs": {
+          "task_progress_percentages": [
+            "100",
+            "50"
+          ],
+          "task_weights": [
+            "0",
+            "0"
+          ]
+        },
+        "expected": {
+          "completion_percentage": "0"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-91eb5c3685f0ea77eecb",
+          "first_line": 1364,
+          "last_line": 1377
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": []
+    },
+    {
+      "calculation_identifier": "time-billed-percentage-zero-price",
+      "expression": "billed_percentage = 100 * billed_hours / billable_hours when billed monetary ratio is unavailable and both hours are positive",
+      "inputs": [
+        "billable_amount",
+        "billed_amount",
+        "billable_hours",
+        "billed_hours"
+      ],
+      "example": {
+        "inputs": {
+          "billable_amount": "0",
+          "billed_amount": "0",
+          "billable_hours": "8",
+          "billed_hours": "2"
+        },
+        "expected": {
+          "billed_percentage": "25"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-8595348130b8e717250e",
+          "first_line": 68,
+          "last_line": 285
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": []
+    },
+    {
+      "calculation_identifier": "maintenance-visit-spacing",
+      "expression": "visit_interval_days = date_difference(end_date, start_date) / visit_count; each nominal_visit_date advances by visit_interval_days",
+      "inputs": [
+        "start_date",
+        "end_date",
+        "visit_count"
+      ],
+      "example": {
+        "inputs": {
+          "start_date": "2026-09-01",
+          "end_date": "2026-10-01",
+          "visit_count": 3,
+          "holiday_dates": []
+        },
+        "expected": {
+          "visit_interval_days": "10",
+          "nominal_visit_dates": [
+            "2026-09-11",
+            "2026-09-21",
+            "2026-10-01"
+          ]
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-42c1faca32e03699af0b",
+          "first_line": 50,
+          "last_line": 221
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "Holiday adjustment moves backwards; example assumes no holidays.",
+        "Fractional day handling needs a date utility fixture rather than a calendar-month substitution."
+      ]
+    },
+    {
+      "calculation_identifier": "dependent-task-rescheduling",
+      "expression": "rescheduled_start = prerequisite_end + 1 day; preserved_duration_days = original_end - original_start; rescheduled_end = rescheduled_start + preserved_duration_days",
+      "inputs": [
+        "prerequisite_end",
+        "original_start",
+        "original_end",
+        "dependent_state"
+      ],
+      "example": {
+        "inputs": {
+          "prerequisite_end": "2026-09-12",
+          "original_start": "2026-09-10",
+          "original_end": "2026-09-15",
+          "dependent_state": "open"
+        },
+        "expected": {
+          "rescheduled_start": "2026-09-13",
+          "rescheduled_end": "2026-09-18",
+          "preserved_duration_days": 5
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-99dd9269f4b4ba1e67df",
+          "first_line": 216,
+          "last_line": 365
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "Applies only when dependent beginning is strictly before prerequisite end and both dependent expected dates exist."
+      ]
+    },
+    {
+      "calculation_identifier": "campaign-final-date",
+      "expression": "campaign_end_date = campaign_start_date + maximum(schedule_delay_days)",
+      "inputs": [
+        "campaign_start_date",
+        "schedule_delay_days"
+      ],
+      "example": {
+        "inputs": {
+          "campaign_start_date": "2026-09-10",
+          "schedule_delay_days": [
+            0,
+            3,
+            7
+          ]
+        },
+        "expected": {
+          "campaign_end_date": "2026-09-17"
+        }
+      },
+      "evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-46c47e21ceb256d60219",
+          "first_line": 32,
+          "last_line": 210
+        }
+      ],
+      "verification": "source inspected; example derived independently; runtime not executed",
+      "notes": [
+        "At least one scheduled entry is required."
+      ]
+    }
+  ]
+}

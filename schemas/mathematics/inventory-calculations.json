@@ -1,0 +1,1282 @@
+{
+  "catalog_name": "Inventory, fulfilment and manufacturing mathematical contracts",
+  "catalog_version": "1.0",
+  "scope": "Source-inspected current business behavior; no historical migration or infrastructure prescription.",
+  "verification_status": "Worked arithmetic checked independently. Source test definitions inspected where referenced; complete source application suites not executed.",
+  "calculation_count": 28,
+  "calculations": [
+    {
+      "calculation_identifier": "stock_quantity_conversion",
+      "name": "Transaction quantity to stock quantity",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "transaction_quantity",
+          "meaning_and_unit": "Quantity in selected commercial unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "stock_units_per_transaction_unit",
+          "meaning_and_unit": "Stock units represented by one transaction unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "transaction_quantity × stock_units_per_transaction_unit",
+      "result_unit": "Product stock units",
+      "rounding_and_sequence": "Preserve transaction factor; apply target stock quantity field precision and whole-number constraint.",
+      "conditions_and_failures": [
+        "Stock unit conversion must equal one.",
+        "Product unit conversion rows must not repeat a unit."
+      ],
+      "worked_example": {
+        "inputs": {
+          "transaction_quantity": 2,
+          "stock_units_per_transaction_unit": 12
+        },
+        "expected": {
+          "stock_quantity": 24
+        }
+      },
+      "evidence": [
+        "source-artifact-146c20ebd9bfc657547a lines 422–492",
+        "source-artifact-3936ec050b9bd26d0830 lines 1596–1625"
+      ]
+    },
+    {
+      "calculation_identifier": "stock_unit_transaction_price",
+      "name": "Price per stock unit",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "transaction_unit_price",
+          "meaning_and_unit": "Document currency per transaction unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "stock_units_per_transaction_unit",
+          "meaning_and_unit": "Stock units per transaction unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "transaction_unit_price ÷ stock_units_per_transaction_unit",
+      "result_unit": "Document currency per stock unit",
+      "rounding_and_sequence": "Do not infer factor from a price or package dimension; the inspected rate helper treats a missing factor as one.",
+      "conditions_and_failures": [
+        "A selected factor of zero cannot be used as an actual divisor."
+      ],
+      "worked_example": {
+        "inputs": {
+          "transaction_unit_price": 60,
+          "stock_units_per_transaction_unit": 12
+        },
+        "expected": {
+          "stock_unit_price": 5
+        }
+      },
+      "evidence": [
+        "source-artifact-f302674e14d1fb05503a lines 407–418"
+      ]
+    },
+    {
+      "calculation_identifier": "packed_component_quantity",
+      "name": "Bundle component stock requirement",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "component_quantity_per_parent_stock_unit",
+          "meaning_and_unit": "Component stock units for each parent stock unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "parent_stock_quantity",
+          "meaning_and_unit": "Parent quantity after commercial conversion",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "component_quantity_per_parent_stock_unit × parent_stock_quantity",
+      "result_unit": "Component stock units",
+      "rounding_and_sequence": "Preserve parent row identity; do not aggregate unrelated parents before applying return references.",
+      "conditions_and_failures": [
+        "Do not post another stock movement for a non-stock commercial parent."
+      ],
+      "worked_example": {
+        "inputs": {
+          "component_quantity_per_parent_stock_unit": 2,
+          "parent_stock_quantity": 6
+        },
+        "expected": {
+          "component_stock_quantity": 12
+        }
+      },
+      "evidence": [
+        "source-artifact-7ae54f496d9cd22e7217 lines 265–276"
+      ]
+    },
+    {
+      "calculation_identifier": "packing_net_weight",
+      "name": "Net weight of a packing slip",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "rows",
+          "meaning_and_unit": "For each row: quantity in row stock units and net weight per stock unit in a common weight unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "round(sum(row.quantity × row.net_weight_per_unit), 2)",
+      "result_unit": "Common weight unit",
+      "rounding_and_sequence": "Round the total to two decimal places after summing products.",
+      "conditions_and_failures": [
+        "All row weight units must match.",
+        "Gross weight defaults to net weight only when its entered value is empty or zero."
+      ],
+      "worked_example": {
+        "inputs": {
+          "rows": [
+            {
+              "quantity": 12,
+              "net_weight_per_unit": 0.25
+            }
+          ]
+        },
+        "expected": {
+          "net_weight": 3
+        }
+      },
+      "evidence": [
+        "source-artifact-1cd7d081b87ba2e621af lines 62–212"
+      ]
+    },
+    {
+      "calculation_identifier": "shipment_weight",
+      "name": "Total shipment parcel weight",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "parcels",
+          "meaning_and_unit": "Each parcel has weight in kilograms and integer parcel count",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "sum(parcel.weight × parcel.count for parcels whose count is positive)",
+      "result_unit": "Kilograms",
+      "rounding_and_sequence": "Parcel weight field has one decimal place in inspected metadata; no separate total rounding appears in the helper.",
+      "conditions_and_failures": [
+        "Every parcel weight must be positive.",
+        "This expression is physical weight, not a carrier dimensional-weight tariff."
+      ],
+      "worked_example": {
+        "inputs": {
+          "parcels": [
+            {
+              "weight": 3.4,
+              "count": 4
+            }
+          ]
+        },
+        "expected": {
+          "total_weight": 13.6
+        }
+      },
+      "evidence": [
+        "source-artifact-1442bc18403ecb8c85b4 lines 83–132",
+        "source-artifact-c8f7a1a3201289d23abc lines 20–57"
+      ]
+    },
+    {
+      "calculation_identifier": "projected_inventory_quantity",
+      "name": "Projected inventory quantity",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "actual_quantity",
+          "meaning_and_unit": "On-hand stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "ordered_quantity",
+          "meaning_and_unit": "Pending purchase stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "requested_quantity",
+          "meaning_and_unit": "Requested stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "planned_quantity",
+          "meaning_and_unit": "Planned production stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "sales_reserved_quantity",
+          "meaning_and_unit": "Sales demand stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "production_reserved_quantity",
+          "meaning_and_unit": "Production material demand stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "subcontract_reserved_quantity",
+          "meaning_and_unit": "Subcontract material demand stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "production_plan_reserved_quantity",
+          "meaning_and_unit": "Production-plan demand stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "actual_quantity + ordered_quantity + requested_quantity + planned_quantity − sales_reserved_quantity − production_reserved_quantity − subcontract_reserved_quantity − production_plan_reserved_quantity",
+      "result_unit": "Product stock units",
+      "rounding_and_sequence": "Sum planning counters; explicit physical reservation is not an additional term here.",
+      "conditions_and_failures": [
+        "All operands must refer to the same product and warehouse planning scope."
+      ],
+      "worked_example": {
+        "inputs": {
+          "actual_quantity": 60,
+          "ordered_quantity": 24,
+          "requested_quantity": 12,
+          "planned_quantity": 30,
+          "sales_reserved_quantity": 18,
+          "production_reserved_quantity": 6,
+          "subcontract_reserved_quantity": 3,
+          "production_plan_reserved_quantity": 9
+        },
+        "expected": {
+          "projected_quantity": 90
+        }
+      },
+      "evidence": [
+        "source-artifact-f3019fa86bf90715e1a7 lines 40–94"
+      ]
+    },
+    {
+      "calculation_identifier": "available_quantity_to_reserve",
+      "name": "Unclaimed physical stock",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "actual_quantity",
+          "meaning_and_unit": "On-hand stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "reservations",
+          "meaning_and_unit": "Submitted applicable claims with reserved, delivered, transferred and consumed stock quantities",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "actual_quantity − sum(reserved_quantity − delivered_quantity − transferred_quantity − consumed_quantity)",
+      "result_unit": "Product stock units",
+      "rounding_and_sequence": "Read and write under exclusion of competing claims for the same stock scope, including the first claim.",
+      "conditions_and_failures": [
+        "Exclude current reservation when recomputing its permitted update.",
+        "Batch-specific path uses batch availability."
+      ],
+      "worked_example": {
+        "inputs": {
+          "actual_quantity": 60,
+          "reservations": [
+            {
+              "reserved_quantity": 20,
+              "delivered_quantity": 4,
+              "transferred_quantity": 2,
+              "consumed_quantity": 1
+            }
+          ]
+        },
+        "expected": {
+          "available_quantity": 47
+        }
+      },
+      "evidence": [
+        "source-artifact-b1dc48719460ed10d39e lines 726–781"
+      ]
+    },
+    {
+      "calculation_identifier": "allowed_reservation_quantity",
+      "name": "Maximum claim against a source row",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "available_quantity",
+          "meaning_and_unit": "Warehouse stock available after other active claims",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "source_quantity",
+          "meaning_and_unit": "Source row demand in stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "delivered_quantity",
+          "meaning_and_unit": "Already delivered quantity converted to stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "other_source_reservations",
+          "meaning_and_unit": "Existing other reservations against the same source demand",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "minimum(available_quantity, source_quantity − delivered_quantity − other_source_reservations)",
+      "result_unit": "Product stock units",
+      "rounding_and_sequence": "Round allowed quantity and candidate reservation to reservation field precision before comparison.",
+      "conditions_and_failures": [
+        "Candidate quantity cannot exceed this maximum.",
+        "Candidate reserved quantity must be greater than delivered quantity on the reservation."
+      ],
+      "worked_example": {
+        "inputs": {
+          "available_quantity": 47,
+          "source_quantity": 40,
+          "delivered_quantity": 12,
+          "other_source_reservations": 8
+        },
+        "expected": {
+          "allowed_quantity": 20
+        }
+      },
+      "evidence": [
+        "source-artifact-b1dc48719460ed10d39e lines 563–690"
+      ]
+    },
+    {
+      "calculation_identifier": "moving_average_positive_receipt",
+      "name": "Moving average receipt while previous inventory is positive",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "previous_quantity",
+          "meaning_and_unit": "Positive stock units before receipt",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "previous_rate",
+          "meaning_and_unit": "Company currency per stock unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "incoming_quantity",
+          "meaning_and_unit": "Positive receipt stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "incoming_rate",
+          "meaning_and_unit": "Company currency per stock unit received",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "(previous_quantity × previous_rate + incoming_quantity × incoming_rate) ÷ (previous_quantity + incoming_quantity)",
+      "result_unit": "Company currency per stock unit",
+      "rounding_and_sequence": "Next stock value is rounded to currency precision; nonzero quantity is rounded to quantity precision before recalculated carried rate.",
+      "conditions_and_failures": [
+        "If previous quantity is zero or negative and receipt makes next quantity nonnegative, use incoming rate directly."
+      ],
+      "worked_example": {
+        "inputs": {
+          "previous_quantity": 10,
+          "previous_rate": 4,
+          "incoming_quantity": 5,
+          "incoming_rate": 7
+        },
+        "expected": {
+          "next_quantity": 15,
+          "next_value": 75,
+          "next_rate": 5
+        }
+      },
+      "evidence": [
+        "source-artifact-9dde27288d6d3f0994cd lines 1716–1804",
+        "source-artifact-9dde27288d6d3f0994cd lines 1005–1215"
+      ]
+    },
+    {
+      "calculation_identifier": "moving_average_explicit_issue_rate",
+      "name": "Moving average issue with specified outgoing rate",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "previous_quantity",
+          "meaning_and_unit": "Stock units before issue",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "previous_rate",
+          "meaning_and_unit": "Company currency per stock unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "signed_issue_quantity",
+          "meaning_and_unit": "Negative stock units issued",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "outgoing_rate",
+          "meaning_and_unit": "Specified company currency per issued stock unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "(previous_quantity × previous_rate + signed_issue_quantity × outgoing_rate) ÷ (previous_quantity + signed_issue_quantity)",
+      "result_unit": "Company currency per remaining stock unit",
+      "rounding_and_sequence": "Apply only when resulting quantity is nonzero; currency and quantity precision follow ledger processing.",
+      "conditions_and_failures": [
+        "When resulting quantity is zero, keep outgoing rate as rate state and set stock value zero.",
+        "An ordinary issue without specified outgoing rate normally retains average rate."
+      ],
+      "worked_example": {
+        "inputs": {
+          "previous_quantity": 10,
+          "previous_rate": 5,
+          "signed_issue_quantity": -2,
+          "outgoing_rate": 7
+        },
+        "expected": {
+          "next_quantity": 8,
+          "next_value": 36,
+          "next_rate": 4.5
+        }
+      },
+      "evidence": [
+        "source-artifact-9dde27288d6d3f0994cd lines 1716–1804"
+      ]
+    },
+    {
+      "calculation_identifier": "stock_value_difference",
+      "name": "Monetary change caused by a stock ledger row",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "next_stock_value",
+          "meaning_and_unit": "Calculated company-currency balance after the row",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "previous_carried_value",
+          "meaning_and_unit": "Previously carried company-currency balance",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "rounded_next_stock_value − previous_carried_value",
+      "result_unit": "Company currency",
+      "rounding_and_sequence": "Round next value to currency precision first; force zero value when quantity is exactly zero.",
+      "conditions_and_failures": [
+        "A reconciliation may replace target quantity and rate rather than adding a receipt."
+      ],
+      "worked_example": {
+        "inputs": {
+          "next_stock_value": 45,
+          "previous_carried_value": 75
+        },
+        "expected": {
+          "stock_value_difference": -30
+        }
+      },
+      "evidence": [
+        "source-artifact-9dde27288d6d3f0994cd lines 1005–1215"
+      ]
+    },
+    {
+      "calculation_identifier": "standard_inventory_value",
+      "name": "Inventory carried at effective standard",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "next_quantity",
+          "meaning_and_unit": "On-hand product stock units after posting",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "effective_standard_rate",
+          "meaning_and_unit": "Approved effective standard in company currency per stock unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "next_quantity × effective_standard_rate",
+      "result_unit": "Company currency",
+      "rounding_and_sequence": "Use standard effective on posting date, then currency precision for stock value.",
+      "conditions_and_failures": [
+        "Missing effective standard fails.",
+        "A posting before the latest approved effective date fails.",
+        "Serial and batch cost paths do not override standard carrying value."
+      ],
+      "worked_example": {
+        "inputs": {
+          "next_quantity": 10,
+          "effective_standard_rate": 100
+        },
+        "expected": {
+          "stock_value": 1000
+        }
+      },
+      "evidence": [
+        "source-artifact-88fa2add755bfc5588cb lines 32–314",
+        "source-artifact-9dde27288d6d3f0994cd lines 57–102",
+        "source-artifact-9dde27288d6d3f0994cd lines 1005–1215"
+      ]
+    },
+    {
+      "calculation_identifier": "manufacturing_standard_variance",
+      "name": "Manufacturing variance under standard cost",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "consumed_material_value",
+          "meaning_and_unit": "Company-currency stock value consumed",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "additional_cost",
+          "meaning_and_unit": "Company-currency attributable additional cost",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "finished_standard_value",
+          "meaning_and_unit": "Company-currency standard carrying amount of output",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "consumed_material_value + additional_cost − finished_standard_value",
+      "result_unit": "Company currency; positive is unfavorable expense",
+      "rounding_and_sequence": "Use monetary ledger values rather than a rounded displayed per-unit rate.",
+      "conditions_and_failures": [
+        "Post to configured manufacturing variance account.",
+        "Finished inventory remains at standard."
+      ],
+      "worked_example": {
+        "inputs": {
+          "consumed_material_value": 250,
+          "additional_cost": 30,
+          "finished_standard_value": 200
+        },
+        "expected": {
+          "manufacturing_variance": 80
+        }
+      },
+      "evidence": [
+        "source-artifact-246cf4f12ac2a5d0bc90 lines 496–590"
+      ]
+    },
+    {
+      "calculation_identifier": "landed_charge_apportionment",
+      "name": "Automatic landed charge distribution",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "total_charges",
+          "meaning_and_unit": "Total additional charges in company currency",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "row_basis",
+          "meaning_and_unit": "Selected row quantity or amount basis",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "sum_of_bases",
+          "meaning_and_unit": "Sum of all applicable row bases",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "total_charges × row_basis ÷ sum_of_bases",
+      "result_unit": "Company currency",
+      "rounding_and_sequence": "Round each row to applicable charge precision; assign total minus sum of rounded rows to final row.",
+      "conditions_and_failures": [
+        "Zero total allocation basis fails.",
+        "Row sequence determines which row receives the residual."
+      ],
+      "worked_example": {
+        "inputs": {
+          "total_charges": 10,
+          "row_bases": [
+            1,
+            1,
+            1
+          ],
+          "precision": 2
+        },
+        "expected": {
+          "allocated_charges": [
+            3.33,
+            3.33,
+            3.34
+          ]
+        }
+      },
+      "evidence": [
+        "source-artifact-0384b50b0a0419065d6e lines 304–371"
+      ]
+    },
+    {
+      "calculation_identifier": "manual_landed_charge_tolerance",
+      "name": "Manual landed allocation reconciliation threshold",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "difference",
+          "meaning_and_unit": "Total charges minus manually allocated total",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "currency_precision",
+          "meaning_and_unit": "Integer number of currency decimal places",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "abs(round(difference, currency_precision)) < 2 ÷ (10 raised to currency_precision)",
+      "result_unit": "Boolean eligibility to correct final row",
+      "rounding_and_sequence": "Round the difference before testing the strict less-than threshold.",
+      "conditions_and_failures": [
+        "If true, assign difference to last row.",
+        "If false, fail reconciliation."
+      ],
+      "worked_example": {
+        "inputs": {
+          "difference": 0.01,
+          "currency_precision": 2
+        },
+        "expected": {
+          "permitted_correction": true,
+          "comparison_threshold": 0.02
+        }
+      },
+      "evidence": [
+        "source-artifact-0384b50b0a0419065d6e lines 304–371"
+      ]
+    },
+    {
+      "calculation_identifier": "putaway_whole_pack_capacity",
+      "name": "Putaway quantity constrained to whole commercial units",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "pending_stock_quantity",
+          "meaning_and_unit": "Stock units awaiting placement",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "free_stock_capacity",
+          "meaning_and_unit": "Available warehouse capacity in stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "conversion_factor",
+          "meaning_and_unit": "Stock units per transaction unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "floor(minimum(pending_stock_quantity, free_stock_capacity) ÷ conversion_factor)",
+      "result_unit": "Transaction units",
+      "rounding_and_sequence": "Apply floor only when commercial unit requires whole numbers; multiply result by factor for actual stock allocation.",
+      "conditions_and_failures": [
+        "This is quantity capacity and does not determine geometric parcel fit."
+      ],
+      "worked_example": {
+        "inputs": {
+          "pending_stock_quantity": 24,
+          "free_stock_capacity": 17,
+          "conversion_factor": 6
+        },
+        "expected": {
+          "transaction_units_allocated": 2,
+          "stock_units_allocated": 12
+        }
+      },
+      "evidence": [
+        "source-artifact-598fd7f1fda59f4050a8 lines 88–200"
+      ]
+    },
+    {
+      "calculation_identifier": "quotation_remaining_order_quantity",
+      "name": "Unordered quantity mapped from quotation",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "quoted_stock_quantity",
+          "meaning_and_unit": "Quotation demand in stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "already_ordered_stock_quantity",
+          "meaning_and_unit": "Submitted order stock quantity against source row",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "already_mapped_stock_quantity",
+          "meaning_and_unit": "Stock quantity in the target draft against source row",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "conversion_factor",
+          "meaning_and_unit": "Source stock units per transaction unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "maximum(quoted_stock_quantity − already_ordered_stock_quantity − already_mapped_stock_quantity, 0) ÷ conversion_factor",
+      "result_unit": "Source transaction units",
+      "rounding_and_sequence": "Subtract in stock units before converting to source transaction units.",
+      "conditions_and_failures": [
+        "Alternative eligibility and quantity-zero unit-price exceptions are tested separately."
+      ],
+      "worked_example": {
+        "inputs": {
+          "quoted_stock_quantity": 24,
+          "already_ordered_stock_quantity": 12,
+          "already_mapped_stock_quantity": 0,
+          "conversion_factor": 12
+        },
+        "expected": {
+          "remaining_transaction_quantity": 1
+        }
+      },
+      "evidence": [
+        "source-artifact-3e85e2f3fd51c063d2fe lines 15–146"
+      ]
+    },
+    {
+      "calculation_identifier": "order_quantity_billable_after_returns",
+      "name": "Billable order quantity after returns and replacement delivery",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "ordered_quantity",
+          "meaning_and_unit": "Order quantity in transaction units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "returned_quantity",
+          "meaning_and_unit": "Quantity returned in transaction units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "delivered_quantity",
+          "meaning_and_unit": "Delivered quantity maintained on order row",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "minimum(ordered_quantity, maximum(ordered_quantity − returned_quantity, delivered_quantity))",
+      "result_unit": "Order transaction units",
+      "rounding_and_sequence": "Then subtract submitted billed quantity and target draft mapped quantity; round and clamp pending result to zero.",
+      "conditions_and_failures": [
+        "Replacement delivery can restore billing eligibility.",
+        "Quantity-zero unit-price rows follow a separate contract."
+      ],
+      "worked_example": {
+        "inputs": {
+          "ordered_quantity": 10,
+          "returned_quantity": 2,
+          "delivered_quantity": 8
+        },
+        "expected": {
+          "billable_quantity": 8
+        }
+      },
+      "evidence": [
+        "source-artifact-141c781627874ac461f9 lines 436–558"
+      ]
+    },
+    {
+      "calculation_identifier": "remaining_quantity_to_pick",
+      "name": "Pick requirement without double subtracting delivered stock",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "ordered_quantity",
+          "meaning_and_unit": "Order transaction units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "picked_stock_quantity",
+          "meaning_and_unit": "Already picked stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "conversion_factor",
+          "meaning_and_unit": "Stock units per order unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "delivered_quantity",
+          "meaning_and_unit": "Already delivered order units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "ordered_quantity − maximum(picked_stock_quantity ÷ conversion_factor, delivered_quantity)",
+      "result_unit": "Order transaction units",
+      "rounding_and_sequence": "Convert picked quantity before comparing; target stock quantity multiplies the result by factor.",
+      "conditions_and_failures": [
+        "Ordinary order-to-pick-list mapping fails when order has explicit reserved stock."
+      ],
+      "worked_example": {
+        "inputs": {
+          "ordered_quantity": 10,
+          "picked_stock_quantity": 72,
+          "conversion_factor": 12,
+          "delivered_quantity": 4
+        },
+        "expected": {
+          "remaining_quantity_to_pick": 4
+        }
+      },
+      "evidence": [
+        "source-artifact-141c781627874ac461f9 lines 1033–1081"
+      ]
+    },
+    {
+      "calculation_identifier": "maximum_receivable_order_quantity",
+      "name": "Purchase order receiving allowance",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "ordered_quantity",
+          "meaning_and_unit": "Purchase order transaction quantity",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "allowance_percentage",
+          "meaning_and_unit": "Permitted over-receipt percentage",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "ordered_quantity × (100 + allowance_percentage) ÷ 100",
+      "result_unit": "Purchase transaction units",
+      "rounding_and_sequence": "Mapper first proposes ordinary remainder, then unused allowance when normal remainder is exhausted.",
+      "conditions_and_failures": [
+        "Exclude closed and supplier-direct rows.",
+        "Subtract quantity already included in current draft."
+      ],
+      "worked_example": {
+        "inputs": {
+          "ordered_quantity": 100,
+          "allowance_percentage": 5
+        },
+        "expected": {
+          "maximum_receivable_quantity": 105
+        }
+      },
+      "evidence": [
+        "source-artifact-0a7930220e6f93cf26a5 lines 26–107"
+      ]
+    },
+    {
+      "calculation_identifier": "formulation_component_quantity",
+      "name": "Recipe percentage converted to component entry unit",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "component_percentage",
+          "meaning_and_unit": "Percent of total batch",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "recipe_quantity",
+          "meaning_and_unit": "Batch output quantity in batch unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "batch_unit_to_component_unit_factor",
+          "meaning_and_unit": "Component entry units per batch unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "component_percentage ÷ 100 × recipe_quantity × batch_unit_to_component_unit_factor",
+      "result_unit": "Component transaction units",
+      "rounding_and_sequence": "Round result to component quantity field precision after multiplication.",
+      "conditions_and_failures": [
+        "Total percentages within 0.0001 percentage points of one hundred.",
+        "Only one balance component, with positive remainder.",
+        "General unit conversion must exist."
+      ],
+      "worked_example": {
+        "inputs": {
+          "component_percentage": 25,
+          "recipe_quantity": 200,
+          "batch_unit_to_component_unit_factor": 1000
+        },
+        "expected": {
+          "component_quantity": 50000
+        }
+      },
+      "evidence": [
+        "source-artifact-546756d7a5c2be6c875f lines 762–837"
+      ]
+    },
+    {
+      "calculation_identifier": "recursive_component_quantity",
+      "name": "Nested material requirement",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "child_component_stock_quantity",
+          "meaning_and_unit": "Leaf stock quantity for child recipe output",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "child_recipe_output_quantity",
+          "meaning_and_unit": "Output units for child recipe",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "parent_required_subassembly_stock_quantity",
+          "meaning_and_unit": "Required child output stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "child_component_stock_quantity ÷ child_recipe_output_quantity × parent_required_subassembly_stock_quantity",
+      "result_unit": "Leaf component stock units",
+      "rounding_and_sequence": "Use complete recipe quantities rather than prematurely rounded stored per-output quotient.",
+      "conditions_and_failures": [
+        "Preserve operation identity when grouping.",
+        "Do not count phantom grouping as an additional physical component."
+      ],
+      "worked_example": {
+        "inputs": {
+          "child_component_stock_quantity": 6,
+          "child_recipe_output_quantity": 2,
+          "parent_required_subassembly_stock_quantity": 4
+        },
+        "expected": {
+          "leaf_component_quantity": 12
+        }
+      },
+      "evidence": [
+        "source-artifact-029ebcbfcd4b7f0c8dd7 lines 18–127"
+      ]
+    },
+    {
+      "calculation_identifier": "operation_cost_from_minutes",
+      "name": "Cost of an operation duration",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "hourly_cost",
+          "meaning_and_unit": "Currency per hour",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "operation_minutes",
+          "meaning_and_unit": "Duration in minutes",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "hourly_cost × operation_minutes ÷ 60",
+      "result_unit": "Applicable currency",
+      "rounding_and_sequence": "Work-order operation amounts round to their amount precision; recipe operation conversion follows company factor.",
+      "conditions_and_failures": [
+        "Planned and actual duration are distinct operands on distinct calculations."
+      ],
+      "worked_example": {
+        "inputs": {
+          "hourly_cost": 90,
+          "operation_minutes": 40
+        },
+        "expected": {
+          "operation_cost": 60
+        }
+      },
+      "evidence": [
+        "source-artifact-5fb9c53ceb985c689b0e lines 138–300",
+        "source-artifact-9c7f0004d538d7c3edba lines 64–194"
+      ]
+    },
+    {
+      "calculation_identifier": "primary_manufactured_material_rate",
+      "name": "Primary output material-derived rate after secondary allocations",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "consumed_material_cost",
+          "meaning_and_unit": "Company-currency cost of known consumed inputs",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "own_cost_secondary_value",
+          "meaning_and_unit": "Company-currency separately valued secondary output",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "primary_allocation_percentage",
+          "meaning_and_unit": "Percent assigned to primary output",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "finished_stock_quantity",
+          "meaning_and_unit": "Positive physical primary output in stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "(consumed_material_cost − own_cost_secondary_value) × primary_allocation_percentage ÷ 100 ÷ finished_stock_quantity",
+      "result_unit": "Company currency per finished stock unit",
+      "rounding_and_sequence": "Value own-cost secondary output before percentage rows; do not round derived basic rate early.",
+      "conditions_and_failures": [
+        "Known zero consumed cost remains zero and does not trigger unrelated fallback.",
+        "Additional costs are allocated separately afterward.",
+        "Standard cost overrides final inventory carrying amount when selected."
+      ],
+      "worked_example": {
+        "inputs": {
+          "consumed_material_cost": 1000,
+          "own_cost_secondary_value": 100,
+          "primary_allocation_percentage": 80,
+          "finished_stock_quantity": 90
+        },
+        "expected": {
+          "primary_basic_rate": 8,
+          "primary_material_value": 720
+        }
+      },
+      "evidence": [
+        "source-artifact-2f9493ae5d1a4b74cb21 lines 585–725",
+        "source-artifact-2f9493ae5d1a4b74cb21 lines 788–947"
+      ]
+    },
+    {
+      "calculation_identifier": "manufactured_entry_final_rate",
+      "name": "Stock entry valuation rate including charges",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "basic_rate",
+          "meaning_and_unit": "Company currency per stock unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "additional_cost",
+          "meaning_and_unit": "Allocated company-currency charge for row",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "landed_cost",
+          "meaning_and_unit": "Additional landed cost for row",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "stock_quantity",
+          "meaning_and_unit": "Nonzero row transfer quantity in stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "basic_rate + (additional_cost + landed_cost) ÷ stock_quantity",
+      "result_unit": "Company currency per stock unit",
+      "rounding_and_sequence": "Do not round valuation rate; round row amount separately after summing basic amount and charges.",
+      "conditions_and_failures": [
+        "Only calculate division when stock quantity is nonzero."
+      ],
+      "worked_example": {
+        "inputs": {
+          "basic_rate": 8,
+          "additional_cost": 90,
+          "landed_cost": 0,
+          "stock_quantity": 90
+        },
+        "expected": {
+          "valuation_rate": 9,
+          "row_value": 810
+        }
+      },
+      "evidence": [
+        "source-artifact-2f9493ae5d1a4b74cb21 lines 947–976"
+      ]
+    },
+    {
+      "calculation_identifier": "recipe_process_loss",
+      "name": "Expected process loss quantity",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "recipe_quantity",
+          "meaning_and_unit": "Recipe output stock quantity",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "loss_percentage",
+          "meaning_and_unit": "Process loss percent",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "recipe_quantity × loss_percentage ÷ 100",
+      "result_unit": "Finished stock units",
+      "rounding_and_sequence": "Secondary loss uses recipe quantity precision; reject fractional loss for whole-number units.",
+      "conditions_and_failures": [
+        "Main recipe loss greater than one hundred percent fails.",
+        "Loss quantity is not a positive inventory receipt."
+      ],
+      "worked_example": {
+        "inputs": {
+          "recipe_quantity": 100,
+          "loss_percentage": 3
+        },
+        "expected": {
+          "process_loss_quantity": 3
+        }
+      },
+      "evidence": [
+        "source-artifact-546756d7a5c2be6c875f lines 1118–1143"
+      ]
+    },
+    {
+      "calculation_identifier": "quality_reading_mean",
+      "name": "Arithmetic mean of entered observations",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "observations",
+          "meaning_and_unit": "Nonempty numerical observations in parameter measurement unit",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "sum(observations) ÷ count(observations), or zero when no observations",
+      "result_unit": "Parameter measurement unit",
+      "rounding_and_sequence": "No additional averaging precision imposed in the inspected helper; input parsing follows number format.",
+      "conditions_and_failures": [
+        "Missing observations excluded from mean.",
+        "Individual missing formula variables are supplied as zero separately."
+      ],
+      "worked_example": {
+        "inputs": {
+          "observations": [
+            10,
+            12,
+            14
+          ]
+        },
+        "expected": {
+          "mean": 12
+        }
+      },
+      "evidence": [
+        "source-artifact-f6270a13e7c3b6eb791d lines 271–417"
+      ]
+    },
+    {
+      "calculation_identifier": "negative_stock_guard",
+      "name": "Precision-dependent negative stock rejection",
+      "evidence_status": "Observed in inspected source",
+      "operands": [
+        {
+          "name": "previous_quantity",
+          "meaning_and_unit": "Stock units before movement",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "signed_movement_quantity",
+          "meaning_and_unit": "Signed stock units moved",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "reserved_quantity",
+          "meaning_and_unit": "Protected stock claim in stock units",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        },
+        {
+          "name": "quantity_precision",
+          "meaning_and_unit": "Integer configured decimal places",
+          "numeric_representation": "Decimal unless explicitly described as a count or date"
+        }
+      ],
+      "expression": "difference = round(previous_quantity + signed_movement_quantity − reserved_quantity, quantity_precision); reject when difference < 0 and abs(difference) > threshold; threshold = 0.0001 when quantity_precision <= 4, otherwise 10 raised to negative quantity_precision",
+      "result_unit": "Boolean rejection decision",
+      "rounding_and_sequence": "Round quantity difference before the strict magnitude comparison.",
+      "conditions_and_failures": [
+        "Applies when negative-stock validation is active.",
+        "Batch-specific allowance is separately configurable."
+      ],
+      "worked_example": {
+        "inputs": {
+          "previous_quantity": 1,
+          "signed_movement_quantity": -1.000002,
+          "reserved_quantity": 0,
+          "quantity_precision": 6
+        },
+        "expected": {
+          "difference": -2e-06,
+          "threshold": 1e-06,
+          "reject": true
+        }
+      },
+      "evidence": [
+        "source-artifact-9dde27288d6d3f0994cd lines 1387–1406"
+      ]
+    }
+  ],
+  "ordered_layer_procedures": [
+    {
+      "name": "First in first out",
+      "receipt_rule": "Merge into last layer when rate matches; otherwise append for positive existing layer. Negative layer clearing retains old rate until receipt creates positive remainder.",
+      "issue_rule": "When explicit outgoing rate is positive or purchase-return mode is active, prefer first exactly matching rate layer; otherwise consume earliest layer. Fall back to earliest layer if no rate match.",
+      "rounding_rule": "Normalise absolute magnitude strictly below 0.0000001 to zero.",
+      "example": {
+        "receipts": [
+          {
+            "quantity": 10,
+            "rate": 4
+          },
+          {
+            "quantity": 5,
+            "rate": 7
+          }
+        ],
+        "issue_quantity": 12,
+        "expected_issue_value": 54,
+        "expected_remaining_layers": [
+          {
+            "quantity": 3,
+            "rate": 7
+          }
+        ]
+      },
+      "evidence": [
+        "source-artifact-09b661db83d498d60156 lines 16–267",
+        "source-artifact-60fc0d3219f1096c48b2 lines 16–206"
+      ]
+    },
+    {
+      "name": "Last in first out",
+      "receipt_rule": "Same receipt and negative-layer handling as first in first out.",
+      "issue_rule": "Consume latest layer; explicit outgoing rate does not choose a matching positive layer. Exhausted negative remainder uses supplied outgoing rate or exhausted rate.",
+      "rounding_rule": "Normalise absolute magnitude strictly below 0.0000001 to zero.",
+      "example": {
+        "receipts": [
+          {
+            "quantity": 10,
+            "rate": 4
+          },
+          {
+            "quantity": 5,
+            "rate": 7
+          }
+        ],
+        "issue_quantity": 12,
+        "expected_issue_value": 63,
+        "expected_remaining_layers": [
+          {
+            "quantity": 3,
+            "rate": 4
+          }
+        ]
+      },
+      "evidence": [
+        "source-artifact-09b661db83d498d60156 lines 16–267"
+      ]
+    }
+  ],
+  "deliberately_unresolved_decisions": [
+    {
+      "name": "Carrier dimensional weight",
+      "observed": "Parcel dimensions and mass exist; inspected shipment helper only sums physical weight.",
+      "proposed_extension": "Configure and validate each carrier dimensional-weight divisor and rounding rule independently."
+    },
+    {
+      "name": "Asset maintenance end-date condition",
+      "observed": "A supplied end date together with a nonempty next due date clears that due date in inspected helper.",
+      "required_follow_up": "Executable reference scenario and explicit decision whether to preserve observed condition or adopt intended upper-bound comparison.",
+      "evidence": [
+        "source-artifact-c65f632ea7a7ac1fdac5 lines 97–175"
+      ]
+    }
+  ]
+}
