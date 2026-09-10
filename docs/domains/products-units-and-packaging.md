@@ -58,7 +58,7 @@ For a length attribute ranging from 100 to 200 in increments of 25, the valid va
 
 A product bundle links a commercial parent to component products and quantities. For each component, packed quantity is component quantity per parent stock unit multiplied by the parent row's stock quantity. A sale of three bundles containing two cups and one spoon therefore produces six cup units and three spoon units for fulfilment. If the parent transaction unit itself represents two parent stock units, a transaction quantity of three expands from six parent stock units, producing twelve cups and six spoons.
 
-Preserve the parent row identity and each component reference. The same component appearing in two parent rows must remain traceable to the correct parent for delivery, reservation, return and pricing. The current composition code honours an explicitly selected submitted bundle version belonging to the product. A disabled selected version blocks the transaction. A stale selection, such as one belonging to a product that the operator replaced, falls back to the product's active version. An otherwise valid chosen version must not silently adopt later composition changes. Commercial parent value and component stock cost are separate: a bundle's selling price is not proof that its components have equal cost. A replacement must not create a second stock movement for the non-stock commercial parent after already moving its components. 
+Preserve the parent row identity and each component reference. The same component appearing in two parent rows must remain traceable to the correct parent for delivery, reservation, return and pricing. The current composition code honours an explicitly selected submitted bundle version belonging to the product. A disabled selected version blocks the transaction. A stale selection, such as one belonging to a product that the operator replaced, falls back to the product's active version. An otherwise valid chosen version must not silently adopt later composition changes. Commercial parent value and component stock cost are separate: a bundle's selling price is not proof that its components have equal cost. A replacement must not create a second stock movement for the non-stock commercial parent after already moving its components.
 
 ## Packing slips and case numbering
 
@@ -99,6 +99,31 @@ For a shipment, equal pickup start and end times are accepted because the reject
 7. Reject packing case ranges two through five when an existing submitted slip uses four through seven for the same delivery.
 8. Reject packing mixed kilogram and gram rows until quantities and weights are expressed in the required common unit.
 9. Keep packing, dispatch and carrier booking as distinct state changes. Repeating an export must not move stock again.
+
+## Complete quantity and money example across mixed packs
+
+A company stocks the same bottled product in Pieces and permits whole transaction quantities for Pack of Three, Pack of Six and Case of Twelve. Its recorded factors are respectively three, six and twelve. The purchasing currency and company currency are the same, taxes and additional charges are zero, and the receipt valuation is five currency units per piece. The following sequence must reconcile in both commercial and stock units.
+
+| Event | Commercial quantity | Stock change | Resulting stock quantity | Resulting inventory value at cost five |
+|---|---|---|---|---|
+| Receive | Five Cases of Twelve at sixty per case | Positive sixty pieces | Sixty | Three hundred |
+| Deliver | Two Packs of Six | Negative twelve pieces | Forty-eight | Two hundred forty |
+| Accept customer return | One Pack of Three | Positive three pieces | Fifty-one | Two hundred fifty-five |
+| Transfer to another company warehouse | One Case of Twelve | Negative twelve here, positive twelve there | Thirty-nine here and twelve there | One hundred ninety-five here and sixty there |
+
+A sales price of forty-two per Pack of Six would produce revenue eighty-four for the delivery, while its cost is sixty. The return's financial credit depends on its referenced sales price and credit document; the returned inventory restores its applicable historical cost. A report must never multiply the sixty-unit received stock quantity by the sixty-per-case price, which would overstate inventory twelvefold.
+
+A cross-document cumulative limit also needs one basis. An order for two Cases of Twelve permits twenty-four stock units before allowances. A first delivery of one Pack of Six uses six; a second delivery of three Packs of Six uses eighteen and completes it. If the particular mapper enforces the original unit and factor, represent that same fulfilment through original-unit quantities or use the explicitly supported split workflow. This example defines quantity equivalence; it does not override a document's restriction on changing a referenced unit.
+
+## Quantity precision, dimensional consistency and field meaning
+
+A conversion factor is an exact business setting at the stored precision, not a measurement guessed from a package name. Retain transaction quantity, selected unit, factor and derived stock quantity together on each transaction row. Use sufficient intermediate precision for multiplication and division and round only at the named destination fields. A whole-number rule applies after conversion as well as to any transaction unit that independently requires whole numbers.
+
+For example, a product stocked in whole Pieces with a factor of three cannot receive half a Pack of Three because that would produce one and one-half pieces. A product allowing decimal litres may receive half a six-litre pack as three litres when both unit policies permit it. One Case of Twelve for product A says nothing about the contents of one case for product B. One litre cannot be converted into one kilogram by a universal mass-to-volume factor; a product-dependent density policy would need a separately named effective value and precision.
+
+Do not persist Small, Medium or Large as a hidden arithmetic multiplier. A size variant has its own product identity and its own stock, reservation and valuation. Package dimensions describe physical geometry. Parcel count describes repeated physical packages. Product-bundle component quantity describes composition. Price packing increment restricts price eligibility. These five values may coincide in a particular example but remain independent fields with different transaction consequences.
+
+[Machine-readable mixed-pack cases](../../schemas/mathematics/inventory-acceptance-cases.json) include stock, inventory value, revenue and unit-compatibility assertions so a replacement can verify this distinction without consulting another codebase.
 
 ## External policy and verification boundary
 
