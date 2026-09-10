@@ -1,0 +1,2496 @@
+{
+  "catalog_name": "Financial calculations and numerical acceptance fixtures",
+  "catalog_version": "1.0",
+  "numeric_encoding": "Decimal amounts are strings so transport does not change financial values.",
+  "expression_notation": "Expressions are mathematical descriptions. Names are fully spelled-out variable identifiers. They do not prescribe an execution language.",
+  "rounding_contract": {
+    "field_precision": "Every round operation uses the precision explicitly identified by the field or scenario.",
+    "current_tie_choices": [
+      "half to even",
+      "half away from zero",
+      "scale-sensitive ties"
+    ],
+    "runtime_fallback": "scale-sensitive ties",
+    "scale_sensitive_tie_behaviour": "Scale by ten to the requested precision and round the intermediate to eight decimal places. At integer precision an exact half selects the even integer. At nonzero precision an exact half selects the next integer toward positive infinity.",
+    "settlement_fraction_tie": "A remainder exactly equal to half the configured fraction selects the lower multiple.",
+    "scope_note": "All active selectable rounding settings remain in scope even when their source labels refer to historical compatibility. Software-version migration remains excluded.",
+    "implementation_choice": "Exact decimal representation is proposed; expected observable outputs remain authoritative."
+  },
+  "execution_status": "Source calculations and selected test assertions were read. No original application acceptance suite was executed.",
+  "formulas": [
+    {
+      "calculation_identifier": "company_currency_conversion",
+      "name": "Convert a commercial amount to company currency",
+      "input_meanings": {
+        "commercial_amount": "Amount expressed in document currency",
+        "commercial_precision": "Precision of the original field",
+        "conversion_rate": "Company units for one document currency unit",
+        "company_precision": "Precision of the destination company field"
+      },
+      "mathematical_expression": "round(round(commercial_amount, commercial_precision) \u00d7 conversion_rate, company_precision)",
+      "evaluation_order": [
+        "Round the commercial field before multiplication",
+        "Multiply by the document conversion rate",
+        "Round to the company field precision"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 251,
+          "last_line": 257
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "reporting_currency_conversion",
+      "name": "Convert ledger amounts to reporting currency",
+      "input_meanings": {
+        "company_amount": "Company-currency debit or credit",
+        "reporting_rate": "Reporting currency units for one company unit at transaction date, otherwise posting date"
+      },
+      "mathematical_expression": "reporting_amount = company_amount \u00d7 reporting_rate",
+      "evaluation_order": [
+        "Resolve company and reporting currencies",
+        "Use transaction date when present, otherwise posting date",
+        "Require a valid rate",
+        "Calculate reporting debit and credit separately"
+      ],
+      "conditions_and_exceptions": [
+        "The reviewed body does not explicitly round these multiplications to a field precision."
+      ],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-c131a4a83d06a1615a51",
+          "first_line": 302,
+          "last_line": 319
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "price_after_margin",
+      "name": "Price after percentage or amount margin",
+      "input_meanings": {
+        "list_rate": "Accepted list unit price",
+        "margin_percentage": "Percentage markup",
+        "margin_amount": "Per-unit additive markup"
+      },
+      "mathematical_expression": "percentage mode: list_rate \u00d7 (1 + margin_percentage \u00f7 100); amount mode: list_rate + margin_amount",
+      "evaluation_order": [
+        "Resolve the applicable price rule",
+        "Apply percentage or amount margin before discount"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 166,
+          "last_line": 198
+        },
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 1227,
+          "last_line": 1238
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "unit_discount_and_rate",
+      "name": "Apply per-unit discount after margin",
+      "input_meanings": {
+        "margin_inclusive_rate": "List price after margin",
+        "discount_percentage": "Percentage off margin-inclusive rate",
+        "discount_precision": "Per-unit discount field precision",
+        "rate_precision": "Accepted unit rate precision"
+      },
+      "mathematical_expression": "discount_amount = round(margin_inclusive_rate \u00d7 discount_percentage \u00f7 100, discount_precision); accepted_rate = round(margin_inclusive_rate \u2212 discount_amount, rate_precision)",
+      "evaluation_order": [
+        "Calculate percentage discount when percentage is positive",
+        "Use resulting or explicitly supplied amount discount",
+        "Subtract and round accepted unit rate"
+      ],
+      "conditions_and_exceptions": [
+        "A manually supplied rate can override reconstructed margin and discount where no applicable pricing rule forces them."
+      ],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 188,
+          "last_line": 222
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "commercial_line_amount",
+      "name": "Commercial quantity and price extension",
+      "input_meanings": {
+        "accepted_rate": "Approved commercial unit price",
+        "commercial_quantity": "Quantity in the transaction unit",
+        "amount_precision": "Line amount precision"
+      },
+      "mathematical_expression": "line_amount = round(accepted_rate \u00d7 commercial_quantity, amount_precision)",
+      "evaluation_order": [
+        "Validate permitted quantity semantics",
+        "Multiply commercial quantity by accepted rate",
+        "Round line amount"
+      ],
+      "conditions_and_exceptions": [
+        "A permitted value-only return with zero quantity uses negative accepted rate as amount.",
+        "A permitted value-only debit adjustment uses positive accepted rate as amount."
+      ],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 224,
+          "last_line": 249
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "sequential_percentage_discount",
+      "name": "Compound a percentage discount on the remaining price",
+      "input_meanings": {
+        "previous_discount_percentage": "Combined discount before current rule",
+        "next_discount_percentage": "Percentage to apply to the undiscounted remainder"
+      },
+      "mathematical_expression": "combined_discount_percentage = previous_discount_percentage + (100 \u2212 previous_discount_percentage) \u00d7 next_discount_percentage \u00f7 100",
+      "evaluation_order": [
+        "Apply eligible multiple rules in ascending priority sequence",
+        "Apply this formula only when the rule discounts the remaining rate"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-94bb810bbd5ca95e758d",
+          "first_line": 63,
+          "last_line": 81
+        },
+        {
+          "source_artifact_identifier": "source-artifact-fc12336d9b5e885b89b3",
+          "first_line": 610,
+          "last_line": 637
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "free_product_award",
+      "name": "Recursive free-product quantity",
+      "input_meanings": {
+        "eligible_quantity": "Sum of eligible nonfree commercial quantities sharing the applicable rule context",
+        "offset_quantity": "Quantity before recursive awards begin",
+        "free_quantity_per_interval": "Configured award quantity",
+        "repeat_interval_quantity": "Purchase interval for one award"
+      },
+      "mathematical_expression": "continuous award = (eligible_quantity \u2212 offset_quantity) \u00d7 free_quantity_per_interval \u00f7 repeat_interval_quantity; whole award = floor((eligible_quantity \u2212 offset_quantity) \u00f7 repeat_interval_quantity) \u00d7 free_quantity_per_interval",
+      "evaluation_order": [
+        "Apply normal rule quantity eligibility",
+        "Remove configured offset",
+        "Apply recursion only for positive remaining quantity",
+        "Floor intervals only when whole awards are enabled"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-94bb810bbd5ca95e758d",
+          "first_line": 650,
+          "last_line": 708
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "percentage_tax",
+      "name": "Tax on the current item net amount",
+      "input_meanings": {
+        "tax_percentage": "Item override or tax-row percentage",
+        "net_amount": "Rounded item net amount",
+        "unrounded_inclusive_net": "Unrounded net from inclusive extraction"
+      },
+      "mathematical_expression": "tax_amount = tax_percentage \u00f7 100 \u00d7 selected_net_amount",
+      "evaluation_order": [
+        "Use item account-rate override where supplied",
+        "For included tax before document-discount recomputation use unrounded inclusive net when available",
+        "Otherwise use rounded item net",
+        "Apply row rounding only when enabled"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 602,
+          "last_line": 647
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "fixed_charge_allocation",
+      "name": "Allocate a document fixed charge across items",
+      "input_meanings": {
+        "item_net_amount": "Net amount of the current item",
+        "document_net_total": "Sum of participating item net amounts",
+        "document_charge": "Rounded fixed document charge"
+      },
+      "mathematical_expression": "share = item_net_amount \u00d7 document_charge \u00f7 document_net_total; final_share = calculated_final_share + document_charge \u2212 sum(all_calculated_shares)",
+      "evaluation_order": [
+        "Return initial zero share when document net total is zero",
+        "Apply row rounding policy",
+        "Track remaining actual charge",
+        "Add final residual to last participating item"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 442,
+          "last_line": 477
+        },
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 610,
+          "last_line": 617
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "tax_on_previous_amount",
+      "name": "Tax on an earlier tax row amount",
+      "input_meanings": {
+        "tax_percentage": "Current tax rate",
+        "previous_tax_amount": "Referenced earlier row amount for the same item"
+      },
+      "mathematical_expression": "tax_amount = tax_percentage \u00f7 100 \u00d7 previous_tax_amount",
+      "evaluation_order": [
+        "Require an ordered earlier-row reference",
+        "Use its current-item amount rather than document tax total"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 632,
+          "last_line": 635
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "tax_on_previous_total",
+      "name": "Tax on an earlier cumulative item amount",
+      "input_meanings": {
+        "tax_percentage": "Current tax rate",
+        "previous_cumulative_total": "Referenced row current-item net amount plus applicable cumulative taxes"
+      },
+      "mathematical_expression": "tax_amount = tax_percentage \u00f7 100 \u00d7 previous_cumulative_total",
+      "evaluation_order": [
+        "Resolve referenced cumulative row",
+        "Multiply its current-item total by current rate"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 636,
+          "last_line": 638
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "tax_on_quantity",
+      "name": "Tax charged per commercial unit",
+      "input_meanings": {
+        "tax_rate_per_unit": "Monetary charge for one commercial unit",
+        "commercial_quantity": "Quantity in the transaction unit"
+      },
+      "mathematical_expression": "tax_amount = tax_rate_per_unit \u00d7 commercial_quantity",
+      "evaluation_order": [
+        "Apply tax applicability",
+        "Multiply by commercial quantity, not implicitly by stock quantity"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 639,
+          "last_line": 641
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "custom_taxable_base",
+      "name": "Tax on an extension-resolved fixed base",
+      "input_meanings": {
+        "resolved_base": "Amount returned for this item and tax context",
+        "tax_percentage": "Tax rate"
+      },
+      "mathematical_expression": "tax_amount = resolved_base \u00d7 tax_percentage \u00f7 100",
+      "evaluation_order": [
+        "Resolve registered taxable-base behaviour",
+        "Apply rate",
+        "For inclusive extraction treat the amount as an intercept independent of unknown net"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 380,
+          "last_line": 393
+        },
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 642,
+          "last_line": 646
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "inclusive_net_extraction",
+      "name": "Extract net from inclusive ordered taxes",
+      "input_meanings": {
+        "printed_amount": "Commercial line amount including selected taxes",
+        "quantity": "Commercial quantity",
+        "total_tax_slope": "Sum of included taxes coefficients of unknown net",
+        "total_tax_intercept_per_unit": "Sum of included fixed per-unit contributions"
+      },
+      "mathematical_expression": "unrounded_net = (printed_amount \u2212 quantity \u00d7 total_tax_intercept_per_unit) \u00f7 (1 + total_tax_slope)",
+      "evaluation_order": [
+        "Derive each included tax slope and intercept in row order",
+        "Negate included deductions",
+        "Subtract total fixed contribution",
+        "Divide by net coefficient",
+        "Retain unrounded net for applicable included taxes",
+        "Round stored net and then derive net unit rate"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 308,
+          "last_line": 402
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "proportional_document_discount",
+      "name": "Distribute trade discount and correct running rounding",
+      "input_meanings": {
+        "discount_amount": "Document discount amount",
+        "item_net_amount": "Current item net amount before document discount",
+        "discountable_total": "Net or eligible grand-total basis"
+      },
+      "mathematical_expression": "raw_share = discount_amount \u00d7 item_net_amount \u00f7 discountable_total; adjusted_net = item_net_amount \u2212 raw_share; correction = round(running_expected_net \u2212 running_rounded_net, document_net_precision)",
+      "evaluation_order": [
+        "Compute raw proportional share",
+        "Round adjusted line net",
+        "Compare cumulative raw and rounded net",
+        "Add correction to current net and subtract it from current discount share",
+        "Recalculate net unit rate and company values",
+        "Recompute affected taxes"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 901,
+          "last_line": 957
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "grand_total_discount_basis",
+      "name": "Exclude fixed charges from trade discount base",
+      "input_meanings": {
+        "pre_discount_grand_total": "Grand total including inclusive correction",
+        "fixed_charges": "Actual and per-unit charges affecting total",
+        "dependent_fixed_tax": "Tax attributable to previous fixed charge amounts or cumulative fixed portions"
+      },
+      "mathematical_expression": "discountable_total = pre_discount_grand_total \u2212 signed_fixed_charges \u2212 signed_dependent_fixed_tax",
+      "evaluation_order": [
+        "Find actual and per-unit taxes",
+        "Follow dependent row references for fixed portions",
+        "Exclude valuation-only charges from payable fixed total",
+        "Subtract from grand total"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 959,
+          "last_line": 1000
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "cash_discount_total",
+      "name": "Apply cash or nontrade discount after tax",
+      "input_meanings": {
+        "original_grand_total": "Grand total after ordinary tax calculation",
+        "discount_amount": "Nontrade discount",
+        "original_company_grand_total": "Corresponding company amount",
+        "company_discount_amount": "Converted discount"
+      },
+      "mathematical_expression": "grand_total = original_grand_total \u2212 discount_amount; company_grand_total = original_company_grand_total \u2212 company_discount_amount",
+      "evaluation_order": [
+        "Retain item net and tax values",
+        "Subtract discount from totals",
+        "Reset and recompute settlement rounding"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 46,
+          "last_line": 69
+        },
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 901,
+          "last_line": 919
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "cash_fraction_rounding",
+      "name": "Round a total to the smallest settlement fraction",
+      "input_meanings": {
+        "amount": "Grand total",
+        "fraction": "Configured smallest settlement fraction",
+        "remainder": "Remainder of amount divided by fraction at selected precision"
+      },
+      "mathematical_expression": "if remainder > fraction \u00f7 2 then rounded_total = amount + fraction \u2212 remainder, otherwise rounded_total = amount \u2212 remainder",
+      "evaluation_order": [
+        "Use configured fraction if nonzero",
+        "At exact half choose the lower multiple",
+        "Without fraction apply configured integer rounding",
+        "Round returned amount to total precision"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-91eb5c3685f0ea77eecb",
+          "first_line": 1378,
+          "last_line": 1394
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "rounding_adjustment",
+      "name": "Retain the settlement rounding difference",
+      "input_meanings": {
+        "rounded_total": "Total after currency settlement rounding",
+        "grand_total": "Calculated commercial total"
+      },
+      "mathematical_expression": "rounding_adjustment = round(rounded_total \u2212 grand_total, adjustment_precision)",
+      "evaluation_order": [
+        "Clear rounded total and adjustment when disabled",
+        "Otherwise calculate rounded total",
+        "Store exact signed difference at field precision",
+        "Convert both rounded total and adjustment to company values"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 835,
+          "last_line": 854
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "journal_imbalance",
+      "name": "Detect and correct company-currency imbalance",
+      "input_meanings": {
+        "debits": "Set of ledger company debit values",
+        "credits": "Set of ledger company credit values",
+        "precision": "Company ledger precision"
+      },
+      "mathematical_expression": "difference = round(sum(round(each_debit, precision) \u2212 round(each_credit, precision)), precision)",
+      "evaluation_order": [
+        "Round each row",
+        "Sum signed differences",
+        "Round aggregate",
+        "Apply voucher-specific allowance",
+        "Within allowance and at least one decimal unit, post the opposite amount to rounding account"
+      ],
+      "conditions_and_exceptions": [
+        "Journal and payment allowance equals 5 \u00f7 10^precision.",
+        "Other vouchers use allowance 0.50.",
+        "Specialized exchange gain or loss journal has an explicit rejection exception."
+      ],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-433eef2e79701daa1acf",
+          "first_line": 397,
+          "last_line": 458
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "cost_center_share",
+      "name": "Allocate a ledger amount to child cost centers",
+      "input_meanings": {
+        "original_amount": "Debit or credit in the selected primary currency context",
+        "allocation_percentage": "Submitted effective child allocation",
+        "precision": "Company ledger precision"
+      },
+      "mathematical_expression": "child_amount = round(original_amount \u00d7 allocation_percentage \u00f7 100, precision)",
+      "evaluation_order": [
+        "Select latest allocation effective on posting date",
+        "Validate main-center budget",
+        "Apply formula to each debit and credit context",
+        "Assign rounding-account rows to first child without splitting"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-433eef2e79701daa1acf",
+          "first_line": 156,
+          "last_line": 224
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "payment_company_amounts",
+      "name": "Calculate source and destination company amounts",
+      "input_meanings": {
+        "paid_amount": "Source account currency amount",
+        "source_conversion_rate": "Company units per source unit",
+        "received_amount": "Destination account currency amount",
+        "target_conversion_rate": "Company units per destination unit"
+      },
+      "mathematical_expression": "company_paid = round(paid_amount \u00d7 source_conversion_rate, paid_precision); company_received = round(received_amount \u00d7 target_conversion_rate, received_precision)",
+      "evaluation_order": [
+        "Calculate both independently",
+        "Do not substitute one rate for both account currencies"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-151c197ffc6d8c7575df",
+          "first_line": 1020,
+          "last_line": 1031
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "settlement_exchange_difference",
+      "name": "Calculate realized exchange difference on a reference",
+      "input_meanings": {
+        "allocated_amount": "Signed party account currency allocation",
+        "payment_party_rate": "Source rate for receipt or target rate for payment",
+        "reference_rate": "Rate stored on the historical claim"
+      },
+      "mathematical_expression": "exchange_difference = round(allocated_amount \u00d7 payment_party_rate, company_precision) \u2212 round(allocated_amount \u00d7 reference_rate, company_precision)",
+      "evaluation_order": [
+        "Calculate payment-side allocation",
+        "Calculate historical-reference allocation",
+        "Store difference on reference",
+        "Create linked exchange journal during posting where required"
+      ],
+      "conditions_and_exceptions": [
+        "Order advances use the payment-side rate without a reference exchange difference."
+      ],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-151c197ffc6d8c7575df",
+          "first_line": 1033,
+          "last_line": 1072
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "bank_transfer_difference",
+      "name": "Separate explicit fees from automatic exchange difference",
+      "input_meanings": {
+        "company_paid": "Source movement in company currency",
+        "company_received": "Destination movement in company currency",
+        "ordinary_deductions": "Explicit deductions excluding automatically generated exchange adjustment"
+      },
+      "mathematical_expression": "automatic_difference = round(company_paid \u2212 company_received \u2212 ordinary_deductions, deduction_precision)",
+      "evaluation_order": [
+        "For internal transfer subtract existing nonexchange deductions",
+        "Retain only one automatic difference row",
+        "Remove it if zero",
+        "Select bank charges for same-currency discrepancy where configured, otherwise exchange account"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-151c197ffc6d8c7575df",
+          "first_line": 1133,
+          "last_line": 1192
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "payment_submission_difference",
+      "name": "Require a balanced payment after allocations and deductions",
+      "input_meanings": {
+        "company_party_amount": "Company allocated plus converted unallocated amount",
+        "company_paid": "Company source movement",
+        "company_received": "Company destination movement",
+        "included_taxes": "Signed included company tax total",
+        "deductions": "Signed company deductions"
+      },
+      "mathematical_expression": "receipt: company_party_amount \u2212 company_received + included_taxes \u2212 deductions; payment: company_paid \u2212 company_party_amount \u2212 included_taxes \u2212 deductions; transfer: company_paid \u2212 company_received \u2212 included_taxes \u2212 deductions",
+      "evaluation_order": [
+        "Determine payment direction",
+        "Calculate direction-specific difference",
+        "Round to difference precision",
+        "Require zero on submission"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-151c197ffc6d8c7575df",
+          "first_line": 1194,
+          "last_line": 1235
+        },
+        {
+          "source_artifact_identifier": "source-artifact-151c197ffc6d8c7575df",
+          "first_line": 204,
+          "last_line": 215
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "payment_term_amount",
+      "name": "Calculate each scheduled invoice portion",
+      "input_meanings": {
+        "remaining_invoice_amount": "Effective total less applicable write-off and advances",
+        "portion_percentage": "Percentage assigned to this term"
+      },
+      "mathematical_expression": "scheduled_amount = round(remaining_invoice_amount \u00d7 portion_percentage \u00f7 100, schedule_precision)",
+      "evaluation_order": [
+        "Subtract advances in party currency context",
+        "Calculate transaction and company schedule independently",
+        "Retain dates and term identity",
+        "Validate total schedule within observed 0.10 tolerance"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-2b2d5c59a529472d317f",
+          "first_line": 17,
+          "last_line": 113
+        },
+        {
+          "source_artifact_identifier": "source-artifact-2b2d5c59a529472d317f",
+          "first_line": 246,
+          "last_line": 294
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "ordered_reconciliation_allocation",
+      "name": "Allocate available money by selected ordering",
+      "input_meanings": {
+        "available_payment": "Remaining payment amount",
+        "invoice_outstanding": "Current invoice amount remaining"
+      },
+      "mathematical_expression": "allocation = min(available_payment, invoice_outstanding)",
+      "evaluation_order": [
+        "Iterate payments in supplied order",
+        "Iterate invoices in supplied order",
+        "Subtract allocation from both amounts",
+        "Advance when either amount is exhausted",
+        "Omit zero rows"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-a36a66a3f4375c8d5d7d",
+          "first_line": 482,
+          "last_line": 534
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "bank_statement_remaining",
+      "name": "Calculate statement remainder after matching",
+      "input_meanings": {
+        "withdrawal": "Statement withdrawal",
+        "deposit": "Statement deposit",
+        "allocations": "Amounts matched to posted vouchers"
+      },
+      "mathematical_expression": "remaining = round(abs(withdrawal \u2212 deposit) \u2212 sum(allocations), remaining_precision)",
+      "evaluation_order": [
+        "Sum linked match allocations",
+        "Subtract from absolute movement",
+        "Positive means unreconciled on submitted statement",
+        "Zero or negative yields reconciled status after allocation validations"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-93f4d60a990dafc3fca9",
+          "first_line": 84,
+          "last_line": 116
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "bank_fee_normalization",
+      "name": "Normalize an excluded bank fee exactly once",
+      "input_meanings": {
+        "deposit": "Incoming statement amount",
+        "withdrawal": "Outgoing statement amount",
+        "included_fee": "Fee already included",
+        "excluded_fee": "Positive fee still to normalize"
+      },
+      "mathematical_expression": "deposit mode: deposit = deposit \u2212 excluded_fee; withdrawal mode: withdrawal = withdrawal + excluded_fee; included_fee = included_fee + excluded_fee; excluded_fee = 0",
+      "evaluation_order": [
+        "Reject simultaneous deposit and withdrawal when applying fee",
+        "Reject fee greater than positive deposit",
+        "Use withdrawal mode when deposit is zero, including a fee-only transaction",
+        "Reset excluded fee to prevent repeated normalization"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-93f4d60a990dafc3fca9",
+          "first_line": 329,
+          "last_line": 362
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "foreign_balance_revaluation",
+      "name": "Revalue a nonzero foreign financial balance",
+      "input_meanings": {
+        "account_balance": "Signed debit-less-credit account currency balance",
+        "company_balance": "Signed existing company balance",
+        "new_rate": "Company units per foreign unit at revaluation date"
+      },
+      "mathematical_expression": "new_company_balance = account_balance \u00d7 new_rate; adjustment = round(new_company_balance, precision) \u2212 round(company_balance, precision)",
+      "evaluation_order": [
+        "Group effective balance by account and party",
+        "Apply configured small-balance allowance",
+        "For nonzero pairs preserve foreign balance",
+        "Post company adjustment against unrealized exchange account"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-48613d6d0d376eea99f3",
+          "first_line": 187,
+          "last_line": 309
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "customer_order_exposure",
+      "name": "Unbilled sales-order contribution to credit exposure",
+      "input_meanings": {
+        "company_order_grand_total": "Order total in company currency",
+        "billed_percentage": "Current billed percentage"
+      },
+      "mathematical_expression": "order_exposure = company_order_grand_total \u00d7 (100 \u2212 billed_percentage) \u00f7 100",
+      "evaluation_order": [
+        "Include only submitted orders with billed percentage below one hundred",
+        "Exclude closed orders",
+        "Omit entire order component when bypass policy requests it"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-813ebf140f877d21a837",
+          "first_line": 745,
+          "last_line": 758
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "customer_credit_exposure",
+      "name": "Combine customer exposure components",
+      "input_meanings": {
+        "ledger_exposure": "Effective customer company debit less credit",
+        "order_exposure": "Unbilled order contribution",
+        "standalone_delivery_exposure": "Eligible unbilled delivery contribution",
+        "additional_exposure": "Positive proposed extra exposure"
+      },
+      "mathematical_expression": "exposure = ledger_exposure + order_exposure + standalone_delivery_exposure + max(additional_exposure, 0)",
+      "evaluation_order": [
+        "Resolve customer, group then company positive limit",
+        "Calculate exposure components without double-counting linked delivery",
+        "Reject strictly greater than positive limit unless permitted bypass"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-813ebf140f877d21a837",
+          "first_line": 519,
+          "last_line": 535
+        },
+        {
+          "source_artifact_identifier": "source-artifact-813ebf140f877d21a837",
+          "first_line": 717,
+          "last_line": 838
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "customer_overdue_portion",
+      "name": "Overdue portion with partial schedules",
+      "input_meanings": {
+        "invoice_company_total": "Company grand total",
+        "outstanding": "Current company settlement-ledger claim",
+        "past_due_scheduled_amount": "Sum of company installments dated strictly before today"
+      },
+      "mathematical_expression": "paid = invoice_company_total \u2212 outstanding; overdue = min(max(past_due_scheduled_amount \u2212 paid, 0), outstanding)",
+      "evaluation_order": [
+        "Read non-delinked settlement ledger",
+        "Use due-date comparison strictly before today",
+        "If no past-due term total exists, use whole outstanding only when invoice due date is before today"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-813ebf140f877d21a837",
+          "first_line": 644,
+          "last_line": 714
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "collection_simple_interest",
+      "name": "Simple annual interest on overdue principal",
+      "input_meanings": {
+        "principal": "Outstanding amount at notice calculation",
+        "annual_percentage": "Annual rate",
+        "overdue_days": "Notice date less due date"
+      },
+      "mathematical_expression": "interest = principal \u00d7 annual_percentage \u00f7 100 \u00f7 365 \u00d7 overdue_days",
+      "evaluation_order": [
+        "Require referenced invoices in notice currency",
+        "Calculate date difference",
+        "Calculate each line interest",
+        "Add interest and fee to outstanding total"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-8e5de3afdeca1108e1e6",
+          "first_line": 73,
+          "last_line": 112
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "deferred_daily_recognition",
+      "name": "Recognize a nonfinal service interval by inclusive days",
+      "input_meanings": {
+        "line_net": "Total deferred amount in the selected currency context",
+        "service_days": "End less start plus one",
+        "booking_days": "Interval end less interval start plus one"
+      },
+      "mathematical_expression": "recognition = round(line_net \u00d7 booking_days \u00f7 service_days, amount_precision)",
+      "evaluation_order": [
+        "Determine interval from prior recognition or service start",
+        "Cap at month end, service end, stop date and cutoff",
+        "Use company and account currency calculations separately",
+        "Use residual instead for final interval"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-d72b4d93df58836c77ea",
+          "first_line": 149,
+          "last_line": 222
+        },
+        {
+          "source_artifact_identifier": "source-artifact-d72b4d93df58836c77ea",
+          "first_line": 280,
+          "last_line": 303
+        },
+        {
+          "source_artifact_identifier": "source-artifact-d72b4d93df58836c77ea",
+          "first_line": 399,
+          "last_line": 415
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "deferred_final_recognition",
+      "name": "Absorb remaining deferred amount in the final interval",
+      "input_meanings": {
+        "line_net": "Total deferred amount",
+        "already_recognized": "Prior effective recognized amount in same currency"
+      },
+      "mathematical_expression": "final_recognition = round(line_net \u2212 already_recognized, amount_precision)",
+      "evaluation_order": [
+        "Find prior recognized amounts",
+        "Calculate company and account residuals separately",
+        "Apply also when reviewed date routine marks a stopped-service interval final"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-d72b4d93df58836c77ea",
+          "first_line": 209,
+          "last_line": 216
+        },
+        {
+          "source_artifact_identifier": "source-artifact-d72b4d93df58836c77ea",
+          "first_line": 265,
+          "last_line": 303
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "deferred_month_count",
+      "name": "Compute effective months for monthly recognition",
+      "input_meanings": {
+        "calendar_months": "Number of months touched by service dates",
+        "service_date_difference": "Service end less service start, without extra inclusive day",
+        "complete_month_date_difference": "Final month end less first month start"
+      },
+      "mathematical_expression": "effective_months = round(calendar_months \u00d7 service_date_difference \u00f7 complete_month_date_difference, 1)",
+      "evaluation_order": [
+        "Count touched months",
+        "Calculate noninclusive date ratio",
+        "Round effective month count to one decimal",
+        "Divide line net by effective months for ordinary month charge"
+      ],
+      "conditions_and_exceptions": [
+        "One-day and zero-denominator edge cases require an explicit execution fixture."
+      ],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-d72b4d93df58836c77ea",
+          "first_line": 225,
+          "last_line": 256
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "deferred_partial_month",
+      "name": "Prorate a monthly recognition interval",
+      "input_meanings": {
+        "ordinary_month_amount": "Rounded ordinary monthly charge, capped to unrecognized total",
+        "booking_date_difference": "Booking end less booking start",
+        "full_month_date_difference": "Ending-month last day less starting-month first day"
+      },
+      "mathematical_expression": "partial_amount = ordinary_month_amount \u00d7 round(booking_date_difference \u00f7 full_month_date_difference, 1)",
+      "evaluation_order": [
+        "Use only for a nonfinal partial month",
+        "Compute date ratio without inclusive extra day",
+        "Round ratio to one decimal before multiplication",
+        "Final interval instead uses residual"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-d72b4d93df58836c77ea",
+          "first_line": 246,
+          "last_line": 277
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "straight_line_fixed_depreciation",
+      "name": "Remaining straight-line depreciation per fixed period",
+      "input_meanings": {
+        "current_carrying_value": "Value after previously booked depreciation",
+        "residual_value": "Expected value at useful life end",
+        "remaining_months": "Remaining useful months",
+        "frequency_months": "Months per depreciation cycle"
+      },
+      "mathematical_expression": "depreciation = (current_carrying_value \u2212 residual_value) \u00f7 (remaining_months \u00f7 frequency_months)",
+      "evaluation_order": [
+        "Determine unposted remaining periods",
+        "Calculate candidate charge",
+        "Apply partial-period and residual correction",
+        "Round at asset monetary precision"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-e17569ef363ca1f54de5",
+          "first_line": 15,
+          "last_line": 31
+        },
+        {
+          "source_artifact_identifier": "source-artifact-754baff265e1928e4846",
+          "first_line": 29,
+          "last_line": 102
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "straight_line_daily_depreciation",
+      "name": "Daily straight-line depreciation under selected denominator",
+      "input_meanings": {
+        "depreciable_value": "Current carrying value less residual",
+        "remaining_days": "Total remaining useful days",
+        "remaining_years": "Remaining useful years",
+        "current_financial_year_days": "Inclusive days in current depreciation financial year",
+        "interval_days": "Inclusive charge interval days"
+      },
+      "mathematical_expression": "total-days mode: depreciable_value \u00f7 remaining_days \u00d7 interval_days; yearly mode: depreciable_value \u00f7 remaining_years \u00f7 current_financial_year_days \u00d7 interval_days",
+      "evaluation_order": [
+        "Choose configured denominator policy",
+        "Calculate unrounded daily amount",
+        "Multiply by interval days",
+        "Round scheduled charge",
+        "Correct final residual"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-e17569ef363ca1f54de5",
+          "first_line": 33,
+          "last_line": 45
+        },
+        {
+          "source_artifact_identifier": "source-artifact-754baff265e1928e4846",
+          "first_line": 429,
+          "last_line": 439
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "weighted_shift_depreciation",
+      "name": "Allocate remaining depreciation by shift factors",
+      "input_meanings": {
+        "depreciable_value": "Remaining carrying value less residual",
+        "row_factor": "Configured factor for current unposted row shift",
+        "unposted_factor_sum": "Sum of factors over unposted rows"
+      },
+      "mathematical_expression": "charge = depreciable_value \u00d7 row_factor \u00f7 unposted_factor_sum",
+      "evaluation_order": [
+        "Preserve posted rows",
+        "Use ordinary fixed-period calculation for an initial schedule without shift assignments",
+        "Resolve each shift factor",
+        "Weight future rows only"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-e17569ef363ca1f54de5",
+          "first_line": 47,
+          "last_line": 73
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "double_declining_rate",
+      "name": "Determine annual double-declining percentage",
+      "input_meanings": {
+        "total_cycles": "Total scheduled depreciation cycles",
+        "frequency_months": "Months per cycle",
+        "rate_precision": "Configured numeric precision"
+      },
+      "mathematical_expression": "annual_percentage = round(200 \u00f7 (total_cycles \u00d7 frequency_months \u00f7 12), rate_precision)",
+      "evaluation_order": [
+        "Convert cycle life to years",
+        "Divide two hundred by life years",
+        "Round rate before schedule calculation"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-b27f188a7ac1322f5204",
+          "first_line": 1004,
+          "last_line": 1026
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "written_down_rate",
+      "name": "Calculate written-down-value annual percentage",
+      "input_meanings": {
+        "residual_value": "Expected final carrying value",
+        "current_carrying_value": "Current or initially adjusted asset value",
+        "remaining_years": "Unposted useful life including extension months"
+      },
+      "mathematical_expression": "annual_percentage = round(100 \u00d7 (1 \u2212 (residual_value \u00f7 current_carrying_value)^(1 \u00f7 remaining_years)), rate_precision)",
+      "evaluation_order": [
+        "Preserve explicit rate during validation where allowed",
+        "Determine carrying amount and unbooked useful life",
+        "Calculate root ratio",
+        "Round percentage"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-b27f188a7ac1322f5204",
+          "first_line": 1028,
+          "last_line": 1051
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "declining_period_charge",
+      "name": "Declining annual amount allocated across periods",
+      "input_meanings": {
+        "financial_year_opening_value": "Remaining carrying amount at financial year change",
+        "annual_percentage": "Configured or calculated annual rate",
+        "frequency_months": "Months in scheduled cycle"
+      },
+      "mathematical_expression": "period_charge = financial_year_opening_value \u00d7 annual_percentage \u00f7 100 \u00d7 frequency_months \u00f7 12",
+      "evaluation_order": [
+        "Recompute at financial-year change",
+        "Reuse the resulting period charge within the same financial year",
+        "Apply prorating and residual cap where relevant"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-e17569ef363ca1f54de5",
+          "first_line": 88,
+          "last_line": 119
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "depreciation_residual_correction",
+      "name": "Stop depreciation at expected residual",
+      "input_meanings": {
+        "candidate_charge": "Charge before final residual correction",
+        "candidate_remaining_value": "Carrying value after candidate charge",
+        "residual_value": "Expected final value"
+      },
+      "mathematical_expression": "corrected_charge = round(candidate_charge + candidate_remaining_value \u2212 residual_value, value_precision)",
+      "evaluation_order": [
+        "Apply on final planned row with a remaining difference or whenever residual would be breached",
+        "Stop generating further rows",
+        "Retain only positive charge"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-754baff265e1928e4846",
+          "first_line": 364,
+          "last_line": 391
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "asset_disposal_result",
+      "name": "Asset disposal gain or loss",
+      "input_meanings": {
+        "selling_amount": "Proceeds before any separate sales tax",
+        "carrying_value": "Cost less accumulated depreciation through disposal"
+      },
+      "mathematical_expression": "disposal_result = selling_amount \u2212 carrying_value",
+      "evaluation_order": [
+        "Recognize required depreciation through disposal",
+        "Credit cost account for asset net purchase cost",
+        "Debit accumulated depreciation",
+        "Credit positive gain or debit negative loss",
+        "Use sales claim or scrap journal as remaining counter-entry"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-80fc5683d2f98099fac7",
+          "first_line": 655,
+          "last_line": 709
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "direct_purchase_stock_value",
+      "name": "Value direct stock receipt by invoice",
+      "input_meanings": {
+        "valuation_rate": "Company cost per stock unit",
+        "commercial_quantity": "Invoice quantity",
+        "conversion_factor": "Stock units per commercial unit",
+        "valuation_precision": "Six or nine according to reviewed precision threshold",
+        "amount_precision": "Company line monetary precision"
+      },
+      "mathematical_expression": "candidate_stock_value = round(round(valuation_rate, valuation_precision) \u00d7 commercial_quantity \u00d7 conversion_factor, amount_precision)",
+      "evaluation_order": [
+        "Calculate candidate value",
+        "In the ordinary stock-update branch compare only when the corresponding stock-ledger value is nonzero",
+        "For the qualifying return branch use its separately selected actual stock-ledger value, including zero",
+        "Use applicable actual stock-ledger movement and post difference to selected variance account"
+      ],
+      "conditions_and_exceptions": [
+        "The ordinary replacement branch requires stock update enabled and a nonzero corresponding stock-ledger value.",
+        "The return-specific branch requires a stock-updating return and either an internal supplier or no original-return reference; that branch can replace the candidate with an actual zero value."
+      ],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f873241b94f87c01af73",
+          "first_line": 535,
+          "last_line": 635
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "receipt_invoice_exchange_difference",
+      "name": "Clear a receipt billed at a new exchange rate",
+      "input_meanings": {
+        "commercial_quantity": "Billed quantity",
+        "net_unit_rate": "Unchanged commercial net rate",
+        "receipt_rate": "Historical receipt conversion",
+        "invoice_rate": "Current invoice conversion"
+      },
+      "mathematical_expression": "clearing_adjustment = commercial_quantity \u00d7 net_unit_rate \u00d7 (receipt_rate \u2212 invoice_rate)",
+      "evaluation_order": [
+        "Require linked stock receipt, perpetual accounting and unchanged unit net rate",
+        "Apply when invoice-price incoming-rate adjustment is disabled",
+        "Post signed debit to clearing and opposite credit to exchange account"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f873241b94f87c01af73",
+          "first_line": 380,
+          "last_line": 416
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "cumulative_budget_exposure",
+      "name": "Combine commitments and expense for budget control",
+      "input_meanings": {
+        "outstanding_requests": "Unordered request amount",
+        "unbilled_orders": "Unbilled order amount",
+        "actual_expense": "Effective ledger expense",
+        "current_changes": "Current amount not yet included in existing query"
+      },
+      "mathematical_expression": "exposure = outstanding_requests + unbilled_orders + actual_expense + current_changes; excess = exposure \u2212 selected_budget",
+      "evaluation_order": [
+        "Resolve dimension and account budget key",
+        "Calculate request and order commitments",
+        "Add current proposed ledger amount without double-counting submitted orders",
+        "Apply annual and accumulated-period thresholds independently",
+        "Positive excess triggers configured action"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-735d0d4f56754c6336a5",
+          "first_line": 82,
+          "last_line": 110
+        },
+        {
+          "source_artifact_identifier": "source-artifact-735d0d4f56754c6336a5",
+          "first_line": 182,
+          "last_line": 282
+        },
+        {
+          "source_artifact_identifier": "source-artifact-735d0d4f56754c6336a5",
+          "first_line": 404,
+          "last_line": 463
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "withholding_threshold_decision",
+      "name": "Decide whether withholding threshold is reached",
+      "input_meanings": {
+        "current_taxable": "Current taxable amount",
+        "single_threshold": "Per-transaction threshold",
+        "cumulative_threshold": "Period threshold",
+        "historical_under_withheld": "Submitted previous taxable amount not yet withheld"
+      },
+      "mathematical_expression": "ordinary remaining_threshold = cumulative_threshold \u2212 historical_under_withheld; when transaction threshold enabled, remaining_threshold = min(remaining_threshold, single_threshold); crossed = current_taxable >= remaining_threshold",
+      "evaluation_order": [
+        "Explicit override succeeds",
+        "Transaction-only mode compares directly to single threshold",
+        "Zero cumulative threshold succeeds",
+        "Excess-only mode proceeds to exemption calculation",
+        "Existing positive settled history keeps threshold crossed",
+        "Otherwise use remaining-threshold expression"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-187b7b2b755c1c31b78c",
+          "first_line": 568,
+          "last_line": 620
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    },
+    {
+      "calculation_identifier": "withholding_excess_exemption",
+      "name": "Exclude the unused cumulative threshold from excess-only withholding",
+      "input_meanings": {
+        "current_taxable": "Current taxable value",
+        "unused_threshold": "Cumulative threshold less previously consumed exemption"
+      },
+      "mathematical_expression": "exempt_amount = min(unused_threshold, current_taxable); remaining_taxable = current_taxable \u2212 exempt_amount",
+      "evaluation_order": [
+        "Evaluate category excess-only policy",
+        "Record exemption separately",
+        "Process remaining taxable amount through historical adjustments and applicable rates"
+      ],
+      "conditions_and_exceptions": [],
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-187b7b2b755c1c31b78c",
+          "first_line": 412,
+          "last_line": 455
+        },
+        {
+          "source_artifact_identifier": "source-artifact-187b7b2b755c1c31b78c",
+          "first_line": 622,
+          "last_line": 657
+        }
+      ],
+      "evidence_status": "source calculation inspected"
+    }
+  ],
+  "examples": [
+    {
+      "example_identifier": "margin_before_percentage_discount",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "price_after_margin",
+        "unit_discount_and_rate"
+      ],
+      "given": {
+        "list_rate": "1000.00",
+        "margin_percentage": "10",
+        "discount_percentage": "10"
+      },
+      "expected": {
+        "margin_inclusive_rate": "1100.00",
+        "unit_discount": "110.00",
+        "accepted_rate": "990.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f50ad78d91719491ba71",
+          "first_line": 403,
+          "last_line": 419
+        }
+      ]
+    },
+    {
+      "example_identifier": "sequential_twenty_then_ten",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "sequential_percentage_discount"
+      ],
+      "given": {
+        "first_discount_percentage": "20",
+        "second_discount_percentage": "10",
+        "second_applies_to_remaining_price": true
+      },
+      "expected": {
+        "combined_discount_percentage": "28"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f50ad78d91719491ba71",
+          "first_line": 653,
+          "last_line": 680
+        }
+      ]
+    },
+    {
+      "example_identifier": "free_products_five_and_seven",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "free_product_award"
+      ],
+      "given": {
+        "minimum_purchase_quantity": "3",
+        "maximum_purchase_quantity": "7",
+        "repeat_interval_quantity": "2",
+        "free_quantity_per_interval": "1",
+        "whole_awards": true
+      },
+      "expected": {
+        "award_for_five_purchased": "2",
+        "award_for_seven_purchased": "3"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f50ad78d91719491ba71",
+          "first_line": 1217,
+          "last_line": 1261
+        }
+      ]
+    },
+    {
+      "example_identifier": "free_products_hundred_and_hundred_fifty",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "free_product_award"
+      ],
+      "given": {
+        "minimum_purchase_quantity": "100",
+        "repeat_interval_quantity": "100",
+        "free_quantity_per_interval": "10",
+        "whole_awards": true
+      },
+      "expected": {
+        "award_for_hundred_purchased": "10",
+        "award_for_hundred_fifty_purchased": "10"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f50ad78d91719491ba71",
+          "first_line": 1263,
+          "last_line": 1300
+        }
+      ]
+    },
+    {
+      "example_identifier": "inclusive_custom_fixed_base",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "custom_taxable_base",
+        "inclusive_net_extraction"
+      ],
+      "given": {
+        "printed_amount": "1000.00",
+        "resolved_list_value": "1200.00",
+        "tax_percentage": "10",
+        "tax_included": true
+      },
+      "expected": {
+        "net_amount": "880.00",
+        "tax_amount": "120.00",
+        "grand_total": "1000.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-a64ca8f7a635228526ad",
+          "first_line": 89,
+          "last_line": 130
+        }
+      ]
+    },
+    {
+      "example_identifier": "exclusive_custom_fixed_base",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "custom_taxable_base"
+      ],
+      "given": {
+        "net_amount": "1000.00",
+        "resolved_base": "1000.00",
+        "tax_percentage": "10",
+        "tax_included": false
+      },
+      "expected": {
+        "tax_amount": "100.00",
+        "grand_total": "1100.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-a64ca8f7a635228526ad",
+          "first_line": 45,
+          "last_line": 87
+        }
+      ]
+    },
+    {
+      "example_identifier": "compound_inclusive_taxes",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "inclusive_net_extraction",
+        "tax_on_previous_total"
+      ],
+      "given": {
+        "printed_amount": "115.50",
+        "first_tax_on_net_percentage": "10",
+        "second_tax_on_first_total_percentage": "5",
+        "quantity": "1"
+      },
+      "expected": {
+        "first_slope": "0.10",
+        "second_slope": "0.055",
+        "net_amount": "100.00",
+        "first_tax": "10.00",
+        "second_tax": "5.50",
+        "grand_total": "115.50"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 308,
+          "last_line": 393
+        }
+      ]
+    },
+    {
+      "example_identifier": "grand_total_discount_with_fixed_freight",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "grand_total_discount_basis",
+        "proportional_document_discount"
+      ],
+      "given": {
+        "net": "100.00",
+        "net_tax_percentage": "10",
+        "fixed_freight": "10.00",
+        "grand_total_discount": "11.00"
+      },
+      "expected": {
+        "discountable_total": "110.00",
+        "discounted_net": "90.00",
+        "percentage_tax": "9.00",
+        "fixed_freight": "10.00",
+        "grand_total": "109.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f8fef5a9bed70b6721b6",
+          "first_line": 901,
+          "last_line": 1000
+        }
+      ]
+    },
+    {
+      "example_identifier": "half_rounding_policies",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [],
+      "given": {
+        "positive_value": "2.345",
+        "negative_value": "-2.345",
+        "precision": 2
+      },
+      "expected": {
+        "half_even_positive": "2.34",
+        "half_even_negative": "-2.34",
+        "half_away_positive": "2.35",
+        "half_away_negative": "-2.35"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-91eb5c3685f0ea77eecb",
+          "first_line": 1299,
+          "last_line": 1353
+        }
+      ]
+    },
+    {
+      "example_identifier": "small_journal_rounding_imbalance",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "journal_imbalance"
+      ],
+      "given": {
+        "company_debit": "100.00",
+        "company_credit": "99.98",
+        "precision": 2,
+        "voucher_kind": "payment"
+      },
+      "expected": {
+        "accepted": true,
+        "rounding_credit": "0.02",
+        "final_debit_total": "100.00",
+        "final_credit_total": "100.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-433eef2e79701daa1acf",
+          "first_line": 397,
+          "last_line": 458
+        }
+      ]
+    },
+    {
+      "example_identifier": "payment_imbalance_exceeds_allowance",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "journal_imbalance"
+      ],
+      "given": {
+        "company_debit": "100.00",
+        "company_credit": "99.94",
+        "precision": 2,
+        "voucher_kind": "payment"
+      },
+      "expected": {
+        "accepted": false,
+        "difference": "0.06",
+        "allowance": "0.05"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-433eef2e79701daa1acf",
+          "first_line": 397,
+          "last_line": 458
+        }
+      ]
+    },
+    {
+      "example_identifier": "two_supplier_invoices_one_payment",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "payment_submission_difference"
+      ],
+      "given": {
+        "invoice_outstanding_amounts": [
+          "250.00",
+          "250.00"
+        ],
+        "paid_amount": "500.00"
+      },
+      "expected": {
+        "total_allocated_amount": "500.00",
+        "remaining_invoice_outstanding": [
+          "0.00",
+          "0.00"
+        ]
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-34f5d9a7e966584075b4",
+          "first_line": 249,
+          "last_line": 272
+        }
+      ]
+    },
+    {
+      "example_identifier": "supplier_excess_payment_retains_advance",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "payment_submission_difference"
+      ],
+      "given": {
+        "invoice_outstanding": "250.00",
+        "payment": "450.00",
+        "allocated_to_invoice": "250.00"
+      },
+      "expected": {
+        "unallocated_amount": "200.00",
+        "company_debit_total": "450.00",
+        "company_credit_total": "450.00",
+        "submitted": true
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-34f5d9a7e966584075b4",
+          "first_line": 274,
+          "last_line": 295
+        }
+      ]
+    },
+    {
+      "example_identifier": "supplier_overallocation_rejected",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [],
+      "given": {
+        "invoice_outstanding": "250.00",
+        "requested_allocation": "350.00",
+        "payment": "350.00"
+      },
+      "expected": {
+        "accepted": false,
+        "reason": "Allocation exceeds current invoice outstanding"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-34f5d9a7e966584075b4",
+          "first_line": 297,
+          "last_line": 303
+        }
+      ]
+    },
+    {
+      "example_identifier": "separate_principal_and_tax_terms",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "payment_term_amount"
+      ],
+      "given": {
+        "invoice_net": "200.00",
+        "tax_percentage": "18",
+        "terms": "Principal and tax collected separately"
+      },
+      "expected": {
+        "principal_term_paid": "200.00",
+        "tax_term_paid": "36.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-34f5d9a7e966584075b4",
+          "first_line": 334,
+          "last_line": 361
+        }
+      ]
+    },
+    {
+      "example_identifier": "supplier_early_discount_tax_split",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "payment_submission_difference"
+      ],
+      "given": {
+        "principal": "250.00",
+        "tax_percentage": "18",
+        "early_discount_percentage": "10",
+        "split_tax_discount": true
+      },
+      "expected": {
+        "full_invoice_allocation": "295.00",
+        "bank_payment": "265.50",
+        "commercial_credit_deduction": "25.00",
+        "tax_credit_deduction": "4.50",
+        "difference": "0.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-34f5d9a7e966584075b4",
+          "first_line": 362,
+          "last_line": 402
+        }
+      ]
+    },
+    {
+      "example_identifier": "supplier_early_discount_combined",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "payment_submission_difference"
+      ],
+      "given": {
+        "principal": "250.00",
+        "tax_percentage": "18",
+        "early_discount_percentage": "10",
+        "split_tax_discount": false
+      },
+      "expected": {
+        "full_invoice_allocation": "295.00",
+        "bank_payment": "265.50",
+        "single_credit_deduction": "29.50",
+        "difference": "0.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-34f5d9a7e966584075b4",
+          "first_line": 362,
+          "last_line": 402
+        }
+      ]
+    },
+    {
+      "example_identifier": "internal_transfer_fee_and_exchange_loss",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "payment_company_amounts",
+        "bank_transfer_difference",
+        "payment_submission_difference"
+      ],
+      "given": {
+        "foreign_paid_amount": "100.00",
+        "source_conversion_rate": "50",
+        "company_received_amount": "4500.00",
+        "explicit_bank_fee": "100.00"
+      },
+      "expected": {
+        "company_paid_amount": "5000.00",
+        "automatic_exchange_loss": "400.00",
+        "difference": "0.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-34f5d9a7e966584075b4",
+          "first_line": 888,
+          "last_line": 944
+        }
+      ],
+      "expected_company_currency_postings": [
+        {
+          "account_role": "source bank",
+          "debit": "0.00",
+          "credit": "5000.00"
+        },
+        {
+          "account_role": "destination bank",
+          "debit": "4500.00",
+          "credit": "0.00"
+        },
+        {
+          "account_role": "bank charges",
+          "debit": "100.00",
+          "credit": "0.00"
+        },
+        {
+          "account_role": "realized exchange loss",
+          "debit": "400.00",
+          "credit": "0.00"
+        }
+      ]
+    },
+    {
+      "example_identifier": "foreign_customer_settlement",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "settlement_exchange_difference"
+      ],
+      "given": {
+        "foreign_invoice_amount": "100.00",
+        "invoice_conversion_rate": "50",
+        "payment_party_conversion_rate": "55"
+      },
+      "expected": {
+        "reference_exchange_difference": "500.00",
+        "main_receipt_bank_debit": "5500.00",
+        "main_receipt_receivable_credit": "5500.00",
+        "linked_exchange_journal_exists": true,
+        "invoice_outstanding": "0.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-34f5d9a7e966584075b4",
+          "first_line": 1078,
+          "last_line": 1112
+        }
+      ]
+    },
+    {
+      "example_identifier": "selected_order_reconciliation",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "ordered_reconciliation_allocation"
+      ],
+      "given": {
+        "payments_in_order": [
+          "300.00",
+          "250.00"
+        ],
+        "invoices_in_order": [
+          "200.00",
+          "400.00"
+        ]
+      },
+      "expected": {
+        "allocation_matrix": [
+          [
+            "200.00",
+            "100.00"
+          ],
+          [
+            "0.00",
+            "250.00"
+          ]
+        ],
+        "invoice_remainders": [
+          "0.00",
+          "50.00"
+        ],
+        "payment_remainders": [
+          "0.00",
+          "0.00"
+        ]
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-a36a66a3f4375c8d5d7d",
+          "first_line": 482,
+          "last_line": 534
+        }
+      ]
+    },
+    {
+      "example_identifier": "excluded_fee_from_deposit",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "bank_fee_normalization"
+      ],
+      "given": {
+        "deposit": "100.00",
+        "withdrawal": "0.00",
+        "included_fee": "2.00",
+        "excluded_fee": "5.00"
+      },
+      "expected": {
+        "deposit": "95.00",
+        "withdrawal": "0.00",
+        "included_fee": "7.00",
+        "excluded_fee": "0.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-d57965db23c9660fc330",
+          "first_line": 72,
+          "last_line": 87
+        }
+      ]
+    },
+    {
+      "example_identifier": "excluded_fee_on_withdrawal",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "bank_fee_normalization"
+      ],
+      "given": {
+        "deposit": "0.00",
+        "withdrawal": "100.00",
+        "included_fee": "2.00",
+        "excluded_fee": "5.00"
+      },
+      "expected": {
+        "deposit": "0.00",
+        "withdrawal": "105.00",
+        "included_fee": "7.00",
+        "excluded_fee": "0.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-d57965db23c9660fc330",
+          "first_line": 104,
+          "last_line": 119
+        }
+      ]
+    },
+    {
+      "example_identifier": "excluded_fee_exceeds_deposit",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "bank_fee_normalization"
+      ],
+      "given": {
+        "deposit": "10.00",
+        "excluded_fee": "11.00"
+      },
+      "expected": {
+        "accepted": false,
+        "reason": "Excluded fee exceeds incoming deposit"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-d57965db23c9660fc330",
+          "first_line": 47,
+          "last_line": 57
+        }
+      ]
+    },
+    {
+      "example_identifier": "overdue_installment_partial_payment",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "customer_overdue_portion"
+      ],
+      "given": {
+        "invoice_company_total": "1200.00",
+        "past_due_term": "600.00",
+        "future_term": "600.00"
+      },
+      "expected": {
+        "overdue_before_payment": "600.00",
+        "overdue_after_payment_of_six_hundred": "0.00",
+        "invoice_due_date": "future term date"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-c1f4c2d1c56ce7496421",
+          "first_line": 408,
+          "last_line": 438
+        }
+      ]
+    },
+    {
+      "example_identifier": "overdue_foreign_claim_in_company_currency",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "customer_overdue_portion",
+        "company_currency_conversion"
+      ],
+      "given": {
+        "foreign_claim": "100.00",
+        "company_conversion_rate": "50",
+        "due_date": "strictly before current date"
+      },
+      "expected": {
+        "company_overdue_contribution": "5000.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-c1f4c2d1c56ce7496421",
+          "first_line": 390,
+          "last_line": 406
+        }
+      ]
+    },
+    {
+      "example_identifier": "advance_reconciled_after_invoice_clears_overdue",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "customer_overdue_portion"
+      ],
+      "given": {
+        "advance_received_before_invoice": "800.00",
+        "later_overdue_invoice": "800.00"
+      },
+      "expected": {
+        "overdue_before_allocation": "800.00",
+        "invoice_outstanding_after_allocation": "0.00",
+        "overdue_after_allocation": "0.00",
+        "invoice_status": "Paid"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-c1f4c2d1c56ce7496421",
+          "first_line": 440,
+          "last_line": 469
+        }
+      ]
+    },
+    {
+      "example_identifier": "simple_collection_interest",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "collection_simple_interest"
+      ],
+      "given": {
+        "principal": "3650.00",
+        "annual_percentage": "10",
+        "overdue_days": 30,
+        "collection_fee": "20.00"
+      },
+      "expected": {
+        "interest": "30.00",
+        "charges": "50.00",
+        "grand_total": "3700.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-8e5de3afdeca1108e1e6",
+          "first_line": 100,
+          "last_line": 112
+        }
+      ]
+    },
+    {
+      "example_identifier": "foreign_revaluation_gain",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "foreign_balance_revaluation"
+      ],
+      "given": {
+        "foreign_receivable_balance": "100.00",
+        "company_carrying_value": "1800.00",
+        "new_conversion_rate": "19"
+      },
+      "expected": {
+        "new_company_balance": "1900.00",
+        "company_adjustment": "100.00",
+        "foreign_balance": "100.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-48613d6d0d376eea99f3",
+          "first_line": 280,
+          "last_line": 309
+        }
+      ]
+    },
+    {
+      "example_identifier": "daily_deferral_rounding_residual",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "deferred_daily_recognition",
+        "deferred_final_recognition"
+      ],
+      "given": {
+        "net_amount": "1000.00",
+        "service_start": "2025-01-01",
+        "service_end": "2025-03-31",
+        "service_days": 90,
+        "precision": 2
+      },
+      "expected": {
+        "january": "344.44",
+        "february": "311.11",
+        "march_final_residual": "344.45",
+        "total_recognized": "1000.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-d72b4d93df58836c77ea",
+          "first_line": 280,
+          "last_line": 303
+        },
+        {
+          "source_artifact_identifier": "source-artifact-d72b4d93df58836c77ea",
+          "first_line": 399,
+          "last_line": 415
+        }
+      ]
+    },
+    {
+      "example_identifier": "frozen_monthly_recognition",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "deferred_month_count"
+      ],
+      "given": {
+        "service_net": "3000.00",
+        "service_start": "2023-05-01",
+        "service_end": "2023-07-31",
+        "invoice_posting_date": "2023-07-01",
+        "frozen_through": "2023-05-31",
+        "processing_cutoff": "2023-06-30"
+      },
+      "expected": {
+        "recognition_events": [
+          {
+            "service_month": "2023-05",
+            "posting_date": "2023-06-30",
+            "amount": "1000.00"
+          },
+          {
+            "service_month": "2023-06",
+            "posting_date": "2023-06-30",
+            "amount": "1000.00"
+          }
+        ],
+        "invoice_claim_unchanged": "3000.00",
+        "cancelling_recognition_preserves_invoice_posting": true
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-feccc46c92e7dd299eb3",
+          "first_line": 16,
+          "last_line": 76
+        }
+      ]
+    },
+    {
+      "example_identifier": "fixed_straight_line_residual",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "straight_line_fixed_depreciation",
+        "depreciation_residual_correction"
+      ],
+      "given": {
+        "cost": "12000.00",
+        "residual": "2000.00",
+        "annual_periods": 5
+      },
+      "expected": {
+        "annual_charges": [
+          "2000.00",
+          "2000.00",
+          "2000.00",
+          "2000.00",
+          "2000.00"
+        ],
+        "closing_carrying_values": [
+          "10000.00",
+          "8000.00",
+          "6000.00",
+          "4000.00",
+          "2000.00"
+        ]
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-e17569ef363ca1f54de5",
+          "first_line": 15,
+          "last_line": 31
+        },
+        {
+          "source_artifact_identifier": "source-artifact-754baff265e1928e4846",
+          "first_line": 364,
+          "last_line": 378
+        }
+      ]
+    },
+    {
+      "example_identifier": "daily_depreciation_leap_year",
+      "evidence_kind": "source test expectation",
+      "calculation_identifiers": [
+        "straight_line_daily_depreciation",
+        "depreciation_residual_correction"
+      ],
+      "given": {
+        "depreciable_amount": "100000.00",
+        "available_for_use": "2020-01-01",
+        "first_schedule_date": "2020-01-31",
+        "monthly_periods": 24,
+        "daily_policy": "year-specific day count"
+      },
+      "expected": {
+        "january_twenty_twenty": "4234.97",
+        "february_twenty_twenty": "3961.75",
+        "february_accumulated": "8196.72",
+        "december_twenty_twenty_accumulated": "49999.98",
+        "january_twenty_twenty_one": "4246.58",
+        "final_december_charge": "4246.56",
+        "final_accumulated": "100000.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-c2093495635cba0caf62",
+          "first_line": 37,
+          "last_line": 87
+        }
+      ]
+    },
+    {
+      "example_identifier": "shift_factor_allocation",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "weighted_shift_depreciation"
+      ],
+      "given": {
+        "remaining_depreciable_value": "600.00",
+        "unposted_shift_factors": [
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      "expected": {
+        "charges": [
+          "100.00",
+          "200.00",
+          "300.00"
+        ]
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-e17569ef363ca1f54de5",
+          "first_line": 47,
+          "last_line": 73
+        }
+      ]
+    },
+    {
+      "example_identifier": "double_declining_with_residual",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "double_declining_rate",
+        "declining_period_charge",
+        "depreciation_residual_correction"
+      ],
+      "given": {
+        "cost": "10000.00",
+        "residual": "1000.00",
+        "life_years": 5,
+        "frequency_months": 12
+      },
+      "expected": {
+        "annual_percentage": "40.00",
+        "annual_charges": [
+          "4000.00",
+          "2400.00",
+          "1440.00",
+          "864.00",
+          "296.00"
+        ],
+        "final_carrying_value": "1000.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-b27f188a7ac1322f5204",
+          "first_line": 1004,
+          "last_line": 1026
+        },
+        {
+          "source_artifact_identifier": "source-artifact-e17569ef363ca1f54de5",
+          "first_line": 88,
+          "last_line": 99
+        },
+        {
+          "source_artifact_identifier": "source-artifact-754baff265e1928e4846",
+          "first_line": 364,
+          "last_line": 378
+        }
+      ]
+    },
+    {
+      "example_identifier": "asset_sale_gain",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "asset_disposal_result"
+      ],
+      "given": {
+        "cost": "12000.00",
+        "accumulated_depreciation": "8000.00",
+        "sale_before_tax": "4500.00"
+      },
+      "expected": {
+        "carrying_value": "4000.00",
+        "gain": "500.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-80fc5683d2f98099fac7",
+          "first_line": 655,
+          "last_line": 709
+        }
+      ],
+      "expected_company_currency_postings": [
+        {
+          "account_role": "customer receivable",
+          "debit": "4500.00",
+          "credit": "0.00"
+        },
+        {
+          "account_role": "accumulated depreciation",
+          "debit": "8000.00",
+          "credit": "0.00"
+        },
+        {
+          "account_role": "fixed asset cost",
+          "debit": "0.00",
+          "credit": "12000.00"
+        },
+        {
+          "account_role": "asset disposal gain",
+          "debit": "0.00",
+          "credit": "500.00"
+        }
+      ]
+    },
+    {
+      "example_identifier": "receipt_invoice_exchange_loss",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "receipt_invoice_exchange_difference"
+      ],
+      "given": {
+        "commercial_quantity": "10",
+        "net_unit_rate": "5",
+        "receipt_rate": "18",
+        "invoice_rate": "19"
+      },
+      "expected": {
+        "clearing_adjustment": "-50.00",
+        "normalized_clearing_credit": "50.00",
+        "exchange_loss_debit": "50.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-f873241b94f87c01af73",
+          "first_line": 380,
+          "last_line": 416
+        }
+      ]
+    },
+    {
+      "example_identifier": "budget_cumulative_excess",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "cumulative_budget_exposure"
+      ],
+      "given": {
+        "annual_budget": "10000.00",
+        "outstanding_requests": "1500.00",
+        "unbilled_orders": "3000.00",
+        "actual_expense": "5000.00",
+        "new_expense": "600.00"
+      },
+      "expected": {
+        "exposure": "10100.00",
+        "annual_excess": "100.00",
+        "ordinary_user_stop_policy_result": "rejected"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-735d0d4f56754c6336a5",
+          "first_line": 404,
+          "last_line": 463
+        }
+      ]
+    },
+    {
+      "example_identifier": "withholding_threshold_equality",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "withholding_threshold_decision"
+      ],
+      "given": {
+        "cumulative_threshold": "1000.00",
+        "historical_under_withheld": "700.00",
+        "transaction_threshold_disabled": true
+      },
+      "expected": {
+        "crossed_at_current_three_hundred": true,
+        "crossed_at_current_two_hundred_ninety_nine_point_nine_nine": false
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-187b7b2b755c1c31b78c",
+          "first_line": 581,
+          "last_line": 620
+        }
+      ]
+    },
+    {
+      "example_identifier": "withholding_excess_only",
+      "evidence_kind": "derived from reviewed calculation",
+      "calculation_identifiers": [
+        "withholding_excess_exemption"
+      ],
+      "given": {
+        "cumulative_threshold": "1000.00",
+        "previously_consumed_exemption": "700.00",
+        "current_taxable": "500.00"
+      },
+      "expected": {
+        "current_exempt_amount": "300.00",
+        "remaining_taxable_basis": "200.00"
+      },
+      "source_evidence": [
+        {
+          "source_artifact_identifier": "source-artifact-187b7b2b755c1c31b78c",
+          "first_line": 446,
+          "last_line": 455
+        },
+        {
+          "source_artifact_identifier": "source-artifact-187b7b2b755c1c31b78c",
+          "first_line": 622,
+          "last_line": 657
+        }
+      ]
+    }
+  ],
+  "acceptance_observations": [
+    "Compare approved inputs, rounded intermediate fields, final totals and all resulting ledgers.",
+    "A rejected financial mutation must not leave a partial effective posting.",
+    "Use explicit company, currency, rate, date, dimensions and configuration in every executable fixture.",
+    "An expression without complete guard conditions is not a standalone permission to post.",
+    "Derived examples are fixtures created from reviewed equations, not claimed original application execution results."
+  ]
+}

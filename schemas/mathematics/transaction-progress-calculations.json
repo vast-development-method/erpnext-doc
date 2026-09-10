@@ -1,0 +1,152 @@
+{
+  "catalog_version": "1.0",
+  "title": "Transaction progress and row closure calculations",
+  "evidence_level": "source reviewed with independently derived arithmetic cases",
+  "reference_execution": "not performed",
+  "calculations": [
+    {
+      "identifier": "transaction_completion_percentage",
+      "inputs": [
+        "expected row magnitudes",
+        "completed row magnitudes",
+        "closed row flags",
+        "closure applicability",
+        "explicit exclusion filter"
+      ],
+      "procedure": [
+        "Apply explicit row exclusion; return one hundred if that exclusion leaves no rows.",
+        "When closure applies, use open rows if any remain; otherwise use all remaining rows.",
+        "Take absolute expected and completed values.",
+        "Clamp each completed magnitude to its own expected magnitude.",
+        "If sum of expected magnitudes is zero, return zero.",
+        "Divide sum of clamped magnitudes by sum of expected magnitudes, multiply by one hundred, and round to six decimal places."
+      ],
+      "source_artifact": "source-artifact-0d529ad6588b0d95c1d7",
+      "source_lines": [
+        674,
+        744
+      ],
+      "examples": [
+        {
+          "expected": [
+            "10",
+            "10"
+          ],
+          "completed": [
+            "10",
+            "0"
+          ],
+          "closed": [
+            false,
+            false
+          ],
+          "percentage": "50.000000"
+        },
+        {
+          "expected": [
+            "10",
+            "10"
+          ],
+          "completed": [
+            "10",
+            "0"
+          ],
+          "closed": [
+            false,
+            true
+          ],
+          "percentage": "100.000000"
+        },
+        {
+          "expected": [
+            "10",
+            "10"
+          ],
+          "completed": [
+            "10",
+            "0"
+          ],
+          "closed": [
+            true,
+            true
+          ],
+          "percentage": "50.000000"
+        },
+        {
+          "expected": [
+            "10",
+            "10"
+          ],
+          "completed": [
+            "15",
+            "0"
+          ],
+          "closed": [
+            false,
+            false
+          ],
+          "percentage": "50.000000"
+        },
+        {
+          "expected": [
+            "-10",
+            "-10"
+          ],
+          "completed": [
+            "-5",
+            "0"
+          ],
+          "closed": [
+            false,
+            false
+          ],
+          "percentage": "25.000000"
+        },
+        {
+          "expected": [
+            "0",
+            "0"
+          ],
+          "completed": [
+            "0",
+            "0"
+          ],
+          "closed": [
+            false,
+            false
+          ],
+          "percentage": "0.000000"
+        }
+      ]
+    },
+    {
+      "identifier": "fulfilment_allowance",
+      "formula": "overflow percentage = one hundred multiplied by completed minus expected, divided by expected",
+      "threshold": "overflow percentage minus allowance exceeds 0.01 percentage points",
+      "zero_expected": "percentage check skipped by the reviewed calling guard",
+      "zero_item_allowance": "falls back to global allowance",
+      "override": "configured authorised role receives warning instead of the excess rejection",
+      "source_artifact": "source-artifact-0d529ad6588b0d95c1d7",
+      "source_lines": [
+        490,
+        547
+      ],
+      "examples": [
+        {
+          "expected": "100",
+          "completed": "105",
+          "allowance_percentage": "5",
+          "overflow_percentage": "5",
+          "exceeds_threshold": false
+        },
+        {
+          "expected": "100",
+          "completed": "105.02",
+          "allowance_percentage": "5",
+          "overflow_percentage": "5.02",
+          "exceeds_threshold": true
+        }
+      ]
+    }
+  ]
+}

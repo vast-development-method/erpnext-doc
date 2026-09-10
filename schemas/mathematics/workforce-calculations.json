@@ -1,0 +1,1623 @@
+{
+  "catalog_name": "Workforce calculations",
+  "catalog_version": "1.0",
+  "scope": "Current employment, attendance, leave, payroll, benefits, recruitment, performance and employee-expense mathematical behaviour",
+  "calculation_count": 44,
+  "notation": "Expressions are language-neutral descriptions, not executable source code. Every named input has its full descriptive name. Conditional source branches take priority over simplified algebra.",
+  "calculations": [
+    {
+      "identifier": "workforce-inclusive-working-days",
+      "name": "Whole-period working days",
+      "expression": "calendar_day_difference(period_end, period_start) + 1 - excluded_holiday_days",
+      "inputs": [
+        "period_start",
+        "period_end",
+        "excluded_holiday_days"
+      ],
+      "output_unit": "days",
+      "conditions": [
+        "Holiday subtraction is zero when holidays are included.",
+        "The denominator covers the whole pay interval, even when joining or leaving occurs within it."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-9fc45f459b90b5cc5496",
+          "first_line": 539,
+          "last_line": 915
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "calendar_day_count": 30,
+            "excluded_holiday_days": 4
+          },
+          "expected": 26
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-payment-days",
+      "name": "Payment days after unpaid equivalents",
+      "expression": "employment_interval_days - excluded_employment_holidays - unpaid_leave_equivalents - attendance_absence_equivalents - applicable_unmarked_days + verified_corrected_days",
+      "inputs": [
+        "employment_interval_days",
+        "excluded_employment_holidays",
+        "unpaid_leave_equivalents",
+        "attendance_absence_equivalents",
+        "applicable_unmarked_days",
+        "verified_corrected_days"
+      ],
+      "output_unit": "days",
+      "conditions": [
+        "Absence and unmarked-day deductions depend on attendance mode.",
+        "The source enters subtraction only when preliminary payment days exceed unpaid leave equivalents; otherwise it starts from zero."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-9fc45f459b90b5cc5496",
+          "first_line": 539,
+          "last_line": 915
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "employment_interval_days": 30,
+            "excluded_employment_holidays": 4,
+            "unpaid_leave_equivalents": 2,
+            "attendance_absence_equivalents": 1,
+            "applicable_unmarked_days": 0,
+            "verified_corrected_days": 0
+          },
+          "expected": 23
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-leave-mode-partial-pay",
+      "name": "Approved-leave partial-pay equivalent",
+      "expression": "leave_day_fraction * (1 - retained_daily_salary_fraction)",
+      "inputs": [
+        "leave_day_fraction",
+        "retained_daily_salary_fraction"
+      ],
+      "output_unit": "unpaid day equivalents",
+      "conditions": [
+        "Full-day fraction is one; half-day fraction is one minus configured half-day wage fraction."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-9fc45f459b90b5cc5496",
+          "first_line": 539,
+          "last_line": 915
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "leave_day_fraction": 1,
+            "retained_daily_salary_fraction": 0.75
+          },
+          "expected": 0.25
+        },
+        {
+          "inputs": {
+            "leave_day_fraction": 0.5,
+            "retained_daily_salary_fraction": 0.75
+          },
+          "expected": 0.125
+        }
+      ],
+      "limitations": [
+        "Attendance mode uses a different expression in the current source."
+      ]
+    },
+    {
+      "identifier": "workforce-attendance-mode-partial-pay",
+      "name": "Attendance-mode partial-pay equivalent",
+      "expression": "leave_day_fraction * configured_daily_salary_fraction",
+      "inputs": [
+        "leave_day_fraction",
+        "configured_daily_salary_fraction"
+      ],
+      "output_unit": "unpaid day equivalents",
+      "conditions": [
+        "A zero configured daily salary fraction falls back to one in this branch."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-9fc45f459b90b5cc5496",
+          "first_line": 539,
+          "last_line": 915
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "leave_day_fraction": 1,
+            "configured_daily_salary_fraction": 0.75
+          },
+          "expected": 0.75
+        }
+      ],
+      "limitations": [
+        "Unresolved compatibility discrepancy: approved-leave mode uses one minus the fraction."
+      ]
+    },
+    {
+      "identifier": "workforce-component-proration",
+      "name": "Ordinary component payment-day proration",
+      "expression": "round_to_field_precision(default_amount * payment_days / total_working_days) + round_to_additional_field_precision(additional_amount * payment_days / total_working_days)",
+      "inputs": [
+        "default_amount",
+        "additional_amount",
+        "payment_days",
+        "total_working_days"
+      ],
+      "output_unit": "component currency",
+      "conditions": [
+        "Applies to ordinary day-dependent components with a positive whole-period denominator.",
+        "Overwritten additional salary, accrued payouts, corrections and ordinary time-based wages have separate branches."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-9fc45f459b90b5cc5496",
+          "first_line": 2140,
+          "last_line": 2305
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "default_amount": 2600,
+            "additional_amount": 0,
+            "payment_days": 23,
+            "total_working_days": 26
+          },
+          "expected": 2300
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-hourly-wages",
+      "name": "Hourly wage earning",
+      "expression": "hour_rate * sum(eligible_time_record_hours)",
+      "inputs": [
+        "hour_rate",
+        "eligible_time_record_hours"
+      ],
+      "output_unit": "salary currency",
+      "conditions": [
+        "Eligible time records have a start date within the slip interval and a permitted submitted or billed state."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-9fc45f459b90b5cc5496",
+          "first_line": 377,
+          "last_line": 539
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "hour_rate": 12.5,
+            "eligible_time_record_hours": [
+              8,
+              7.5,
+              8
+            ]
+          },
+          "expected": 293.75
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-net-pay",
+      "name": "Net pay",
+      "expression": "gross_pay - employee_deductions - loan_repayment",
+      "inputs": [
+        "gross_pay",
+        "employee_deductions",
+        "loan_repayment"
+      ],
+      "output_unit": "salary currency",
+      "conditions": [
+        "Employer contributions do not change this net amount.",
+        "Loan repayment requires the optional lending boundary."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-9fc45f459b90b5cc5496",
+          "first_line": 910,
+          "last_line": 1235
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "gross_pay": 10000,
+            "employee_deductions": 1500,
+            "loan_repayment": 500
+          },
+          "expected": 8000
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-base-currency",
+      "name": "Company-currency conversion",
+      "expression": "round_to_destination_precision(transaction_amount * exchange_rate)",
+      "inputs": [
+        "transaction_amount",
+        "exchange_rate",
+        "destination_precision"
+      ],
+      "output_unit": "company currency",
+      "conditions": [
+        "Final salary rounding is performed independently in salary and company currency."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-9fc45f459b90b5cc5496",
+          "first_line": 910,
+          "last_line": 1235
+        },
+        {
+          "source_artifact": "source-artifact-eceb277b10e28c2ada70",
+          "first_line": 426,
+          "last_line": 605
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "transaction_amount": 123.45,
+            "exchange_rate": 1.6,
+            "destination_precision": 2
+          },
+          "expected": 197.52
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-exact-month-count",
+      "name": "Inclusive monthly assessment count",
+      "expression": "12 * (end_year - start_year) + end_month - start_month + (1 when end_day >= start_day else 0)",
+      "inputs": [
+        "start_year",
+        "start_month",
+        "start_day",
+        "end_year",
+        "end_month",
+        "end_day"
+      ],
+      "output_unit": "pay intervals",
+      "conditions": [
+        "Used for monthly payroll when not explicitly payment-day based."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-20786104f4b62aa8bcf3",
+          "first_line": 1045,
+          "last_line": 1080
+        },
+        {
+          "source_artifact": "source-artifact-240c22f3160ef0540c14",
+          "first_line": 1,
+          "last_line": 153
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "start_date": "2024-07-16",
+            "end_date": "2025-07-15"
+          },
+          "expected": 12
+        },
+        {
+          "inputs": {
+            "start_date": "2024-07-16",
+            "end_date": "2025-07-16"
+          },
+          "expected": 13
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-other-period-factor",
+      "name": "Other-frequency remaining interval count",
+      "expression": "inclusive_days(assessment_end_clipped_to_relief, slip_start) / inclusive_days(slip_end, slip_start)",
+      "inputs": [
+        "assessment_end_clipped_to_relief",
+        "slip_start",
+        "slip_end"
+      ],
+      "output_unit": "pay intervals",
+      "conditions": [
+        "Remaining factors may be fractional."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-240c22f3160ef0540c14",
+          "first_line": 1,
+          "last_line": 153
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "remaining_assessment_days": 42,
+            "current_slip_days": 14
+          },
+          "expected": 3
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-taxable-projection",
+      "name": "Annual taxable projection",
+      "expression": "previous_taxable_earnings + current_structured_taxable_earnings + future_structured_taxable_earnings + current_additional_taxable_earnings + other_income + taxable_unclaimed_benefits - allowed_exemptions",
+      "inputs": [
+        "previous_taxable_earnings",
+        "current_structured_taxable_earnings",
+        "future_structured_taxable_earnings",
+        "current_additional_taxable_earnings",
+        "other_income",
+        "taxable_unclaimed_benefits",
+        "allowed_exemptions"
+      ],
+      "output_unit": "assessment currency",
+      "conditions": [
+        "Future structured values use full-payment-day amounts, not the reduced actual current amount.",
+        "Final assessment period uses submitted exemption proof under the inspected enforcement rule."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-9fc45f459b90b5cc5496",
+          "first_line": 910,
+          "last_line": 1235
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "previous_taxable_earnings": 20000,
+            "current_structured_taxable_earnings": 9000,
+            "future_structured_taxable_earnings": 30000,
+            "current_additional_taxable_earnings": 1000,
+            "other_income": 2000,
+            "taxable_unclaimed_benefits": 0,
+            "allowed_exemptions": 5000
+          },
+          "expected": 57000
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-income-slab",
+      "name": "Inclusive income-tax slab contribution",
+      "expression": "max(0, min(annual_income, upper_amount) - lower_amount + 1) * percentage / 100",
+      "inputs": [
+        "annual_income",
+        "lower_amount",
+        "upper_amount",
+        "percentage"
+      ],
+      "output_unit": "tax currency",
+      "conditions": [
+        "This expression applies only when annual income is at least the lower bound and the slab condition passes.",
+        "For an unbounded slab substitute annual income for the upper amount."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-45f1c425fe24bc8b4a4f",
+          "first_line": 1,
+          "last_line": 136
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "annual_income": 1500,
+            "lower_amount": 1001,
+            "upper_amount": 2000,
+            "percentage": 10
+          },
+          "expected": 50
+        },
+        {
+          "inputs": {
+            "annual_income": 2000,
+            "lower_amount": 1001,
+            "upper_amount": 2000,
+            "percentage": 10
+          },
+          "expected": 100
+        }
+      ],
+      "limitations": [
+        "The added one is a current-source boundary convention. Adjacent slabs sharing endpoints may overlap."
+      ]
+    },
+    {
+      "identifier": "workforce-sequential-tax-charges",
+      "name": "Sequential other tax charges",
+      "expression": "for each eligible charge: charge_amount = running_tax * percentage / 100; running_tax = running_tax + charge_amount",
+      "inputs": [
+        "starting_tax",
+        "ordered_charge_percentages",
+        "minimum_income_bounds",
+        "maximum_income_bounds"
+      ],
+      "output_unit": "tax currency",
+      "conditions": [
+        "Minimum and maximum taxable-income limits are inclusive when nonzero."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-45f1c425fe24bc8b4a4f",
+          "first_line": 1,
+          "last_line": 136
+        },
+        {
+          "source_artifact": "source-artifact-03a96ff9be2450dd3ef9",
+          "first_line": 1,
+          "last_line": 193
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "starting_tax": 1000,
+            "ordered_charge_percentages": [
+              10,
+              4
+            ]
+          },
+          "expected": {
+            "charge_amounts": [
+              100,
+              44
+            ],
+            "total_tax": 1144
+          }
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-marginal-relief",
+      "name": "Configured income marginal relief",
+      "expression": "min(base_tax, annual_income - relief_limit)",
+      "inputs": [
+        "base_tax",
+        "annual_income",
+        "relief_limit",
+        "marginal_relief_limit"
+      ],
+      "output_unit": "tax currency",
+      "conditions": [
+        "Applies only when annual income is strictly above relief limit and strictly below marginal relief limit."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-d6eaa5bdd707d22001d8",
+          "first_line": 195,
+          "last_line": 221
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "base_tax": 300,
+            "annual_income": 10100,
+            "relief_limit": 10000,
+            "marginal_relief_limit": 11000
+          },
+          "expected": 100
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-current-tax",
+      "name": "Current structured and immediate additional tax",
+      "expression": "max(0, (annual_ordinary_tax - tax_previously_paid) / remaining_intervals + immediate_bonus_tax)",
+      "inputs": [
+        "annual_ordinary_tax",
+        "tax_previously_paid",
+        "remaining_intervals",
+        "immediate_bonus_tax"
+      ],
+      "output_unit": "tax currency",
+      "conditions": [
+        "When remaining intervals are zero, ordinary current tax is zero rather than divided by zero.",
+        "Additional salary tax override follows its separate overwrite route."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-9fc45f459b90b5cc5496",
+          "first_line": 1880,
+          "last_line": 2010
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "annual_ordinary_tax": 12000,
+            "tax_previously_paid": 7200,
+            "remaining_intervals": 4,
+            "immediate_bonus_tax": 900
+          },
+          "expected": 2100
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-cycle-benefit",
+      "name": "Current benefit entitlement",
+      "expression": "annual_benefit / total_assessment_intervals * payment_day_factor",
+      "inputs": [
+        "annual_benefit",
+        "total_assessment_intervals",
+        "payment_day_factor"
+      ],
+      "output_unit": "benefit currency",
+      "conditions": [
+        "Payment-day factor is one unless the component is day-dependent."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-9fc45f459b90b5cc5496",
+          "first_line": 1400,
+          "last_line": 1680
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "annual_benefit": 12000,
+            "total_assessment_intervals": 12,
+            "payment_day_factor": 0.5
+          },
+          "expected": 500
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-accrued-claim-eligibility",
+      "name": "Accrued benefit claim eligibility",
+      "expression": "prior_accrual + current_cycle_benefit - prior_payout",
+      "inputs": [
+        "prior_accrual",
+        "current_cycle_benefit",
+        "prior_payout"
+      ],
+      "output_unit": "benefit currency",
+      "conditions": [
+        "Accrued amount below already-paid amount is rejected in the inspected accrued-claim branch."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-d219754791021c79b72a",
+          "first_line": 1,
+          "last_line": 152
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "prior_accrual": 5000,
+            "current_cycle_benefit": 1000,
+            "prior_payout": 3000
+          },
+          "expected": 3000
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-final-benefit-payout",
+      "name": "Final-period benefit payout",
+      "expression": "max(prior_accrual + current_cycle_benefit - prior_payout - current_claim_payout, 0)",
+      "inputs": [
+        "prior_accrual",
+        "current_cycle_benefit",
+        "prior_payout",
+        "current_claim_payout"
+      ],
+      "output_unit": "benefit currency",
+      "conditions": [
+        "The final-cycle option and benefit payout method control applicability."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-9fc45f459b90b5cc5496",
+          "first_line": 1400,
+          "last_line": 1680
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "prior_accrual": 11000,
+            "current_cycle_benefit": 1000,
+            "prior_payout": 3000,
+            "current_claim_payout": 500
+          },
+          "expected": 8500
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-overtime-rate",
+      "name": "Salary-component-derived overtime rate",
+      "expression": "sum(selected_ordinary_earnings) / max(payment_days, 1) / standard_working_hours",
+      "inputs": [
+        "selected_ordinary_earnings",
+        "payment_days",
+        "standard_working_hours"
+      ],
+      "output_unit": "salary currency per hour",
+      "conditions": [
+        "Exclude additional-salary earnings from the basis."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-b911b6ea2d8c8047f004",
+          "first_line": 54,
+          "last_line": 424
+        },
+        {
+          "source_artifact": "source-artifact-957bacd51f9c5c93d96f",
+          "first_line": 18,
+          "last_line": 83
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "selected_ordinary_earnings": [
+              2600
+            ],
+            "payment_days": 26,
+            "standard_working_hours": 8
+          },
+          "expected": 12.5
+        }
+      ],
+      "limitations": [
+        "Zero standard working hours is not guarded by the inspected division."
+      ]
+    },
+    {
+      "identifier": "workforce-overtime-pay",
+      "name": "Overtime pay",
+      "expression": "eligible_overtime_hours * applicable_hourly_rate * selected_multiplier",
+      "inputs": [
+        "eligible_overtime_hours",
+        "applicable_hourly_rate",
+        "selected_multiplier"
+      ],
+      "output_unit": "salary currency",
+      "conditions": [
+        "Weekly rest day and public holiday multiplier replace the standard multiplier when enabled and applicable.",
+        "Attendance-derived hours are capped; manually supplied over-cap hours are rejected."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-b911b6ea2d8c8047f004",
+          "first_line": 54,
+          "last_line": 424
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "eligible_overtime_hours": 3,
+            "applicable_hourly_rate": 12.5,
+            "selected_multiplier": 1.5
+          },
+          "expected": 56.25
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-gratuity-experience",
+      "name": "Calculated gratuity experience",
+      "expression": "(elapsed_joining_to_relief_days - counted_nonworking_attendance_days) / configured_working_days_per_year",
+      "inputs": [
+        "elapsed_joining_to_relief_days",
+        "counted_nonworking_attendance_days",
+        "configured_working_days_per_year"
+      ],
+      "output_unit": "years",
+      "conditions": [
+        "Date subtraction excludes one endpoint, unlike inclusive salary working days.",
+        "A missing or zero annual divisor is treated as one in the inspected source."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-5716777be64860fc44b9",
+          "first_line": 30,
+          "last_line": 348
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "elapsed_joining_to_relief_days": 1825,
+            "counted_nonworking_attendance_days": 25,
+            "configured_working_days_per_year": 360
+          },
+          "expected": 5
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-current-slab-gratuity",
+      "name": "Current-slab gratuity",
+      "expression": "eligible_default_earnings * experience_years * selected_slab_fraction",
+      "inputs": [
+        "eligible_default_earnings",
+        "experience_years",
+        "selected_slab_fraction"
+      ],
+      "output_unit": "salary currency",
+      "conditions": [
+        "Default earnings come from the most recent submitted slip and configured earning components."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-5716777be64860fc44b9",
+          "first_line": 30,
+          "last_line": 348
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "eligible_default_earnings": 2000,
+            "experience_years": 7,
+            "selected_slab_fraction": 1
+          },
+          "expected": 14000
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-cumulative-gratuity",
+      "name": "Cumulative-slab gratuity",
+      "expression": "eligible_default_earnings * sum(years_consumed_in_band * band_fraction)",
+      "inputs": [
+        "eligible_default_earnings",
+        "years_consumed_in_band",
+        "band_fraction"
+      ],
+      "output_unit": "salary currency",
+      "conditions": [
+        "The final participating band consumes the remaining years."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-5716777be64860fc44b9",
+          "first_line": 30,
+          "last_line": 348
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "eligible_default_earnings": 2000,
+            "bands": [
+              {
+                "years": 5,
+                "fraction": 0.5
+              },
+              {
+                "years": 2,
+                "fraction": 1
+              }
+            ]
+          },
+          "expected": 9000
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-payroll-correction",
+      "name": "Ordinary payroll-correction amount",
+      "expression": "eligible_original_default_amount / original_total_working_days * approved_corrected_days",
+      "inputs": [
+        "eligible_original_default_amount",
+        "original_total_working_days",
+        "approved_corrected_days"
+      ],
+      "output_unit": "salary currency",
+      "conditions": [
+        "Cumulative corrected days cannot exceed original working days minus payment days.",
+        "Accrual correction uses accrued amount divided by original payment days instead.",
+        "A zero divisor is rejected."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-c15908ed3eef0905bce9",
+          "first_line": 50,
+          "last_line": 87
+        },
+        {
+          "source_artifact": "source-artifact-c15908ed3eef0905bce9",
+          "first_line": 141,
+          "last_line": 230
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "eligible_original_default_amount": 2600,
+            "original_total_working_days": 26,
+            "approved_corrected_days": 2
+          },
+          "expected": 200
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-positive-arrear-difference",
+      "name": "Retrospective positive salary difference",
+      "expression": "new_eligible_amount - existing_eligible_amount, retained only when positive",
+      "inputs": [
+        "new_eligible_amount",
+        "existing_eligible_amount"
+      ],
+      "output_unit": "salary currency",
+      "conditions": [
+        "Negative differences do not become recoveries through this path."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-902acc618624a1f4ab35",
+          "first_line": 370,
+          "last_line": 435
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "new_eligible_amount": 3000,
+            "existing_eligible_amount": 2600
+          },
+          "expected": 400
+        },
+        {
+          "inputs": {
+            "new_eligible_amount": 2400,
+            "existing_eligible_amount": 2600
+          },
+          "expected": "omitted"
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-shift-hours",
+      "name": "Each paired attendance interval",
+      "expression": "round_half_to_even((exit_timestamp - entry_timestamp).seconds / 3600, 2)",
+      "inputs": [
+        "entry_timestamp",
+        "exit_timestamp"
+      ],
+      "output_unit": "hours",
+      "conditions": [
+        "Summation happens after each valid pair has been rounded."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-b7ff41618e1752e31cad",
+          "first_line": 354,
+          "last_line": 460
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "interval_seconds": 60
+          },
+          "expected": 0.02
+        },
+        {
+          "inputs": {
+            "separate_interval_seconds": [
+              60,
+              60
+            ]
+          },
+          "expected_sum": 0.04
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-leave-consumption",
+      "name": "Leave application day count",
+      "expression": "inclusive_calendar_days - valid_nonholiday_half_day_reduction - excluded_holidays",
+      "inputs": [
+        "inclusive_calendar_days",
+        "valid_nonholiday_half_day_reduction",
+        "excluded_holidays"
+      ],
+      "output_unit": "leave days",
+      "conditions": [
+        "Half-day reduction is zero when its specified date is a holiday."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-3bfe2b1f28ebb7d5783b",
+          "first_line": 1005,
+          "last_line": 1034
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "inclusive_calendar_days": 5,
+            "valid_nonholiday_half_day_reduction": 0.5,
+            "excluded_holidays": 1
+          },
+          "expected": 3.5
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-earned-leave",
+      "name": "Cycle earned-leave entitlement",
+      "expression": "annual_leave / annual_frequency_count * inclusive_days_from_joining / inclusive_cycle_days",
+      "inputs": [
+        "annual_leave",
+        "annual_frequency_count",
+        "inclusive_days_from_joining",
+        "inclusive_cycle_days"
+      ],
+      "output_unit": "leave days",
+      "conditions": [
+        "Joining-day proration applies only when joining is later than cycle start.",
+        "Frequency counts are one, two, four and twelve.",
+        "Apply quantity precision, then optional quarter-, half- or whole-day rounding."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-20786104f4b62aa8bcf3",
+          "first_line": 400,
+          "last_line": 556
+        },
+        {
+          "source_artifact": "source-artifact-d3b9f4a51acf987fc32d",
+          "first_line": 475,
+          "last_line": 530
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "annual_leave": 24,
+            "annual_frequency_count": 12,
+            "inclusive_days_from_joining": 15,
+            "inclusive_cycle_days": 30
+          },
+          "expected": 1
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-carry-forward-limit",
+      "name": "Carried leave after limits",
+      "expression": "min(unused_prior_leave, carry_forward_cap, total_allocation_cap - new_allocation)",
+      "inputs": [
+        "unused_prior_leave",
+        "carry_forward_cap",
+        "total_allocation_cap",
+        "new_allocation"
+      ],
+      "output_unit": "leave days",
+      "conditions": [
+        "An unset cap is omitted from the minimum.",
+        "Separate validation rejects new allocations above their allowed maximum."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-16ed3251c700f1b555e3",
+          "first_line": 75,
+          "last_line": 330
+        },
+        {
+          "source_artifact": "source-artifact-3067c25ea7674d9d7cc1",
+          "first_line": 230,
+          "last_line": 279
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "unused_prior_leave": 15,
+            "carry_forward_cap": 10,
+            "total_allocation_cap": 30,
+            "new_allocation": 25
+          },
+          "expected": 5
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-encashment-limit",
+      "name": "Maximum encashment days",
+      "expression": "min(max(available_balance - nonencashable_retention, 0), encashment_cap)",
+      "inputs": [
+        "available_balance",
+        "nonencashable_retention",
+        "encashment_cap"
+      ],
+      "output_unit": "leave days",
+      "conditions": [
+        "An unset cap does not limit the remaining balance."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-bb8418ad7437d439872d",
+          "first_line": 75,
+          "last_line": 238
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "available_balance": 14,
+            "nonencashable_retention": 4,
+            "encashment_cap": 8
+          },
+          "expected": 8
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-encashment-value",
+      "name": "Leave encashment amount",
+      "expression": "selected_encashment_days * positive_per_day_amount",
+      "inputs": [
+        "selected_encashment_days",
+        "positive_per_day_amount"
+      ],
+      "output_unit": "salary currency",
+      "conditions": [
+        "Latest eligible assignment supplies the rate, falling back to structure rate."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-bb8418ad7437d439872d",
+          "first_line": 75,
+          "last_line": 238
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "selected_encashment_days": 8,
+            "positive_per_day_amount": 120
+          },
+          "expected": 960
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-compensatory-entitlement",
+      "name": "Compensatory leave earned",
+      "expression": "inclusive_worked_holiday_days - selected_half_day_reduction",
+      "inputs": [
+        "inclusive_worked_holiday_days",
+        "selected_half_day_reduction"
+      ],
+      "output_unit": "leave days",
+      "conditions": [
+        "Every day must be a holiday with eligible submitted attendance.",
+        "Entitlement begins the day after the work interval ends."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-18ebd9c462a9b6ef5ea7",
+          "first_line": 1,
+          "last_line": 181
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "inclusive_worked_holiday_days": 2,
+            "selected_half_day_reduction": 0.5
+          },
+          "expected": 1.5
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-expense-tax",
+      "name": "Expense percentage tax",
+      "expression": "round_to_tax_precision(total_sanctioned_amount * percentage / 100)",
+      "inputs": [
+        "total_sanctioned_amount",
+        "percentage"
+      ],
+      "output_unit": "claim currency",
+      "conditions": [
+        "Each percentage tax uses the same sanctioned base; expense taxes do not compound."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-eceb277b10e28c2ada70",
+          "first_line": 426,
+          "last_line": 605
+        },
+        {
+          "source_artifact": "source-artifact-40c2a5f5fc8e5a203047",
+          "first_line": 750,
+          "last_line": 775
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "total_sanctioned_amount": 130.84,
+            "percentage": 7,
+            "precision": 2
+          },
+          "expected": 9.16
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-expense-residual",
+      "name": "Claim residual payable",
+      "expression": "total_sanctioned_amount + total_taxes - allocated_advances",
+      "inputs": [
+        "total_sanctioned_amount",
+        "total_taxes",
+        "allocated_advances"
+      ],
+      "output_unit": "claim currency",
+      "conditions": [],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-eceb277b10e28c2ada70",
+          "first_line": 426,
+          "last_line": 605
+        },
+        {
+          "source_artifact": "source-artifact-eceb277b10e28c2ada70",
+          "first_line": 268,
+          "last_line": 407
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "total_sanctioned_amount": 200,
+            "total_taxes": 18,
+            "allocated_advances": 100
+          },
+          "expected": 118
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-advance-available",
+      "name": "Available paid advance",
+      "expression": "paid_amount - claimed_amount - returned_amount",
+      "inputs": [
+        "paid_amount",
+        "claimed_amount",
+        "returned_amount"
+      ],
+      "output_unit": "advance currency",
+      "conditions": [
+        "Paid amount cannot exceed requested advance; returns cannot exceed paid less claimed."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-ac7c1c8028a6331e06a5",
+          "first_line": 115,
+          "last_line": 287
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "paid_amount": 1000,
+            "claimed_amount": 600,
+            "returned_amount": 250
+          },
+          "expected": 150
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-advance-exchange-difference",
+      "name": "Single advance exchange difference",
+      "expression": "allocated_foreign_amount * (claim_exchange_rate - original_advance_exchange_rate)",
+      "inputs": [
+        "allocated_foreign_amount",
+        "claim_exchange_rate",
+        "original_advance_exchange_rate"
+      ],
+      "output_unit": "company currency",
+      "conditions": [],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-eceb277b10e28c2ada70",
+          "first_line": 426,
+          "last_line": 605
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "allocated_foreign_amount": 100,
+            "claim_exchange_rate": 1.6,
+            "original_advance_exchange_rate": 1.5
+          },
+          "expected": 10
+        }
+      ],
+      "limitations": [
+        "Multiple advances currently use a cumulative loop that can double-count earlier differences; see the verification register."
+      ]
+    },
+    {
+      "identifier": "workforce-vehicle-expense",
+      "name": "Vehicle-originated claim amount",
+      "expression": "sum(service_expense_rows) + fuel_quantity * fuel_unit_price",
+      "inputs": [
+        "service_expense_rows",
+        "fuel_quantity",
+        "fuel_unit_price"
+      ],
+      "output_unit": "claim currency",
+      "conditions": [
+        "Preparing the claim does not approve or post it."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-9d075d03270607666fa8",
+          "first_line": 38,
+          "last_line": 136
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "service_expense_rows": [
+              40,
+              60
+            ],
+            "fuel_quantity": 40,
+            "fuel_unit_price": 1.8
+          },
+          "expected": 172
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-staffing-budget",
+      "name": "Incremental staffing budget",
+      "expression": "sum(vacancies_by_designation * estimated_cost_per_position)",
+      "inputs": [
+        "vacancies_by_designation",
+        "estimated_cost_per_position"
+      ],
+      "output_unit": "company currency",
+      "conditions": [
+        "Current employees contribute to planned position count but not vacancy cost."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-71f3f94ac1a91828eed6",
+          "first_line": 1,
+          "last_line": 311
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "vacancies": 3,
+            "estimated_cost_per_position": 40000
+          },
+          "expected": 120000
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-offer-acceptance",
+      "name": "Offer acceptance rate",
+      "expression": "100 * submitted_accepted_offers / all_submitted_offers",
+      "inputs": [
+        "submitted_accepted_offers",
+        "all_submitted_offers"
+      ],
+      "output_unit": "percent",
+      "conditions": [
+        "Return zero when the denominator is zero."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-15af15cbb81a007f9677",
+          "first_line": 1,
+          "last_line": 172
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "submitted_accepted_offers": 6,
+            "all_submitted_offers": 8
+          },
+          "expected": 75
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-interview-feedback-average",
+      "name": "Individual interview feedback average",
+      "expression": "sum(skill_ratings) / count(skill_rows)",
+      "inputs": [
+        "skill_ratings",
+        "skill_rows"
+      ],
+      "output_unit": "normalised rating",
+      "conditions": [
+        "Unrated rows remain in the denominator; an empty table produces zero.",
+        "The example is the arithmetic stage before rating-field storage rounding; saved ratings can have scale two."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-d5eef1e3e4eaf1e15758",
+          "first_line": 1,
+          "last_line": 106
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "skill_ratings": [
+              0.8,
+              0.6,
+              0
+            ]
+          },
+          "expected_approximate": 0.4666666667
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-interview-overall-average",
+      "name": "Overall interview average",
+      "expression": "arithmetic_mean(submitted_feedback_averages)",
+      "inputs": [
+        "submitted_feedback_averages"
+      ],
+      "output_unit": "normalised rating",
+      "conditions": [
+        "Do not pool skill rows across interviewers; each submitted feedback has equal weight.",
+        "Actual aggregation uses saved feedback averages. The example isolates mathematical aggregation; apply storage scale before composing it with saved feedback."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-d5eef1e3e4eaf1e15758",
+          "first_line": 1,
+          "last_line": 106
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "submitted_feedback_averages": [
+              0.4666666667,
+              1
+            ]
+          },
+          "expected_approximate": 0.7333333334
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-goal-score",
+      "name": "Goal-derived five-point appraisal score",
+      "expression": "sum(result_area_completion_percent * result_area_weight_percent / 100) / 20",
+      "inputs": [
+        "result_area_completion_percent",
+        "result_area_weight_percent"
+      ],
+      "output_unit": "five-point score",
+      "conditions": [
+        "Each completion value averages top-level non-archived goals."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-12e831b4c68b136cd706",
+          "first_line": 40,
+          "last_line": 335
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "result_area_completion_percent": [
+              80,
+              60
+            ],
+            "result_area_weight_percent": [
+              60,
+              40
+            ]
+          },
+          "expected": 3.6
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-default-final-appraisal",
+      "name": "Default final appraisal score",
+      "expression": "(goal_score + average_feedback_score + self_assessment_score) / 3",
+      "inputs": [
+        "goal_score",
+        "average_feedback_score",
+        "self_assessment_score"
+      ],
+      "output_unit": "five-point score",
+      "conditions": [
+        "Missing categories are not omitted from the denominator.",
+        "A configured final-score expression replaces this default."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-12e831b4c68b136cd706",
+          "first_line": 40,
+          "last_line": 335
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "goal_score": 3.6,
+            "average_feedback_score": 4.2,
+            "self_assessment_score": 3.9
+          },
+          "expected": 3.9
+        },
+        {
+          "inputs": {
+            "goal_score": 3.6,
+            "average_feedback_score": 0,
+            "self_assessment_score": 3.9
+          },
+          "expected": 2.5
+        }
+      ],
+      "limitations": []
+    },
+    {
+      "identifier": "workforce-final-settlement-totals",
+      "name": "Separate final settlement totals",
+      "expression": "payable_total = sum(payable_rows); receivable_total = sum(receivable_rows) + asset_recovery_cost",
+      "inputs": [
+        "payable_rows",
+        "receivable_rows",
+        "asset_recovery_cost"
+      ],
+      "output_unit": "settlement currency",
+      "conditions": [
+        "Keep separate obligation records and their settlement states."
+      ],
+      "evidence": [
+        {
+          "source_artifact": "source-artifact-6d41c13978f619ac7243",
+          "first_line": 50,
+          "last_line": 215
+        }
+      ],
+      "verification_status": "statically derived; numeric examples independently calculated; source application not executed",
+      "examples": [
+        {
+          "inputs": {
+            "payable_rows": [
+              8000,
+              750
+            ],
+            "receivable_rows": [
+              500
+            ],
+            "asset_recovery_cost": 1200
+          },
+          "expected": {
+            "payable_total": 8750,
+            "receivable_total": 1700
+          }
+        }
+      ],
+      "limitations": []
+    }
+  ]
+}
