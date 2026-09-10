@@ -1,0 +1,119 @@
+{
+  "catalog_kind": "record_value_semantics",
+  "purpose": "Define value normalization, validation, ownership, precision, and option comparison for all record-type and field contracts without relying on unavailable implementation files.",
+  "rule_precedence": [
+    "Request binding distinguishes omitted values from explicit values.",
+    "The record create workflow resolves configured, user, company, and parent defaults.",
+    "Record and child-row metadata normalize values for persistence.",
+    "Mandatory values, option membership, links, uniqueness, lengths, and numeric constraints are checked.",
+    "Lifecycle procedures apply domain calculations and transaction invariants; an earlier domain rejection is not overridden by later numeric coercion.",
+    "An atomic save persists the record and all owned rows, or rolls back their database effects."
+  ],
+  "numeric_normalization": {
+    "integer": "Convert numeric text and fractional numeric values to an integer, truncating toward zero. Unconvertible or absent input resolves to the configured numeric default, normally zero, unless an earlier validation rejects it.",
+    "boolean": "Convert through integer coercion; zero becomes false and a nonzero integer becomes true. Fractional values whose integer conversion is zero therefore become false.",
+    "decimal": "Convert numeric input to the decimal field representation. Invalid or absent numeric input resolves to the configured numeric default, normally zero; domain validation may reject malformed input earlier.",
+    "non_negative": "For integer, decimal, monetary, or percentage fields explicitly carrying the non-negative flag, reject normalized values below zero. Zero is permitted.",
+    "precision": "Resolve explicit field precision first; otherwise apply currency-aware precision and configured numeric defaults. Intermediate calculation order and rounding locations belong to the domain formulas.",
+    "percentage": "Store percentage points. A stored rate of twelve means twelve percent and a multiplication factor of 0.12.",
+    "no_implicit_range": "A percentage type alone does not impose a zero-to-one-hundred restriction. Only an explicit field or business rule imposes bounds."
+  },
+  "enumerated_text": {
+    "comparison_values": "Each allowed_values entry defines a stable semantic option. An ordinal records declaration order and is not a persisted option identity. Translate display labels separately from comparison values.",
+    "ordinary_validation": "For a nonempty value and a nonempty declared option list, trim surrounding whitespace and require exact membership. A list containing only empty options imposes no nonempty membership restriction.",
+    "empty_values": "An empty value bypasses selection-membership validation; the separate mandatory-field rule still decides whether the empty value is allowed.",
+    "naming_series_exception": "The naming-series field is checked by naming policy rather than the ordinary selection-membership validator.",
+    "import_exception": "The ordinary selection-membership check is bypassed during the explicitly marked import workflow; other import and domain validations still apply."
+  },
+  "text_and_structured_values": {
+    "list_assignment": "Reject collection input for an ordinary scalar field. Owned-row collections and structured-value fields accept collections according to their own contracts.",
+    "read_only_text": "Normalize nontext values to a textual representation for this value kind. Read-only display metadata does not itself authorize a write.",
+    "empty_date": "An empty date or time value is stored as null.",
+    "unique_empty_value": "An empty or whitespace-only value in a unique field is normalized to null before persistence.",
+    "structured_value": "Objects and lists are serialized as structured data without semantically significant presentation whitespace.",
+    "non_null_storage": "For a field explicitly prohibiting null storage, resolve its nonempty configured default or the value-kind non-null default before persistence."
+  },
+  "required_values": {
+    "scope": "Validate mandatory fields on the parent and all owned rows. Report all detected missing values in the error context.",
+    "flags": "A Boolean flag can be false; a mandatory checkbox does not force truth.",
+    "zero": "A normalized numeric zero is not the same as an absent mandatory value.",
+    "conditions": "Generated-form conditional requiredness is a presentation property. A server business rule must explicitly enforce any corresponding operation requirement."
+  },
+  "relationships": {
+    "reference": "A reference identifies a target record; it does not convey ownership or authorization. Validate declared target type and effective access unless a specifically authorized workflow overrides that check.",
+    "dynamic_reference": "Resolve both companion target type and record identity, then validate the resulting pair.",
+    "owned_rows": "An owned row belongs to one parent type, identity, and collection field; its position is ordered within that collection. Save child changes atomically with the parent.",
+    "external_contract": "A declared external_record_contract means the local application consumes the defined integration boundary. Its identifier must resolve through that boundary; the local catalog does not invent the external service complete persistence model."
+  },
+  "field_change_rules": {
+    "set_once": "When a field is immutable after its first saved nonempty value, ordinary edits cannot change it. Explicit administrator migration and rename workflows require their own reviewed contract.",
+    "after_posting": "A field marked editable after posting is eligible for the update-after-posting lifecycle only. That flag does not permit changes to ledger consequences without the corresponding reposting or reversal workflow.",
+    "reference_copy": "A copied value is resolved from the selected reference and path. When fetch-if-empty applies, preserve a nonempty destination value."
+  },
+  "presentation_controls": "Layout, heading, image-display, rendered-content, and action controls remain in the ordered field inventory so a replacement can reproduce work surfaces. They are not independent scalar business columns.",
+  "acceptance_examples": [
+    {
+      "case": "nonnegative_boundary",
+      "field_flags": {
+        "non_negative": true
+      },
+      "normalized_values": [
+        0,
+        1,
+        -1
+      ],
+      "accepted": [
+        true,
+        true,
+        false
+      ]
+    },
+    {
+      "case": "selection_trim",
+      "allowed_values": [
+        "open",
+        "closed"
+      ],
+      "input": " open ",
+      "normalized_value": "open",
+      "accepted": true
+    },
+    {
+      "case": "selection_unknown",
+      "allowed_values": [
+        "open",
+        "closed"
+      ],
+      "input": "pending",
+      "accepted": false
+    },
+    {
+      "case": "optional_selection_empty",
+      "required": false,
+      "input": "",
+      "accepted": true
+    },
+    {
+      "case": "integer_fraction",
+      "input": 12.9,
+      "stored_value": 12
+    },
+    {
+      "case": "percentage_scale",
+      "stored_rate": 12,
+      "basis": 250,
+      "calculated_amount": 30
+    },
+    {
+      "case": "unique_empty",
+      "input": "   ",
+      "stored_value": null
+    },
+    {
+      "case": "owned_row_rollback",
+      "parent_save_fails": true,
+      "child_row_changes_committed": false
+    }
+  ],
+  "validation_scope": "These examples describe metadata and boundary behavior. They do not certify full accounting, permission, reporting, or end-to-end workflow equivalence."
+}

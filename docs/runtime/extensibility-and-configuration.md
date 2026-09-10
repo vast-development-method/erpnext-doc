@@ -10,7 +10,7 @@ A record declaration distinguishes stored root records, singleton settings, chil
 
 Custom permission rows replace or augment the effective permission definition through their specific metadata mechanism. It is unsafe to concatenate every permission source without reproducing precedence. A property marked hidden or read-only in a form is not a sufficient server restriction; field permission levels and domain validation remain authoritative.
 
-Evidence: source-artifact-444b5a1f4b08e77b3ae8 lines 145–224; source-artifact-1fd0d520ab1c4b24593c lines 8–96.
+The [effective schema publication procedure](#effective-schema-publication) requires storage, validation, forms, serialization, imports, and reports to use the same effective field identities and properties.
 
 ## Behavior replacement and composition
 
@@ -20,7 +20,7 @@ A neutral implementation can express this with ordered delegates, composition, o
 
 Virtual records retain the document contract while supplying an alternative persistence provider. Required capabilities include load, insert, update, delete, list, count, and statistics. Computed child tables provide lazily evaluated collections that are reset after saving. Their declaration is not permission to materialize an arbitrary table and treat it as authoritative.
 
-Evidence: source-artifact-0f25eaf4b484dd77cdbb lines 90–255; source-artifact-1369c9744914030ba553 lines 10–93.
+The [extension registration table](#extension-registration-contract) defines replacement and composition precedence independently; a later handler cannot silently discard required base financial validation.
 
 ## Event extensions
 
@@ -30,7 +30,7 @@ During registered event handlers, transaction-control calls are disabled so that
 
 New extension points must be named for the business event, with clear arguments, identity, transaction scope, error propagation, and permitted mutation. An unspecified generic callback after everything is complete cannot reproduce the distinction between before-validation and after-submission behavior.
 
-Evidence: source-artifact-1c79c95fe9c8ab1bc9d4 lines 1645–1712; source-artifact-1c79c95fe9c8ab1bc9d4 lines 1773–1960; source-artifact-1c79c95fe9c8ab1bc9d4 lines 2060–2115.
+Event registration must specify its phase and permitted mutations. A failure inside the guarded event chain follows the [transaction boundary](document-lifecycle-and-transactions.md#failure-boundary-table), not an independent extension commit.
 
 ## Named operations and authorization extensions
 
@@ -40,7 +40,7 @@ A named-operation override is resolved before the registered operation is invoke
 
 Permission extensions provide per-document restrictions and query conditions. The reviewed controller permission layer can deny but not directly grant a missing role permission, while explicit document sharing is evaluated afterward for supported rights. Query conditions and document checks must remain consistent enough that restricted documents cannot appear in counts, exports, reports, or lookup results through an alternate path.
 
-Evidence: source-artifact-66f1c84f2539463cb381 lines 580–655; source-artifact-70f793c473898fecc4cc lines 24–189; source-artifact-c07b20c42194f0dc2edd lines 358–508; source-artifact-c07b20c42194f0dc2edd lines 82–348.
+The [service operation matrix](../interfaces/service-contracts.md#operation-contract-matrix) distinguishes exposed reachability from actual business authority, including row and field access.
 
 ## Configurable workflow and rules
 
@@ -50,7 +50,7 @@ Synchronous transition tasks execute before the corresponding save, submit, or c
 
 Naming rules are also executable configuration. Enabled rules are ordered by priority and the first matching rule that establishes identity wins. Document-specific amendment rules can choose normal naming or a predecessor suffix. Explicit decimal precision, rounding policy, smallest currency fraction, and number-format selection are calculation inputs. They belong in reproducible business configuration, not only user presentation preferences.
 
-Evidence: source-artifact-c53dbe3cd685497ce317 lines 43–230; source-artifact-c869f513562448905114 lines 144–286; source-artifact-c869f513562448905114 lines 512–592; source-artifact-444b5a1f4b08e77b3ae8 lines 960–985; source-artifact-91eb5c3685f0ea77eecb lines 1253–1392.
+The [configuration classifications](#configuration-change-classifications) separate calculation inputs, current permissions, workflow controls, and future defaults so a setting change cannot silently rewrite history.
 
 ## Operational configuration boundary
 
@@ -58,7 +58,7 @@ The blueprint includes settings that change business decisions or observable beh
 
 A setting must have a declared type, default, scope, allowed values, precedence, and effect. A change that affects future documents must not silently rewrite historical financial values. Domain documents decide when historical calculations are frozen and when an explicit reposting or recalculation operation is supported. Caches must be invalidated when effective metadata, permission rules, or event configuration changes; cached decisions are not an independent source of authority.
 
-Evidence: source-artifact-444b5a1f4b08e77b3ae8 lines 145–224; source-artifact-6e027c5d8c38cd20566f lines 551–557; source-artifact-b1ad771a8c35d6eebd3d lines 84–218; source-artifact-c92b91c9ae73e577a3db lines 155–352.
+The [unified capability composition](#unified-capability-composition) requires extension results and base financial invariants to be tested together under the selected effective configuration.
 
 ## Extension acceptance obligations
 
@@ -72,3 +72,44 @@ Evidence: source-artifact-444b5a1f4b08e77b3ae8 lines 145–224; source-artifact-
 - Round the same transaction under every explicitly supported policy and preserve the chosen policy in the reproducible scenario configuration.
 
 The extension mechanism does not make arbitrary extension behavior compatible automatically. Every installed extension that changes domain behavior must supply its own evidence, contract changes, and acceptance cases in the combined system specification.
+
+## Extension registration contract
+
+Every extension declaration identifies the capability owner, target business record or service, extension kind, enabled condition, precedence, arguments, returned value, allowed mutations, permissions, and transaction boundary. The registry must distinguish replacing a behavior provider, composing a provider, adding a document event, adding a query condition, replacing a service, supplying virtual persistence, and scheduling work. These categories are not interchangeable.
+
+| Extension kind | Combination rule | Failure consequence |
+| --- | --- | --- |
+| Behavior-provider replacement | Last applicable replacement wins; preserve the original contract | Initialization or execution fails if the replacement cannot satisfy that contract |
+| Behavior-provider composition | Later registered extensions resolve before earlier ones | A suppressed base validator can invalidate financial equivalence |
+| Document-specific event handlers | Run after the document's behavior in registration order | Failure propagates within the enclosing action transaction |
+| Wildcard document handlers | Follow applicable document-specific handlers | Apply only to the declared event with the same transaction guard |
+| Permission restrictions | Evaluate applicable restrictions in their defined order | False-like result denies within that permission layer |
+| Named-service replacement | Resolve replacement before exposure and invocation checks | Registration does not independently grant record rights |
+| Synchronous workflow task | Run before the corresponding structural operation | Failure prevents transition completion |
+| Asynchronous workflow task | Eligible after commit | Failure is an operational outcome; it does not undo the prior commit |
+| Computed field provider | Evaluate as required with field permissions | Does not create an authoritative persisted scalar |
+| Virtual persistence provider | Supplies complete record persistence and query operations | Missing required operation is an unsupported capability |
+
+## Effective schema publication
+
+A custom field needs stable field identity, full label, value kind, placement, default, constraints, permission level, and applicable references. A property override changes the effective property of its selected target; it does not create a second business field. Publish the resulting definition to validation, storage mapping, permitted serialization, forms, import templates, and reporting. Invalidate caches that retain an earlier definition.
+
+For example, adding a warehouse reference to a custom child row requires more than a visible selector. The effective model must resolve the target warehouse identity, preserve the row's parent ownership, apply relevant user restrictions, validate the link on save, and expose or omit the field consistently in reads and exports. A read-only form flag does not independently enforce post-submission immutability; that property must be declared or implemented in the server's business rules.
+
+## Configuration change classifications
+
+| Classification | Example | Required handling |
+| --- | --- | --- |
+| Future default | Default warehouse or selling price list | Apply when resolving new values; preserve existing transaction snapshots |
+| Calculation policy | Currency precision or rounding policy | Include in reproducible fixtures; specify effective calculation boundary |
+| Immediate authorization | Role permission, share, or allowed company | Invalidate cached decisions and evaluate the current operation |
+| Workflow control | Approver role or transition condition | Validate requested action against the active workflow and record state |
+| Historical recomputation policy | Valuation correction or accounting reposting | Use an explicit tracked business operation with reconciliation |
+| External delivery policy | Enabled state, retries, signing credentials | Preserve retained retry payloads and specify how current settings affect later attempts |
+| Operational scheduling | Frequency, enabled capability, queue threshold | Recompute future eligibility without inventing a completed business transaction |
+
+## Unified capability composition
+
+Employee-linked payment, payroll journal cancellation, contact-channel updates, product catalog projection, time billing, and project costing can each invoke behavior from several business domains. Treat these as one installed capability graph. Combining overlapping forms does not permit dropping an expense-claim update from payment submission or a payroll reference cleanup from journal cancellation.
+
+An extension acceptance fixture must therefore include both its own result and the base record's invariants. For a payment extension, verify balanced posting, correct party or employee allocation, dependent claim update, and cancellation reversal. For a contact extension, verify identity preservation, protected fields, and related communication or lead views. The [application architecture](../overview/application-architecture.md#extension-composition) identifies the shared boundaries; domain specifications supply the actual business consequences.

@@ -8,7 +8,7 @@ The runtime initializes a tenant context before handling an operation and attach
 
 An implementation must prevent a record reference, cache entry, job identifier, or event subscription from accidentally crossing tenant context. This is a behavioral isolation requirement, not a prescription for a database-per-tenant topology. The source selects a site using configured request information; the replacement's trusted tenant-selection mechanism is a transport decision. It must not treat an arbitrary untrusted tenant selector as sufficient authorization.
 
-Evidence: source-artifact-d8764548dbbd91bf1e51 lines 111–222; source-artifact-b1ad771a8c35d6eebd3d lines 84–218; source-artifact-3d8f5f8af4a5a70b7faf lines 31–136.
+Use the tenant as part of the logical context for every record, cache, job, and subscription. The [domain model](../data/domain-model.md#identity-and-relationship-decision-table) separately defines company ownership inside that context.
 
 ## Acting identities
 
@@ -20,7 +20,7 @@ Credential-pair authentication supports a key and protected secret belonging to 
 
 Source-address restrictions are explicitly rechecked when request authentication changes the acting user to a non-guest identity. The reviewed address matching uses configured prefixes; a replacement should document the intended matching syntax rather than assuming network-range parsing. Failed-login tracking uses the first failure within a lock interval and blocks when the failure count is strictly greater than the configured maximum; equality is not the rejection boundary in that helper.
 
-Evidence: source-artifact-187d5fd72469df5def58 lines 29–113; source-artifact-187d5fd72469df5def58 lines 642–775; source-artifact-187d5fd72469df5def58 lines 517–639; source-artifact-187d5fd72469df5def58 lines 476–515; source-artifact-c07b20c42194f0dc2edd lines 82–348.
+The [permission decision inputs](#permission-decision-inputs) identify the independent authentication and authorization variables. The selected session policy and credential precedence must be included in each test fixture.
 
 ## Permission evaluation
 
@@ -32,7 +32,7 @@ Explicit sharing is a later fallback when the ordinary result is false. Shareabl
 
 For type-level access checks, the existence of one shared record can make a list surface available. It does not imply access to every row of that type. Every list, count, lookup, report, export, and document read must preserve row-level conditions. Child permission evaluation derives authority from the parent context; a child identifier is not an independent escape from the parent's permission policy.
 
-Evidence: source-artifact-c07b20c42194f0dc2edd lines 82–348; source-artifact-c07b20c42194f0dc2edd lines 358–508.
+The [permission fixtures](#permission-fixtures-with-explicit-expected-results) explicitly test owner grants, later sharing fallback, child authority, and separate export rights.
 
 ## User restrictions across links
 
@@ -42,7 +42,7 @@ A link marked to ignore user permissions is excluded from this propagation. In n
 
 Controller restrictions execute in reverse hook order and a false-like result denies within that layer. A custom hook must therefore deliberately return a truthy result when it intends to permit ordinary evaluation to continue. The base algorithm does not infer that an absent return means allow.
 
-Evidence: source-artifact-c07b20c42194f0dc2edd lines 358–508.
+Test restrictions against every relevant parent and child link, including empty-link strictness and explicitly ignored links. A visible company filter alone cannot reproduce linked-record permission propagation.
 
 ## Field-level access and masking
 
@@ -52,7 +52,7 @@ When saving an existing record, masked fields are restored from real stored valu
 
 Secret fields have a protected backing store. Their normal document value is a mask, and an all-mask supplied value is treated as a placeholder. An empty secret removes its protected backing value under the base helper. A transport serializer must keep masks, absent fields, explicit clearing, and actual new secret values distinct.
 
-Evidence: source-artifact-1c79c95fe9c8ab1bc9d4 lines 1253–1382; source-artifact-444b5a1f4b08e77b3ae8 lines 145–224; source-artifact-0f25eaf4b484dd77cdbb lines 1431–1490.
+The [normalization table](../data/persistence-identity-and-values.md#absence-empty-values-and-normalization) distinguishes absent, empty, masked, and replacement secret values; serialization and save must preserve those differences.
 
 ## Reports, attachments, and real-time subscriptions
 
@@ -62,7 +62,7 @@ Authenticated attachment upload checks write access to a target document, includ
 
 Real-time document and document-type subscriptions invoke permission checks. User rooms and tenant rooms have separate routing. The reviewed task-progress subscription joins a room by task identifier without the document-style authorization check, even for guests. This is an observed limitation: do not place secret payloads in a generic progress message based on an assumed ownership check. A replacement may require stricter task access, but that would be an explicit security improvement rather than source-equivalent behavior.
 
-Evidence: source-artifact-e9e5a0c9d8b9908522c7 lines 27–88; source-artifact-e9e5a0c9d8b9908522c7 lines 279–333; source-artifact-e9e5a0c9d8b9908522c7 lines 108–192; source-artifact-9d66d61a7b7d9a437d11 lines 130–261; source-artifact-af5a18ab59f29558dded lines 36–138.
+The [privacy boundaries](#privacy-boundaries-for-business-records) require separate treatment of report output, attachments, and task channels; protected form display alone does not establish confidentiality.
 
 ## Acceptance matrix
 
@@ -81,4 +81,42 @@ Evidence: source-artifact-e9e5a0c9d8b9908522c7 lines 27–88; source-artifact-e9
 
 The identity retained by a background retry needs particular attention: the reviewed retry call drops the initiating-user argument after releasing tenant-local state, and reconnect defaults to the administrative identity. The static call chain indicates identity may change on this retry path. It has not been reproduced in a running system; it is a documented source discrepancy to resolve in acceptance testing, not a recommendation to grant administrative privilege to retries.
 
-Evidence: source-artifact-b1ad771a8c35d6eebd3d lines 250–328; source-artifact-66f1c84f2539463cb381 lines 372–424; source-artifact-66f1c84f2539463cb381 lines 472–479.
+The [credential and permission change boundaries](#credential-and-permission-change-boundaries) distinguish captured identity from current permissions, and the explicit security profile below records proposed retry and task-access corrections.
+
+## Permission decision inputs
+
+| Input | Scope | Effect |
+| --- | --- | --- |
+| Acting principal and user type | Invocation | Distinguish anonymous, internal, external, and administrative identity |
+| Enabled state and authentication evidence | Identity establishment | A disabled user cannot acquire an authenticated credential-pair session |
+| Effective role grants | Record type and permission level | Establish candidate rights, including owner-only variants |
+| Controller restrictions | Record and action | Can deny the normal permission path |
+| Record owner | Individual record | Select owner-specific grants |
+| Linked-record restrictions | User, target type, applicable record type | Restrict direct and referenced identities, including relevant children |
+| Explicit share | Individual record and supported right | Can provide the documented fallback right |
+| Field permission level and masking | Parent and child fields | Restrict authorized representation and accepted updates |
+| Structural lifecycle and workflow | Record and action | Constrain an otherwise authorized mutation |
+| Domain policy | Company, period, party, product, and operation | Reject business-invalid actions even when access is granted |
+
+The decision must be reproducible for read, select, list, count, print, export, import, and mutation paths. It is insufficient to test only a document form. A lookup may grant selection of an identity without access to its full document; a report may require rights beyond ordinary read; a child row must be evaluated through its real parent context.
+
+## Permission fixtures with explicit expected results
+
+1. A purchasing user has write permission restricted to owned records. The user can edit its own draft purchase document; the same role cannot edit another user's draft unless another applicable grant or share supplies write.
+2. A user has read sharing on a particular record but no ordinary delete grant. Read succeeds, delete fails. The existence of this share can expose the type's list surface, but cannot expose unrelated rows.
+3. A user may access only Company North. A parent referring to Company North and a child referring to Company South must be evaluated against both relevant linked restrictions. Display filtering only on the parent company is insufficient.
+4. A permitted field is masked. Reading then saving the masked representation preserves the real value. A new secret updates protected storage; an explicit empty secret clears it under the secret helper; omitting the field during an overlay leaves the loaded value.
+5. A principal can read a report's reference type but lacks export permission. Viewing and exporting can produce different authorization outcomes. A queued export must retain the requesting identity.
+6. A user knows a job identifier belonging to another user. The baseline task channel does not provide the document channel's ownership gate; the replacement must declare a confidential-task correction before claiming that task identifiers are protected references.
+
+## Credential and permission change boundaries
+
+Authentication proves the acting identity for a request; it does not freeze that user's rights permanently. Effective role or user-restriction changes require cache invalidation before subsequent permission decisions. A queued operation records its initiating identity, but the identity's roles and record access can change before execution. Each business job must state whether it rechecks current authority or executes an explicitly delegated authorization; the generic queue does not supply a universal frozen-permission snapshot.
+
+Company deactivation, closed accounting periods, revoked workflow authority, and document cancellation are business conditions to re-evaluate at mutation time. A user who was allowed to open a form earlier is not thereby entitled to submit its stale contents. The [transaction lifecycle](document-lifecycle-and-transactions.md) specifies current-state and version checking.
+
+## Privacy boundaries for business records
+
+Employee pay, bank details, protected credentials, private attachments, and customer communications require explicit field and record rules. Masking must occur before data enters ordinary read responses and applicable reports. Search, notification payloads, background failure messages, and report downloads require their own exposure analysis; masking one form field alone does not establish system-wide confidentiality.
+
+A proposed enterprise security profile retains the initiating user across all retries, requires authorized task subscriptions, and applies the same permitted-field serialization to create, update, and read responses. These are explicit corrections where the baseline paths differ. They do not alter the business calculation rules and must be included in the replacement's declared compatibility decisions and acceptance fixtures.
