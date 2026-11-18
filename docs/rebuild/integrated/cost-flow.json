@@ -1,0 +1,254 @@
+{
+  "profile": "FIFO-linked-delivery-v1",
+  "currency": "NAD",
+  "amount_scale": 2,
+  "tax_percent": "15.00",
+  "steps": [
+    {
+      "id": "OPEN",
+      "operation": "open",
+      "inputs": {
+        "cash": "1000.00"
+      },
+      "predecessors": [],
+      "journal_net_debit": {
+        "bank": "1000.00",
+        "capital": "-1000.00"
+      },
+      "stock": []
+    },
+    {
+      "id": "GR1",
+      "operation": "receive",
+      "inputs": {
+        "units": 12,
+        "purchase_rate": "10.00"
+      },
+      "predecessors": [],
+      "journal_net_debit": {
+        "raw_inventory": "120.00",
+        "receipt_clearing": "-120.00"
+      },
+      "stock": [
+        {
+          "item": "raw",
+          "quantity_delta": 12,
+          "value_delta": "120.00"
+        }
+      ]
+    },
+    {
+      "id": "GR2",
+      "operation": "receive",
+      "inputs": {
+        "units": 8,
+        "purchase_rate": "14.00"
+      },
+      "predecessors": [],
+      "journal_net_debit": {
+        "raw_inventory": "112.00",
+        "receipt_clearing": "-112.00"
+      },
+      "stock": [
+        {
+          "item": "raw",
+          "quantity_delta": 8,
+          "value_delta": "112.00"
+        }
+      ]
+    },
+    {
+      "id": "BILL",
+      "operation": "supplier_bill",
+      "inputs": {
+        "receipts": [
+          "GR1",
+          "GR2"
+        ]
+      },
+      "predecessors": [
+        "GR1",
+        "GR2"
+      ],
+      "journal_net_debit": {
+        "receipt_clearing": "232.00",
+        "input_tax": "34.80",
+        "payables": "-266.80"
+      },
+      "stock": []
+    },
+    {
+      "id": "PACK",
+      "operation": "repack",
+      "inputs": {
+        "raw_units": 15,
+        "finished_units": 5
+      },
+      "predecessors": [
+        "GR1",
+        "GR2"
+      ],
+      "journal_net_debit": {
+        "raw_inventory": "-162.00",
+        "packed_inventory": "162.00"
+      },
+      "stock": [
+        {
+          "item": "raw",
+          "quantity_delta": -15,
+          "value_delta": "-162.00"
+        },
+        {
+          "item": "packed",
+          "quantity_delta": 5,
+          "value_delta": "162.00"
+        }
+      ]
+    },
+    {
+      "id": "SHIP",
+      "operation": "deliver",
+      "inputs": {
+        "units": 4
+      },
+      "predecessors": [
+        "PACK"
+      ],
+      "journal_net_debit": {
+        "cost_of_sales": "129.60",
+        "packed_inventory": "-129.60"
+      },
+      "stock": [
+        {
+          "item": "packed",
+          "quantity_delta": -4,
+          "value_delta": "-129.60"
+        }
+      ]
+    },
+    {
+      "id": "SALE",
+      "operation": "invoice",
+      "inputs": {
+        "shipment": "SHIP",
+        "unit_price": "60.00"
+      },
+      "predecessors": [
+        "SHIP"
+      ],
+      "journal_net_debit": {
+        "receivables": "276.00",
+        "sales": "-240.00",
+        "output_tax": "-36.00"
+      },
+      "stock": []
+    },
+    {
+      "id": "PAY1",
+      "operation": "collect",
+      "inputs": {
+        "invoice": "SALE",
+        "amount": "180.00"
+      },
+      "predecessors": [
+        "SALE"
+      ],
+      "journal_net_debit": {
+        "bank": "180.00",
+        "receivables": "-180.00"
+      },
+      "stock": []
+    },
+    {
+      "id": "RET",
+      "operation": "return_delivery",
+      "inputs": {
+        "shipment": "SHIP",
+        "units": 1
+      },
+      "predecessors": [
+        "SHIP"
+      ],
+      "journal_net_debit": {
+        "packed_inventory": "32.40",
+        "cost_of_sales": "-32.40"
+      },
+      "stock": [
+        {
+          "item": "packed",
+          "quantity_delta": 1,
+          "value_delta": "32.40"
+        }
+      ]
+    },
+    {
+      "id": "CREDIT",
+      "operation": "credit",
+      "inputs": {
+        "invoice": "SALE",
+        "return_delivery": "RET"
+      },
+      "predecessors": [
+        "SALE",
+        "RET"
+      ],
+      "journal_net_debit": {
+        "receivables": "-69.00",
+        "sales": "60.00",
+        "output_tax": "9.00"
+      },
+      "stock": []
+    },
+    {
+      "id": "PAY2",
+      "operation": "collect",
+      "inputs": {
+        "invoice": "SALE",
+        "amount": "27.00"
+      },
+      "predecessors": [
+        "SALE",
+        "CREDIT",
+        "PAY1"
+      ],
+      "journal_net_debit": {
+        "bank": "27.00",
+        "receivables": "-27.00"
+      },
+      "stock": []
+    },
+    {
+      "id": "REMIT",
+      "operation": "pay_supplier",
+      "inputs": {
+        "bill": "BILL",
+        "amount": "266.80"
+      },
+      "predecessors": [
+        "BILL"
+      ],
+      "journal_net_debit": {
+        "payables": "266.80",
+        "bank": "-266.80"
+      },
+      "stock": []
+    }
+  ],
+  "closing": {
+    "bank": "940.20",
+    "raw_quantity": 5,
+    "raw_value": "70.00",
+    "packed_quantity": 2,
+    "packed_value": "64.80",
+    "unbilled_receipts": "0.00",
+    "customer_outstanding": "0.00",
+    "supplier_outstanding": "0.00",
+    "net_sales": "180.00",
+    "cost_of_sales": "97.20",
+    "gross_profit": "82.80",
+    "input_tax": "34.80",
+    "output_tax": "27.00",
+    "assets": "1109.80",
+    "liabilities_and_equity": "1109.80"
+  }
+}
