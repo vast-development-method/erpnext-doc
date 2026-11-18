@@ -2,6 +2,8 @@
 
 A supplier delivers raw material in two lots at different prices. The company converts part of those lots into a saleable product, ships four units, invoices the customer and takes back one unit after a partial payment. This example tests whether separate purchasing, warehouse, sales and payment implementations can share one set of balances.
 
+The submitted sales invoice from this trading scenario was also rendered in English, Afrikaans, German, Chinese and Arabic. Compare its stable record ID, customer, status, total and outstanding amount with the five translated headings in the [language observations](../marketplace-guides/languages/observed.json).
+
 ## Effective configuration
 
 One company, one supplier, one customer and one bank account use NAD. The company uses perpetual inventory, FIFO, two stock accounts mapped through separate warehouses and a single cost centre. The company converts 15 raw units into five identical finished units using a Repack stock entry. The receiving and delivery documents move quantities. The subsequent purchase invoice, sales invoice and credit note have stock updating disabled. Input tax is wholly recoverable. The example uses an exclusive 15% charge on the net amount, no additional costs, zero opening stock and no currency translation. The rate is a fixture parameter. After setting the mapped credit quantity to one returned unit, recalculate the draft taxes and totals before saving or submitting it. This gives the allocation check the intended credit of 69.00 against 96.00 still outstanding. The credit note then reduces the original sales invoice's balance. Configure two-decimal monetary precision and choose values with no fractional-cent rounding in this profile.

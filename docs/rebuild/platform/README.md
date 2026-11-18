@@ -8,6 +8,7 @@ This profile supplements the [shared runtime](../../runtime/README.md) and [inte
 | [Approvals, routing and background work](work-dispatch.md) | Which items commit independently? Who receives the next assignment? When may a worker re-enter? |
 | [Durable event automation](automation.md) | Which edits coalesce? What wins an event versus timeout race? What evidence survives a failed delivery? |
 | [Files and reporting](files-and-reports.md) | Who may reuse a private blob? Who owns a prepared result and how is it selected? |
+| [Language selection and delivery](../marketplace-guides/languages/README.md) | Which language governs a signed-in view, a public page, an issued document and a queued message? How does a retry retain the chosen template revision? |
 | [Application composition and recovery](site-operations.md) | Which extension wins? What belongs to a backup generation? How far may a failed update have progressed? |
 | [Decision contracts](contracts.json), [contract schema](contracts.schema.json), [acceptance cases](acceptance.json) and [case schema](acceptance.schema.json) | Ordered rules with typed inputs, expected outcomes, exact source locations and examples. |
 | [Verification](verification.md) | Re-evaluate each case independently of the reference service or run it against a replacement adapter. |

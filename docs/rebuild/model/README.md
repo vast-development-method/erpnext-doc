@@ -10,6 +10,8 @@ Use the [module directory](INDEX.md) to find a document by business area or the 
 
 The inventory includes layout, virtual and child fields. The two repositories supply 2,549 fixed references, 118 dynamic type selectors, 430 child tables and 41 child multiselects. Core-to-core lookup resolves every fixed and child target except the **Payment Gateway** referenced by **Payment Gateway Account.payment_gateway**. The [Payments declaration](https://github.com/frappe/payments/blob/1978965f38b8a1f0ea30c5f5dfd1c37d4888afe3/payments/payments/doctype/payment_gateway/payment_gateway.json) supplies that type. An installation can have a different app set. Each dynamic binding resolves a selector field in its own record. Its eventual target depends on record data. Separate [extension inventories](../extensions/README.md) cover the reviewed add-ons.
 
+Store identifiers, enumeration values and original content separately from display labels and translated content revisions. The [language contract](../marketplace-guides/languages/README.md) describes the mapping. The [assessment scoring example](../marketplace-guides/apps/frappe_pcat_exam.md) illustrates the effect of using display text as a lookup key.
+
 ## Scope and interpretation
 
 The [pins](pins.json) identify both revisions of all four original source packs. This dictionary enumerates the version-16 core and framework declarations at the November revisions. The original [neutral domain model](../../data/domain-model.md) and [record specifications](../../../schemas/data/record-types/README.md) describe the September development snapshot. Source names in this directory are lookup keys and interoperability evidence. A replacement can retain any internal naming scheme that preserves identity and behavior.
