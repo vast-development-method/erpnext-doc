@@ -1,0 +1,55 @@
+{
+  "contract_version": 1,
+  "scope": "Synthetic projection of an ordinary, saved Purchase Order in two isolated sites. Transactions have valid items, suppliers, accounts, currencies and dates. Both sites are in normal operation after migration. No share, delegated role, controller veto or submission queue is configured.",
+  "record_type": "Purchase Order",
+  "data_profile": {"frappe":"199a0385c00e572664a099a57a00be6ce7404eeb","erpnext":"886ab6ae187244e7f1b852393384ab6019d56264"},
+  "synthetic_apps": {
+    "purchase_controls": {
+      "requires":["erpnext"],
+      "fixture_files":{
+        "10_field.json":[{"kind":"custom_field","name":"custom_tender_ref","value":{"type":"Data","insert_after":"supplier","permlevel":0,"label":"Tender reference"}}],
+        "20_label.json":[{"kind":"property_setter","name":"tender-label","value":{"field":"custom_tender_ref","attribute":"label","property_type":"Data","value":"Procurement reference"}}],
+        "30_workflow.json":[{"kind":"workflow","name":"Procurement approval","value":{"record":"Purchase Order","state_field":"custom_procurement_state","states":[{"name":"Draft","status":0,"edit_role":"Purchase User"},{"name":"Approved","status":1,"edit_role":"Purchase Manager"}],"transition":{"from":"Draft","action":"Approve","to":"Approved","role":"Purchase Manager","allow_self":false,"condition":{"field":"base_grand_total","op":"at_most","value":"10000.00"}}}}]
+      },
+      "migrate_customizations":[]
+    },
+    "inland_controls": {
+      "requires":["purchase_controls"],
+      "fixture_files":{
+        "10_label.json":[{"kind":"property_setter","name":"tender-label","value":{"field":"custom_tender_ref","attribute":"label","property_type":"Data","value":"Bid reference"}}]
+      },
+      "migrate_customizations":[
+        {"kind":"property_setter","name":"tender-label","value":{"field":"custom_tender_ref","attribute":"label","property_type":"Data","value":"Tender decision reference"}},
+        {"kind":"property_setter","name":"tender-level","value":{"field":"custom_tender_ref","attribute":"permlevel","property_type":"Int","value":"1"}},
+        {"kind":"custom_grants","name":"Purchase Order","value":[
+          {"role":"Purchase User","read":1,"write":1,"create":1},
+          {"role":"Purchase Manager","read":1,"write":1,"submit":1},
+          {"role":"Purchase Manager","permlevel":1,"read":1,"write":1}
+        ]}
+      ]
+    }
+  },
+  "sites": {
+    "inland": {
+      "app_order":["frappe","erpnext","purchase_controls","inland_controls"],
+      "companies":["Trading","Transport"],
+      "actors":{"buyer":{"roles":["Purchase User"],"companies":["Trading"]},"manager":{"roles":["Purchase Manager"],"companies":["Trading"]},"observer":{"roles":["Stock User"],"companies":["Trading"]}},
+      "naming_rules":[{"id":"trading-rule","priority":20,"when_company":"Trading","prefix":"PO-T-","digits":4,"counter":9},{"id":"fallback-rule","priority":5,"prefix":"PO-","digits":4,"counter":39}],
+      "purchase_orders":[
+        {"name":"PO-041","owner":"buyer","company":"Trading","base_grand_total":"10000.00","custom_tender_ref":"IN-315","state":"Draft","status":0},
+        {"name":"PO-042","owner":"manager","company":"Trading","base_grand_total":"25.00","custom_tender_ref":"IN-316","state":"Draft","status":0},
+        {"name":"PO-043","owner":"buyer","company":"Transport","base_grand_total":"98.00","custom_tender_ref":"IN-317","state":"Draft","status":0},
+        {"name":"PO-044","owner":"buyer","company":"Trading","base_grand_total":"10000.01","custom_tender_ref":"IN-318","state":"Draft","status":0}
+      ]
+    },
+    "coast": {
+      "app_order":["frappe","erpnext","purchase_controls"],
+      "companies":["Trading","Transport"],
+      "actors":{"buyer":{"roles":["Purchase User"],"companies":["Trading"]},"manager":{"roles":["Purchase Manager"],"companies":["Trading"]},"observer":{"roles":["Stock User"],"companies":["Trading"]}},
+      "naming_rules":[{"id":"trading-rule","priority":20,"when_company":"Trading","prefix":"PO-T-","digits":4,"counter":79},{"id":"fallback-rule","priority":5,"prefix":"PO-","digits":4,"counter":3}],
+      "purchase_orders":[
+        {"name":"PO-041","owner":"buyer","company":"Trading","base_grand_total":"10000.00","custom_tender_ref":"CO-812","state":"Draft","status":0}
+      ]
+    }
+  }
+}
