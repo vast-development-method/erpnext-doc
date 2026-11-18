@@ -12,7 +12,8 @@
   "specification_documents": [
     "../../docs/domains/cross-domain-transactions.md",
     "../../docs/domains/transaction-progress-and-row-closure.md",
-    "../../docs/domains/company-and-master-governance.md"
+    "../../docs/domains/company-and-master-governance.md",
+    "../../docs/transfers/competing-commitments.md"
   ],
   "calculation_catalogs": [
     "../mathematics/transaction-progress-calculations.json"
@@ -23,7 +24,7 @@
     "../mathematics/workforce-acceptance-cases.json",
     "../mathematics/customer-and-service-acceptance-cases.json"
   ],
-  "reviewed_rule_count": 28,
+  "reviewed_rule_count": 32,
   "reviewed_rules": [
     {
       "rule_identifier": "cross-domain-transactions--shared-business-consequences",
@@ -384,6 +385,50 @@
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
       "acceptance_status": "No exact section-specific machine-readable case is linked by this register; use the chapter acceptance obligations and add an executed fixture before claiming full conformance."
+    },
+    {
+      "rule_identifier": "competing-commitments--reserve-fulfil-and-release-the-last-units",
+      "name": "Reserve, fulfil and release the last units",
+      "specification_reference": "../../docs/transfers/competing-commitments.md#reserve-fulfil-and-release-the-last-units",
+      "business_rule_summary": [
+        "Recheck unconsumed reservation balances and source-line claims across reservation, delivery and release."
+      ],
+      "review_status": "Reviewed against the implementation and its persisted record declarations.",
+      "review_boundary": "The worked scenario describes expected decisions and effects. Concurrent application execution and live provider outcomes require their own observations.",
+      "acceptance_status": "Worked input, decision and outcome are recorded in the referenced section."
+    },
+    {
+      "rule_identifier": "competing-commitments--claim-a-delivery-for-one-shipment",
+      "name": "Claim a delivery for one shipment",
+      "specification_reference": "../../docs/transfers/competing-commitments.md#claim-a-delivery-for-one-shipment",
+      "business_rule_summary": [
+        "Serialize submitted shipment claims on the same delivery; cancelling the claim leaves the delivery and invoice as posted."
+      ],
+      "review_status": "Reviewed against the implementation and its persisted record declarations.",
+      "review_boundary": "The worked scenario describes expected decisions and effects. Concurrent application execution and live provider outcomes require their own observations.",
+      "acceptance_status": "Worked input, decision and outcome are recorded in the referenced section."
+    },
+    {
+      "rule_identifier": "competing-commitments--close-and-reopen-an-order-after-partial-execution",
+      "name": "Close and reopen an order after partial execution",
+      "specification_reference": "../../docs/transfers/competing-commitments.md#close-and-reopen-an-order-after-partial-execution",
+      "business_rule_summary": [
+        "Revalidate authority, modification, blanket order and active reservations; refresh commitments without reposting an earlier receipt or sale."
+      ],
+      "review_status": "Reviewed against the implementation and its persisted record declarations.",
+      "review_boundary": "The worked scenario describes expected decisions and effects. Concurrent application execution and live provider outcomes require their own observations.",
+      "acceptance_status": "Worked input, decision and outcome are recorded in the referenced section."
+    },
+    {
+      "rule_identifier": "competing-commitments--trace-a-production-return-through-stock-and-service-billing",
+      "name": "Trace a production return through stock and service billing",
+      "specification_reference": "../../docs/transfers/competing-commitments.md#trace-a-production-return-through-stock-and-service-billing",
+      "business_rule_summary": [
+        "Retain accepted/rejected warehouse, originating subcontract line and distinct service receipt across partial return and cancellation."
+      ],
+      "review_status": "Reviewed against the implementation and its persisted record declarations.",
+      "review_boundary": "The worked scenario describes expected decisions and effects. Concurrent application execution and live provider outcomes require their own observations.",
+      "acceptance_status": "Worked input, decision and outcome are recorded in the referenced section."
     }
   ],
   "acceptance_sections": [
@@ -405,15 +450,20 @@
   "remaining_verification": [
     {
       "name": "Concurrent cross-domain commands",
-      "specification_reference": "../../docs/domains/cross-domain-transactions.md#shared-event-boundaries-and-conservation-checks",
+      "specification_reference": "../../docs/transfers/competing-commitments.md#reserve-fulfil-and-release-the-last-units",
       "required_verification": "Execute competing fulfilment, billing, payment, payroll and stock operations; reconcile durable records and ledgers after failures, cancellation and retry.",
-      "status": "Complete runtime validation outstanding"
+      "status": "Recheck unconsumed reservation balances and source-line claims across reservation, delivery and release. Specification reviewed. Complete runtime qualification remains open.",
+      "related_specification_references": [
+        "../../docs/transfers/competing-commitments.md#claim-a-delivery-for-one-shipment",
+        "../../docs/transfers/competing-commitments.md#close-and-reopen-an-order-after-partial-execution",
+        "../../docs/transfers/competing-commitments.md#trace-a-production-return-through-stock-and-service-billing"
+      ]
     },
     {
       "name": "Closed-row lifecycle compatibility",
-      "specification_reference": "../../docs/domains/transaction-progress-and-row-closure.md#failure-outcomes-and-numeric-boundary-fixtures",
+      "specification_reference": "../../docs/transfers/competing-commitments.md#close-and-reopen-an-order-after-partial-execution",
       "required_verification": "Percentage and overflow arithmetic are independently checked. Execute close/reopen, mapping and downstream cancellation against persisted documents.",
-      "status": "Arithmetic checked; persisted-command execution outstanding"
+      "status": "Revalidate authority, modification, blanket order and active reservations; refresh commitments without reposting an earlier receipt or sale. Specification reviewed. Complete runtime qualification remains open."
     }
   ],
   "conformance_gate_register": "conformance-gates.json"

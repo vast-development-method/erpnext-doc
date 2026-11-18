@@ -13,6 +13,8 @@ A commercial commitment starts with an order row and a delivery unit. Physical f
 | What releases goods for use and schedules subsequent service? | [Inspection, release and corrective action](quality.md), [quality procedures, customer service visits and maintenance](quality-and-maintenance.md) |
 | How do these records support industry operations? | [Farm crop cycles, measurements and project work](agriculture.md), [room occupancy, restaurant service and guest billing](hospitality.md) |
 
+[Stock and service decisions](traceable-stock-and-service.md) follows expiring batches, serial returns, dimension shortages, internal receipts, workstation capacity, carrier charges, inspection results and maintenance-log reversal.
+
 ## Worked acceptance cases
 
 Each example supplies initial facts, an operation and its expected outcome. Ordered cost layers are listed oldest first as quantity–unit-rate pairs. Positive quantities enter stock and negative quantities leave it. Amounts in the valuation cases are in company currency. Compare quantity, rate, monetary value, custody, and the status or rejection separately.

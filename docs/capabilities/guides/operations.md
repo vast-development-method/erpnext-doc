@@ -57,6 +57,17 @@ Send the assigned operator the task instructions in their selected language and 
 | A daily task records an explicit “no”; another daily task is left unanswered. | Reports count one completed negative check and one missing check. Repeated submission of the first occurrence creates no second observation. |
 | The next week's instructions change the allowed range. | A historical report evaluates the original occurrence against its original bounds and displays the language used for that occurrence. |
 
+#### Occurrences, exceptions and the reporting denominator
+
+| Event | Input and resulting record | Failure or correction |
+|---|---|---|
+| Schedule an occurrence | Bind plan revision, site time zone, scheduled local slot and target asset or common-area location. Use one occurrence ID for its original slot. | If a supervisor moves the visit, retain the original slot and record the new due time, actor and reason. A scheduler retry reuses the occurrence. |
+| Record a reading | Bind occurrence ID, parameter ID and revision, performer, observation instant, original value, unit and normalized value. Record binary answers separately from an empty response. | Reject an incompatible unit. A repeated observation ID with identical input returns its saved result. Conflicting input under that ID enters review. |
+| Review the result | Record the supervisor’s disposition, reason and related corrective-work or incident reference if one is authorized. | Supersede an incorrect reading with a linked correction. Preserve the first reading and its original limit decision. Acknowledging an alert leaves the measured result intact. |
+| Report the shift | Count each scheduled occurrence once. Report completion separately from conformance, excused occurrences and open exceptions. | Keep both the plan revision and reporting cutoff. Late entry can change a subsequent report without changing an already issued report. |
+
+For a specified site policy, three inspections are due by 10:00. One records 8.0 °C against an inclusive maximum of 8.0 °C; the second records 8.1 °C; the third has no observation. At the cutoff, completion is 2/3 and conformance among completed inspections is 1/2. A supervisor opens one corrective task against the second occurrence. Redelivery of its alert leaves one task, two completed inspections and one missing inspection. A rescheduled visit retains its previous due time in the history. The source profile identifies which of these reporting and recurrence decisions are independently specified.
+
 [Implementation evidence and scope](../../rebuild/marketplace-guides/apps/green_checklist.md).
 
 ## Incident investigation

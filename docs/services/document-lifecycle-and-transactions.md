@@ -142,3 +142,9 @@ For a posting operation, define its affected fact set before implementation: doc
 ## Linked specifications
 
 - **Related decisions** · [cross-domain transactions](../transactions/cross-domain-transactions.md)
+
+## Approval action and saved state
+
+An explicit workflow action reloads the stored document, selects an action permitted for the actor and current state, and checks approval authority including the self-approval policy. It applies the target state and any configured additional field, executes enabled synchronous transition tasks in sequence and registers asynchronous tasks after commit. The target structural state determines save, submit or cancel. Where submission or cancellation is queued, queue admission is the immediate result.
+
+The ordinary save validator compares the prior and proposed workflow states. A new record may start only in the initial workflow state. For a changed state on an existing record, the requested destination must be reachable through an available transition evaluated on the stored document. For audit and approval reporting, a changed state alone does not establish that the dedicated approval action, approval authority check, tasks and resulting comment occurred. Record the originating action and its business effects with the decision.

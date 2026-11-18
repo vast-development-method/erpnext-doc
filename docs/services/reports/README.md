@@ -2,6 +2,8 @@
 
 Each entry identifies the business report, reference record, explicit roles and default presentation controls. An empty role list adds no explicit report-specific grant. A reference-type reporting grant, filters, effective tenant permissions and row restrictions still apply. The column list retains only identified columns. Runtime grouping and formula-dependent outputs can add columns. [Execution and export](../reporting-and-exports.md) describes ordering, filtering, masking and totals. [Settlement example](../settlement-reports.md) reconciles six reports to one set of movements.
 
+The [report behaviour directory](behaviour/README.md) gives current row procedures, filter controls, conditional columns and worked outputs. Individual entries identify declarations retained for compatibility or supplied as fixtures.
+
 | Business area | Entries |
 |---|---:|
 | [Accounting](accounting.json) | 57 |

@@ -28,6 +28,8 @@ Koppel die gemagtigde ondertekenaar aan die faktuur. Die ondertekende lêer beho
 
 As twee e-posse in verskillende tale na dieselfde ondertekende Duitse faktuur verwys, moet albei aanhangsels se kontrolesomme met dié van die bewaarde, ondertekende PDF ooreenstem. Die taal van die e-pos verander nie die lêer of die ondertekenaar nie, en geen tweede ondertekening vind plaas nie.
 
+By ’n wagtydverstryking kan die diens reeds onderteken het. Rekonsilieer die oorspronklike versoek voordat nog ’n ondertekening gemagtig word. As die lêer ongeskonde is maar die vertrouensketting onseker bly, behou die lêer en die toetsuitslag. Waar ’n vertroude handtekening verpligtend is, wag versending op bevestiging. ’n Herhaalde e-pos gebruik dieselfde goedgekeurde lêer.
+
 [English](../documents.md#signed-document-dispatch) · [Bronwaarnemings](../../../rebuild/marketplace-guides/editions/af/documents.md#digital-signature).
 
 ## Wys elke ondertekenaar se velde toe en bewaar die taal en inhoud van die ondertekende ooreenkoms

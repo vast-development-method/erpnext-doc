@@ -606,15 +606,26 @@
       "specification_reference": "../../docs/domains/service-and-support.md#precise-calendar-algorithm"
     },
     {
-      "case_identifier": "service-hold-wall-clock-extension",
+      "case_identifier": "service-hold-working-time-extension",
       "classification": "compatibility_requirement",
       "operation": "Apply accumulated hold",
       "inputs": {
         "calendar_deadline": "2026-09-15T10:30:00",
-        "hold_seconds": 7200
+        "hold_started": "2026-09-14T16:30:00",
+        "resumed": "2026-09-15T09:30:00",
+        "working_days": [
+          "Monday",
+          "Tuesday"
+        ],
+        "opening": "09:00:00",
+        "closing": "17:00:00",
+        "holidays": [],
+        "previous_extension_seconds": 0
       },
       "expected": {
-        "resolution_deadline": "2026-09-15T12:30:00"
+        "elapsed_hold_seconds": 61200,
+        "eligible_working_seconds": 3600,
+        "resolution_deadline": "2026-09-15T11:30:00"
       },
       "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed.",
       "specification_reference": "../../docs/domains/service-and-support.md#hold-and-reopen-worked-sequence"
@@ -706,7 +717,8 @@
       "operation": "Cancel submitted maintenance visit",
       "inputs": {
         "detail_status": "Fully Completed",
-        "actual_date": "2026-09-20"
+        "actual_date": "2026-09-20",
+        "remaining_submitted_visits_for_detail": []
       },
       "expected": {
         "detail_status": "Pending",
@@ -730,21 +742,24 @@
       "specification_reference": "../../docs/domains/service-and-support.md#warranty-and-installation"
     },
     {
-      "case_identifier": "supplier-import-inherits-prior-row-quantity",
+      "case_identifier": "supplier-import-independent-line-defaults",
       "classification": "compatibility_requirement",
       "operation": "Prepare successive supplier invoice rows",
       "inputs": {
         "previous_quantity": "3",
         "previous_unit": "Box",
-        "unit_rate": "5",
-        "line_total": "5",
-        "quantity": null,
-        "unit": null
+        "current_unit_rate": "5",
+        "current_line_total": "5",
+        "current_quantity": null,
+        "current_unit": null,
+        "default_unit": "Each",
+        "credit_document": false,
+        "line_has_adjustment": false
       },
       "expected": {
-        "prepared_quantity": "3",
-        "prepared_unit": "Box",
-        "prepared_amount": "15"
+        "prepared_quantity": "1",
+        "prepared_unit": "Each",
+        "prepared_amount": "5"
       },
       "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed.",
       "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#supplier-import-row-derivation-and-partial-failure"
@@ -780,22 +795,22 @@
       },
       "expected": {
         "invoice_creation_rolled_back": true,
-        "supplier_creation_inside_same_rollback": false,
+        "supplier_creation_inside_same_rollback": true,
         "continue_later_invoice_definitions": true
       },
       "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed.",
       "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#supplier-import-row-derivation-and-partial-failure"
     },
     {
-      "case_identifier": "supplier-import-preparation-failure-not-contained",
+      "case_identifier": "supplier-import-preparation-failure-contained",
       "classification": "compatibility_requirement",
-      "operation": "Reject missing supplier invoice number before creation rollback point",
+      "operation": "Reject a missing supplier invoice number inside its header savepoint",
       "inputs": {
         "invoice_number": ""
       },
       "expected": {
-        "outcome": "failure_before_local_rollback",
-        "guaranteed_continue_later_headers": false
+        "outcome": "header_rolled_back_and_logged",
+        "continue_later_headers": true
       },
       "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed.",
       "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#supplier-import-row-derivation-and-partial-failure"

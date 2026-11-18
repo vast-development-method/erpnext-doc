@@ -26,9 +26,9 @@ The opportunity stores the selected exchange rate and refreshes it when currency
 
 An acquisition source has enabled state, source kind, credential, selected external page/form, interval setting, and last synchronised timestamp. Reject two enabled sources for the same external form. Manual synchronisation dispatches background work in normal operation. The worker maps configured external form questions to local lead fields, retains external form and lead identities, and records the acquisition source.
 
-External fields with multiple values contribute their first value in the worker. Duplicate detection compares mapped business fields plus form identity; it is not solely an external lead identifier check. Duplicate and failed creation outcomes are logged separately with retained incoming payload. A failed lead does not abort all remaining leads. The last-synchronised timestamp advances after processing the fetched batch, even if individual records failed. Recovery therefore depends on retrying failure records, not simply expecting the next incremental fetch to include them. The [acquisition checkpoint example](#acquisition-checkpoint-example) specifies how successful and failed records coexist with an advanced checkpoint, so recovery does not require re-reading an unavailable implementation.
+Map the first value of each configured, nonempty external field. A provider lead ID already present skips the record. Another gate compares mapped business values and the form, and a duplicate or failed insertion records its original payload and outcome. The worker snapshots the run start as its next checkpoint after processing all returned leads, even when individual insertions failed.
 
-The fetch requests a large maximum count and does not implement subsequent-page traversal. Its incremental filter requests external creation timestamps strictly greater than the last local synchronisation time. This leaves pagination, clock skew, and equal-boundary arrivals as concrete compatibility and reliability gaps. A proposed reliable replacement uses external message identity for duplicate control, consumes every continuation page, and advances a replayable checkpoint only after every item has a durable outcome. Those improvements must be labelled additions rather than assertions about the current worker.
+An incremental read asks for creations strictly after the previous run's start minus five minutes. A single request asks for up to 100,000 records and consumes the returned data; the adapter does not follow subsequent pages. See [lead-form acquisition and replay](../people-and-services/customer-relationships-and-sales.md#lead-form-acquisition-and-replay) for timezone handling, duplicates and retries.
 
 ## Website enrichment
 
@@ -94,9 +94,7 @@ Call lookup uses external call identity. An update can replace destination numbe
 
 ## Acquisition checkpoint example
 
-A fetched acquisition batch contains records A, B, and C. A and C create local leads; B fails a required-field check. The worker retains B's failed payload and can still advance its last-synchronized time after processing the batch. The next incremental fetch requests external creations strictly after that checkpoint and may never return B again. Operational recovery must therefore retry B from its retained failure information. Rewinding the checkpoint without duplicate handling can also replay A and C.
-
-First-value mapping for multivalued external fields loses subsequent values. An implementation that retains every supplied phone number must declare that richer mapping. Similarly, consuming all continuation pages and using external lead identity as durable duplicate protection are explicit reliability additions to the acquisition worker, not behavior that can be inferred from a large page-size request.
+Suppose a run starts at 10:00 local site time and receives A, B and C. A and C insert. B fails validation and retains its incoming payload in the failure log. The next run fetches creations strictly later than 09:55 on the same clock. Previously inserted provider IDs skip immediately. A failed B can be retried from its log even after its creation drops outside the overlap. A creation exactly at 09:55 is outside that run's selection. A returned continuation page is not consumed. The checkpoint proves completion of this fetched batch; it cannot prove that the provider returned its entire dataset.
 
 ## Exchange-rate identity example
 

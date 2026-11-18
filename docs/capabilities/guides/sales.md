@@ -192,6 +192,12 @@ Choose storefront copy using the language options defined by the agreed network 
 | Stock is exhausted after the quote but before confirmation. | The seller returns the protocol-defined failure for the negotiated version and a localized explanation for staff. No order is marked fulfilled or invoiced. |
 | A callback is delayed and the operator changes interface language while waiting. | Reconciliation still matches the original transaction and callback IDs. The original response bytes and correlation record remain unchanged. |
 
+#### Reserving a confirmed quote
+
+Persist the incoming transaction ID, message ID, seller identity and the frozen quote revision. Bind order lines to catalog and fulfilment IDs, quantities, unit prices, currency, charges and the quote expiry instant. Keep the acknowledgement of message receipt separate from the seller’s decision and its callback. A callback recovery record references the same accepted order and quote.
+
+For an independent seller policy, a quote permits two units at 120 each plus delivery of 30 in the quoted currency. A valid confirmation inside the expiry instant creates one order for 270, one reservation of two units and one callback identity. If dispatching the callback times out, replay that callback identity. A retry with the same message key but an added third unit is a conflict; it cannot change the order or reserve another unit. Actual message fields, signatures and version-specific extension keys belong to the negotiated network profile.
+
 [Implementation evidence and scope](../../rebuild/marketplace-guides/apps/ondc_seller_app.md).
 
 ## Retail shift settlement

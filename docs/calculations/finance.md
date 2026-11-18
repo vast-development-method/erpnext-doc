@@ -280,14 +280,14 @@
 
 - Include only submitted orders with billed percentage below one hundred
 - Exclude closed orders
-- Omit entire order component when bypass policy requests it
+- Under delivered-only credit control, an order row contributes the positive difference between its delivered quantity share and billed value share, multiplied by the row’s share of document gross in company currency. Billing ahead of delivery gives zero on that row.
 
 ## Combine customer exposure components
 
 `exposure = ledger_exposure + order_exposure + standalone_delivery_exposure + max(additional_exposure, 0)`
 
 - Resolve customer, group then company positive limit
-- Calculate exposure components without double-counting linked delivery
+- For each standalone delivery row, multiply its company net by the undischarged stock quantity share and by the document gross-to-net ratio. Ten units delivered, four billed and two returned against company net 1,800 and gross 2,070 contribute 828. Resolve eligible credits to their original delivery detail.
 - Reject strictly greater than positive limit unless permitted bypass
 
 ## Overdue portion with partial schedules

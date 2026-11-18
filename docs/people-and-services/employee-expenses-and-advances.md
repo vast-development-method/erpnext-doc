@@ -120,6 +120,14 @@ Reimbursement and advance availability must be rebuilt from surviving posted mov
 
 Immediate payment, ordinary reimbursement, advance recovery through payroll and employee final settlement are distinct routes. A route selection must identify which financial record settles which obligation and prevent repeated settlement on retry. A failed posting cannot be reported paid solely because a screen flag changed.
 
+## Exchange differences on successive advance rows
+
+Include rows with a nonzero advance rate and base allocation when the claim has a nonzero base advance total. Round each difference between base allocation and foreign allocation multiplied by advance rate. The accumulator carries into the next row. Differences of +10 and +20 produce stored row differences 10 and 30 and a journal total of 40. Reversing their order gives 20 and 30 and a total of 50. The exchange journal uses the processing date and references the claim. Reconcile each stored row and its linked journal when cancelling or reposting.
+
+## Competing workforce transactions
+
+Payroll checks existing salary slips for the same employee and applicable period or submitted time sheets. Leave checks processed payroll dates and overlapping leave. Claim allocations must fit the paid advance less prior claims and returns. A paid advance of 500 with 300 claimed can fund one further allocation of 150, leaving 50. Two allocations of 150 cannot both remain effective. Re-read submitted allocations and settlements after a competing transaction posts. Distinguish an already processed slip for the same batch from a second payroll run. These admission checks define the balances to preserve. A cross-command serialization guarantee requires evidence at the actual transaction boundary.
+
 ## Linked specifications
 
 - **Calculation and acceptance cases** · [workforce calculations](../../schemas/mathematics/workforce-calculations.json) · [workforce acceptance cases](../../schemas/mathematics/workforce-acceptance-cases.json)

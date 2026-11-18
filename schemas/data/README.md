@@ -22,7 +22,7 @@ The record definitions preserve ordered fields, persistence roles, defaults, val
 | [Common record attributes](common-record-attributes.json) | 11 attributes; 4 storage rules. |
 | [Conditional field rules](conditional-field-rules.json) | Manifest for 2,818 rules in 11 ordered parts. |
 | [Conditional field semantics](conditional-field-semantics.json) | Resolve every condition occurrence that the structural catalogue parser could not parse, without carrying executable source expressions into this specification. |
-| [External record contracts](external-record-contracts.json) | Minimal consumed shapes for optional services whose complete record definitions are outside the integrated record inventory. The contracts preserve local callers and r… |
+| [Optional settlement record contracts](external-record-contracts.json) | Payroll loan recovery, provider allocation and dates, exit-settlement compatibility, gateway selection and local accounting outcomes. |
 | [Numeric field catalog](numeric-field-catalog.json) | Manifest for 2,053 fields in 5 ordered parts. |
 | [Record behavior bindings](record-behavior-bindings.json) | Manifest for 1,042 bindings in 3 ordered parts. |
 | [Record type index](record-type-index.json) | Manifest for 1,044 record types in 2 ordered parts. |

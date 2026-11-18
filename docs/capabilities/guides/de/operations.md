@@ -18,6 +18,8 @@ Die wiederkehrende Aufgabe mit Anlage oder Dienstleistung verknüpfen. Ausführe
 
 Bei einem zulässigen Bereich von 2 bis einschließlich 8 °C erfasst der Mitarbeiter auf Deutsch 8,1 °C. Die Aufsicht sieht auf Afrikaans genau eine Grenzwertüberschreitung für denselben Ort und dieselbe Person.
 
+Bis 10 Uhr sind drei Prüfungen fällig. 8,0 °C erfüllt den einschließlich geltenden Höchstwert von 8,0 °C, 8,1 °C überschreitet ihn, und die dritte Messung fehlt. Erledigt sind zwei von drei Prüfungen, bestanden ist eine der zwei erledigten. Eine wiederholte Warnung erzeugt keine zweite Korrekturaufgabe.
+
 [English](../operations.md#facility-inspection-measurements) · [Quellenbelege](../../../rebuild/marketplace-guides/editions/de/operations.md#green-checklist).
 
 ## Erfassen Sie einen Vorfall, weisen Sie ihn einer zuständigen Person zu und verfolgen Sie die Untersuchung bis zu den Vorbeugungsmaßnahmen

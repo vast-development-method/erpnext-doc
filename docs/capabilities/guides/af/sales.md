@@ -68,6 +68,8 @@ Die verkoper bied goedere of dienste deur die ONDC-netwerk aan. Die toepaslike k
 
 Die Engelse en Hindi-katalogus wys dieselfde artikelkode. As die netwerk ná ’n taalverandering dieselfde bevestiging vir twee eenhede herhaal, kry dit dieselfde antwoord en net een bestelling reserveer die twee eenhede.
 
+’n Kwotasie bevat twee eenhede teen 120 elk en aflewering van 30. Een geldige bevestiging skep ’n bestelling van 270 en reserveer twee eenhede. ’n Herhaalde terugroep gebruik dieselfde identiteit. ’n Derde eenheid onder dieselfde boodskapsleutel veroorsaak ’n konflik.
+
 [English](../sales.md#open-commerce-order-confirmations) · [Bronwaarnemings](../../../rebuild/marketplace-guides/editions/af/sales.md#ondc-seller-app).
 
 ## Skandeer naspeurbare items, verwerk verkope of terugsendings en rekonsilieer elke betaalmetode wanneer die skof sluit

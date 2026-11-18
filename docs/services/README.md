@@ -14,6 +14,8 @@ A purchasing manager can approve an order while a warehouse operator can see onl
 | How are reports filtered, prepared, exported and reconciled? | [Report directory](reports/README.md), [execution and exports](reporting-and-exports.md), [attachments and prepared results](files-and-reports.md) and [six reports after settlement](settlement-reports.md) |
 | How do connected providers, master identifiers and published media interact with internal records? | [External integrations](external-integrations.md) and [bulk identity changes and video statistics](identity-and-media.md) |
 
+[Optional settlement](optional-settlement.md) follows salary recovery into loan repayments and payment requests into provider capture and accounting. It identifies the extension and caller contracts needed for exit settlement.
+
 ## Structured rules
 
 [Decision tables](decision-tables.json) describe ordered alternatives for record access, edit conflicts, admission, work scheduling, approval, retries, duplicate event claims, report stalls and attachment reuse. Evaluate each table against its input contract, in sequence. The first rule whose conditions all match supplies the outcome. An empty condition list is the fallback. [Boundary examples](decision-examples.json) give exact inputs and expected results.

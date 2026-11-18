@@ -153,6 +153,12 @@ A clerk works in Hindi, an approver in English and the supplier wants German rem
 
 If approval expires after the user changes UI language, refuse submission and offer the localized reauthorization flow. If the bank status is unknown, distinguish “waiting for confirmation” from “failed” in every translation. Determine currency and rail eligibility from the bank agreement and account setup, independently of display language.
 
+#### A timeout followed by mixed bank results
+
+Freeze the beneficiary, amount, currency and instruction key for each approved line. If a bank connection closes after dispatch, record an uncertain submission against those same keys. Obtain status by the original bank or client reference using the supported reconciliation route. Where no reliable lookup exists, retain the item for reconciliation with bank records. A fresh approval is required for a changed beneficiary or amount.
+
+In a two-line batch of 600 and 400 currency units, the bank confirms the first transfer and rejects the second. Link the confirmed 600 to its supplier payment and prepare its advice once. The rejected 400 retains its reason and remains open for correction. Replaying the bank response does not create a second advice. A bank statement debit of 600 reconciles the confirmed line. The batch’s approved total of 1,000 does not demonstrate a bank debit of 1,000.
+
 [Implementation evidence and scope](../../rebuild/marketplace-guides/apps/sanpra_easypay.md).
 
 ## Online and terminal payment collection

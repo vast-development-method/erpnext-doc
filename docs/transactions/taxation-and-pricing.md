@@ -101,6 +101,14 @@ A fixed 10.00 charge distributed over three equal net lines at two places become
 
 For six units with printed total 138.00 including a per-unit charge 2.00 and a ten percent charge on the net plus that per-unit charge, the intercept is 2.20 per unit and slope is 0.10. Tax-exclusive net is (138.00 − 6 × 2.20) ÷ 1.10 = 113.454545…, rounded to 113.45. The per-unit charge is 12.00 and the dependent percentage contribution before final rounding is 12.545454… . The rounded dependent charge is 12.55 and the final total is 138.00. Calculating ten percent only on the net would omit the tax-on-per-unit component.
 
+## Regional base and settlement identity
+
+Resolve the company’s country, the party’s tax identity and the rule’s effective date before selecting a local treatment. Keep the pre-tax base, amount withheld, invoice liability, later settlement and authority acknowledgement as distinct facts. A retained withholding of 10 against a taxable amount of 100 records a different event from a receiver rejecting the issued invoice. A receiver rejection alone cannot undo the already submitted ledger voucher. The relevant [regional workflow](../governance/regional-and-specialised-capabilities.md), tax category and installed receiver contract determine the allowed correction or reissue.
+
+## Certificate capacity on recalculation
+
+For the company and applicable category, the certificate validity interval includes both endpoints. Match the shared tax identifier when supplied, otherwise match the supplier. Compute use from submitted withholding entries with status Settled or Over Withheld, grouped by certificate, for that company, party type, category and tax identity. The total is the taxable base consumed, not tax deducted. A certificate limit of 1,000 with 750 already consumed has 250 of reduced-rate capacity. If 250 capacity is applied at 2% and another 150 is subject to a normal 5%, the two contributions are 5 and 7.50. A cancelled entry drops out of the next utilization query. A certificate with exactly zero remaining capacity is skipped. Reconcile returns to their signed withholding entries and re-read utilization before reusing capacity.
+
 ## Linked specifications
 
 - **Record definitions** · [Pricing rule](../../schemas/data/record-types/pricing_rule.json) · [Sales tax row](../../schemas/data/record-types/sales_taxes_and_charges.json) · [Purchase tax row](../../schemas/data/record-types/purchase_taxes_and_charges.json) · [Item tax template](../../schemas/data/record-types/item_tax_template.json) · [Withholding category](../../schemas/data/record-types/tax_withholding_category.json) · [Withholding entry](../../schemas/data/record-types/tax_withholding_entry.json) · [Lower deduction certificate](../../schemas/data/record-types/lower_deduction_certificate.json)

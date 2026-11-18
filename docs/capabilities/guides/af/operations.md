@@ -18,6 +18,8 @@ Koppel die herhalende taak aan die bate of diens. Teken die uitvoerder, toesigho
 
 Met ’n toegelate omvang van 2 tot en met 8 °C voer ’n Duitssprekende werknemer 8,1 °C in. Die Afrikaanse toesighouer sien een afwyking vir dieselfde plek en uitvoerder.
 
+Drie inspeksies is teen 10:00 verskuldig. Een lesing van 8,0 °C voldoen aan die inklusiewe maksimum van 8,0 °C. ’n Tweede lesing van 8,1 °C is te hoog, en die derde ontbreek. Voltooiing is 2 uit 3; nakoming onder voltooide inspeksies is 1 uit 2. ’n Herhaalde waarskuwing skep geen tweede regstellende taak nie.
+
 [English](../operations.md#facility-inspection-measurements) · [Bronwaarnemings](../../../rebuild/marketplace-guides/editions/af/operations.md#green-checklist).
 
 ## Teken ’n voorval aan, wys ’n verantwoordelike persoon aan en volg die ondersoek tot by die voorkomende maatreëls

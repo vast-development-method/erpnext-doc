@@ -28,6 +28,8 @@ Die berechtigte unterzeichnende Person mit der Rechnung verbinden. Die signierte
 
 Werden zwei E-Mails in verschiedenen Sprachen mit derselben signierten deutschen Rechnung versandt, müssen die Prüfsummen beider Anhänge mit der archivierten signierten PDF-Datei übereinstimmen. Die Sprache der E-Mail ändert weder Datei noch Unterzeichner und löst keinen weiteren Signaturvorgang aus.
 
+Nach einer Zeitüberschreitung kann die Signatur bereits erstellt sein. Zuerst die ursprüngliche Anfrage abgleichen. Ist die signierte Fassung unverändert, die Vertrauenskette aber ungeklärt, bleiben Datei und Prüfergebnis erhalten. Verlangt die Freigaberegel eine vertrauenswürdige Signatur, wartet der Versand auf die Bestätigung. Ein erneuter E-Mail-Versand verwendet dieselbe freigegebene Datei.
+
 [English](../documents.md#signed-document-dispatch) · [Quellenbelege](../../../rebuild/marketplace-guides/editions/de/documents.md#digital-signature).
 
 ## Weisen Sie jedem Unterzeichner die vorgesehenen Felder zu und bewahren Sie Sprache und Inhalt der unterzeichneten Vereinbarung

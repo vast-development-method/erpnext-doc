@@ -1,20 +1,51 @@
 {
   "catalog_kind": "external_record_boundary_contracts",
-  "scope": "Minimal consumed shapes for optional services whose complete record definitions are outside the integrated record inventory. The contracts preserve local callers and references without claiming an implementation of the optional service.",
+  "scope": "Field and lifecycle contracts for the workforce, lending, accounting and payments interfaces. Caller-supplied values, provider-resolved values and unsupported pairings are distinguished at each boundary.",
   "payment_gateway": {
     "identifier": "external_record_payment_gateway",
     "required_fields": {
-      "identity": "stable configured payment-provider identity"
+      "identity": "stable configured payment-provider identity",
+      "gateway_settings": "Settings record type used when a named controller is configured",
+      "gateway_controller": "Optional settings record identity. A null reference selects singleton settings named for the gateway."
     },
     "capabilities": [
       "Resolve the provider-specific payment initiation behavior.",
       "Validate payment currency and amount according to provider settings.",
       "Create a payment session or payment resource address for a payment request.",
-      "Return an explicit failure when the provider cannot create a session."
+      "Report provider-specific initiation errors. Some optional checkout guards suppress URL creation, and a failed direct charge can redirect without updating the integration record."
     ],
     "local_record_contract": "record-types/payment_gateway_account.json",
     "local_accounting_rule": "A payment gateway account links the provider identity to a company ledger account. Its currency is taken from that ledger account. Selecting a default clears the default flag on other gateway accounts for the same company; when no other default exists the current account becomes default.",
-    "availability_rule": "Optional provider-package absence must be reported by the payment boundary when that provider capability is invoked."
+    "availability_rule": "Resolving a missing provider package or settings record may fail. In the nonphone submission guard a controller check exception suppresses URL creation. A missing URL is not evidence of a financial payment.",
+    "provider_declarations": "../../docs/rebuild/extensions/catalog/payments-records.json",
+    "exchange": {
+      "gateway_selection": [
+        "explicit gateway account",
+        "default gateway account for company when no selection supplied"
+      ],
+      "request_reference": [
+        "payment request identity",
+        "underlying financial document identity",
+        "company",
+        "party",
+        "gateway",
+        "payment account"
+      ],
+      "currency_inputs": [
+        "rounded grand total in request currency for checkout",
+        "outstanding in party-account currency for accounting",
+        "reference conversion rate when party-account currency equals company currency and differs from request currency"
+      ],
+      "callback_accepts": [
+        "Authorized",
+        "Completed"
+      ],
+      "phone_completion": "Paid and outstanding zero; the authorization callback does not create a payment voucher.",
+      "nonphone_completion": "Create and submit payment voucher with request-linked references; generate the requested sales invoice where enabled.",
+      "cancel_guard": "For a Paid request check for a payment reference whose reference name matches and whose document status is below cancelled; then mark the request Cancelled if permitted.",
+      "failure_reconciliation": "Compare provider capture, integration request status and local payment voucher separately before deciding whether local recovery or a provider refund is needed."
+    },
+    "behavior_contract": "../../docs/services/optional-settlement.md#payment-request-gateway-and-financial-outcome"
   },
   "loan": {
     "identifier": "external_record_loan",
@@ -24,7 +55,7 @@
       "applicant": "employee record identity",
       "record_state": "posted record state",
       "repay_from_salary": "Boolean eligibility flag",
-      "status": "loan business status; closed loans are excluded",
+      "status": "Loan business status; the payroll query excludes Closed rather than enumerating a fixed set of eligible open-state names.",
       "loan_product": "external loan-product identity",
       "is_term_loan": "Boolean term-loan flag",
       "loan_account": "loan principal ledger account identity",
@@ -39,16 +70,28 @@
         "payable amount",
         "interest amount",
         "payable principal amount"
-      ]
+      ],
+      "scope": "Submitted unpaid demands through salary end, positive outstanding at currency precision. The provider checks read permission and determines the allocations. Total payable can include penalties and other charges; the caller sums total, interest and principal independently.",
+      "validation": "Provider recalculates due amounts for the value date with locking during ordinary repayment validation."
     },
-    "behavior_contract": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary"
+    "behavior_contract": "../../docs/services/optional-settlement.md#salary-deduction-and-loan-repayment",
+    "provider_declarations": "../../docs/rebuild/extensions/catalog/lending-records.json"
   },
   "loan_product": {
     "identifier": "external_record_loan_product",
     "required_fields": {
       "identity": "stable product identity carried through payroll deduction and repayment"
     },
-    "scope": "Payroll preserves the product identity. Product pricing, interest calculation policy, and full lending lifecycle are owned by the optional loan service."
+    "scope": "Payroll passes the product identity from the linked loan. Lending owns product rates, account choices, limits and allocation sequences.",
+    "provider_declarations": "../../docs/rebuild/extensions/catalog/lending-records.json",
+    "provider_fields": {
+      "loan_account": "Principal ledger account retrieved on the linked loan",
+      "interest_receivable_account": "Credits ordinary collected interest when loan accounting is enabled",
+      "payment_account": "Ordinary nonpayroll payment-account fallback after explicit account, company mode of payment and bank account",
+      "validate_normal_repayment": "When enabled, normal repayment amount cannot exceed calculated payable at currency precision. The salary caller independently caps its row."
+    },
+    "behavior_contract": "../../docs/people-and-services/lending.md",
+    "collection_offset_sequence": "Select the product sequence for the applicable classification, then the corresponding company sequence. Allocation requires an effective sequence."
   },
   "loan_repayment": {
     "identifier": "external_record_loan_repayment",
@@ -56,18 +99,34 @@
       "loan": "loan identity",
       "employee": "employee identity",
       "company": "company identity",
-      "posting_date": "repayment posting date",
+      "posting_date": "Caller supplies salary-slip posting date. Ordinary non-import provider validation replaces posting_date with its processing timestamp; ordinary GL rows use its date.",
       "loan_product": "loan product identity",
-      "repayment_type": "normal repayment",
-      "interest_amount": "interest deduction amount",
-      "principal_amount": "principal deduction amount",
+      "repayment_type": "The payroll caller passes Normal Repayment to the constructor payment_type argument; the declared provider repayment_type field defaults to Normal Repayment.",
+      "interest_amount": "Salary-row interest passed as interest_payable. Provider validation refreshes interest and allocates from amount paid under the configured collection sequence.",
+      "principal_amount": "Salary-row principal passed as payable_principal_amount. Provider validation refreshes payable principal.",
       "amount_paid": "total deduction amount",
-      "payment_account": "payroll payable ledger account",
+      "payment_account": "Salary route uses the payroll payable supplied by the batch, or the company default only when there is no batch.",
       "employee_wise_accounting": "Boolean accounting option",
-      "value_date": "salary ending date"
+      "value_date": "Salary end date explicitly supplied. The constructor uses the current day when a caller omits a value date."
     },
-    "create_rule": "Save and post the repayment, then retain the returned repayment identity on the salary loan row.",
-    "cancel_rule": "When reversing the salary loan consequence, invoke cancellation of the related repayment according to the payroll cancellation order.",
-    "behavior_contract": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary"
+    "create_rule": "The provider constructor inserts the repayment. Payroll saves and submits it and stores the repayment ID on the originating salary row only after submission.",
+    "cancel_rule": "Salary cancellation targets the exact linked repayment ID. The provider reverses demand and paid balances plus applicable accounting consequences.",
+    "behavior_contract": "../../docs/services/optional-settlement.md#salary-deduction-and-loan-repayment",
+    "replay_rule": "A nonzero row is submitted through the constructor without a salary-row idempotency argument. A lost completion or failed link write requires reconciliation before retry."
+  },
+  "specification": "../../docs/services/optional-settlement.md",
+  "exit_settlement": {
+    "identifier": "exit_settlement_lending_pairing",
+    "caller_inputs": [
+      "loan receivable and amount",
+      "statement transaction date",
+      "employee and company",
+      "submitted repayment schedule"
+    ],
+    "provider_compatibility": "The current schedule exposes demand_generated, while the exit caller expects is_accrued. The caller passes a single dictionary to an accrual constructor that requires multiple separate values. Successful accrual through this pairing is unsupported by the inspected declarations.",
+    "amount_binding": "The exit loop collects loan identifiers and reuses the final original receivable amount for each; independent processing must bind amounts to each origin row.",
+    "dates": "The exit caller omits value_date when building repayment. Matching by settlement transaction date may miss the processing posting date.",
+    "cancellation": "Caller selects submitted repayment and accruals by loan and posting date, without a durable origin ID. Independent reversal requires explicit generated references.",
+    "behavior_contract": "../../docs/services/optional-settlement.md#exit-settlement-requires-a-different-adapter"
   }
 }

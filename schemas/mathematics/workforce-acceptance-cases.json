@@ -2386,15 +2386,35 @@
         "service_payable": 1100,
         "stored_principal": 1000,
         "stored_interest": 100,
-        "edited_total_payment": 550
+        "edited_total_payment": 550,
+        "due_demands": [
+          {
+            "type": "EMI",
+            "subtype": "Interest",
+            "date": "2025-06-10",
+            "outstanding": 100
+          },
+          {
+            "type": "EMI",
+            "subtype": "Principal",
+            "date": "2025-06-11",
+            "outstanding": 1000
+          }
+        ],
+        "collection_order": [
+          "EMI (Principal + Interest)"
+        ],
+        "loan": "Standard performing term loan",
+        "value_date": "2025-06-11"
       },
       "action": "Validate salary loan row and prepare repayment.",
-      "expected": "The inspected payroll cap allows a total below 1,100 and sums stored principal/interest independently. Execute the external repayment service to establish how principal and interest are recalculated or rejected; do not assume proportional allocation.",
+      "expected": "The salary row passes the 1,100 cap with a total of 550. It retains its original 1,000 principal and 100 interest in the slip component totals. On ordinary repayment, the provider requotes the outstanding demands and allocates 100 to the interest demand, then the remaining 450 to principal because the combined component consumes the older instalment demand first.",
       "financial_effect": "Deduct only accepted total loan recovery from employee cash wages and preserve the external repayment link.",
       "specification_references": [
-        "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary"
+        "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary",
+        "../../docs/services/optional-settlement.md#salary-deduction-and-loan-repayment"
       ],
-      "verification_status": "compatibility_decision"
+      "verification_status": "inspected_transaction"
     }
   ],
   "case_count": 113,
@@ -2426,18 +2446,20 @@
         "Delinquency policy",
         "Loan origination eligibility"
       ],
-      "specification": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary"
+      "specification": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary",
+      "provider_contract": "../../docs/services/optional-settlement.md"
     },
     {
       "record_name": "loan_product",
-      "scope": "Opaque product identity passed through workforce operations",
+      "scope": "Product identity consumed by payroll. The linked lending catalog owns product policy and account configuration.",
       "fields": {
         "identity": "Stable loan-product identity referenced by loan and repayment"
       },
       "excluded_inferences": [
         "No product fields beyond the identity are required or established by this workforce integration"
       ],
-      "specification": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary"
+      "specification": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary",
+      "provider_contract": "../../docs/services/optional-settlement.md"
     },
     {
       "record_name": "loan_repayment",
@@ -2447,23 +2469,22 @@
         "against_loan": "Referenced loan identity",
         "employee": "Salary employee identity",
         "company": "Salary company identity",
-        "posting_date": "Salary posting date",
+        "posting_date": "Caller supplies salary posting date; the provider resets ordinary validation posting time and uses its date for ordinary ledger posting.",
         "value_date": "Salary interval end date",
         "loan_product": "Referenced product identity",
         "repayment_kind": "Normal repayment",
         "interest_amount": "Company-currency interest supplied by due-amount service or stored salary loan row",
         "principal_amount": "Company-currency principal supplied by due-amount service or stored salary loan row",
         "total_payment": "Company-currency amount deducted from cash salary",
-        "payroll_payable_account": "Batch account, otherwise company default",
+        "payroll_payable_account": "Use the named batch payable. Only when no batch is named use the company default.",
         "employee_based_accounting": "Whether employee-specific accounting is enabled",
         "document_state": "Returned draft is saved and submitted; cancellation follows external reversal contract"
       },
       "excluded_inferences": [
-        "Internal payment allocation order",
-        "Principal-interest recalculation after edited total",
-        "Complete lending ledger posting implementation"
+        "Payroll alone cannot establish the lending policy. The linked provider contract specifies allocation and ordinary journal behavior."
       ],
-      "specification": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary"
+      "specification": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary",
+      "provider_contract": "../../docs/services/optional-settlement.md"
     }
   ],
   "verification_policy": {

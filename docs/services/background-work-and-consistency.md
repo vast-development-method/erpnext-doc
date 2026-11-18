@@ -20,7 +20,7 @@ The internal retry path handles a declared retry request and recognized deadlock
 
 **Required retry policy.** Capture the initiating tenant and actor on the work record. On every attempt reestablish that identity, check current permissions, and stop if the actor is no longer authorized. Retries of the same business event use the same duplicate-detection key.
 
-**Qualification.** The inspected retry path did not establish preservation of the original user on every attempt. Record the effective tenant and actor for each attempt when verifying this requirement.
+**Retry identity.** On the first queued attempt the worker selects the captured tenant and initiating user. On an internal retry the worker reopens the tenant but does not forward the initiating user. The normal fresh connection uses an administrative session. Treat the work's original actor, its effective execution identity, and the tenant as separate audit facts. Business authorization for replay belongs to the original action and record.
 
 The [retry schedule](#retry-schedule-and-duplicate-boundaries) defines six maximum internal executions and separates retryable concurrency failures from ordinary business rejection. Acting identity must be checked on every attempt.
 
@@ -126,3 +126,15 @@ For outgoing event delivery, retry delays by retry number are five minutes, thir
 Inject a failure before enqueue, after business commit but before enqueue, during worker execution, immediately after worker commit, after a remote receiver commits but before its response, and during report-file publication. Record persisted business state, queue state, lock state, failure log, and next permitted recovery action for each case. The commit-callback mechanism alone does not guarantee recovery in the commit-to-enqueue crash gap. A durable outbox is an explicitly proposed enterprise reliability addition for integrations that require eventual delivery; its records must be committed with the business transaction and consumed idempotently.
 
 The exact per-payload import boundaries are defined in [fresh initialisation and data exchange](fresh-initialisation-and-data-exchange.md#import-modes-and-durable-outcomes). Savepoint semantics and financial closure are defined in [document lifecycle and transactions](document-lifecycle-and-transactions.md#failure-boundary-table).
+
+## Batch outcomes and queued effects
+
+| Event | Durable state and next decision |
+|---|---|
+| Row B fails after row A succeeds inside one transaction | Rolling back to B's savepoint restores database rows to the savepoint and clears cached values. The enclosing transaction continues. A later enclosing rollback can still undo A. |
+| B registered after-commit work, wrote a file or contacted a provider before failing | A savepoint does not reset the transaction callback registries or remove an external effect. If the outer transaction commits, the queued callback can run. Check B's surviving business record and the associated attachment, dispatch or provider receipt before treating B as complete. |
+| Whole transaction rolls back | The transaction discards pending commit callbacks and runs rollback callbacks around the database rollback. An independently accepted provider request still requires its own reconciliation. |
+| Posting commits but its enqueue fails | The posting is already durable. Compare its business identity with pending and finished work before re-enqueueing. Reposting the voucher can duplicate effects. |
+| Worker receives a retryable failure | Roll back the failed attempt, clear that attempt's after-job callbacks and retry at delays of 1, 2, 3, 4 and 5 seconds. On the sixth failed attempt surface the error. Ordinary nonretryable exceptions follow rollback, diagnostic recording and failure. A completed worker commit precedes job-level completion callbacks. |
+
+A payment batch can therefore show one posted invoice, one rejected allocation and an outstanding notification together. Reconcile posting state, row outcome and notification delivery separately.

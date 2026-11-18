@@ -86,6 +86,10 @@ Return the payment identity, lifecycle, source and target amounts and currencies
 
 Failure after a stale allocation check must not leave half an application visible. Failure creating a linked exchange journal must not present a foreign invoice as fully reconciled without its company residual explained. A retry must distinguish a completed payment from a pending external bank operation: posting a payment document is not evidence that a bank transfer was sent. Exactly-once external payment initiation needs the external adapter's durable operation identity and response contract; it is an additional operational acceptance requirement, not a property established by local ledger arithmetic.
 
+## Allocation against a changing balance
+
+Payment validation reloads outstanding references for the party and checks the selected invoice and payment term against those amounts. Reconciliation reloads the outstanding payments and invoices and checks that both sides still exist and the proposed allocation fits. A payment of 60 against an outstanding 100 leaves 40. A later request to allocate 60 must refresh the claim and be rejected for excess. These checks constrain a fresh read. They do not establish that two uncommitted readers are serialized across every entry point. Compare the submitted allocations and the payment ledger before deciding whether a retry still has work to do. Cancelling an allocation must release only its linked reference.
+
 ## Linked specifications
 
 - **Record definitions** · [Payment](../../schemas/data/record-types/payment_entry.json) · [Payment allocation](../../schemas/data/record-types/payment_entry_reference.json) · [Bank statement event](../../schemas/data/record-types/bank_transaction.json) · [Statement allocation](../../schemas/data/record-types/bank_transaction_payments.json) · [Bank account](../../schemas/data/record-types/bank_account.json) · [Reconciliation](../../schemas/data/record-types/payment_reconciliation.json) · [Reconciliation allocation](../../schemas/data/record-types/payment_reconciliation_allocation.json) · [Exchange revaluation](../../schemas/data/record-types/exchange_rate_revaluation.json)

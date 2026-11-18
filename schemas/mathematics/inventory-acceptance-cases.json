@@ -942,8 +942,8 @@
     },
     {
       "case_identifier": "maintenance_due_date_observed_edge",
-      "name": "End date clears a computed asset due date",
-      "case_kind": "observed_compatibility_edge",
+      "name": "A maintenance recurrence may land on its end date",
+      "case_kind": "calendar_boundary",
       "initial_state": {
         "periodicity": "Monthly",
         "start_date": "2026-01-01",
@@ -951,15 +951,32 @@
       },
       "operations": [
         {
-          "action": "calculate_next_due_date_using_observed_end_condition"
+          "action": "calculate_initial_due_date",
+          "expected_next_due_date": "2026-02-01"
+        },
+        {
+          "action": "set_end_date",
+          "value": "2026-03-01"
+        },
+        {
+          "action": "complete_task",
+          "last_completion_date": "2026-02-01",
+          "expected_next_due_date": "2026-03-01"
+        },
+        {
+          "action": "complete_task",
+          "last_completion_date": "2026-03-01",
+          "expected_next_due_date": null
         }
       ],
       "expected_final_state": {
         "next_due_date": null,
-        "unbounded_calculated_due_date": "2026-02-01"
+        "end_date": "2026-03-01"
       },
       "required_assertions": [
-        "Preserve this observed compatibility case separately from a proposed bounded-recurrence correction."
+        "The initial January 1 monthly recurrence remains due February 1 even with an end date.",
+        "A candidate landing exactly on March 1 is permitted for the February completion.",
+        "Completing on March 1 clears future recurrence. A candidate beyond the end also clears it."
       ],
       "definition_reference": "../../docs/domains/quality-and-maintenance.md",
       "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"

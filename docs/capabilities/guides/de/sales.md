@@ -68,6 +68,8 @@ Der Händler bietet Waren oder Dienstleistungen im ONDC-Netzwerk an. Das verwend
 
 Im englischen und im Hindi-Katalog steht dieselbe Artikelkennung. Wird die Bestätigung für zwei Einheiten nach einem Sprachwechsel erneut zugestellt, bleibt das Ergebnis identisch und genau ein Auftrag reserviert die zwei Einheiten.
 
+Ein Angebot enthält zwei Einheiten zu je 120 und Versandkosten von 30. Eine gültige Bestätigung erzeugt einen Auftrag über 270 und reserviert zwei Einheiten. Der wiederholte Rückruf verwendet dieselbe Kennung. Eine dritte Einheit unter demselben Nachrichtenschlüssel führt zu einem Konflikt.
+
 [English](../sales.md#open-commerce-order-confirmations) · [Quellenbelege](../../../rebuild/marketplace-guides/editions/de/sales.md#ondc-seller-app).
 
 ## Scannen Sie Artikel mit Serien- oder Chargennummer, erfassen Sie Verkäufe und Retouren und gleichen Sie jede Zahlungsart beim Schichtabschluss ab

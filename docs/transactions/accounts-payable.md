@@ -98,6 +98,10 @@ The machine-readable case `receipt_bill_partial_payment_and_return` fixes one co
 
 The case `standard_cost_receipt_billed_once` specifies the proposed standard-cost extension. The core stock valuation methods are moving average, FIFO and LIFO. Do not apply its 20.00 purchase variance to the moving-average sequence above. Valuation policy is a mandatory input to any supposedly complete expected posting.
 
+## Supplier and invoice release controls
+
+A supplier hold covers the selected transaction class or All. Saving a held supplier without a class selects All. A blank release date keeps the hold open. The supplier hold predicate uses today strictly before release, so a 12 May release allows a matching transaction on 12 May. For a specific invoice, blocking, unblocking and changing the release date each require write permission. Blocking also checks invoice eligibility, positive outstanding and a release date in the future when supplied. An unblocked invoice cannot have its release date moved by the hold operation. Unblocking clears the hold flag and release date. Releasing a hold authorizes subsequent processing without creating a payment or changing the outstanding balance.
+
 ## Linked specifications
 
 - **Record definitions** · [Supplier](../../schemas/data/record-types/supplier.json) · [Supplier invoice](../../schemas/data/record-types/purchase_invoice.json) · [Supplier invoice line](../../schemas/data/record-types/purchase_invoice_item.json) · [Receipt](../../schemas/data/record-types/purchase_receipt.json) · [Receipt line](../../schemas/data/record-types/purchase_receipt_item.json) · [Payment](../../schemas/data/record-types/payment_entry.json) · [Payment allocation](../../schemas/data/record-types/payment_entry_reference.json) · [Payment schedule](../../schemas/data/record-types/payment_schedule.json) · [Withholding entry](../../schemas/data/record-types/tax_withholding_entry.json)

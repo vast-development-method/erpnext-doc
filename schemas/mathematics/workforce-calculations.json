@@ -24,7 +24,9 @@
           "inputs": {
             "calendar_day_count": 30,
             "excluded_full_holiday_count": 4,
-            "excluded_half_holiday_count": 0
+            "excluded_half_holiday_count": 0,
+            "period_start": "2025-04-01",
+            "period_end": "2025-04-30"
           },
           "expected": 26
         }
@@ -77,12 +79,12 @@
       "limitations": [],
       "business_rule": "Determine the clipped employment interval after holidays. Enter the deduction branch only when that value exceeds unpaid-leave equivalents; otherwise start at zero. In the deduction branch subtract unpaid leave, absence and applicable unmarked days. Add only a positive verified correction last.",
       "input_meanings": {
-        "employment_interval_days": "Employment interval days",
-        "excluded_employment_holidays": "Excluded employment holidays",
-        "unpaid_leave_equivalents": "Unpaid leave equivalents",
-        "attendance_absence_equivalents": "Attendance absence equivalents",
-        "applicable_unmarked_days": "Applicable unmarked days",
-        "verified_corrected_days": "Verified corrected days"
+        "employment_interval_days": "Calendar days of this pay period falling within the employee’s employment dates, inclusive.",
+        "excluded_employment_holidays": "Holiday day-equivalents excluded within the clipped employment interval under the payroll holiday policy.",
+        "unpaid_leave_equivalents": "Unpaid day-equivalents determined by the selected attendance or approved-leave basis.",
+        "attendance_absence_equivalents": "Absent day-equivalents in the employee’s relevant attendance records.",
+        "applicable_unmarked_days": "Unmarked working days counted as absent when the payroll setting requires it.",
+        "verified_corrected_days": "Payment days added back by an approved attendance correction."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -123,8 +125,8 @@
       ],
       "business_rule": "Use approved leave requests. A full day starts from one unpaid equivalent; a half day starts from one minus the effective half-day wage fraction. Multiply by one minus the retained salary fraction, with a zero retained fraction producing factor one.",
       "input_meanings": {
-        "leave_day_fraction": "Leave day fraction",
-        "retained_daily_salary_fraction": "Retained daily salary fraction"
+        "leave_day_fraction": "Affected portion of the working day before applying the leave type’s paid fraction.",
+        "retained_daily_salary_fraction": "Share of normal daily salary retained on this partially paid leave type, from 0 to 1."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -203,10 +205,10 @@
       "limitations": [],
       "business_rule": "Prorate the structure default and ordinary supplement separately and round them at their respective precisions before adding. Overwriting supplements, already-corrected arrears, accruals and hourly rows have separate branches.",
       "input_meanings": {
-        "default_amount": "Default amount",
-        "additional_amount": "Additional amount",
-        "payment_days": "Payment days",
-        "total_working_days": "Total working days"
+        "default_amount": "Ordinary component amount before payment-day proration, in slip currency.",
+        "additional_amount": "Separately calculated amount of additional salary subject to this proration, in slip currency.",
+        "payment_days": "Payable day-equivalents for this employee and payroll interval.",
+        "total_working_days": "Working day-equivalents across the salary period before clipping for employment or absence."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -242,8 +244,8 @@
       "limitations": [],
       "business_rule": "Sum working hours from eligible time records whose start date is inside the pay interval. Multiply by the configured rate. A time record already linked to a salary slip must not be paid again.",
       "input_meanings": {
-        "hour_rate": "Hour rate",
-        "eligible_time_record_hours": "Eligible time record hours"
+        "hour_rate": "Wage per eligible hour in the agreed salary currency.",
+        "eligible_time_record_hours": "Hours accepted from linked time records for this payroll calculation."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -278,9 +280,9 @@
       "limitations": [],
       "business_rule": "Subtract included employee deductions and optional loan repayment from included gross earnings. Employer contributions do not enter this expression. Negative net pay is rejected on slip submission.",
       "input_meanings": {
-        "gross_pay": "Gross pay",
-        "employee_deductions": "Employee deductions",
-        "loan_repayment": "Loan repayment"
+        "gross_pay": "Sum of earning components included in the slip’s gross pay, in slip currency.",
+        "employee_deductions": "Effective amounts withheld through employee deduction components.",
+        "loan_repayment": "Employee loan recovery amount applied to this pay slip."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -314,9 +316,9 @@
       "limitations": [],
       "business_rule": "The exchange rate is company-currency units per one transaction-currency unit. Multiply, then round using the destination field precision. Independently converted parent and child amounts can differ at rounding boundaries.",
       "input_meanings": {
-        "transaction_amount": "Transaction amount",
-        "exchange_rate": "Exchange rate",
-        "destination_precision": "Destination precision"
+        "transaction_amount": "Monetary amount expressed in the transaction currency.",
+        "exchange_rate": "Company-currency units for one unit of transaction currency.",
+        "destination_precision": "Number of decimal places stored in the destination amount field."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -344,14 +346,26 @@
         {
           "inputs": {
             "start_date": "2024-07-16",
-            "end_date": "2025-07-15"
+            "end_date": "2025-07-15",
+            "start_year": 2024,
+            "start_month": 7,
+            "start_day": 16,
+            "end_year": 2025,
+            "end_month": 7,
+            "end_day": 15
           },
           "expected": 12
         },
         {
           "inputs": {
             "start_date": "2024-07-16",
-            "end_date": "2025-07-16"
+            "end_date": "2025-07-16",
+            "start_year": 2024,
+            "start_month": 7,
+            "start_day": 16,
+            "end_year": 2025,
+            "end_month": 7,
+            "end_day": 16
           },
           "expected": 13
         }
@@ -359,12 +373,12 @@
       "limitations": [],
       "business_rule": "Count month boundaries by year and month difference and add one when the ending day number is at least the starting day number. This is the monthly period-count convention, not rounded elapsed days divided by thirty.",
       "input_meanings": {
-        "start_year": "Start year",
-        "start_month": "Start month",
-        "start_day": "Start day",
-        "end_year": "End year",
-        "end_month": "End month",
-        "end_day": "End day"
+        "start_year": "Calendar component of the assessment start date named by this operand.",
+        "start_month": "Calendar component of the assessment start date named by this operand.",
+        "start_day": "Calendar component of the assessment start date named by this operand.",
+        "end_year": "Calendar component of the assessment end date named by this operand.",
+        "end_month": "Calendar component of the assessment end date named by this operand.",
+        "end_day": "Calendar component of the assessment end date named by this operand."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -389,7 +403,10 @@
         {
           "inputs": {
             "remaining_assessment_days": 42,
-            "current_slip_days": 14
+            "current_slip_days": 14,
+            "slip_start": "2025-01-01",
+            "slip_end": "2025-01-14",
+            "assessment_end_clipped_to_relief": "2025-02-11"
           },
           "expected": 3
         }
@@ -397,9 +414,9 @@
       "limitations": [],
       "business_rule": "For a remaining period count, divide inclusive days from the current slip start to the assessment end clipped by relieving date by inclusive days in the current slip. For the total assessment count use the whole assessment interval instead.",
       "input_meanings": {
-        "assessment_end_clipped_to_relief": "Assessment end clipped to relief",
-        "slip_start": "Slip start",
-        "slip_end": "Slip end"
+        "assessment_end_clipped_to_relief": "Last applicable assessment date after allowing for the employee’s relieving date.",
+        "slip_start": "First or last calendar date of this salary slip’s pay interval.",
+        "slip_end": "First or last calendar date of this salary slip’s pay interval."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -442,13 +459,13 @@
       "limitations": [],
       "business_rule": "Combine earlier submitted taxable earnings including eligible opening balances, actual current ordinary taxable earnings, full-period future ordinary earnings, additional earnings and declared other income. Subtract eligible exemptions. Keep immediate-tax bonuses separately identifiable.",
       "input_meanings": {
-        "previous_taxable_earnings": "Previous taxable earnings",
-        "current_structured_taxable_earnings": "Current structured taxable earnings",
-        "future_structured_taxable_earnings": "Future structured taxable earnings",
-        "current_additional_taxable_earnings": "Current additional taxable earnings",
-        "other_income": "Other income",
-        "taxable_unclaimed_benefits": "Taxable unclaimed benefits",
-        "allowed_exemptions": "Allowed exemptions"
+        "previous_taxable_earnings": "Taxable earnings already recognized in prior slips of this tax period.",
+        "current_structured_taxable_earnings": "Current taxable salary-structure components used by the projection.",
+        "future_structured_taxable_earnings": "Projected taxable ordinary earnings for periods after this slip.",
+        "current_additional_taxable_earnings": "Taxable additional salary allocated to the current slip.",
+        "other_income": "Other taxable income declared for this employee’s assessment.",
+        "taxable_unclaimed_benefits": "Benefits treated as taxable for the assessment because they remain unclaimed.",
+        "allowed_exemptions": "Accepted deductions from taxable income in the assessment currency."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -514,10 +531,10 @@
       ],
       "business_rule": "Reject participation when the condition fails or income is below the lower bound. Otherwise use income up to the upper bound, subtract the lower bound, add one currency unit and multiply by the percentage. An absent upper bound means unbounded.",
       "input_meanings": {
-        "annual_income": "Annual income",
-        "lower_amount": "Lower amount",
-        "upper_amount": "Upper amount",
-        "percentage": "Percentage"
+        "annual_income": "Taxable annual income considered for the employee’s tax calculation.",
+        "lower_amount": "Lower or upper monetary boundary of the selected income-tax slab.",
+        "upper_amount": "Lower or upper monetary boundary of the selected income-tax slab.",
+        "percentage": "Rate in percentage points applied to the eligible monetary base."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -546,6 +563,14 @@
             "ordered_charge_percentages": [
               10,
               4
+            ],
+            "minimum_income_bounds": [
+              null,
+              null
+            ],
+            "maximum_income_bounds": [
+              null,
+              null
             ]
           },
           "expected": {
@@ -560,10 +585,10 @@
       "limitations": [],
       "business_rule": "Process configured tax charges in row order. Each eligible percentage applies to tax including earlier charges; income limits are inclusive. Return both the total tax and the sum of added charges.",
       "input_meanings": {
-        "starting_tax": "Starting tax",
-        "ordered_charge_percentages": "Ordered charge percentages",
-        "minimum_income_bounds": "Minimum income bounds",
-        "maximum_income_bounds": "Maximum income bounds"
+        "starting_tax": "Monetary tax balance before supplementary tax charges are applied.",
+        "ordered_charge_percentages": "Charge rates in configured sequence, each applied to the running tax.",
+        "minimum_income_bounds": "Per-charge lower or upper income thresholds for its application. An absent bound leaves that side open.",
+        "maximum_income_bounds": "Per-charge lower or upper income thresholds for its application. An absent bound leaves that side open."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -599,10 +624,10 @@
       "limitations": [],
       "business_rule": "Within the strict marginal-relief interval cap base tax at income exceeding the relief threshold. This is configured regional behavior and does not establish current statutory rates.",
       "input_meanings": {
-        "base_tax": "Base tax",
-        "annual_income": "Annual income",
-        "relief_limit": "Relief limit",
-        "marginal_relief_limit": "Marginal relief limit"
+        "base_tax": "Tax calculated before applying marginal relief.",
+        "annual_income": "Taxable annual income considered for the employee’s tax calculation.",
+        "relief_limit": "Configured monetary threshold used in the applicable marginal-relief calculation.",
+        "marginal_relief_limit": "Configured monetary threshold used in the applicable marginal-relief calculation."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -640,10 +665,10 @@
       "limitations": [],
       "business_rule": "Without an explicit additional-tax override, divide unpaid annual ordinary tax by positive remaining periods, or use zero structured tax when no periods remain. Add immediate bonus tax and floor the combined amount at zero.",
       "input_meanings": {
-        "annual_ordinary_tax": "Annual ordinary tax",
-        "tax_previously_paid": "Tax previously paid",
-        "remaining_intervals": "Remaining intervals",
-        "immediate_bonus_tax": "Immediate bonus tax"
+        "annual_ordinary_tax": "Projected ordinary tax liability for the assessment year.",
+        "tax_previously_paid": "Effective tax already withheld from the employee in the assessment period.",
+        "remaining_intervals": "Number of remaining payroll intervals over which ordinary tax is apportioned.",
+        "immediate_bonus_tax": "Tax on additional earnings payable in full in the present payroll."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -677,9 +702,9 @@
       "limitations": [],
       "business_rule": "Divide annual entitlement by total assessment cycles; use zero when that count is zero. When payment-day dependent, multiply by payment days divided by total working days. Apply later payout/cap branches before monetary rounding.",
       "input_meanings": {
-        "annual_benefit": "Annual benefit",
-        "total_assessment_intervals": "Total assessment intervals",
-        "payment_day_factor": "Payment day factor"
+        "annual_benefit": "Employee’s monetary entitlement to this benefit for the benefit year.",
+        "total_assessment_intervals": "Count of payroll intervals in the annual assessment.",
+        "payment_day_factor": "Payable fraction applied to the current benefit cycle."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -713,9 +738,9 @@
       "limitations": [],
       "business_rule": "For claim-only cycle-accrual benefits, add current-cycle entitlement to prior accrual and subtract prior payouts. For full-benefit claim mode, use yearly entitlement less payouts instead. Already overpaid eligibility is rejected.",
       "input_meanings": {
-        "prior_accrual": "Prior accrual",
-        "current_cycle_benefit": "Current cycle benefit",
-        "prior_payout": "Prior payout"
+        "prior_accrual": "Cumulative benefit amount accrued before the current cycle.",
+        "current_cycle_benefit": "Benefit entitlement allocated to the present payroll cycle.",
+        "prior_payout": "Effective benefit paid or claimed before this cycle."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -751,10 +776,10 @@
       "limitations": [],
       "business_rule": "For end-of-period payout use prior accrual plus current entitlement less prior and current claim payouts, floored at zero. Claim-only mode can first reduce current entitlement for overpayment, so this final expression alone is insufficient for that branch.",
       "input_meanings": {
-        "prior_accrual": "Prior accrual",
-        "current_cycle_benefit": "Current cycle benefit",
-        "prior_payout": "Prior payout",
-        "current_claim_payout": "Current claim payout"
+        "prior_accrual": "Cumulative benefit amount accrued before the current cycle.",
+        "current_cycle_benefit": "Benefit entitlement allocated to the present payroll cycle.",
+        "prior_payout": "Effective benefit paid or claimed before this cycle.",
+        "current_claim_payout": "Benefit claim amount included in the current cycle."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -792,9 +817,9 @@
       ],
       "business_rule": "Take selected ordinary earnings excluding additional salary, divide by payment days with minimum one, then divide by the row standard working hours. A zero standard-hours value has no established fallback.",
       "input_meanings": {
-        "selected_ordinary_earnings": "Selected ordinary earnings",
-        "payment_days": "Payment days",
-        "standard_working_hours": "Standard working hours"
+        "selected_ordinary_earnings": "Eligible ordinary earning amounts used to derive an overtime base.",
+        "payment_days": "Payable day-equivalents for this employee and payroll interval.",
+        "standard_working_hours": "Normal paid hours per working day used in the rate calculation."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -829,9 +854,9 @@
       "limitations": [],
       "business_rule": "Use allowed overtime duration after the applicable cap and multiply by the fixed or component-derived hourly rate and the selected ordinary, rest-day or public-holiday multiplier.",
       "input_meanings": {
-        "eligible_overtime_hours": "Eligible overtime hours",
-        "applicable_hourly_rate": "Applicable hourly rate",
-        "selected_multiplier": "Selected multiplier"
+        "eligible_overtime_hours": "Qualifying overtime hours under the selected overtime category.",
+        "applicable_hourly_rate": "Monetary base rate for one overtime hour before its multiplier.",
+        "selected_multiplier": "Dimensionless overtime factor for the applicable day and overtime category."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -866,9 +891,9 @@
       "limitations": [],
       "business_rule": "Subtract counted non-working attendance from elapsed joining-to-relieving date difference. Divide by configured working days per year, falling back to one for an absent or zero divisor. The relieving endpoint is not included by date subtraction.",
       "input_meanings": {
-        "elapsed_joining_to_relief_days": "Elapsed joining to relief days",
-        "counted_nonworking_attendance_days": "Counted nonworking attendance days",
-        "configured_working_days_per_year": "Configured working days per year"
+        "elapsed_joining_to_relief_days": "Elapsed calendar days between joining and the relieving date for gratuity service.",
+        "counted_nonworking_attendance_days": "Recorded days excluded from gratuity service under the applicable policy.",
+        "configured_working_days_per_year": "Policy divisor converting eligible service days to years."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -902,9 +927,9 @@
       "limitations": [],
       "business_rule": "Use the applicable slab fraction for every eligible experience year and the selected default earning basis from the latest submitted salary slip. Experience must meet the minimum policy threshold.",
       "input_meanings": {
-        "eligible_default_earnings": "Eligible default earnings",
-        "experience_years": "Experience years",
-        "selected_slab_fraction": "Selected slab fraction"
+        "eligible_default_earnings": "Ordinary earning component base included in gratuity, in payroll currency.",
+        "experience_years": "Qualifying years of service used to select or consume gratuity slabs.",
+        "selected_slab_fraction": "Payout fraction per year of service in the selected gratuity slab."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -938,6 +963,14 @@
                 "years": 2,
                 "fraction": 1
               }
+            ],
+            "years_consumed_in_band": [
+              5,
+              2
+            ],
+            "band_fraction": [
+              0.5,
+              1
             ]
           },
           "expected": 9000
@@ -946,9 +979,9 @@
       "limitations": [],
       "business_rule": "Multiply the width of experience consumed in each band by that band fraction, sum the weighted years and multiply by the eligible ordinary earning basis. This differs from applying the final band to all years.",
       "input_meanings": {
-        "eligible_default_earnings": "Eligible default earnings",
-        "years_consumed_in_band": "Years consumed in band",
-        "band_fraction": "Band fraction"
+        "eligible_default_earnings": "Ordinary earning component base included in gratuity, in payroll currency.",
+        "years_consumed_in_band": "Qualifying service years falling within each successive gratuity slab.",
+        "band_fraction": "Gratuity payout rate for each corresponding service slab."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -984,9 +1017,9 @@
       "limitations": [],
       "business_rule": "For eligible ordinary components prorate original default amount by approved corrected days over original working days. For accrual components instead use original accrual divided by original payment days. A zero denominator is rejected.",
       "input_meanings": {
-        "eligible_original_default_amount": "Eligible original default amount",
-        "original_total_working_days": "Original total working days",
-        "approved_corrected_days": "Approved corrected days"
+        "eligible_original_default_amount": "Original unprorated eligible component value on the slip being corrected.",
+        "original_total_working_days": "Working days on the original pay slip used to price the correction.",
+        "approved_corrected_days": "Approved day-equivalents for the corrective payroll event."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -1025,8 +1058,8 @@
       "limitations": [],
       "business_rule": "Recalculate eligible historical components under the revised structure and keep only positive differences. A reduction does not create negative arrears through this route.",
       "input_meanings": {
-        "new_eligible_amount": "New eligible amount",
-        "existing_eligible_amount": "Existing eligible amount"
+        "new_eligible_amount": "Eligible component value under the revised or previously paid salary basis.",
+        "existing_eligible_amount": "Eligible component value under the revised or previously paid salary basis."
       },
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md",
@@ -1050,7 +1083,9 @@
       "examples": [
         {
           "inputs": {
-            "interval_seconds": 60
+            "interval_seconds": 60,
+            "entry_timestamp": "2025-04-01T08:00:00",
+            "exit_timestamp": "2025-04-01T08:01:00"
           },
           "expected": 0.02
         },
@@ -1059,6 +1094,14 @@
             "separate_interval_seconds": [
               60,
               60
+            ],
+            "entry_timestamp": [
+              "2025-04-01T08:00:00",
+              "2025-04-01T09:00:00"
+            ],
+            "exit_timestamp": [
+              "2025-04-01T08:01:00",
+              "2025-04-01T09:01:00"
             ]
           },
           "expected_sum": 0.04
@@ -1067,8 +1110,8 @@
       "limitations": [],
       "business_rule": "Measure full elapsed seconds between the two timestamps, including date boundaries, divide by three thousand six hundred and round to two decimal places using nearest-even. Pair mode sums these individually rounded intervals.",
       "input_meanings": {
-        "entry_timestamp": "Entry timestamp",
-        "exit_timestamp": "Exit timestamp"
+        "entry_timestamp": "First or last instant of one paired attendance interval in the same clock basis.",
+        "exit_timestamp": "First or last instant of one paired attendance interval in the same clock basis."
       },
       "specification_references": [
         "../../docs/domains/attendance-and-leave.md",
@@ -1102,9 +1145,9 @@
       "limitations": [],
       "business_rule": "Start from the inclusive date count. Subtract a half day only for a valid half-day date that is not a holiday; subtract excluded holiday quantities according to the leave-type setting. Reject nonpositive consumption.",
       "input_meanings": {
-        "inclusive_calendar_days": "Inclusive calendar days",
-        "valid_nonholiday_half_day_reduction": "Valid nonholiday half day reduction",
-        "excluded_holidays": "Excluded holidays"
+        "inclusive_calendar_days": "Calendar day count from leave start through leave end, including both endpoints.",
+        "valid_nonholiday_half_day_reduction": "Half-day deduction where the marked reduced day qualifies under the leave policy.",
+        "excluded_holidays": "Count of holiday day-equivalents excluded from the requested leave."
       },
       "specification_references": [
         "../../docs/domains/attendance-and-leave.md",
@@ -1142,10 +1185,10 @@
       "limitations": [],
       "business_rule": "Divide annual entitlement by accrual frequency, prorate only when joining falls after cycle start, then apply quantity precision and the selected leave increment. Carried entitlement is excluded from new-entitlement annual quota checks.",
       "input_meanings": {
-        "annual_leave": "Annual leave",
-        "annual_frequency_count": "Annual frequency count",
-        "inclusive_days_from_joining": "Inclusive days from joining",
-        "inclusive_cycle_days": "Inclusive cycle days"
+        "annual_leave": "Number of leave days granted for the full entitlement cycle.",
+        "annual_frequency_count": "Number of equal accrual installments scheduled for one annual cycle.",
+        "inclusive_days_from_joining": "Calendar days applicable to the employee from joining through the assessed accrual interval.",
+        "inclusive_cycle_days": "Calendar days across the complete accrual interval, inclusive."
       },
       "specification_references": [
         "../../docs/domains/attendance-and-leave.md",
@@ -1182,10 +1225,10 @@
       "limitations": [],
       "business_rule": "Take unused eligible prior balance subject to a configured carry cap and remaining total-allocation capacity. Unset limits are omitted. Expire the transferred prior balance and record the admitted new balance separately.",
       "input_meanings": {
-        "unused_prior_leave": "Unused prior leave",
-        "carry_forward_cap": "Carry forward cap",
-        "total_allocation_cap": "Total allocation cap",
-        "new_allocation": "New allocation"
+        "unused_prior_leave": "Unused eligible days carried out of the preceding allocation.",
+        "carry_forward_cap": "Maximum prior days the leave type permits the employee to carry.",
+        "total_allocation_cap": "Maximum total leave days allowed for the resulting allocation.",
+        "new_allocation": "New days granted for this period before carry-forward."
       },
       "specification_references": [
         "../../docs/domains/attendance-and-leave.md",
@@ -1219,9 +1262,9 @@
       "limitations": [],
       "business_rule": "Remove the non-encashable retention from the available leave balance with a zero floor; then apply an optional encashment cap. An unset cap is not a zero-day prohibition.",
       "input_meanings": {
-        "available_balance": "Available balance",
-        "nonencashable_retention": "Nonencashable retention",
-        "encashment_cap": "Encashment cap"
+        "available_balance": "Unused available leave days at the qualifying date.",
+        "nonencashable_retention": "Leave days required to remain in the employee’s balance.",
+        "encashment_cap": "Maximum number of leave days eligible for this encashment."
       },
       "specification_references": [
         "../../docs/domains/attendance-and-leave.md",
@@ -1253,8 +1296,8 @@
       "limitations": [],
       "business_rule": "Multiply selected eligible days by the positive rate from the latest applicable salary assignment, falling back to the structure rate when the assignment value is zero. Submit through exactly one chosen payout route.",
       "input_meanings": {
-        "selected_encashment_days": "Selected encashment days",
-        "positive_per_day_amount": "Positive per day amount"
+        "selected_encashment_days": "Number of eligible days chosen for payment.",
+        "positive_per_day_amount": "Approved positive monetary payment per day of encashed leave."
       },
       "specification_references": [
         "../../docs/domains/attendance-and-leave.md",
@@ -1287,8 +1330,8 @@
       "limitations": [],
       "business_rule": "Count inclusive eligible worked holidays and subtract one half when a valid half-day claim is selected. Every day requires qualifying submitted attendance; entitlement begins the day after the worked interval.",
       "input_meanings": {
-        "inclusive_worked_holiday_days": "Inclusive worked holiday days",
-        "selected_half_day_reduction": "Selected half day reduction"
+        "inclusive_worked_holiday_days": "Qualifying worked holiday dates counted inclusively.",
+        "selected_half_day_reduction": "Fraction of a day deducted where the compensatory request is for a partial day."
       },
       "specification_references": [
         "../../docs/domains/attendance-and-leave.md",
@@ -1321,8 +1364,8 @@
       "limitations": [],
       "business_rule": "For each nonzero-rate tax row, multiply total sanctioned spending by that rate and round at the tax-row precision. Zero-rate rows retain their manually supplied amount. Percentage expense taxes do not compound.",
       "input_meanings": {
-        "total_sanctioned_amount": "Total sanctioned amount",
-        "percentage": "Percentage"
+        "total_sanctioned_amount": "Approved claim-line reimbursement total in claim currency before the claim taxes.",
+        "percentage": "Rate in percentage points applied to the eligible monetary base."
       },
       "specification_references": [
         "../../docs/domains/employee-expenses-and-advances.md",
@@ -1354,9 +1397,9 @@
       "limitations": [],
       "business_rule": "Approved spending plus tax is the whole expense obligation; subtract eligible allocated advances to obtain the remaining employee payable. Parent monetary rounding is applied after arithmetic.",
       "input_meanings": {
-        "total_sanctioned_amount": "Total sanctioned amount",
-        "total_taxes": "Total taxes",
-        "allocated_advances": "Allocated advances"
+        "total_sanctioned_amount": "Approved claim-line reimbursement total in claim currency before the claim taxes.",
+        "total_taxes": "Applicable monetary tax amounts posted with the expense claim.",
+        "allocated_advances": "Monetary amounts from employee advances allocated against this claim."
       },
       "specification_references": [
         "../../docs/domains/employee-expenses-and-advances.md",
@@ -1390,9 +1433,9 @@
       "limitations": [],
       "business_rule": "From posted paid advance movements subtract submitted approved claim allocations and posted returns. The remaining available amount identifies a receivable balance, not a new reimbursement claim.",
       "input_meanings": {
-        "paid_amount": "Paid amount",
-        "claimed_amount": "Claimed amount",
-        "returned_amount": "Returned amount"
+        "paid_amount": "Effective amount already paid to the employee under the advance.",
+        "claimed_amount": "Advance amount effectively applied to expense claims.",
+        "returned_amount": "Previously advanced funds effectively returned by the employee."
       },
       "specification_references": [
         "../../docs/domains/employee-expenses-and-advances.md",
@@ -1426,9 +1469,9 @@
       ],
       "business_rule": "For one eligible allocation compare its company amount at claim rate with the company amount at original advance rate. The multiple-row compatibility path separately accumulates running differences and is row-order sensitive.",
       "input_meanings": {
-        "allocated_foreign_amount": "Allocated foreign amount",
-        "claim_exchange_rate": "Claim exchange rate",
-        "original_advance_exchange_rate": "Original advance exchange rate"
+        "allocated_foreign_amount": "Advance amount allocated in the foreign currency shared by claim and advance.",
+        "claim_exchange_rate": "Company-currency units per foreign unit at the claim or original advance, respectively.",
+        "original_advance_exchange_rate": "Company-currency units per foreign unit at the claim or original advance, respectively."
       },
       "specification_references": [
         "../../docs/domains/employee-expenses-and-advances.md",
@@ -1465,9 +1508,9 @@
       "limitations": [],
       "business_rule": "Add maintenance/service rows and fuel quantity times unit price. Vehicle distance itself does not multiply an automatic mileage reimbursement rate in this preparation action.",
       "input_meanings": {
-        "service_expense_rows": "Service expense rows",
-        "fuel_quantity": "Fuel quantity",
-        "fuel_unit_price": "Fuel unit price"
+        "service_expense_rows": "Eligible monetary expense amounts recorded for vehicle service.",
+        "fuel_quantity": "Quantity of fuel in the unit used by this vehicle expense.",
+        "fuel_unit_price": "Expense-currency cost per unit of fuel."
       },
       "specification_references": [
         "../../docs/domains/employee-expenses-and-advances.md",
@@ -1491,7 +1534,10 @@
         {
           "inputs": {
             "vacancies": 3,
-            "estimated_cost_per_position": 40000
+            "estimated_cost_per_position": 40000,
+            "vacancies_by_designation": [
+              3
+            ]
           },
           "expected": 120000
         }
@@ -1499,8 +1545,8 @@
       "limitations": [],
       "business_rule": "Multiply each designation vacancy count by estimated cost per new position and sum rows. Existing employees affect planned headcount but do not multiply the incremental vacancy cost.",
       "input_meanings": {
-        "vacancies_by_designation": "Vacancies by designation",
-        "estimated_cost_per_position": "Estimated cost per position"
+        "vacancies_by_designation": "Number of approved unfilled positions in each designation.",
+        "estimated_cost_per_position": "Budget currency cost for one position in the corresponding designation."
       },
       "specification_references": [
         "../../docs/domains/recruitment-and-performance.md",
@@ -1532,8 +1578,8 @@
       "limitations": [],
       "business_rule": "Count accepted submitted offers over all submitted offers. Use zero for an empty population. Business response status and document submission state both affect the numerator.",
       "input_meanings": {
-        "submitted_accepted_offers": "Submitted accepted offers",
-        "all_submitted_offers": "All submitted offers"
+        "submitted_accepted_offers": "Count of submitted job offers marked accepted in the reporting population.",
+        "all_submitted_offers": "Count of all submitted job offers in the same population."
       },
       "specification_references": [
         "../../docs/domains/recruitment-and-performance.md",
@@ -1561,6 +1607,17 @@
               0.8,
               0.6,
               0
+            ],
+            "skill_rows": [
+              {
+                "rating": 0.8
+              },
+              {
+                "rating": 0.6
+              },
+              {
+                "rating": 0
+              }
             ]
           },
           "expected_approximate": 0.4666666667
@@ -1569,8 +1626,8 @@
       "limitations": [],
       "business_rule": "Sum skill ratings and divide by all assessment rows, including unrated rows counted as zero. An empty assessment table produces zero. Store field precision before interview-wide aggregation.",
       "input_meanings": {
-        "skill_ratings": "Skill ratings",
-        "skill_rows": "Skill rows"
+        "skill_ratings": "Numeric rating for each skill on the feedback form’s normalized scale.",
+        "skill_rows": "All rated and unrated skill rows used for the feedback denominator."
       },
       "specification_references": [
         "../../docs/domains/recruitment-and-performance.md",
@@ -1604,7 +1661,7 @@
       "limitations": [],
       "business_rule": "Average the saved averages of submitted individual feedback documents. Every feedback document has equal weight regardless of its number of skill rows. Cancellation removes that feedback from the aggregate.",
       "input_meanings": {
-        "submitted_feedback_averages": "Submitted feedback averages"
+        "submitted_feedback_averages": "Means of the submitted feedback records in this interview."
       },
       "specification_references": [
         "../../docs/domains/recruitment-and-performance.md",
@@ -1642,8 +1699,8 @@
       "limitations": [],
       "business_rule": "Average top-level non-archived goal completion within each result area, weight by that result-area percentage, sum and divide by twenty to convert percentage completion to a five-point score.",
       "input_meanings": {
-        "result_area_completion_percent": "Result area completion percent",
-        "result_area_weight_percent": "Result area weight percent"
+        "result_area_completion_percent": "Completion or configured contribution of the result area in percentage points.",
+        "result_area_weight_percent": "Completion or configured contribution of the result area in percentage points."
       },
       "specification_references": [
         "../../docs/domains/recruitment-and-performance.md",
@@ -1686,9 +1743,9 @@
       "limitations": [],
       "business_rule": "Average goal score, submitted reviewer average and self-assessment score with fixed denominator three. Missing categories contribute zero. A configured final-score expression explicitly replaces this default.",
       "input_meanings": {
-        "goal_score": "Goal score",
-        "average_feedback_score": "Average feedback score",
-        "self_assessment_score": "Self assessment score"
+        "goal_score": "Appraisal-scale score from goals, peer feedback or self-assessment, respectively.",
+        "average_feedback_score": "Appraisal-scale score from goals, peer feedback or self-assessment, respectively.",
+        "self_assessment_score": "Appraisal-scale score from goals, peer feedback or self-assessment, respectively."
       },
       "specification_references": [
         "../../docs/domains/recruitment-and-performance.md",
@@ -1730,9 +1787,9 @@
       "limitations": [],
       "business_rule": "Keep payable and receivable totals separate. Add asset-recovery cost only to receivables and retain every obligation reference and settled status. A display net amount cannot replace those records.",
       "input_meanings": {
-        "payable_rows": "Payable rows",
-        "receivable_rows": "Receivable rows",
-        "asset_recovery_cost": "Asset recovery cost"
+        "payable_rows": "Monetary settlement rows payable to, or receivable from, the departing employee.",
+        "receivable_rows": "Monetary settlement rows payable to, or receivable from, the departing employee.",
+        "asset_recovery_cost": "Monetary amount recoverable from the employee for asset custody or loss."
       },
       "specification_references": [
         "../../docs/domains/workforce-and-employment.md",
@@ -1749,8 +1806,8 @@
         "remaining_period_count"
       ],
       "input_meanings": {
-        "full_period_taxable_earnings": "Full period taxable earnings",
-        "remaining_period_count": "Remaining period count"
+        "full_period_taxable_earnings": "Ordinary taxable salary for one complete pay interval, before multiplying by remaining intervals.",
+        "remaining_period_count": "Remaining assessment periods including the current period. The relevant projection selects its rounding rule before subtracting one."
       },
       "output_unit": "salary currency",
       "business_rule": "No ceiling is substituted for nearest-even rounding of the remaining-period count.",
@@ -1763,7 +1820,8 @@
             "full_period_taxable_earnings": 10000,
             "remaining_period_count": 2.5
           },
-          "expected": 10000
+          "expected": 10000,
+          "working": "Nearest-even rounding maps 2.5 remaining periods to 2. Subtract this period and project 1 × 10,000 = 10,000."
         }
       ],
       "limitations": [],
@@ -1782,8 +1840,8 @@
         "remaining_period_count"
       ],
       "input_meanings": {
-        "recalculated_full_period_nontaxable_earnings": "Recalculated full period nontaxable earnings",
-        "remaining_period_count": "Remaining period count"
+        "recalculated_full_period_nontaxable_earnings": "Ordinary nontaxable salary recomputed for one fully payable interval, excluding additional earnings.",
+        "remaining_period_count": "Remaining assessment periods including the current period. The relevant projection selects its rounding rule before subtracting one."
       },
       "output_unit": "salary currency",
       "business_rule": "Recalculate a copy of the salary slip with payment days equal to working days; exclude additional-salary rows from ordinary future earnings.",
@@ -1796,7 +1854,8 @@
             "recalculated_full_period_nontaxable_earnings": 1000,
             "remaining_period_count": 2.5
           },
-          "expected": 2000
+          "expected": 2000,
+          "working": "Ceiling maps 2.5 remaining periods to 3. Exclude the current period and project 2 × 1,000 = 2,000."
         }
       ],
       "limitations": [],
@@ -1817,10 +1876,10 @@
         "prior_accrual"
       ],
       "input_meanings": {
-        "current_entitlement": "Current entitlement",
-        "prior_payout": "Prior payout",
-        "current_claim_payout": "Current claim payout",
-        "prior_accrual": "Prior accrual"
+        "current_entitlement": "Amount the employee earns under this benefit for the present cycle.",
+        "prior_payout": "Effective benefit paid or claimed before this cycle.",
+        "current_claim_payout": "Benefit claim amount included in the current cycle.",
+        "prior_accrual": "Cumulative benefit amount accrued before the current cycle."
       },
       "output_unit": "salary currency",
       "business_rule": "Then apply the strictly positive remaining-yearly-entitlement cap and optional final payout branch. Nonpositive resulting rows are omitted.",
@@ -1835,7 +1894,8 @@
             "current_claim_payout": 0,
             "prior_accrual": 5000
           },
-          "expected": 500
+          "expected": 500,
+          "working": "5,500 paid plus zero current payout less 5,000 already accrued leaves 500 to offset the 1,000 entitlement. Accrue 500."
         }
       ],
       "limitations": [],
@@ -1853,7 +1913,7 @@
         "ordered_local_differences"
       ],
       "input_meanings": {
-        "ordered_local_differences": "Ordered local differences"
+        "ordered_local_differences": "Claim-currency exchange differences for each advance in posting order, rounded at the local row stage."
       },
       "output_unit": "company currency",
       "business_rule": "Observed compatibility behavior is row-order sensitive; an independent sum of 30 is a separate financial correction candidate.",
@@ -1874,7 +1934,8 @@
               30
             ],
             "document_difference": 40
-          }
+          },
+          "working": "The ordered running balances are 10 and 30. Add those stored values to get the document exchange difference of 40."
         }
       ],
       "limitations": [],
@@ -1894,9 +1955,9 @@
         "criterion_weights"
       ],
       "input_meanings": {
-        "normalised_ratings": "Normalised ratings",
-        "configured_star_count": "Configured star count",
-        "criterion_weights": "Criterion weights"
+        "normalised_ratings": "Rating per self-assessment criterion on the 0–1 scale.",
+        "configured_star_count": "Number of stars corresponding to a maximum normalized rating.",
+        "criterion_weights": "Contribution of each corresponding assessment criterion in percentage points."
       },
       "output_unit": "five-point score",
       "business_rule": "Apply score-field precision after summing; weights must meet the applicable validation rule.",
@@ -1916,7 +1977,8 @@
               40
             ]
           },
-          "expected": 3.6
+          "expected": 3.6,
+          "working": "0.8 × 5 × 60/100 + 0.6 × 5 × 40/100 = 2.4 + 1.2 = 3.6 on the five-star scale."
         }
       ],
       "limitations": [],
@@ -1934,7 +1996,7 @@
         "direct_nonarchived_child_completion"
       ],
       "input_meanings": {
-        "direct_nonarchived_child_completion": "Direct nonarchived child completion"
+        "direct_nonarchived_child_completion": "Percent completion for each active direct child goal selected by the roll-up."
       },
       "output_unit": "percent",
       "business_rule": "Closed children remain eligible; archived children do not. Moving a child refreshes old and new parents.",
@@ -1950,7 +2012,8 @@
               0
             ]
           },
-          "expected": 50
+          "expected": 50,
+          "working": "The direct nonarchived children average (100 + 50 + 0) / 3 = 50 percent."
         }
       ],
       "limitations": [],
@@ -1968,7 +2031,7 @@
         "ordered_local_differences"
       ],
       "input_meanings": {
-        "ordered_local_differences": "Ordered local differences"
+        "ordered_local_differences": "Claim-currency exchange differences for each advance in posting order, rounded at the local row stage."
       },
       "output_unit": "company currency",
       "business_rule": "The second row does not trigger a nonzero update; this does not equal independent net exchange exposure.",
@@ -1987,7 +2050,8 @@
             "first_row_difference": 10,
             "second_running_difference": 0,
             "document_difference": 10
-          }
+          },
+          "working": "The first row adds 10 to the document. The next local −10 brings the running balance to zero and contributes no new amount. The document retains 10."
         }
       ],
       "limitations": [],

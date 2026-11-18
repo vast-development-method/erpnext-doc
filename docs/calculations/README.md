@@ -11,3 +11,5 @@ A formula specifies its operands, their units, the stage at which precision appl
 | [Commercial progress](transaction-progress.md) | Row allocation, clamping, tolerance, exclusion, closure and reopening | [Procedures and boundary values](../../schemas/mathematics/transaction-progress-calculations.json) |
 
 [Inventory decisions at the voucher boundary](inventory-decisions.md) specifies how to combine item and warehouse account selection, landed costs, reservation updates, inspections and reversals. Recognising revenue, paying an invoice and shipping stock have different effects even when the documents share an amount.
+
+The [calculation and worked-case index](../../schemas/mathematics/definition-coverage.json) connects all 184 named definitions and both ordered valuation procedures to their operands and worked cases. The [review register](../../schemas/traceability/mathematics-verification.json) identifies the calculation evidence and the scope of each comparison.

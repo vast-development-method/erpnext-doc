@@ -12,6 +12,12 @@ Group invoices and debit and credit notes into a signed submission. Persist each
 
 Model issuer, source document revision, document type/version, customer, tax and product codes, original-invoice references, signed content digest, submission attempt, external document ID and validation events. Capture source values and outbound representations separately. The adapter can queue a batch, process accepted and rejected members independently and refresh each accepted document’s status. Keep cancellations and adjustment documents tied to the targeted authority IDs. Do not infer tax acceptance or reverse the ERP ledger from a transport acknowledgement alone.
 
+#### Correlating a mixed submission
+
+Store the signed-request digest and internal document ID before transmission. Record the submission identifier once at batch level and the authority’s document identifier or rejection details separately for each member. For a correction, link the new document revision to the rejected member. Preserve the originally signed bytes and its error code. Refresh the accepted member through its external identifier. A late validation response must match that same member before changing its state.
+
+If the accepted invoice later fails validation, keep the original initial acceptance, the later rejection and their timestamps. Count zero finally validated documents in this two-invoice example until an accepted member completes validation. Resubmitting the corrected second invoice must leave both the first invoice’s validation history and the ERP’s issued invoice ledger intact. The authority response, the correction workflow and the accounting disposition each have their own identity.
+
 [Implementation evidence and scope](../../rebuild/marketplace-guides/apps/e_invoice.md).
 
 ## Forward exchange contract allocation

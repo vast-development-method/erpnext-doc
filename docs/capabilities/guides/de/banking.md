@@ -58,6 +58,8 @@ Lieferantenzahlungen auswählen und den Sammelauftrag mit einem Einmalcode freig
 
 Verarbeiten Sie dieselbe Bankantwort für einen freigegebenen Sammelauftrag mit einer bestätigten und einer abgelehnten Lieferantenzahlung zweimal. Nur der bezahlte Lieferant erhält ein deutsches Zahlungsavis, der abgelehnte Posten bleibt offen und Hindi- sowie englischsprachige Mitarbeitende sehen dieselben Bankreferenzen und den ursprünglichen Ablehnungsgrund.
 
+Von einem freigegebenen Sammelauftrag über 1.000 bestätigt die Bank 600 und weist 400 zurück. Den Kontoumsatz von 600 abstimmen und nur dafür ein Avis erstellen. Der Rest bleibt mit dem Ablehnungsgrund offen. Bei einem Verbindungsabbruch zuerst die ursprünglichen Referenzen abgleichen.
+
 [English](../banking.md#supplier-payment-batch-authorization) · [Quellenbelege](../../../rebuild/marketplace-guides/editions/de/banking.md#sanpra-easypay).
 
 ## Wickeln Sie eine Zahlung online, über ein gekoppeltes Terminal oder für eine wiederkehrende Zahlungsanforderung ab und gleichen Sie sie mit der Rechnung ab
