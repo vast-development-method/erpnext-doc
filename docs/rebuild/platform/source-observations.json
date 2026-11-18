@@ -1,0 +1,253 @@
+{
+  "revision": "199a0385c00e572664a099a57a00be6ce7404eeb",
+  "referenceExecution": "isolated-function",
+  "dependencies": "Controlled clocks, in-memory storage and queue call observers. No application boot, real database, authentication, worker, transport or external provider.",
+  "sourceFunctions": {
+    "RateLimiter.apply": {
+      "source": "https://github.com/frappe/frappe/blob/199a0385c00e572664a099a57a00be6ce7404eeb/frappe/rate_limiter.py#L69-L72",
+      "bodySha256": "70be85e176764872aa05860e4b946bb1e5df2ca2b82c46273913dab8d0787611"
+    },
+    "bulk_workflow_approval": {
+      "source": "https://github.com/frappe/frappe/blob/199a0385c00e572664a099a57a00be6ce7404eeb/frappe/model/workflow.py#L324-L340",
+      "bodySha256": "1085cb1370553e57c67e39e7c4874ecd41af679022099d1534afbc2a2660d500"
+    },
+    "has_approval_access": {
+      "source": "https://github.com/frappe/frappe/blob/199a0385c00e572664a099a57a00be6ce7404eeb/frappe/model/workflow.py#L307-L308",
+      "bodySha256": "fd792593ed9d841e67cdfa3f78c3a1b0fc546d97fd4e802a61376378df809903"
+    },
+    "_claim_subscription": {
+      "source": "https://github.com/frappe/frappe/blob/199a0385c00e572664a099a57a00be6ce7404eeb/frappe/automation_engine/events.py#L206-L221",
+      "bodySha256": "11ebce4479b44db99f35b0973b08451f4407cc52e06a3ba5adbddcae9da5c8ed"
+    },
+    "_settle_queue_row": {
+      "source": "https://github.com/frappe/frappe/blob/199a0385c00e572664a099a57a00be6ce7404eeb/frappe/automation_engine/runner.py#L567-L574",
+      "bodySha256": "c2f88de7a928917f52f1dd905f67c1840f33f3c09dcfbe9bb7b8063fe382db82"
+    },
+    "File.validate_private_file_access": {
+      "source": "https://github.com/frappe/frappe/blob/199a0385c00e572664a099a57a00be6ce7404eeb/frappe/core/doctype/file/file.py#L252-L280",
+      "bodySha256": "fab003cabf3cfffd827d37ef796c35c8bc23c0b5e2d4b425583ffd2242e83256"
+    }
+  },
+  "observations": [
+    {
+      "case": "site-time-budget-below",
+      "observed": "admit",
+      "effects": {
+        "rejected": false
+      }
+    },
+    {
+      "case": "site-time-budget-equal",
+      "observed": "admit",
+      "effects": {
+        "rejected": false
+      }
+    },
+    {
+      "case": "site-time-budget-above",
+      "observed": "throttle",
+      "effects": {
+        "rejected": true
+      }
+    },
+    {
+      "case": "bulk-approval-empty",
+      "observed": "inline",
+      "effects": {
+        "inlineCalls": 1,
+        "queueCalls": 0
+      }
+    },
+    {
+      "case": "bulk-approval-nineteen",
+      "observed": "inline",
+      "effects": {
+        "inlineCalls": 1,
+        "queueCalls": 0
+      }
+    },
+    {
+      "case": "bulk-approval-twenty",
+      "observed": "enqueue",
+      "effects": {
+        "inlineCalls": 0,
+        "queueCalls": 1
+      }
+    },
+    {
+      "case": "bulk-approval-five-hundred",
+      "observed": "enqueue",
+      "effects": {
+        "inlineCalls": 0,
+        "queueCalls": 1
+      }
+    },
+    {
+      "case": "bulk-approval-too-many",
+      "observed": "reject",
+      "effects": {
+        "inlineCalls": 0,
+        "queueCalls": 0
+      }
+    },
+    {
+      "case": "self-approval-admin",
+      "observed": "allow",
+      "effects": {
+        "approved": true
+      }
+    },
+    {
+      "case": "self-approval-owner-enabled",
+      "observed": "allow",
+      "effects": {
+        "approved": true
+      }
+    },
+    {
+      "case": "self-approval-another-reviewer",
+      "observed": "allow",
+      "effects": {
+        "approved": true
+      }
+    },
+    {
+      "case": "self-approval-self-disabled",
+      "observed": "deny",
+      "effects": {
+        "approved": false
+      }
+    },
+    {
+      "case": "event-claim-before",
+      "observed": "match-and-wake",
+      "effects": {
+        "matchedCount": 1,
+        "resumeUpdates": 1,
+        "status": "Matched",
+        "matchedPayloadPersisted": true
+      }
+    },
+    {
+      "case": "event-claim-exact",
+      "observed": "timeout-and-wake",
+      "effects": {
+        "matchedCount": 0,
+        "resumeUpdates": 1,
+        "status": "Timed Out",
+        "matchedPayloadPersisted": false
+      }
+    },
+    {
+      "case": "event-claim-late",
+      "observed": "timeout-and-wake",
+      "effects": {
+        "matchedCount": 0,
+        "resumeUpdates": 1,
+        "status": "Timed Out",
+        "matchedPayloadPersisted": false
+      }
+    },
+    {
+      "case": "event-claim-duplicate",
+      "observed": "no-change",
+      "effects": {
+        "matchedCount": 0,
+        "resumeUpdates": 0
+      }
+    },
+    {
+      "case": "event-claim-late-duplicate",
+      "observed": "no-change",
+      "effects": {
+        "matchedCount": 0,
+        "resumeUpdates": 0
+      }
+    },
+    {
+      "case": "event-claim-cancelled",
+      "observed": "no-change",
+      "effects": {
+        "matchedCount": 0,
+        "resumeUpdates": 0
+      }
+    },
+    {
+      "case": "automation-queue-settlement-success",
+      "observed": "remove-processed-row",
+      "effects": {
+        "deleted": true
+      }
+    },
+    {
+      "case": "automation-queue-settlement-partial",
+      "observed": "remove-processed-row",
+      "effects": {
+        "deleted": true
+      }
+    },
+    {
+      "case": "automation-queue-settlement-wait",
+      "observed": "remove-processed-row",
+      "effects": {
+        "deleted": true
+      }
+    },
+    {
+      "case": "automation-queue-settlement-error",
+      "observed": "retain-failed",
+      "effects": {
+        "deleted": false,
+        "status": "Failed"
+      }
+    },
+    {
+      "case": "automation-queue-settlement-gone",
+      "observed": "retain-skipped",
+      "effects": {
+        "deleted": false,
+        "status": "Skipped"
+      }
+    },
+    {
+      "case": "private-reference-reuse-new",
+      "observed": "continue",
+      "effects": {
+        "controllerReadChecks": 0,
+        "continued": true
+      }
+    },
+    {
+      "case": "private-reference-reuse-owned",
+      "observed": "continue",
+      "effects": {
+        "controllerReadChecks": 1,
+        "continued": true
+      }
+    },
+    {
+      "case": "private-reference-reuse-shared",
+      "observed": "continue",
+      "effects": {
+        "controllerReadChecks": 2,
+        "continued": true
+      }
+    },
+    {
+      "case": "private-reference-reuse-admin",
+      "observed": "continue",
+      "effects": {
+        "controllerReadChecks": 0,
+        "continued": true
+      }
+    },
+    {
+      "case": "private-reference-reuse-unauthorized",
+      "observed": "deny",
+      "effects": {
+        "controllerReadChecks": 2,
+        "continued": false
+      }
+    }
+  ]
+}
