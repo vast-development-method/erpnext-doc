@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+"""Assemble or verify the published ERP blueprint. Requires Python 3.8+ standard library."""
+
+import argparse
+import hashlib
+import io
+import os
+from pathlib import Path, PurePosixPath
+import shutil
+import sys
+import tarfile
+import tempfile
+
+ROOT = Path(__file__).resolve().parent.parent
+ARCHIVE_SHA256 = 'bf852d1a552aeeb42579cb2972dacb156f28198bc3349c18b07efff0d88b91b7'
+ARCHIVE_FILES = 3476
+PREFIX = 'complete-specification.tar.gz.part-'
+BLOCK = 1024 * 1024
+MARKER = '.restore-in-progress'
+
+
+def sha256(stream):
+    digest = hashlib.sha256()
+    for block in iter(lambda: stream.read(BLOCK), b''):
+        digest.update(block)
+    return digest.hexdigest()
+
+
+def verified_archive(temp):
+    folder = ROOT / 'checkpoints'
+    parts = [folder / (PREFIX + f'{n:02}') for n in range(1, 18)]
+    if sorted(folder.glob(PREFIX + '*')) != parts:
+        raise ValueError('Expected archive parts 01 through 17, with no extra parts.')
+    for part in parts:
+        with part.open('rb') as data:
+            shutil.copyfileobj(data, temp, BLOCK)
+    temp.seek(0)
+    if sha256(temp) != ARCHIVE_SHA256:
+        raise ValueError('The joined archive SHA-256 differs from the published checkpoint.')
+    temp.seek(0)
+
+
+def regular_files(base):
+    """Collect distributable files. Exclude transient editor, VCS and interpreter metadata."""
+    if not base.is_dir() or base.is_symlink():
+        raise ValueError(f'Expected a directory in the branch checkout: {base}')
+    for root, dirs, files in os.walk(base):
+        dirs[:] = sorted(d for d in dirs if not d.startswith('.') and d != '__pycache__')
+        folder = Path(root)
+        if any((folder / d).is_symlink() for d in dirs):
+            raise ValueError(f'Unexpected symbolic link in {folder}')
+        for name in sorted(files):
+            if name.startswith('.') or name.endswith(('.pyc', '.pyo', '~')):
+                continue
+            path = folder / name
+            if path.is_symlink() or not path.is_file():
+                raise ValueError(f'Expected a regular file: {path}')
+            yield path
+
+
+def overlay_files():
+    yield ROOT / 'checkpoints/reading-guide.md'
+    yield ROOT / 'schemas/traceability/source-snapshot.json'
+    yield from regular_files(ROOT / 'schemas/source-file-distribution')
+    yield from regular_files(ROOT / 'docs/rebuild')
+
+
+def landing_page(paths):
+    nav = [
+        '# Unified ERP rebuilding specification', '',
+        'The development checkpoint and version-pinned supplements retain their own evidence and compatibility boundaries.', '',
+        '- [Complete checkpoint reading paths](README.md)',
+        '- [Checkpoint documentation index](docs/README.md)',
+        '- [Machine-readable catalogs](schemas/README.md)',
+        '- [Source revisions of the earlier checkpoint](schemas/traceability/source-snapshot.json)',
+    ]
+    if 'docs/rebuild/README.md' in paths:
+        nav.append('- [Rebuild supplement index](docs/rebuild/README.md)')
+    nav.extend(['', '## Rebuild supplements', ''])
+    for name in sorted(paths):
+        parts = PurePosixPath(name).parts
+        if len(parts) == 4 and parts[:2] == ('docs', 'rebuild') and parts[-1] == 'README.md':
+            nav.append(f'- [{parts[2].replace("-", " ").capitalize()}]({name})')
+    nav.extend(['', '[Restoring and verifying this edition](checkpoints/reading-guide.md)', ''])
+    return '\n'.join(nav).encode('utf-8')
+
+
+def assemble(destination, verify):
+    managed = set()
+    with tempfile.TemporaryFile() as temp:
+        verified_archive(temp)
+        if verify:
+            if not destination.is_dir() or destination.is_symlink():
+                raise ValueError(f'Expected an existing assembled directory: {destination}')
+            if os.path.lexists(destination / MARKER):
+                raise ValueError('The destination carries an incomplete restore marker.')
+        else:
+            # mkdir is the exclusive reservation, including when two restores start together.
+            destination.mkdir(mode=0o700)
+            with (destination / MARKER).open('x', encoding='utf-8') as marker:
+                marker.write('Restore in progress\n')
+
+        def install(name, data, executable=False):
+            path = PurePosixPath(name)
+            if (path.is_absolute() or '..' in path.parts or '\\' in name or ':' in name
+                    or name != path.as_posix() or name in managed):
+                raise ValueError(f'Invalid or duplicate member: {name}')
+            managed.add(name)
+            output = destination.joinpath(*path.parts)
+            if any((destination / parent).is_symlink() for parent in path.parents):
+                raise ValueError(f'Symbolic link in output path: {name}')
+            if verify:
+                if not output.is_file() or output.is_symlink():
+                    raise ValueError(f'Missing or non-regular output: {name}')
+                with output.open('rb') as existing:
+                    if sha256(existing) != sha256(data):
+                        raise ValueError(f'Content differs: {name}')
+            else:
+                output.parent.mkdir(parents=True, exist_ok=True)
+                # Never replace a file, even if another writer creates it after the directory reservation.
+                with output.open('xb') as target:
+                    shutil.copyfileobj(data, target, BLOCK)
+                if executable:
+                    output.chmod(output.stat().st_mode | 0o100)
+
+        with tarfile.open(fileobj=temp, mode='r:gz') as archive:
+            for member in archive:
+                if member.isdir():
+                    continue
+                if not member.isfile():
+                    raise ValueError(f'Unexpected archive member type: {member.name}')
+                with archive.extractfile(member) as data:
+                    install(member.name, data, member.mode & 0o100)
+        if len(managed) != ARCHIVE_FILES:
+            raise ValueError(f'Expected {ARCHIVE_FILES} archived files, found {len(managed)}.')
+
+    for source in overlay_files():
+        with source.open('rb') as data:
+            install(source.relative_to(ROOT).as_posix(), data, source.stat().st_mode & 0o100)
+    install('START-HERE.md', io.BytesIO(landing_page(managed)))
+    if verify:
+        for path in destination.rglob('*'):
+            if (path.is_symlink() or not path.is_dir()) and path.relative_to(destination).as_posix() not in managed:
+                raise ValueError(f'Unrecognized additional file: {path.relative_to(destination)}')
+    else:
+        (destination / MARKER).unlink()
+    return len(managed)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--verify', action='store_true', help='check an assembled directory against this checkout')
+    parser.add_argument('directory', type=Path, help='directory outside the checkout, in an existing parent')
+    args = parser.parse_args()
+    raw_path = args.directory.expanduser().absolute()
+    destination = raw_path.parent.resolve(strict=True) / raw_path.name
+    if ROOT == destination or ROOT in destination.parents or destination in ROOT.parents:
+        raise ValueError('Choose a separate destination outside the repository checkout.')
+    if not args.verify and os.path.lexists(destination):
+        raise FileExistsError(f'Destination already exists. Choose a fresh directory: {destination}')
+    count = assemble(destination, args.verify)
+    action = 'Verified' if args.verify else 'Assembled'
+    print(f'{action} {count} files, including {ARCHIVE_FILES} authenticated checkpoint files.')
+    print(destination / 'START-HERE.md')
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, ValueError, tarfile.TarError) as error:
+        print(f'Restore failed: {error}', file=sys.stderr)
+        sys.exit(1)
