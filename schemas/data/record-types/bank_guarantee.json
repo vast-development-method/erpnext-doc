@@ -3,11 +3,10 @@
   "identifier": "record_type_bank_guarantee",
   "name": "bank_guarantee",
   "display_name": "bank guarantee",
-  "source_name_digest": "bbff488fd89c9979bd106e9db92b9d7d8bfb12dc995e074ccf0ef7b6dd89f24b",
-  "source_pack": "enterprise",
-  "source_artifact": "source-artifact-14348708ae90a0b1e26d",
+  "capability_group": "enterprise",
+  "component_identifier": "component_enterprise_accounts_record_definitions_bank_guarantee_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "independent_record",
   "supports_posting_and_cancellation": true,
   "ordered_field_names": [
@@ -22,7 +21,7 @@
     "start_date",
     "validity",
     "end_date",
-    "bank_account_info",
+    "bank_account_information",
     "bank",
     "bank_account",
     "account",
@@ -50,7 +49,7 @@
       "segments": [
         {
           "kind": "literal_segment",
-          "neutral_value": "accounting_source_term_82ff23ecef",
+          "neutral_value": "accounting_bank_guarantee",
           "source_value_digest": "570833c2feb30a479ae3c40b351619a25bd00908fa28d921960fd54a1a4b3a68"
         },
         {
@@ -141,14 +140,13 @@
     }
   ],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 30,
   "fields": [
     {
       "identifier": "record_type_bank_guarantee.bg_type",
       "name": "bg_type",
-      "source_field_ordinal": 0,
-      "source_name_digest": "b6417d2e86e4d8e15f7def833cbcbf3cfe79424ba8c4f6025cfabbc571a91853",
+      "field_ordinal": 0,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -174,13 +172,26 @@
         ],
         "required": 1
       },
-      "display_name": "bank guarantee type"
+      "display_name": "bank guarantee type",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "",
+          "receiving",
+          "providing"
+        ],
+        "empty_option_explicitly_listed": true,
+        "required_when_no_conditional_override": true,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "b6417d2e86e4d8e15f7def833cbcbf3cfe79424ba8c4f6025cfabbc571a91853"
     },
     {
       "identifier": "record_type_bank_guarantee.reference_record_type",
       "name": "reference_record_type",
-      "source_field_ordinal": 1,
-      "source_name_digest": "fa57aeb2e82c3a7d9086135c8c4f4b1e7d632d52289990dc5acdbe01f3ed6fd2",
+      "field_ordinal": 1,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -192,13 +203,24 @@
           "identifier": "record_type_record_type"
         }
       },
-      "display_name": "reference document type"
+      "display_name": "reference document type",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_record_type"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "fa57aeb2e82c3a7d9086135c8c4f4b1e7d632d52289990dc5acdbe01f3ed6fd2"
     },
     {
       "identifier": "record_type_bank_guarantee.reference_record_name",
       "name": "reference_record_name",
-      "source_field_ordinal": 2,
-      "source_name_digest": "27f3b683b360cfaab89b46228bca68527ff122e1ab3c143bc3a5f4a653a26d01",
+      "field_ordinal": 2,
       "value_type": "dynamic_record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -207,13 +229,21 @@
       "properties": {
         "target_type_field": "reference_record_type"
       },
-      "display_name": "reference document name"
+      "display_name": "reference document name",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target_type_field": "reference_record_type",
+        "validation": "Read the target record type from the companion type field and validate the identity against that selected type. Type and identity form one reference.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "27f3b683b360cfaab89b46228bca68527ff122e1ab3c143bc3a5f4a653a26d01"
     },
     {
       "identifier": "record_type_bank_guarantee.customer",
       "name": "customer",
-      "source_field_ordinal": 3,
-      "source_name_digest": "2e11f7f6e11df49ae8edf97db7606b01ced26939b92649a1e4ec5aba38b68c46",
+      "field_ordinal": 3,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -243,21 +273,34 @@
               }
             ]
           },
-          "source_value_digest": "3ac012d535086dcd1882b531ca35a283e3501f457b8dadddd7e6ea230e843dc7",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.reference record type equals sales_order",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "3ac012d535086dcd1882b531ca35a283e3501f457b8dadddd7e6ea230e843dc7"
         },
         "target_record_type": {
           "kind": "record_type",
           "identifier": "record_type_customer"
         }
       },
-      "display_name": "customer"
+      "display_name": "customer",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_customer"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "2e11f7f6e11df49ae8edf97db7606b01ced26939b92649a1e4ec5aba38b68c46"
     },
     {
       "identifier": "record_type_bank_guarantee.supplier",
       "name": "supplier",
-      "source_field_ordinal": 4,
-      "source_name_digest": "6dc47b3f81d4f564627d557daaab0830b4d5ca13bebd2d9536041575910a66c0",
+      "field_ordinal": 4,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -287,21 +330,34 @@
               }
             ]
           },
-          "source_value_digest": "7612ff0dafe709c3a731c2009610bbe88681f29fffb685dad737150c70bdfb5a",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.reference record type equals purchase_order",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "7612ff0dafe709c3a731c2009610bbe88681f29fffb685dad737150c70bdfb5a"
         },
         "target_record_type": {
           "kind": "record_type",
           "identifier": "record_type_supplier"
         }
       },
-      "display_name": "supplier"
+      "display_name": "supplier",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_supplier"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 4,
+      "source_name_digest": "6dc47b3f81d4f564627d557daaab0830b4d5ca13bebd2d9536041575910a66c0"
     },
     {
       "identifier": "record_type_bank_guarantee.project",
       "name": "project",
-      "source_field_ordinal": 5,
-      "source_name_digest": "471cacee86a419f75111098ba664eeb1e7db51b9436a9821c23851df5ed52c15",
+      "field_ordinal": 5,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -314,25 +370,43 @@
           "identifier": "record_type_project"
         }
       },
-      "display_name": "project"
+      "display_name": "project",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_project"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 5,
+      "source_name_digest": "471cacee86a419f75111098ba664eeb1e7db51b9436a9821c23851df5ed52c15"
     },
     {
       "identifier": "record_type_bank_guarantee.column_break_6",
       "name": "column_break_6",
-      "source_field_ordinal": 6,
-      "source_name_digest": "0a7c7686b9d8b47b6a7c44ec7e93a17321a5b09cfcbe054eefd1aa27e926ecee",
+      "field_ordinal": 6,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 6
+      },
+      "source_field_ordinal": 6,
+      "source_name_digest": "0a7c7686b9d8b47b6a7c44ec7e93a17321a5b09cfcbe054eefd1aa27e926ecee"
     },
     {
       "identifier": "record_type_bank_guarantee.amount",
       "name": "amount",
-      "source_field_ordinal": 7,
-      "source_name_digest": "bf8be0777c7b38dfae01bc3f63a8b0a6e34481f9ef8fbec6a68f07f5f3a8baec",
+      "field_ordinal": 7,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -342,13 +416,23 @@
         "visible_in_list": 1,
         "required": 1
       },
-      "display_name": "amount"
+      "display_name": "amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 7,
+      "source_name_digest": "bf8be0777c7b38dfae01bc3f63a8b0a6e34481f9ef8fbec6a68f07f5f3a8baec"
     },
     {
       "identifier": "record_type_bank_guarantee.start_date",
       "name": "start_date",
-      "source_field_ordinal": 8,
-      "source_name_digest": "c8044235216a437ff3e53bff4af5fd28ce3045c4a3067271e2200e574eb7ac89",
+      "field_ordinal": 8,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -357,26 +441,44 @@
       "properties": {
         "required": 1
       },
-      "display_name": "start date"
+      "display_name": "start date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 8,
+      "source_name_digest": "c8044235216a437ff3e53bff4af5fd28ce3045c4a3067271e2200e574eb7ac89"
     },
     {
       "identifier": "record_type_bank_guarantee.validity",
       "name": "validity",
-      "source_field_ordinal": 9,
-      "source_name_digest": "c1fbbd0fa0a423ef18324f65af868cae226506c455212b8484a7587e8a8bc7c2",
+      "field_ordinal": 9,
       "value_type": "integer",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "validity in days"
+      "display_name": "validity in days",
+      "value_contract": {
+        "value_kind": "integer",
+        "fractional_values_allowed": false,
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false,
+        "input_normalization": "The ordinary record adapter converts numeric input to an integer, including truncating a fractional numeric value toward zero. Invalid or absent numeric input follows the shared numeric-default policy; a domain operation may reject it earlier."
+      },
+      "source_field_ordinal": 9,
+      "source_name_digest": "c1fbbd0fa0a423ef18324f65af868cae226506c455212b8484a7587e8a8bc7c2"
     },
     {
       "identifier": "record_type_bank_guarantee.end_date",
       "name": "end_date",
-      "source_field_ordinal": 10,
-      "source_name_digest": "db4f1ff28df4d8e33cc7277883fc0f520f6b558ad2a07a5f8d0c1f57dc4b8c42",
+      "field_ordinal": 10,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -385,26 +487,42 @@
       "properties": {
         "read_only": 1
       },
-      "display_name": "end date"
+      "display_name": "end date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 10,
+      "source_name_digest": "db4f1ff28df4d8e33cc7277883fc0f520f6b558ad2a07a5f8d0c1f57dc4b8c42"
     },
     {
-      "identifier": "record_type_bank_guarantee.bank_account_info",
-      "name": "bank_account_info",
-      "source_field_ordinal": 11,
-      "source_name_digest": "ec611c098e32da204a6c2dd2251a131ec85526fe456efa17a7cc3eae2eaa91f8",
+      "identifier": "record_type_bank_guarantee.bank_account_information",
+      "name": "bank_account_information",
+      "field_ordinal": 11,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "bank account info"
+      "display_name": "bank account info",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 11
+      },
+      "source_field_ordinal": 11,
+      "source_name_digest": "ec611c098e32da204a6c2dd2251a131ec85526fe456efa17a7cc3eae2eaa91f8",
+      "source_identifier": "record_type_bank_guarantee.bank_account_info",
+      "source_name": "bank_account_info"
     },
     {
       "identifier": "record_type_bank_guarantee.bank",
       "name": "bank",
-      "source_field_ordinal": 12,
-      "source_name_digest": "4e1d7abb8a7eb004f99440d0f35dcc1d6f240760bd0773d352b1525bbd565e6d",
+      "field_ordinal": 12,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -416,13 +534,24 @@
           "identifier": "record_type_bank"
         }
       },
-      "display_name": "bank"
+      "display_name": "bank",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_bank"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 12,
+      "source_name_digest": "4e1d7abb8a7eb004f99440d0f35dcc1d6f240760bd0773d352b1525bbd565e6d"
     },
     {
       "identifier": "record_type_bank_guarantee.bank_account",
       "name": "bank_account",
-      "source_field_ordinal": 13,
-      "source_name_digest": "f9d84a722045d3166c5a306a6f993f50668a36e24ddd3d3e6236ad2feb208e60",
+      "field_ordinal": 13,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -434,13 +563,24 @@
           "identifier": "record_type_bank_account"
         }
       },
-      "display_name": "bank account"
+      "display_name": "bank account",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_bank_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 13,
+      "source_name_digest": "f9d84a722045d3166c5a306a6f993f50668a36e24ddd3d3e6236ad2feb208e60"
     },
     {
       "identifier": "record_type_bank_guarantee.account",
       "name": "account",
-      "source_field_ordinal": 14,
-      "source_name_digest": "a2b520d68009c64e1dcdf8cbc40f0f870d1427d455bfe18d4963b7f154b76cda",
+      "field_ordinal": 14,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -453,13 +593,24 @@
         },
         "read_only": 1
       },
-      "display_name": "account"
+      "display_name": "account",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 14,
+      "source_name_digest": "a2b520d68009c64e1dcdf8cbc40f0f870d1427d455bfe18d4963b7f154b76cda"
     },
     {
       "identifier": "record_type_bank_guarantee.bank_account_number",
       "name": "bank_account_number",
-      "source_field_ordinal": 15,
-      "source_name_digest": "6af8627f79d650508b4ab6cd05728f042a912be6626e3ae04754555d8d35fa3d",
+      "field_ordinal": 15,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -468,25 +619,37 @@
       "properties": {
         "read_only": 1
       },
-      "display_name": "bank account no"
+      "display_name": "bank account no",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 15,
+      "source_name_digest": "6af8627f79d650508b4ab6cd05728f042a912be6626e3ae04754555d8d35fa3d"
     },
     {
       "identifier": "record_type_bank_guarantee.column_break_17",
       "name": "column_break_17",
-      "source_field_ordinal": 16,
-      "source_name_digest": "269926aac96de3f48cd5e8f0ac9e90b91dbeeb4ad89bc099334926257b61b756",
+      "field_ordinal": 16,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 16
+      },
+      "source_field_ordinal": 16,
+      "source_name_digest": "269926aac96de3f48cd5e8f0ac9e90b91dbeeb4ad89bc099334926257b61b756"
     },
     {
       "identifier": "record_type_bank_guarantee.international_bank_account_number",
       "name": "international_bank_account_number",
-      "source_field_ordinal": 17,
-      "source_name_digest": "e38643494aaa9fdc76aa1650c11849a6b7426b6c8cde4def203467b2b8f7c6d8",
+      "field_ordinal": 17,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -500,13 +663,18 @@
         },
         "read_only": 1
       },
-      "display_name": "international bank account number"
+      "display_name": "international bank account number",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 17,
+      "source_name_digest": "e38643494aaa9fdc76aa1650c11849a6b7426b6c8cde4def203467b2b8f7c6d8"
     },
     {
       "identifier": "record_type_bank_guarantee.branch_code",
       "name": "branch_code",
-      "source_field_ordinal": 18,
-      "source_name_digest": "5a71a7d0830055f948cf3ef5c17bf97afe052f62044d0d38593aa84da1421a77",
+      "field_ordinal": 18,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -515,13 +683,18 @@
       "properties": {
         "read_only": 1
       },
-      "display_name": "branch code"
+      "display_name": "branch code",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 18,
+      "source_name_digest": "5a71a7d0830055f948cf3ef5c17bf97afe052f62044d0d38593aa84da1421a77"
     },
     {
       "identifier": "record_type_bank_guarantee.society_for_worldwide_interbank_financial_telecommunication_number",
       "name": "society_for_worldwide_interbank_financial_telecommunication_number",
-      "source_field_ordinal": 19,
-      "source_name_digest": "bbd7a2477280a912e452ea78b422e5273a34aff489a69d38fc8755d9fb8dfa94",
+      "field_ordinal": 19,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -530,51 +703,76 @@
       "properties": {
         "read_only": 1
       },
-      "display_name": "society for worldwide interbank financial telecommunication number"
+      "display_name": "society for worldwide interbank financial telecommunication number",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 19,
+      "source_name_digest": "bbd7a2477280a912e452ea78b422e5273a34aff489a69d38fc8755d9fb8dfa94"
     },
     {
       "identifier": "record_type_bank_guarantee.section_break_14",
       "name": "section_break_14",
-      "source_field_ordinal": 20,
-      "source_name_digest": "eba79991cc4a15d0692db77eefa3a38949dd3f04847bfc2fcd48db86070bde91",
+      "field_ordinal": 20,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 20
+      },
+      "source_field_ordinal": 20,
+      "source_name_digest": "eba79991cc4a15d0692db77eefa3a38949dd3f04847bfc2fcd48db86070bde91"
     },
     {
       "identifier": "record_type_bank_guarantee.more_information",
       "name": "more_information",
-      "source_field_ordinal": 21,
-      "source_name_digest": "aade032e2f6af8e5bce14a1de228d0582bec9aaf9dd0d3f40136ff3f8c6a772a",
+      "field_ordinal": 21,
       "value_type": "rich_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "clauses and conditions"
+      "display_name": "clauses and conditions",
+      "value_contract": {
+        "value_kind": "rich_document_text",
+        "rendering": "Preserve supported formatting while applying the configured content sanitization policy.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 21,
+      "source_name_digest": "aade032e2f6af8e5bce14a1de228d0582bec9aaf9dd0d3f40136ff3f8c6a772a"
     },
     {
       "identifier": "record_type_bank_guarantee.margin_details",
       "name": "margin_details",
-      "source_field_ordinal": 22,
-      "source_name_digest": "5c5ac7ff1abed0bca95350502c50606be9fe9b1fd20c7cd5d483bc3568bd635c",
+      "field_ordinal": 22,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "other details"
+      "display_name": "other details",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 22
+      },
+      "source_field_ordinal": 22,
+      "source_name_digest": "5c5ac7ff1abed0bca95350502c50606be9fe9b1fd20c7cd5d483bc3568bd635c"
     },
     {
       "identifier": "record_type_bank_guarantee.bank_guarantee_number",
       "name": "bank_guarantee_number",
-      "source_field_ordinal": 23,
-      "source_name_digest": "5aa07020f85aceace637c9fb416cf5920efc78513239533a632ed3bdbd64e134",
+      "field_ordinal": 23,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -583,77 +781,122 @@
       "properties": {
         "unique": 1
       },
-      "display_name": "bank guarantee number"
+      "display_name": "bank guarantee number",
+      "value_contract": {
+        "value_kind": "text",
+        "uniqueness_scope": "the record type across saved records",
+        "uniqueness_validation": "Reject another persisted record with the same constrained value; handle empty values according to the field storage contract.",
+        "required_when_no_conditional_override": false,
+        "empty_storage_policy": "An empty or whitespace-only unique value is stored as null rather than a repeated empty string."
+      },
+      "source_field_ordinal": 23,
+      "source_name_digest": "5aa07020f85aceace637c9fb416cf5920efc78513239533a632ed3bdbd64e134"
     },
     {
       "identifier": "record_type_bank_guarantee.name_of_beneficiary",
       "name": "name_of_beneficiary",
-      "source_field_ordinal": 24,
-      "source_name_digest": "f9819b5c35beffd4816539e1e78fc632d7194fc5dee072fc52d7c53c5c8d1f0c",
+      "field_ordinal": 24,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "name of beneficiary"
+      "display_name": "name of beneficiary",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 24,
+      "source_name_digest": "f9819b5c35beffd4816539e1e78fc632d7194fc5dee072fc52d7c53c5c8d1f0c"
     },
     {
       "identifier": "record_type_bank_guarantee.column_break_19",
       "name": "column_break_19",
-      "source_field_ordinal": 25,
-      "source_name_digest": "5517a29781f527253a6dc26c94f529adb1d51deb21e8a107139f76288f371201",
+      "field_ordinal": 25,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 25
+      },
+      "source_field_ordinal": 25,
+      "source_name_digest": "5517a29781f527253a6dc26c94f529adb1d51deb21e8a107139f76288f371201"
     },
     {
       "identifier": "record_type_bank_guarantee.margin_money",
       "name": "margin_money",
-      "source_field_ordinal": 26,
-      "source_name_digest": "3532033ad8a181ebadae91e9763fe93d12a8ae94a961b8211a9f96d2ed2b6989",
+      "field_ordinal": 26,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "margin money"
+      "display_name": "margin money",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 26,
+      "source_name_digest": "3532033ad8a181ebadae91e9763fe93d12a8ae94a961b8211a9f96d2ed2b6989"
     },
     {
       "identifier": "record_type_bank_guarantee.charges",
       "name": "charges",
-      "source_field_ordinal": 27,
-      "source_name_digest": "f9d47e04a42d1d22cc0305d85b5e7f8f12fce07cb23faac357dcc1f417dbcca6",
+      "field_ordinal": 27,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "charges incurred"
+      "display_name": "charges incurred",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 27,
+      "source_name_digest": "f9d47e04a42d1d22cc0305d85b5e7f8f12fce07cb23faac357dcc1f417dbcca6"
     },
     {
       "identifier": "record_type_bank_guarantee.fixed_deposit_number",
       "name": "fixed_deposit_number",
-      "source_field_ordinal": 28,
-      "source_name_digest": "d4738bfeebc566a3483212960e0711313face9e3956f34b4605e1cbee7397ebe",
+      "field_ordinal": 28,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "fixed deposit number"
+      "display_name": "fixed deposit number",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 28,
+      "source_name_digest": "d4738bfeebc566a3483212960e0711313face9e3956f34b4605e1cbee7397ebe"
     },
     {
       "identifier": "record_type_bank_guarantee.amended_from",
       "name": "amended_from",
-      "source_field_ordinal": 29,
-      "source_name_digest": "b43b52ad6f6c613ab2fb1330e5f616e71c8b496566b87009de27f6c7b11ed774",
+      "field_ordinal": 29,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -668,9 +911,43 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "amended from"
+      "display_name": "amended from",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_bank_guarantee"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 29,
+      "source_name_digest": "b43b52ad6f6c613ab2fb1330e5f616e71c8b496566b87009de27f6c7b11ed774"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "ordinary record rename disabled",
+    "strategy": "configured_number_series",
+    "rule": "Expand configured prefix and calendar segments and increment the resulting sequence counter.",
+    "serial_width": 5,
+    "calendar_components": [
+      "four_digit_year",
+      "two_digit_year"
+    ],
+    "field_substitutions": []
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "independent_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "Use draft, posted, and cancelled record states with explicit posting and cancellation operations."
+  },
+  "source_name_digest": "bbff488fd89c9979bd106e9db92b9d7d8bfb12dc995e074ccf0ef7b6dd89f24b",
+  "source_pack": "enterprise",
+  "source_artifact": "source-artifact-14348708ae90a0b1e26d",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "1577e44143f1bc6b00c2abb3142531ee0c258ab5de6b9006460fb3594322624c",
@@ -692,5 +969,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "accounting.bank_guarantee",
+    "status": "declared",
+    "dictionary": "schema/entities/accounting-01.json",
+    "declaration_name": "Bank Guarantee",
+    "declaration_catalog": "docs/rebuild/model/catalog/erpnext-accounts-01.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

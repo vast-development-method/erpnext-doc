@@ -4,102 +4,44 @@
 
 [全部主题](README.md)
 
-验收示例描述的是新系统应达到的结果。英文详细说明会区分发布者的描述、源代码中的实现与运行环境中的实测结果。
-
 ## cheque
-
-跟踪每张支票从收取或签发到兑付或退票的过程，并与会计分录和银行流水核对。
-
-**有资料可查的工作流程**
 
 提交收款凭证后生成客户支票，再用送存单把符合条件的支票合并送交银行。查阅到的对账代码先按参考号查找已送存的支票，并确认有关联的会计分录，之后才记录收妥或退票。
 
-**建议的验收示例**
-
-审批门槛为 1,000 时，金额恰好为 1,000 的支票提交后，在新会话中应仍为待审批，且尚无会计分录。会计经理批准后只生成一笔分录，阿拉伯语和英语凭证引用同一支票号码、审批记录和金额。
-
-[英文详细说明](../../apps/cheque.md) · [发布者的市场页面](https://cloud.frappe.io/marketplace/apps/cheque)
+[工作流程与验收案例](../../../../capabilities/guides/zh-Hans/banking.md#workflow-cheque-approval-and-collection) · [来源说明](../../apps/cheque.md)
 
 ## IPCONNEX Stripe Payment
 
-通过 Stripe 收取销售发票款项，并用已确认的付款核销该发票的未结余额。
-
-**有资料可查的工作流程**
-
 产品条目说明，配置 Stripe 和客户付款资料后，销售发票上即可使用付款操作。历史公开副本使用客户保存的付款方式和发票币种，向 Stripe 请求创建 PaymentIntent，并生成分配到该发票的客户付款记录；此处描述的是代码路径，未验证实际部署中的到账结果。
 
-**建议的验收示例**
-
-法语付款人对一张尚欠 40 欧元的英语发票重复提交同一笔收款请求，再重复处理支付服务商的成功事件。只能扣款并核销一次 40 欧元，发票余额归零；收据语言不会改变付款人、商户、支付参考号、币种或金额。
-
-[英文详细说明](../../apps/ipconnex_stripe_payment.md) · [发布者的市场页面](https://cloud.frappe.io/marketplace/apps/ipconnex_stripe_payment)
+[工作流程与验收案例](../../../../capabilities/guides/zh-Hans/banking.md#workflow-saved-payment-method-collections) · [来源说明](../../apps/ipconnex_stripe_payment.md)
 
 ## PDC Cheque Management
 
-跟踪远期支票从收取或签发到存入银行、结清或退票的全过程。
-
-**有资料可查的工作流程**
-
 据发布者介绍，收取客户支票或向供应商签发支票时，系统会通过相应的过渡账户生成付款或收款凭证。在一份注明发布者信息的公开代码副本中，存入银行时生成银行日记账凭证，结清时再将清算日期记入该凭证。
 
-**建议的验收示例**
-
-用支票 00072 核销一张金额为 400.00 的客户发票，存入银行后以相同参考号确认两次。银行余额只增加 400.00，过渡账户归零，德语和南非荷兰语界面显示相同的支票号及凭证号。
-
-[英文详细说明](../../apps/pdc_cheque_management.md) · [发布者的市场页面](https://cloud.frappe.io/marketplace/apps/pdc_cheque_management)
+[工作流程与验收案例](../../../../capabilities/guides/zh-Hans/banking.md#workflow-post-dated-cheque-settlement) · [来源说明](../../apps/pdc_cheque_management.md)
 
 ## ProCredit Bank Statement Processing
 
-导入波斯尼亚和黑塞哥维那 ProCredit 银行的 CSV 对账单，并在对账前核查重复的交易参考号。
-
-**有资料可查的工作流程**
-
 据发布者介绍，导入波斯尼亚和黑塞哥维那 ProCredit 银行的 CSV 对账单时，系统会检查重复参考号。发布者的截图先显示日期、存入金额、支取金额、参考号和说明的导入预览，随后显示尚未对账的银行交易。
 
-**建议的验收示例**
-
-把参考号 00038、金额写作 1.234,50 的银行交易导入两次，再导入同一参考号但金额为 1.234,55 的记录。系统只登记一笔交易，标明重复项，并将金额冲突交给人工复核；切换界面语言不会改变小数解析规则或参考号的前导零。
-
-[英文详细说明](../../apps/procreditbank.md) · [发布者的市场页面](https://cloud.frappe.io/marketplace/apps/procreditbank)
+[工作流程与验收案例](../../../../capabilities/guides/zh-Hans/banking.md#workflow-bank-statement-import-and-duplicate-review) · [来源说明](../../apps/procreditbank.md)
 
 ## Treasury Entry
 
-在资金台账中登记现金或支票收付款，并查看与特定交易方关联的记录。
-
-**有资料可查的工作流程**
-
 发布者的截图显示，在资金台账中，每种付款方式分别配置应付账户和应收账户。登记资金流水时，经办人可以逐行输入账户和金额，也可以选择按交易方登记，调取未结清发票并填写每笔发票的核销金额。
 
-**建议的验收示例**
-
-在同一资金台账中登记一笔关联交易方的现金收入 250.00，以及一笔未关联交易方的现金支出 75.00。无论使用德语还是南非荷兰语，台账净增加额都是 175.00；筛选关联交易方的记录后只显示 250.00 的收入。
-
-[英文详细说明](../../apps/safe_entry.md) · [发布者的市场页面](https://cloud.frappe.io/marketplace/apps/safe_entry)
+[工作流程与验收案例](../../../../capabilities/guides/zh-Hans/banking.md#workflow-treasury-transaction-register) · [来源说明](../../apps/safe_entry.md)
 
 ## Sanpra Easypay
 
-授权通过 ICICI 银行批量支付供应商款项，并逐笔核对银行回执。
-
-**有资料可查的工作流程**
-
 商品说明列出通过 ICICI 银行办理收款和付款的功能。对于供应商付款，发布者介绍了调取付款凭证、通过一次性密码授权批量支付及跟踪银行交易状态的流程，并明确列出 RTGS 和 NEFT 两种转账方式。
 
-**建议的验收示例**
-
-一批两笔已获批准的供应商付款收到银行回执，其中一笔确认、一笔被拒；将该回执处理两次。已付款供应商只收到一份德语付款通知，另一笔仍未付；印地语操作员和英语审批人看到相同的银行参考号和拒付原因原文。
-
-[英文详细说明](../../apps/sanpra_easypay.md) · [发布者的市场页面](https://cloud.frappe.io/marketplace/apps/sanpra_easypay)
+[工作流程与验收案例](../../../../capabilities/guides/zh-Hans/banking.md#workflow-supplier-payment-batch-authorization) · [来源说明](../../apps/sanpra_easypay.md)
 
 ## Stripe2 Payment Integration
 
-通过线上结账、已配对的终端或定期付款请求收款，并将收款结果与发票核对。
-
-**有资料可查的工作流程**
-
 公司联系人验证邮箱并授权 Stripe 账户后，商户设置线上和线下支付方式。已提交的付款请求可以打开在线收银台，定期收款可使用已保存的付款方式，收银员也可使用已注册的终端。
 
-**建议的验收示例**
-
-一名使用法语的付款人结清一张 35.70 欧元的发票。支付平台重复发送成功通知时，系统只核销一次；使用德语的收银员看到的是同一张已结清的发票。
-
-[英文详细说明](../../apps/stripe2.md) · [发布者的市场页面](https://cloud.frappe.io/marketplace/apps/stripe2)
+[工作流程与验收案例](../../../../capabilities/guides/zh-Hans/banking.md#workflow-online-and-terminal-payment-collection) · [来源说明](../../apps/stripe2.md)

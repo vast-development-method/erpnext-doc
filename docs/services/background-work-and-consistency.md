@@ -18,7 +18,9 @@ A worker restores tenant context, connects, applies the captured user when prese
 
 The internal retry path handles a declared retry request and recognized deadlock or lock-wait timeout failures. It rolls back and retries while the retry counter is below five. The first attempt therefore permits up to five further attempts, with delays of one through five seconds. This is distinct from any separately configured queue-level retry policy. A caller cannot infer that an arbitrary validation error, permission error, or external-service failure will retry automatically.
 
-Capture the initiating tenant and actor on the work record. On every attempt reestablish that identity, check current permissions, and stop if the actor is no longer authorized. Retries of the same business event use the same duplicate-detection key.
+**Required retry policy.** Capture the initiating tenant and actor on the work record. On every attempt reestablish that identity, check current permissions, and stop if the actor is no longer authorized. Retries of the same business event use the same duplicate-detection key.
+
+**Qualification.** The inspected retry path did not establish preservation of the original user on every attempt. Record the effective tenant and actor for each attempt when verifying this requirement.
 
 The [retry schedule](#retry-schedule-and-duplicate-boundaries) defines six maximum internal executions and separates retryable concurrency failures from ordinary business rejection. Acting identity must be checked on every attempt.
 

@@ -1,5 +1,7 @@
 # Digital Signature
 
+[Business workflow and acceptance cases](../../../capabilities/guides/documents.md#signed-document-dispatch).
+
 Apoorv Soral’s listing for version 14 describes signing a generated PDF inside the ERP. Each user can have an associated digital signature. A user is assigned responsibility for signing a document such as a Sales Invoice. The resulting signed file can be downloaded or emailed directly to the customer or other party. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/dsc)
 
 ## Documented scope
@@ -10,16 +12,10 @@ The publisher's setup walkthrough names the **DSC User** record. The operator ad
 
 ## Proposed rebuild contract
 
-An eligible business document has an immutable revision, print template/version, selected output language, intended signer and recipient. Render an unsigned PDF snapshot. A signing request references its digest, assigned signer and signing policy. The approved signing operation produces a new immutable artifact, associates a verification result and records the completion time and certificate identity. Use a protected signing credential reference. A downloaded copy and emailed attachment must refer to that exact signed artifact. Email-delivery success, retry and bounce remain separate from signature validity.
-
-Keep the source document, rendered input and signed output distinct. The source can be amended, but the amendment must create a new PDF revision and signing request. Keep the old signed document retrievable with its prior audit record. If signing fails, identify the request and cause and leave the output unavailable for signed delivery.
+[Read the consolidated workflow](../../../capabilities/guides/documents.md#signed-document-dispatch).
 
 ## Language and acceptance
 
-Resolve document language before rendering, including customer terms, signature captions, glyph-capable fonts and directionality. Preserve signer and recipient names as authored. An operator can dispatch an Arabic invoice from an English interface. Translate the email body independently of the attached signed bytes.
-
-- A German invoice is signed and sent to two authorised recipients using different email languages. Each attachment's digest equals the stored signed digest. Downloading the archive later returns those same bytes.
-- An Arabic version is requested after the German PDF was signed. Generate a separate Arabic document revision and obtain a new signature. The first signed copy and its verification result remain available.
-- If a non-assigned user attempts signing, or the signing service reports an unusable credential, no signed artifact is published. Retrying an email delivery resends the stored attachment without creating a second signature.
-
 These are replacement requirements. Independent signature validation against sample PDFs, distinguishing credential issuance from legal recognition and matching specific distributed versions remain open. [Publisher-named repository](https://github.com/asoral/dsc)
+
+[Read the consolidated acceptance cases](../../../capabilities/guides/documents.md#signed-document-dispatch-3).

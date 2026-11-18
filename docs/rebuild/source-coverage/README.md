@@ -4,9 +4,9 @@ An accounts clerk can open a link labelled **Home**, arrive at the **Accounting*
 
 ## Source coverage
 
-The [object register](records.tsv) and [supporting data register](supporting-data.tsv) account for **all 703 tracked JSON files beneath the two application packages whose path has no directory named `doctype`**. The November release pins are [ERPNext 16.60.0](https://github.com/frappe/erpnext/tree/886ab6ae187244e7f1b852393384ab6019d56264) and [Frappe 16.60.1](https://github.com/frappe/frappe/tree/199a0385c00e572664a099a57a00be6ce7404eeb).
+The [object register](records.tsv) and [supporting data register](supporting-data.tsv) account for **all 703 tracked JSON files beneath the two application packages whose path has no directory named `doctype`**. The source inventory covers [Business application](https://github.com/frappe/erpnext/tree/886ab6ae187244e7f1b852393384ab6019d56264) and [Foundation](https://github.com/frappe/frappe/tree/199a0385c00e572664a099a57a00be6ce7404eeb).
 
-| Population | ERPNext | Framework | What a reader can verify |
+| Population | Business application | Framework | What a reader can verify |
 |---|---:|---:|---|
 | Named, object-form records | 579 | 109 | Type, original record name, source module when present, package-relative path and Git blob ID. Two Framework DocType objects under `custom/fixtures` are marked as fixtures. |
 | Lists and objects without a root record type | 10 | 5 | File shape, top-level entry count, source path and Git blob ID. Examples include 239 UOM definitions, 235 conversion rows, 29 account categories, country data, demo records and a test sidebar. |
@@ -14,7 +14,7 @@ The [object register](records.tsv) and [supporting data register](supporting-dat
 
 The application packages contain additional assets and executable code. The [canonical record dictionary](../model/INDEX.md) covers DocType definitions inside the `doctype` folders. The [runtime surface register](../surfaces/README.md) covers report executors, controllers, hooks and test declarations. A report in both indexes is one source record viewed from two perspectives. Site-added records and app ordering enter through the [effective site profile](../configuration/README.md).
 
-| Published projection | ERPNext | Framework | Details retained |
+| Published projection | Business application | Framework | Details retained |
 |---|---:|---:|---|
 | [ERP workspaces](erpnext-workspace.tsv) and [Framework workspaces](frappe-workspace.tsv) | 858 rows | 95 rows | Ordered links, shortcuts, embedded sidebar rows, chart and number-card bindings, and quick lists across 24 workspaces. |
 | [ERP sidebars and dock](erpnext-sidebar.tsv) and [Framework sidebars and dock](frappe-sidebar.tsv) | 324 rows | 181 rows | 26 Sidebar documents and two Docks. Includes grouping, drill-down destinations, URI rows and declared routing options. |
@@ -24,7 +24,7 @@ The application packages contain additional assets and executable code. The [can
 | [Onboarding sequence](onboarding.tsv) | 69 steps | 0 | Nine guides, 39 required and 30 optional step positions. Access roles, action, stable destination and initial field values are recorded for each position. |
 | [Settings exposed from business records](settings-map.tsv) | 165 field mappings | 0 | 31 maps connect an affected record to a field on its source settings document. Each mapping resolves to a declared field and includes its label, type, permission level and declared default where present. |
 
-**Navigation lookup.** Each of the 1,931 navigation rows has a one-based position in its source array. The `lookup` column matches the exact target type and name to a shipped record in either package, including canonical DocTypes. A match establishes identity at these pins. There are **1,710 matches**, **216 structural or other rows without a target**, **three URI targets** and **two named targets without a matching definition**. Repeated references to a destination and the same link appearing in distinct source objects retain separate positions.
+**Navigation lookup.** Each of the 1,931 navigation rows has a one-based position in its source array. The `lookup` column matches the exact target type and name to a shipped record in either package, including canonical DocTypes. A match establishes identity in the catalog. There are **1,710 matches**, **216 structural or other rows without a target**, **three URI targets** and **two named targets without a matching definition**. Repeated references to a destination and the same link appearing in distinct source objects retain separate positions.
 
 | Named target without a matching definition | Evidence | Rebuild treatment |
 |---|---|---|

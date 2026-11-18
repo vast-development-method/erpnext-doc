@@ -1,0 +1,2005 @@
+{
+  "catalog_kind": "ordered_decision_contracts",
+  "partition_of": "enterprise-decision-contracts.json",
+  "contracts": [
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_show_stock_ledger_preview",
+      "name": "show_stock_ledger_preview",
+      "owner_scope": [],
+      "parameters": [
+        {
+          "name": "company",
+          "position": 0,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "text"
+          }
+        },
+        {
+          "name": "record_type",
+          "position": 1,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "text"
+          }
+        },
+        {
+          "name": "record_name",
+          "position": 2,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "text"
+          }
+        }
+      ],
+      "scope": "current_candidate",
+      "source_symbol": "show_stock_ledger_preview",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L640-L656"
+      ],
+      "decision_steps": [
+        "Accept company and voucher identity. Select currency formatting for valuation, retrieve the voucher and require read permission.",
+        "Invoke the before-stock-ledger-preview hook, obtain the stock columns and rows, roll back the transaction and return them under sl_columns and sl_data."
+      ],
+      "acceptance_example": "A warehouse voucher preview returns stock rows with currency-valued valuation and leaves preview writes rolled back.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_repost_required_for_queue",
+      "name": "repost_required_for_queue",
+      "owner_scope": [],
+      "parameters": [
+        {
+          "name": "record",
+          "position": 0,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "stock_controller"
+          }
+        }
+      ],
+      "scope": "current_candidate",
+      "source_symbol": "repost_required_for_queue",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L659-L685"
+      ],
+      "decision_steps": [
+        "Select this voucher’s uncancelled stock-ledger rows with negative actual quantity. Build ordered item/warehouse pairs.",
+        "If every pair is distinct, return false. Otherwise return true if any selected row’s stock queue differs from the serialized empty-list literal, even if that row belongs to a different pair. Return false if all equal the empty literal."
+      ],
+      "acceptance_example": "Two outgoing A/W entries with empty queues plus one outgoing B/W entry with a populated queue return true; three distinct pairs return false regardless of queue contents.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_check_item_quality_inspection",
+      "name": "check_item_quality_inspection",
+      "owner_scope": [],
+      "parameters": [
+        {
+          "name": "record_type",
+          "position": 0,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "text"
+          }
+        },
+        {
+          "name": "record_state",
+          "position": 1,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "binary_operation",
+            "operator": "bitwise_or",
+            "left": {
+              "kind": "variable",
+              "name": "text"
+            },
+            "right": {
+              "kind": "variable",
+              "name": "integer"
+            }
+          }
+        },
+        {
+          "name": "items",
+          "position": 2,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "binary_operation",
+            "operator": "bitwise_or",
+            "left": {
+              "kind": "variable",
+              "name": "text"
+            },
+            "right": {
+              "kind": "indexed_value",
+              "collection": {
+                "kind": "variable",
+                "name": "list"
+              },
+              "index": {
+                "kind": "variable",
+                "name": "mapping"
+              }
+            }
+          }
+        }
+      ],
+      "scope": "current_candidate",
+      "source_symbol": "check_item_quality_inspection",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L688-L717"
+      ],
+      "decision_steps": [
+        "Parse rows and resolve the inspection flag for this voucher type. Without a mapping return all rows for Stock Entry and an empty list for other unmapped types.",
+        "For a mapped submitted document whose site permits inspection after purchase or delivery, return the input rows. Otherwise query distinct item codes for the relevant master flag and return qualifying original rows in input order with duplicates preserved."
+      ],
+      "acceptance_example": "For flagged A and unflagged B, a draft containing A, B, A returns A, A; an eligible submitted voucher with post-transaction inspection enabled returns all three.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_make_quality_inspections",
+      "name": "make_quality_inspections",
+      "owner_scope": [],
+      "parameters": [
+        {
+          "name": "company",
+          "position": 0,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "text"
+          }
+        },
+        {
+          "name": "record_type",
+          "position": 1,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "text"
+          }
+        },
+        {
+          "name": "record_name",
+          "position": 2,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "text"
+          }
+        },
+        {
+          "name": "items",
+          "position": 3,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "binary_operation",
+            "operator": "bitwise_or",
+            "left": {
+              "kind": "variable",
+              "name": "text"
+            },
+            "right": {
+              "kind": "variable",
+              "name": "list"
+            }
+          }
+        },
+        {
+          "name": "inspection_type",
+          "position": 4,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "text"
+          }
+        }
+      ],
+      "scope": "current_candidate",
+      "source_symbol": "make_quality_inspections",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L720-L758"
+      ],
+      "decision_steps": [
+        "Accept a POST request and parse the input items. For each item reject sample size greater than accepted quantity using numeric conversions.",
+        "Build and save an inspection for the passed company, inspection type and reference voucher. Set inspector to the session user and preserve item code, description, numeric sample size, batch and child-row reference. Use only the first newline-delimited serial when provided.",
+        "Return the saved inspection identifiers in input order. The wrapper contains no per-item commit."
+      ],
+      "acceptance_example": "For an accepted quantity of 5, sample 2 and serials S1 then S2 on separate lines, the new inspection records sample 2 and S1. A sample of 6 raises validation failure.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_is_reposting_pending",
+      "name": "is_reposting_pending",
+      "owner_scope": [],
+      "parameters": [],
+      "scope": "current_candidate",
+      "source_symbol": "is_reposting_pending",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L761-L764"
+      ],
+      "decision_steps": [
+        "Query for the existence of a submitted Repost Item Valuation record whose status is Queued or In Progress. Return the storage layer’s existence result, which can be an identifier usable as a truth value."
+      ],
+      "acceptance_example": "A completed submitted repost and a draft queued repost alone leave this check falsey. A submitted queued repost makes it truthy.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_invalidate_future_stock_ledger_entry_cache",
+      "name": "invalidate_future_stock_ledger_entry_cache",
+      "owner_scope": [],
+      "parameters": [
+        {
+          "name": "voucher_type",
+          "position": 0,
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "voucher_number",
+          "position": 1,
+          "binding": "positional_or_named",
+          "required": true
+        }
+      ],
+      "scope": "current_candidate",
+      "source_symbol": "invalidate_future_sle_cache",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L767-L769"
+      ],
+      "decision_steps": [
+        "If the current execution context carries a future-stock-ledger cache, remove the entry keyed by the exact pair of voucher type and number. Missing keys or a missing cache are tolerated."
+      ],
+      "acceptance_example": "Evicting Delivery Note / A keeps Stock Entry / A cached. Repeating the eviction completes without error.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_customer_relationship_management_utils_business_behavior_update_lead_phone_numbers",
+      "name": "update lead phone numbers",
+      "component": "component_enterprise_customer_relationship_management_utils_business_behavior",
+      "scope": "current_candidate",
+      "procedure_semantics": "decision-semantics.json",
+      "contract_role": "operational_behavior",
+      "validation_level": "structural_decision_translation_with_domain_review_separate",
+      "parameters": [
+        {
+          "name": "contact",
+          "public_parameter_name": "contact",
+          "external_parameter_text": "contact",
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "method",
+          "public_parameter_name": "method",
+          "external_parameter_text": "method",
+          "binding": "positional_or_named",
+          "required": true
+        }
+      ],
+      "definition_wrappers": [],
+      "wrapper_application_order": "Evaluate wrapper expressions at definition; apply wrappers from the last listed expression toward the first. Their authorization, regional dispatch, caching and optional-capability behavior must be bound separately.",
+      "module_context_requirement": "Bind referenced module values, imports, class inheritance and shared state before invoking the operation body.",
+      "decision_steps": [
+        {
+          "action": "choose_branch",
+          "when": {
+            "kind": "member_value",
+            "owner": {
+              "kind": "value_reference",
+              "name": "contact"
+            },
+            "name": "phone_numbers"
+          },
+          "then": [
+            {
+              "action": "set_values",
+              "targets": [
+                {
+                  "kind": "value_reference",
+                  "name": "contact_lead"
+                }
+              ],
+              "value": {
+                "kind": "operation_result",
+                "operation": {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "contact"
+                  },
+                  "name": "get_link_for"
+                },
+                "arguments": [
+                  {
+                    "kind": "symbolic_value",
+                    "value": "lead",
+                    "identifier_roles": [
+                      "record_identifier"
+                    ],
+                    "text_when_not_used_as_identifier": "Lead",
+                    "interpretation_contract": "decision-semantics.json#identifier_literals"
+                  }
+                ],
+                "named_arguments": [],
+                "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+              }
+            },
+            {
+              "action": "choose_branch",
+              "when": {
+                "kind": "value_reference",
+                "name": "contact_lead"
+              },
+              "then": [
+                {
+                  "action": "set_values",
+                  "targets": [
+                    {
+                      "kind": "value_reference",
+                      "name": "phone"
+                    },
+                    {
+                      "kind": "value_reference",
+                      "name": "mobile_number"
+                    }
+                  ],
+                  "value": {
+                    "kind": "member_value",
+                    "owner": {
+                      "kind": "indexed_value",
+                      "collection": {
+                        "kind": "member_value",
+                        "owner": {
+                          "kind": "value_reference",
+                          "name": "contact"
+                        },
+                        "name": "phone_numbers"
+                      },
+                      "selection": {
+                        "kind": "number",
+                        "value": "0"
+                      }
+                    },
+                    "name": "phone"
+                  }
+                },
+                {
+                  "action": "choose_branch",
+                  "when": {
+                    "kind": "ordered_comparison_chain",
+                    "initial": {
+                      "kind": "operation_result",
+                      "operation": {
+                        "kind": "value_reference",
+                        "name": "length"
+                      },
+                      "arguments": [
+                        {
+                          "kind": "member_value",
+                          "owner": {
+                            "kind": "value_reference",
+                            "name": "contact"
+                          },
+                          "name": "phone_numbers"
+                        }
+                      ],
+                      "named_arguments": [],
+                      "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+                    },
+                    "comparisons": [
+                      {
+                        "operator": "greater_than",
+                        "right": {
+                          "kind": "number",
+                          "value": "1"
+                        }
+                      }
+                    ]
+                  },
+                  "then": [
+                    {
+                      "action": "set_values",
+                      "targets": [
+                        {
+                          "kind": "value_reference",
+                          "name": "primary_phones"
+                        }
+                      ],
+                      "value": {
+                        "kind": "collection_projection",
+                        "collection_kind": "ordered",
+                        "iteration": [
+                          {
+                            "bind": {
+                              "kind": "value_reference",
+                              "name": "phone_record"
+                            },
+                            "over": {
+                              "kind": "member_value",
+                              "owner": {
+                                "kind": "value_reference",
+                                "name": "contact"
+                              },
+                              "name": "phone_numbers"
+                            },
+                            "where_all": [
+                              {
+                                "kind": "member_value",
+                                "owner": {
+                                  "kind": "value_reference",
+                                  "name": "phone_record"
+                                },
+                                "name": "is_primary_phone"
+                              }
+                            ],
+                            "asynchronous": false
+                          }
+                        ],
+                        "value": {
+                          "kind": "member_value",
+                          "owner": {
+                            "kind": "value_reference",
+                            "name": "phone_record"
+                          },
+                          "name": "phone"
+                        }
+                      }
+                    },
+                    {
+                      "action": "choose_branch",
+                      "when": {
+                        "kind": "value_reference",
+                        "name": "primary_phones"
+                      },
+                      "then": [
+                        {
+                          "action": "set_values",
+                          "targets": [
+                            {
+                              "kind": "value_reference",
+                              "name": "phone"
+                            }
+                          ],
+                          "value": {
+                            "kind": "indexed_value",
+                            "collection": {
+                              "kind": "value_reference",
+                              "name": "primary_phones"
+                            },
+                            "selection": {
+                              "kind": "number",
+                              "value": "0"
+                            }
+                          }
+                        }
+                      ],
+                      "otherwise": []
+                    },
+                    {
+                      "action": "set_values",
+                      "targets": [
+                        {
+                          "kind": "value_reference",
+                          "name": "primary_mobile_numbers"
+                        }
+                      ],
+                      "value": {
+                        "kind": "collection_projection",
+                        "collection_kind": "ordered",
+                        "iteration": [
+                          {
+                            "bind": {
+                              "kind": "value_reference",
+                              "name": "phone_record"
+                            },
+                            "over": {
+                              "kind": "member_value",
+                              "owner": {
+                                "kind": "value_reference",
+                                "name": "contact"
+                              },
+                              "name": "phone_numbers"
+                            },
+                            "where_all": [
+                              {
+                                "kind": "member_value",
+                                "owner": {
+                                  "kind": "value_reference",
+                                  "name": "phone_record"
+                                },
+                                "name": "is_primary_mobile_number"
+                              }
+                            ],
+                            "asynchronous": false
+                          }
+                        ],
+                        "value": {
+                          "kind": "member_value",
+                          "owner": {
+                            "kind": "value_reference",
+                            "name": "phone_record"
+                          },
+                          "name": "phone"
+                        }
+                      }
+                    },
+                    {
+                      "action": "choose_branch",
+                      "when": {
+                        "kind": "value_reference",
+                        "name": "primary_mobile_numbers"
+                      },
+                      "then": [
+                        {
+                          "action": "set_values",
+                          "targets": [
+                            {
+                              "kind": "value_reference",
+                              "name": "mobile_number"
+                            }
+                          ],
+                          "value": {
+                            "kind": "indexed_value",
+                            "collection": {
+                              "kind": "value_reference",
+                              "name": "primary_mobile_numbers"
+                            },
+                            "selection": {
+                              "kind": "number",
+                              "value": "0"
+                            }
+                          }
+                        }
+                      ],
+                      "otherwise": []
+                    }
+                  ],
+                  "otherwise": []
+                },
+                {
+                  "action": "set_values",
+                  "targets": [
+                    {
+                      "kind": "value_reference",
+                      "name": "lead"
+                    }
+                  ],
+                  "value": {
+                    "kind": "operation_result",
+                    "operation": {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "value_reference",
+                        "name": "application_foundation"
+                      },
+                      "name": "get_record"
+                    },
+                    "arguments": [
+                      {
+                        "kind": "symbolic_value",
+                        "value": "lead",
+                        "identifier_roles": [
+                          "record_identifier"
+                        ],
+                        "text_when_not_used_as_identifier": "Lead",
+                        "interpretation_contract": "decision-semantics.json#identifier_literals"
+                      },
+                      {
+                        "kind": "value_reference",
+                        "name": "contact_lead"
+                      }
+                    ],
+                    "named_arguments": [],
+                    "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+                  }
+                },
+                {
+                  "action": "evaluate",
+                  "value": {
+                    "kind": "operation_result",
+                    "operation": {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "value_reference",
+                        "name": "lead"
+                      },
+                      "name": "persistent_records_set"
+                    },
+                    "arguments": [
+                      {
+                        "kind": "symbolic_value",
+                        "value": "phone",
+                        "identifier_roles": [
+                          "member_identifier"
+                        ],
+                        "text_when_not_used_as_identifier": "phone",
+                        "interpretation_contract": "decision-semantics.json#identifier_literals"
+                      },
+                      {
+                        "kind": "value_reference",
+                        "name": "phone"
+                      }
+                    ],
+                    "named_arguments": [],
+                    "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+                  }
+                },
+                {
+                  "action": "evaluate",
+                  "value": {
+                    "kind": "operation_result",
+                    "operation": {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "value_reference",
+                        "name": "lead"
+                      },
+                      "name": "persistent_records_set"
+                    },
+                    "arguments": [
+                      {
+                        "kind": "symbolic_value",
+                        "value": "mobile_number",
+                        "identifier_roles": [
+                          "member_identifier"
+                        ],
+                        "text_when_not_used_as_identifier": "mobile_no",
+                        "interpretation_contract": "decision-semantics.json#identifier_literals"
+                      },
+                      {
+                        "kind": "value_reference",
+                        "name": "mobile_number"
+                      }
+                    ],
+                    "named_arguments": [],
+                    "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+                  }
+                }
+              ],
+              "otherwise": []
+            }
+          ],
+          "otherwise": []
+        }
+      ],
+      "asynchronous": false,
+      "declared_result_shape": {
+        "kind": "inferred_from_completion_branches"
+      },
+      "locally_resolved_operations": [],
+      "context_bound_capabilities": [
+        "application_foundation_get_record",
+        "contact_get_link_for",
+        "lead_persistent_records_set",
+        "length"
+      ],
+      "implicit_completion": "Absent an earlier completion or propagated failure, complete with an absent value."
+    },
+    {
+      "identifier": "operation_enterprise_customer_relationship_management_utils_business_behavior_copy_comments",
+      "name": "copy comments",
+      "component": "component_enterprise_customer_relationship_management_utils_business_behavior",
+      "scope": "current_candidate",
+      "procedure_semantics": "decision-semantics.json",
+      "contract_role": "operational_behavior",
+      "validation_level": "structural_decision_translation_with_domain_review_separate",
+      "parameters": [
+        {
+          "name": "record_type",
+          "public_parameter_name": "record_type",
+          "external_parameter_text": "doctype",
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "record_name",
+          "public_parameter_name": "record_name",
+          "external_parameter_text": "docname",
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "record",
+          "public_parameter_name": "record",
+          "external_parameter_text": "doc",
+          "binding": "positional_or_named",
+          "required": true
+        }
+      ],
+      "definition_wrappers": [],
+      "wrapper_application_order": "Evaluate wrapper expressions at definition; apply wrappers from the last listed expression toward the first. Their authorization, regional dispatch, caching and optional-capability behavior must be bound separately.",
+      "module_context_requirement": "Bind referenced module values, imports, class inheritance and shared state before invoking the operation body.",
+      "decision_steps": [
+        {
+          "action": "set_values",
+          "targets": [
+            {
+              "kind": "value_reference",
+              "name": "comments"
+            }
+          ],
+          "value": {
+            "kind": "operation_result",
+            "operation": {
+              "kind": "member_value",
+              "owner": {
+                "kind": "member_value",
+                "owner": {
+                  "kind": "value_reference",
+                  "name": "application_foundation"
+                },
+                "name": "persistent_records"
+              },
+              "name": "get_values"
+            },
+            "arguments": [
+              {
+                "kind": "symbolic_value",
+                "value": "comment",
+                "identifier_roles": [
+                  "record_identifier"
+                ],
+                "text_when_not_used_as_identifier": "Comment",
+                "interpretation_contract": "decision-semantics.json#identifier_literals"
+              }
+            ],
+            "named_arguments": [
+              {
+                "name": "filters",
+                "value": {
+                  "kind": "keyed_collection",
+                  "entries": [
+                    {
+                      "key": {
+                        "kind": "symbolic_value",
+                        "value": "reference_record_type",
+                        "identifier_roles": [
+                          "member_identifier"
+                        ],
+                        "text_when_not_used_as_identifier": "reference_doctype",
+                        "interpretation_contract": "decision-semantics.json#identifier_literals"
+                      },
+                      "value": {
+                        "kind": "value_reference",
+                        "name": "record_type"
+                      },
+                      "expand_mapping": false
+                    },
+                    {
+                      "key": {
+                        "kind": "symbolic_value",
+                        "value": "reference_name",
+                        "identifier_roles": [
+                          "member_identifier"
+                        ],
+                        "text_when_not_used_as_identifier": "reference_name",
+                        "interpretation_contract": "decision-semantics.json#identifier_literals"
+                      },
+                      "value": {
+                        "kind": "value_reference",
+                        "name": "record_name"
+                      },
+                      "expand_mapping": false
+                    },
+                    {
+                      "key": {
+                        "kind": "symbolic_value",
+                        "value": "comment_type",
+                        "identifier_roles": [
+                          "member_identifier"
+                        ],
+                        "text_when_not_used_as_identifier": "comment_type",
+                        "interpretation_contract": "decision-semantics.json#identifier_literals"
+                      },
+                      "value": {
+                        "kind": "symbolic_value",
+                        "value": "comment",
+                        "identifier_roles": [
+                          "record_identifier"
+                        ],
+                        "text_when_not_used_as_identifier": "Comment",
+                        "interpretation_contract": "decision-semantics.json#identifier_literals"
+                      },
+                      "expand_mapping": false
+                    }
+                  ]
+                },
+                "external_parameter_text": "filters",
+                "parameter_binding": "callee_public_name_requires_context_binding"
+              },
+              {
+                "name": "fieldname",
+                "value": {
+                  "kind": "text",
+                  "value": "*"
+                },
+                "external_parameter_text": "fieldname",
+                "parameter_binding": "callee_public_name_requires_context_binding"
+              }
+            ],
+            "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+          }
+        },
+        {
+          "action": "for_each",
+          "bind": {
+            "kind": "value_reference",
+            "name": "comment"
+          },
+          "over": {
+            "kind": "value_reference",
+            "name": "comments"
+          },
+          "steps": [
+            {
+              "action": "set_values",
+              "targets": [
+                {
+                  "kind": "value_reference",
+                  "name": "comment"
+                }
+              ],
+              "value": {
+                "kind": "operation_result",
+                "operation": {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "application_foundation"
+                  },
+                  "name": "get_record"
+                },
+                "arguments": [
+                  {
+                    "kind": "operation_result",
+                    "operation": {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "value_reference",
+                        "name": "comment"
+                      },
+                      "name": "update"
+                    },
+                    "arguments": [
+                      {
+                        "kind": "keyed_collection",
+                        "entries": [
+                          {
+                            "key": {
+                              "kind": "symbolic_value",
+                              "value": "record_type",
+                              "identifier_roles": [
+                                "member_identifier"
+                              ],
+                              "text_when_not_used_as_identifier": "doctype",
+                              "interpretation_contract": "decision-semantics.json#identifier_literals"
+                            },
+                            "value": {
+                              "kind": "symbolic_value",
+                              "value": "comment",
+                              "identifier_roles": [
+                                "record_identifier"
+                              ],
+                              "text_when_not_used_as_identifier": "Comment",
+                              "interpretation_contract": "decision-semantics.json#identifier_literals"
+                            },
+                            "expand_mapping": false
+                          }
+                        ]
+                      }
+                    ],
+                    "named_arguments": [],
+                    "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+                  }
+                ],
+                "named_arguments": [],
+                "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+              }
+            },
+            {
+              "action": "set_values",
+              "targets": [
+                {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "comment"
+                  },
+                  "name": "record_name",
+                  "name_when_not_record_member": "name",
+                  "binding_requirement": "Resolve the receiver record type and select its canonical schema member before reading or writing; ambiguous candidates have no default. For ordinary non-record objects bind the alternate member according to its capability."
+                }
+              ],
+              "value": {
+                "kind": "absence"
+              }
+            },
+            {
+              "action": "set_values",
+              "targets": [
+                {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "comment"
+                  },
+                  "name": "reference_record_type"
+                }
+              ],
+              "value": {
+                "kind": "member_value",
+                "owner": {
+                  "kind": "value_reference",
+                  "name": "record"
+                },
+                "name": "record_type"
+              }
+            },
+            {
+              "action": "set_values",
+              "targets": [
+                {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "comment"
+                  },
+                  "name": "reference_name"
+                }
+              ],
+              "value": {
+                "kind": "member_value",
+                "owner": {
+                  "kind": "value_reference",
+                  "name": "record"
+                },
+                "name": "record_name",
+                "name_when_not_record_member": "name",
+                "binding_requirement": "Resolve the receiver record type and select its canonical schema member before reading or writing; ambiguous candidates have no default. For ordinary non-record objects bind the alternate member according to its capability."
+              }
+            },
+            {
+              "action": "evaluate",
+              "value": {
+                "kind": "operation_result",
+                "operation": {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "comment"
+                  },
+                  "name": "insert"
+                },
+                "arguments": [],
+                "named_arguments": [],
+                "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+              }
+            }
+          ],
+          "after_natural_completion": [],
+          "asynchronous": false
+        }
+      ],
+      "asynchronous": false,
+      "declared_result_shape": {
+        "kind": "inferred_from_completion_branches"
+      },
+      "locally_resolved_operations": [],
+      "context_bound_capabilities": [
+        "application_foundation_get_record",
+        "application_foundation_persistent_records_get_values",
+        "comment_insert",
+        "comment_update"
+      ],
+      "implicit_completion": "Absent an earlier completion or propagated failure, complete with an absent value."
+    },
+    {
+      "identifier": "operation_enterprise_customer_relationship_management_utils_business_behavior_link_communications",
+      "name": "link communications",
+      "component": "component_enterprise_customer_relationship_management_utils_business_behavior",
+      "scope": "current_candidate",
+      "procedure_semantics": "decision-semantics.json",
+      "contract_role": "operational_behavior",
+      "validation_level": "structural_decision_translation_with_domain_review_separate",
+      "parameters": [
+        {
+          "name": "record_type",
+          "public_parameter_name": "record_type",
+          "external_parameter_text": "doctype",
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "record_name",
+          "public_parameter_name": "record_name",
+          "external_parameter_text": "docname",
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "record",
+          "public_parameter_name": "record",
+          "external_parameter_text": "doc",
+          "binding": "positional_or_named",
+          "required": true
+        }
+      ],
+      "definition_wrappers": [],
+      "wrapper_application_order": "Evaluate wrapper expressions at definition; apply wrappers from the last listed expression toward the first. Their authorization, regional dispatch, caching and optional-capability behavior must be bound separately.",
+      "module_context_requirement": "Bind referenced module values, imports, class inheritance and shared state before invoking the operation body.",
+      "decision_steps": [
+        {
+          "action": "set_values",
+          "targets": [
+            {
+              "kind": "value_reference",
+              "name": "communication_list"
+            }
+          ],
+          "value": {
+            "kind": "operation_result",
+            "operation": {
+              "kind": "value_reference",
+              "name": "get_linked_communication_list"
+            },
+            "arguments": [
+              {
+                "kind": "value_reference",
+                "name": "record_type"
+              },
+              {
+                "kind": "value_reference",
+                "name": "record_name"
+              }
+            ],
+            "named_arguments": [],
+            "operation_identifier": "operation_enterprise_customer_relationship_management_utils_business_behavior_get_linked_communication_list",
+            "resolution_basis": "lexically_visible_definition",
+            "dispatch_requirement": "Honor captured scope, receiver override and wrapper context; this link identifies a declared body rather than proving every runtime dispatch."
+          }
+        },
+        {
+          "action": "for_each",
+          "bind": {
+            "kind": "value_reference",
+            "name": "communication"
+          },
+          "over": {
+            "kind": "value_reference",
+            "name": "communication_list"
+          },
+          "steps": [
+            {
+              "action": "set_values",
+              "targets": [
+                {
+                  "kind": "value_reference",
+                  "name": "communication_record"
+                }
+              ],
+              "value": {
+                "kind": "operation_result",
+                "operation": {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "application_foundation"
+                  },
+                  "name": "get_record"
+                },
+                "arguments": [
+                  {
+                    "kind": "symbolic_value",
+                    "value": "communication",
+                    "identifier_roles": [
+                      "record_identifier"
+                    ],
+                    "text_when_not_used_as_identifier": "Communication",
+                    "interpretation_contract": "decision-semantics.json#identifier_literals"
+                  },
+                  {
+                    "kind": "value_reference",
+                    "name": "communication"
+                  }
+                ],
+                "named_arguments": [],
+                "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+              }
+            },
+            {
+              "action": "evaluate",
+              "value": {
+                "kind": "operation_result",
+                "operation": {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "communication_record"
+                  },
+                  "name": "add_link"
+                },
+                "arguments": [
+                  {
+                    "kind": "member_value",
+                    "owner": {
+                      "kind": "value_reference",
+                      "name": "record"
+                    },
+                    "name": "record_type"
+                  },
+                  {
+                    "kind": "member_value",
+                    "owner": {
+                      "kind": "value_reference",
+                      "name": "record"
+                    },
+                    "name": "record_name",
+                    "name_when_not_record_member": "name",
+                    "binding_requirement": "Resolve the receiver record type and select its canonical schema member before reading or writing; ambiguous candidates have no default. For ordinary non-record objects bind the alternate member according to its capability."
+                  }
+                ],
+                "named_arguments": [
+                  {
+                    "name": "autosave",
+                    "value": {
+                      "kind": "truth_value",
+                      "value": true
+                    },
+                    "external_parameter_text": "autosave",
+                    "parameter_binding": "callee_public_name_requires_context_binding"
+                  }
+                ],
+                "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+              }
+            }
+          ],
+          "after_natural_completion": [],
+          "asynchronous": false
+        }
+      ],
+      "asynchronous": false,
+      "declared_result_shape": {
+        "kind": "inferred_from_completion_branches"
+      },
+      "locally_resolved_operations": [
+        "operation_enterprise_customer_relationship_management_utils_business_behavior_get_linked_communication_list"
+      ],
+      "context_bound_capabilities": [
+        "application_foundation_get_record",
+        "communication_record_add_link"
+      ],
+      "implicit_completion": "Absent an earlier completion or propagated failure, complete with an absent value."
+    },
+    {
+      "identifier": "operation_enterprise_customer_relationship_management_utils_business_behavior_get_linked_communication_list",
+      "name": "get linked communication list",
+      "component": "component_enterprise_customer_relationship_management_utils_business_behavior",
+      "scope": "current_candidate",
+      "procedure_semantics": "decision-semantics.json",
+      "contract_role": "operational_behavior",
+      "validation_level": "structural_decision_translation_with_domain_review_separate",
+      "parameters": [
+        {
+          "name": "record_type",
+          "public_parameter_name": "record_type",
+          "external_parameter_text": "doctype",
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "record_name",
+          "public_parameter_name": "record_name",
+          "external_parameter_text": "docname",
+          "binding": "positional_or_named",
+          "required": true
+        }
+      ],
+      "definition_wrappers": [],
+      "wrapper_application_order": "Evaluate wrapper expressions at definition; apply wrappers from the last listed expression toward the first. Their authorization, regional dispatch, caching and optional-capability behavior must be bound separately.",
+      "module_context_requirement": "Bind referenced module values, imports, class inheritance and shared state before invoking the operation body.",
+      "decision_steps": [
+        {
+          "action": "set_values",
+          "targets": [
+            {
+              "kind": "value_reference",
+              "name": "communications"
+            }
+          ],
+          "value": {
+            "kind": "operation_result",
+            "operation": {
+              "kind": "member_value",
+              "owner": {
+                "kind": "value_reference",
+                "name": "application_foundation"
+              },
+              "name": "get_all"
+            },
+            "arguments": [
+              {
+                "kind": "symbolic_value",
+                "value": "communication",
+                "identifier_roles": [
+                  "record_identifier"
+                ],
+                "text_when_not_used_as_identifier": "Communication",
+                "interpretation_contract": "decision-semantics.json#identifier_literals"
+              }
+            ],
+            "named_arguments": [
+              {
+                "name": "filters",
+                "value": {
+                  "kind": "keyed_collection",
+                  "entries": [
+                    {
+                      "key": {
+                        "kind": "symbolic_value",
+                        "value": "reference_record_type",
+                        "identifier_roles": [
+                          "member_identifier"
+                        ],
+                        "text_when_not_used_as_identifier": "reference_doctype",
+                        "interpretation_contract": "decision-semantics.json#identifier_literals"
+                      },
+                      "value": {
+                        "kind": "value_reference",
+                        "name": "record_type"
+                      },
+                      "expand_mapping": false
+                    },
+                    {
+                      "key": {
+                        "kind": "symbolic_value",
+                        "value": "reference_name",
+                        "identifier_roles": [
+                          "member_identifier"
+                        ],
+                        "text_when_not_used_as_identifier": "reference_name",
+                        "interpretation_contract": "decision-semantics.json#identifier_literals"
+                      },
+                      "value": {
+                        "kind": "value_reference",
+                        "name": "record_name"
+                      },
+                      "expand_mapping": false
+                    }
+                  ]
+                },
+                "external_parameter_text": "filters",
+                "parameter_binding": "callee_public_name_requires_context_binding"
+              },
+              {
+                "name": "pluck",
+                "value": {
+                  "kind": "symbolic_value",
+                  "value": "record_name",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "name",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "external_parameter_text": "pluck",
+                "parameter_binding": "callee_public_name_requires_context_binding"
+              }
+            ],
+            "operation_identifier": "operation_foundation_initialize_business_behavior_get_all",
+            "resolution_basis": "unconditional_import_or_unambiguous_reexport_subject_to_runtime_binding",
+            "dispatch_requirement": "Honor captured scope, receiver override and wrapper context; this link identifies a declared body rather than proving every runtime dispatch."
+          }
+        },
+        {
+          "action": "set_values",
+          "targets": [
+            {
+              "kind": "value_reference",
+              "name": "communication_links"
+            }
+          ],
+          "value": {
+            "kind": "operation_result",
+            "operation": {
+              "kind": "member_value",
+              "owner": {
+                "kind": "value_reference",
+                "name": "application_foundation"
+              },
+              "name": "get_all"
+            },
+            "arguments": [
+              {
+                "kind": "symbolic_value",
+                "value": "communication_link",
+                "identifier_roles": [
+                  "record_identifier"
+                ],
+                "text_when_not_used_as_identifier": "Communication Link",
+                "interpretation_contract": "decision-semantics.json#identifier_literals"
+              },
+              {
+                "kind": "keyed_collection",
+                "entries": [
+                  {
+                    "key": {
+                      "kind": "symbolic_value",
+                      "value": "link_record_type",
+                      "identifier_roles": [
+                        "member_identifier"
+                      ],
+                      "text_when_not_used_as_identifier": "link_doctype",
+                      "interpretation_contract": "decision-semantics.json#identifier_literals"
+                    },
+                    "value": {
+                      "kind": "value_reference",
+                      "name": "record_type"
+                    },
+                    "expand_mapping": false
+                  },
+                  {
+                    "key": {
+                      "kind": "symbolic_value",
+                      "value": "link_name",
+                      "identifier_roles": [
+                        "member_identifier"
+                      ],
+                      "text_when_not_used_as_identifier": "link_name",
+                      "interpretation_contract": "decision-semantics.json#identifier_literals"
+                    },
+                    "value": {
+                      "kind": "value_reference",
+                      "name": "record_name"
+                    },
+                    "expand_mapping": false
+                  },
+                  {
+                    "key": {
+                      "kind": "symbolic_value",
+                      "value": "parent_record",
+                      "identifier_roles": [
+                        "member_identifier"
+                      ],
+                      "text_when_not_used_as_identifier": "parent",
+                      "interpretation_contract": "decision-semantics.json#identifier_literals"
+                    },
+                    "value": {
+                      "kind": "fixed_order_collection",
+                      "values": [
+                        {
+                          "kind": "symbolic_value",
+                          "value": "not_in"
+                        },
+                        {
+                          "kind": "value_reference",
+                          "name": "communications"
+                        }
+                      ]
+                    },
+                    "expand_mapping": false
+                  }
+                ]
+              }
+            ],
+            "named_arguments": [
+              {
+                "name": "pluck",
+                "value": {
+                  "kind": "symbolic_value",
+                  "value": "parent_record",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "parent",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "external_parameter_text": "pluck",
+                "parameter_binding": "callee_public_name_requires_context_binding"
+              }
+            ],
+            "operation_identifier": "operation_foundation_initialize_business_behavior_get_all",
+            "resolution_basis": "unconditional_import_or_unambiguous_reexport_subject_to_runtime_binding",
+            "dispatch_requirement": "Honor captured scope, receiver override and wrapper context; this link identifies a declared body rather than proving every runtime dispatch."
+          }
+        },
+        {
+          "action": "complete_with_value",
+          "value": {
+            "kind": "combine_values",
+            "operator": "add",
+            "left": {
+              "kind": "value_reference",
+              "name": "communications"
+            },
+            "right": {
+              "kind": "value_reference",
+              "name": "communication_links"
+            }
+          }
+        }
+      ],
+      "asynchronous": false,
+      "declared_result_shape": {
+        "kind": "inferred_from_completion_branches"
+      },
+      "locally_resolved_operations": [
+        "operation_foundation_initialize_business_behavior_get_all"
+      ],
+      "context_bound_capabilities": [],
+      "implicit_completion": "Absent an earlier completion or propagated failure, complete with an absent value."
+    },
+    {
+      "identifier": "operation_enterprise_customer_relationship_management_utils_business_behavior_link_communications_with_prospect",
+      "name": "link communications with prospect",
+      "component": "component_enterprise_customer_relationship_management_utils_business_behavior",
+      "scope": "current_candidate",
+      "procedure_semantics": "decision-semantics.json",
+      "contract_role": "operational_behavior",
+      "validation_level": "structural_decision_translation_with_domain_review_separate",
+      "parameters": [
+        {
+          "name": "communication",
+          "public_parameter_name": "communication",
+          "external_parameter_text": "communication",
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "method",
+          "public_parameter_name": "method",
+          "external_parameter_text": "method",
+          "binding": "positional_or_named",
+          "required": true
+        }
+      ],
+      "definition_wrappers": [],
+      "wrapper_application_order": "Evaluate wrapper expressions at definition; apply wrappers from the last listed expression toward the first. Their authorization, regional dispatch, caching and optional-capability behavior must be bound separately.",
+      "module_context_requirement": "Bind referenced module values, imports, class inheritance and shared state before invoking the operation body.",
+      "decision_steps": [
+        {
+          "action": "set_values",
+          "targets": [
+            {
+              "kind": "value_reference",
+              "name": "prospect"
+            }
+          ],
+          "value": {
+            "kind": "operation_result",
+            "operation": {
+              "kind": "value_reference",
+              "name": "get_linked_prospect"
+            },
+            "arguments": [
+              {
+                "kind": "member_value",
+                "owner": {
+                  "kind": "value_reference",
+                  "name": "communication"
+                },
+                "name": "reference_record_type"
+              },
+              {
+                "kind": "member_value",
+                "owner": {
+                  "kind": "value_reference",
+                  "name": "communication"
+                },
+                "name": "reference_name"
+              }
+            ],
+            "named_arguments": [],
+            "operation_identifier": "operation_enterprise_customer_relationship_management_utils_business_behavior_get_linked_prospect",
+            "resolution_basis": "lexically_visible_definition",
+            "dispatch_requirement": "Honor captured scope, receiver override and wrapper context; this link identifies a declared body rather than proving every runtime dispatch."
+          }
+        },
+        {
+          "action": "choose_branch",
+          "when": {
+            "kind": "value_reference",
+            "name": "prospect"
+          },
+          "then": [
+            {
+              "action": "set_values",
+              "targets": [
+                {
+                  "kind": "value_reference",
+                  "name": "already_linked"
+                }
+              ],
+              "value": {
+                "kind": "operation_result",
+                "operation": {
+                  "kind": "value_reference",
+                  "name": "any"
+                },
+                "arguments": [
+                  {
+                    "kind": "collection_projection",
+                    "collection_kind": "ordered",
+                    "iteration": [
+                      {
+                        "bind": {
+                          "kind": "value_reference",
+                          "name": "d"
+                        },
+                        "over": {
+                          "kind": "operation_result",
+                          "operation": {
+                            "kind": "member_value",
+                            "owner": {
+                              "kind": "value_reference",
+                              "name": "communication"
+                            },
+                            "name": "get"
+                          },
+                          "arguments": [
+                            {
+                              "kind": "symbolic_value",
+                              "value": "timeline_links",
+                              "identifier_roles": [
+                                "member_identifier"
+                              ],
+                              "text_when_not_used_as_identifier": "timeline_links",
+                              "interpretation_contract": "decision-semantics.json#identifier_literals"
+                            }
+                          ],
+                          "named_arguments": [],
+                          "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+                        },
+                        "where_all": [
+                          {
+                            "kind": "short_circuit_choice",
+                            "operator": "first_false_or_last",
+                            "operands": [
+                              {
+                                "kind": "ordered_comparison_chain",
+                                "initial": {
+                                  "kind": "member_value",
+                                  "owner": {
+                                    "kind": "value_reference",
+                                    "name": "d"
+                                  },
+                                  "name": "link_record_type"
+                                },
+                                "comparisons": [
+                                  {
+                                    "operator": "equal",
+                                    "right": {
+                                      "kind": "symbolic_value",
+                                      "value": "prospect",
+                                      "identifier_roles": [
+                                        "record_identifier"
+                                      ],
+                                      "text_when_not_used_as_identifier": "Prospect",
+                                      "interpretation_contract": "decision-semantics.json#identifier_literals"
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "kind": "ordered_comparison_chain",
+                                "initial": {
+                                  "kind": "member_value",
+                                  "owner": {
+                                    "kind": "value_reference",
+                                    "name": "d"
+                                  },
+                                  "name": "link_name"
+                                },
+                                "comparisons": [
+                                  {
+                                    "operator": "equal",
+                                    "right": {
+                                      "kind": "value_reference",
+                                      "name": "prospect"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "asynchronous": false
+                      }
+                    ],
+                    "value": {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "value_reference",
+                        "name": "d"
+                      },
+                      "name": "record_name",
+                      "name_when_not_record_member": "name",
+                      "binding_requirement": "Resolve the receiver record type and select its canonical schema member before reading or writing; ambiguous candidates have no default. For ordinary non-record objects bind the alternate member according to its capability."
+                    }
+                  }
+                ],
+                "named_arguments": [],
+                "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+              }
+            },
+            {
+              "action": "choose_branch",
+              "when": {
+                "kind": "unary_value",
+                "operator": "negate_truth",
+                "operand": {
+                  "kind": "value_reference",
+                  "name": "already_linked"
+                }
+              },
+              "then": [
+                {
+                  "action": "set_values",
+                  "targets": [
+                    {
+                      "kind": "value_reference",
+                      "name": "row"
+                    }
+                  ],
+                  "value": {
+                    "kind": "operation_result",
+                    "operation": {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "value_reference",
+                        "name": "communication"
+                      },
+                      "name": "append"
+                    },
+                    "arguments": [
+                      {
+                        "kind": "symbolic_value",
+                        "value": "timeline_links",
+                        "identifier_roles": [
+                          "member_identifier"
+                        ],
+                        "text_when_not_used_as_identifier": "timeline_links",
+                        "interpretation_contract": "decision-semantics.json#identifier_literals"
+                      }
+                    ],
+                    "named_arguments": [],
+                    "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+                  }
+                },
+                {
+                  "action": "set_values",
+                  "targets": [
+                    {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "value_reference",
+                        "name": "row"
+                      },
+                      "name": "link_record_type"
+                    }
+                  ],
+                  "value": {
+                    "kind": "symbolic_value",
+                    "value": "prospect",
+                    "identifier_roles": [
+                      "record_identifier"
+                    ],
+                    "text_when_not_used_as_identifier": "Prospect",
+                    "interpretation_contract": "decision-semantics.json#identifier_literals"
+                  }
+                },
+                {
+                  "action": "set_values",
+                  "targets": [
+                    {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "value_reference",
+                        "name": "row"
+                      },
+                      "name": "link_name"
+                    }
+                  ],
+                  "value": {
+                    "kind": "value_reference",
+                    "name": "prospect"
+                  }
+                },
+                {
+                  "action": "evaluate",
+                  "value": {
+                    "kind": "operation_result",
+                    "operation": {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "value_reference",
+                        "name": "row"
+                      },
+                      "name": "persistent_records_update"
+                    },
+                    "arguments": [],
+                    "named_arguments": [],
+                    "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+                  }
+                }
+              ],
+              "otherwise": []
+            }
+          ],
+          "otherwise": []
+        }
+      ],
+      "asynchronous": false,
+      "declared_result_shape": {
+        "kind": "inferred_from_completion_branches"
+      },
+      "locally_resolved_operations": [
+        "operation_enterprise_customer_relationship_management_utils_business_behavior_get_linked_prospect"
+      ],
+      "context_bound_capabilities": [
+        "any",
+        "communication_append",
+        "communication_get",
+        "row_persistent_records_update"
+      ],
+      "implicit_completion": "Absent an earlier completion or propagated failure, complete with an absent value."
+    },
+    {
+      "identifier": "operation_enterprise_customer_relationship_management_utils_business_behavior_update_modified_timestamp",
+      "name": "update modified timestamp",
+      "component": "component_enterprise_customer_relationship_management_utils_business_behavior",
+      "scope": "current_candidate",
+      "procedure_semantics": "decision-semantics.json",
+      "contract_role": "operational_behavior",
+      "validation_level": "structural_decision_translation_with_domain_review_separate",
+      "parameters": [
+        {
+          "name": "communication",
+          "public_parameter_name": "communication",
+          "external_parameter_text": "communication",
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "method",
+          "public_parameter_name": "method",
+          "external_parameter_text": "method",
+          "binding": "positional_or_named",
+          "required": true
+        }
+      ],
+      "definition_wrappers": [],
+      "wrapper_application_order": "Evaluate wrapper expressions at definition; apply wrappers from the last listed expression toward the first. Their authorization, regional dispatch, caching and optional-capability behavior must be bound separately.",
+      "module_context_requirement": "Bind referenced module values, imports, class inheritance and shared state before invoking the operation body.",
+      "decision_steps": [
+        {
+          "action": "choose_branch",
+          "when": {
+            "kind": "short_circuit_choice",
+            "operator": "first_false_or_last",
+            "operands": [
+              {
+                "kind": "member_value",
+                "owner": {
+                  "kind": "value_reference",
+                  "name": "communication"
+                },
+                "name": "reference_record_type"
+              },
+              {
+                "kind": "member_value",
+                "owner": {
+                  "kind": "value_reference",
+                  "name": "communication"
+                },
+                "name": "reference_name"
+              }
+            ]
+          },
+          "then": [
+            {
+              "action": "choose_branch",
+              "when": {
+                "kind": "short_circuit_choice",
+                "operator": "first_false_or_last",
+                "operands": [
+                  {
+                    "kind": "ordered_comparison_chain",
+                    "initial": {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "value_reference",
+                        "name": "communication"
+                      },
+                      "name": "sent_or_received"
+                    },
+                    "comparisons": [
+                      {
+                        "operator": "equal",
+                        "right": {
+                          "kind": "text",
+                          "value": "Received"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "operation_result",
+                    "operation": {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "member_value",
+                        "owner": {
+                          "kind": "value_reference",
+                          "name": "application_foundation"
+                        },
+                        "name": "persistent_records"
+                      },
+                      "name": "get_single_value"
+                    },
+                    "arguments": [
+                      {
+                        "kind": "symbolic_value",
+                        "value": "customer_relationship_transaction_settings",
+                        "identifier_roles": [
+                          "record_identifier"
+                        ],
+                        "text_when_not_used_as_identifier": "customer relationship management Settings",
+                        "interpretation_contract": "decision-semantics.json#identifier_literals"
+                      },
+                      {
+                        "kind": "symbolic_value",
+                        "value": "update_timestamp_on_new_communication",
+                        "identifier_roles": [
+                          "member_identifier"
+                        ],
+                        "text_when_not_used_as_identifier": "update_timestamp_on_new_communication",
+                        "interpretation_contract": "decision-semantics.json#identifier_literals"
+                      }
+                    ],
+                    "named_arguments": [],
+                    "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+                  }
+                ]
+              },
+              "then": [
+                {
+                  "action": "evaluate",
+                  "value": {
+                    "kind": "operation_result",
+                    "operation": {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "member_value",
+                        "owner": {
+                          "kind": "value_reference",
+                          "name": "application_foundation"
+                        },
+                        "name": "persistent_records"
+                      },
+                      "name": "set_value"
+                    },
+                    "arguments": [],
+                    "named_arguments": [
+                      {
+                        "name": "record_type",
+                        "value": {
+                          "kind": "member_value",
+                          "owner": {
+                            "kind": "value_reference",
+                            "name": "communication"
+                          },
+                          "name": "reference_record_type"
+                        },
+                        "external_parameter_text": "dt",
+                        "parameter_binding": "callee_public_name_requires_context_binding"
+                      },
+                      {
+                        "name": "record_name",
+                        "value": {
+                          "kind": "member_value",
+                          "owner": {
+                            "kind": "value_reference",
+                            "name": "communication"
+                          },
+                          "name": "reference_name"
+                        },
+                        "external_parameter_text": "dn",
+                        "parameter_binding": "callee_public_name_requires_context_binding"
+                      },
+                      {
+                        "name": "field",
+                        "value": {
+                          "kind": "symbolic_value",
+                          "value": "modified_at",
+                          "identifier_roles": [
+                            "member_identifier"
+                          ],
+                          "text_when_not_used_as_identifier": "modified",
+                          "interpretation_contract": "decision-semantics.json#identifier_literals"
+                        },
+                        "external_parameter_text": "field",
+                        "parameter_binding": "callee_public_name_requires_context_binding"
+                      },
+                      {
+                        "name": "val",
+                        "value": {
+                          "kind": "operation_result",
+                          "operation": {
+                            "kind": "value_reference",
+                            "name": "now"
+                          },
+                          "arguments": [],
+                          "named_arguments": [],
+                          "operation_identifier": "operation_foundation_utils_data_business_behavior_now",
+                          "resolution_basis": "unconditional_import_or_unambiguous_reexport_subject_to_runtime_binding",
+                          "dispatch_requirement": "Honor captured scope, receiver override and wrapper context; this link identifies a declared body rather than proving every runtime dispatch."
+                        },
+                        "external_parameter_text": "val",
+                        "parameter_binding": "callee_public_name_requires_context_binding"
+                      },
+                      {
+                        "name": "update_modified",
+                        "value": {
+                          "kind": "truth_value",
+                          "value": false
+                        },
+                        "external_parameter_text": "update_modified",
+                        "parameter_binding": "callee_public_name_requires_context_binding"
+                      }
+                    ],
+                    "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+                  }
+                }
+              ],
+              "otherwise": []
+            }
+          ],
+          "otherwise": []
+        }
+      ],
+      "asynchronous": false,
+      "declared_result_shape": {
+        "kind": "inferred_from_completion_branches"
+      },
+      "locally_resolved_operations": [
+        "operation_foundation_utils_data_business_behavior_now"
+      ],
+      "context_bound_capabilities": [
+        "application_foundation_persistent_records_get_single_value",
+        "application_foundation_persistent_records_set_value"
+      ],
+      "implicit_completion": "Absent an earlier completion or propagated failure, complete with an absent value."
+    }
+  ]
+}

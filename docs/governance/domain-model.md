@@ -87,3 +87,11 @@ The [record type index](../../schema/index.tsv) locates the structural definitio
 ## Cross-domain acceptance fixture
 
 A minimum integrated fixture contains two companies in one tenant, two warehouses, one customer also acting as a supplier, one employee with a login, one stock product with two commercial units, two rows for that product with distinct source identities, one partial receipt, one partial delivery, one invoice, one payment allocation, and one cancellation. Verify that changing a contact display name does not create a new customer balance; changing a product label does not merge stock; cancelling a descendant recalculates only its own source commitment; and a company-restricted user cannot recover the other company's entries through child rows, lists, reports, or exports.
+
+## Site-specific schema
+
+Enumerate runtime custom fields, property changes, generated accounting dimensions, extension contributions and single-instance defaults for the target organisation. Capture that effective schema with the tenant configuration when comparing records. The common dictionary describes the shared fields and ownership relationships.
+
+## Linked specifications
+
+- **Structured contracts** · [record type index](../../schemas/data/record-type-index.json) · [relationship catalog](../../schemas/data/relationship-catalog.json)

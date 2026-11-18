@@ -111,3 +111,11 @@ A connector entry lacking these details remains incomplete even if its endpoint 
 ## Callback and delivery acceptance
 
 For each connector, provide fixtures for wrong credentials or account, disabled configuration, valid initial message, repeated message, unknown parent reference, partial mapping failure, out-of-order status, network timeout after acceptance, retry exhaustion, and recovery. A receiver that returns success before durable business processing must expose a later terminal outcome. If its acknowledgement is durable, deduplicate the repeated business reference before creating another financial effect. The outgoing retry schedule and commit boundary are defined in [background work and consistency](background-work-and-consistency.md#retry-schedule-and-duplicate-boundaries).
+
+## Provider evidence
+
+Internal transaction examples establish local state and posting effects. External receipt, duplicate suppression, callback authentication and failures after remote acceptance require observations from the selected provider. Match the remote reference to the payment, fiscal document or message before marking delivery complete.
+
+## Linked specifications
+
+- **Related decisions** · [treasury and reconciliation](../transactions/treasury-and-reconciliation.md) · [accounts payable](../transactions/accounts-payable.md) · [regional capabilities](../governance/regional-and-specialised-capabilities.md)

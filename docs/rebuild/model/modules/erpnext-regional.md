@@ -1,4 +1,4 @@
-# Regional declarations in erpnext
+# Regional declarations in business application
 
 Each dictionary part contains an ordered field list, source location, record settings and grants. The source column opens the declaration at the reviewed revision.
 

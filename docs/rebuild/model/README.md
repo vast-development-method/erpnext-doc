@@ -1,11 +1,11 @@
-# Record declarations and release differences
+# Record declarations, storage and effective fields
 
 Use the [module directory](INDEX.md) to find a document by business area or the [record index](record-index.json) to look up its upstream name. For example, follow **Sales Invoice → items → Sales Invoice Item → item_code → Item**. The first edge owns an ordered collection. The second references a separately maintained master. The type declaration, record settings, grants and ordered fields for each step are in the linked JSON parts. Every row in a module directory also opens the source declaration at the exact revision.
 
-| November source profile | Standard records | Declared fields | Declared role-grant rows | Field conditions |
+| Application area | Standard records | Declared fields | Declared role-grant rows | Field conditions |
 |---|---:|---:|---:|---:|
-| ERPNext | 534 | 10,617 | 1,185 | 1,670 |
-| Frappe Framework | 332 | 3,795 | 353 | 885 |
+| Business application | 534 | 10,617 | 1,185 | 1,670 |
+| Shared foundation | 332 | 3,795 | 353 | 885 |
 | Combined | 866 | 14,412 | 1,538 | 2,555 |
 
 The inventory includes layout, virtual and child fields. The two repositories supply 2,549 fixed references, 118 dynamic type selectors, 430 child tables and 41 child multiselects. Core-to-core lookup resolves every fixed and child target except the **Payment Gateway** referenced by **Payment Gateway Account.payment_gateway**. The [Payments declaration](https://github.com/frappe/payments/blob/1978965f38b8a1f0ea30c5f5dfd1c37d4888afe3/payments/payments/doctype/payment_gateway/payment_gateway.json) supplies that type. An installation can have a different app set. Each dynamic binding resolves a selector field in its own record. Its eventual target depends on record data. Separate [extension inventories](../extensions/README.md) cover the reviewed add-ons.
@@ -14,9 +14,9 @@ Store identifiers, enumeration values and original content separately from displ
 
 ## Scope and interpretation
 
-The [pins](pins.json) identify both revisions of all four original source packs. This dictionary enumerates the version-16 core and framework declarations at the November revisions. The original [neutral domain model](../../data/domain-model.md) and [record specifications](../../../schemas/data/record-types/README.md) describe the September development snapshot. Source names in this directory are lookup keys and interoperability evidence. A replacement can retain any internal naming scheme that preserves identity and behavior.
+Use the [entity dictionary](../../../schema/README.md) for qualified business identities, the [domain model](../../data/domain-model.md) for ownership and business relationships, and the [record specifications](../../../schemas/data/record-types/README.md) for detailed behavioral contracts. The [source identities](pins.json) and [declaration reconciliation](source-comparison.md) support audits of the observed field and permission facts.
 
-Selection uses the canonical module record path in the committed tree, the declared document category and the source record identity. It includes every standard declaration in those module paths, including deprecated or virtual types still present. It excludes temporary fixtures outside the module tree, custom fields installed by hooks or setup, site-specific changes and generated settings. The September totals compare **1,042 canonical records and 16,809 fields** across the four apps. The original **1,044 and 16,813** also include two temporary fixture records with two fields apiece. The comparison follows the two exact commits in each app across development and version-16 branches. An addition or absence describes these two trees and establishes no upgrade instruction. [Original revisions](../../../schemas/traceability/source-snapshot.json) · [Frappe module discovery](https://github.com/frappe/frappe/blob/199a0385c00e572664a099a57a00be6ce7404eeb/frappe/model/sync.py#L169) · [Fixture one](https://github.com/frappe/frappe/blob/5921915ad69a1f557cad9dfe6bca8a2cb947bb08/frappe/custom/fixtures/temp_doctype.json) · [Fixture two](https://github.com/frappe/frappe/blob/5921915ad69a1f557cad9dfe6bca8a2cb947bb08/frappe/custom/fixtures/temp_singles.json)
+Selection uses the canonical module record path in the committed tree, the declared document category and the source record identity. It includes every standard declaration in those module paths, including deprecated or virtual types still present. It excludes temporary fixtures outside the module tree, custom fields installed by hooks or setup, site-specific changes and generated settings. The source comparison counts **1,042 canonical records and 16,809 fields** across the four apps. The original **1,044 and 16,813** also include two temporary fixture records with two fields apiece. The source manifest preserves the populations used by the comparison. Treat a declaration difference as evidence about metadata. Effective access and business posting require their own observations. [Original revisions](../../../schemas/traceability/source-snapshot.json) · [Foundation module discovery](https://github.com/frappe/frappe/blob/199a0385c00e572664a099a57a00be6ce7404eeb/frappe/model/sync.py#L169) · [Fixture one](https://github.com/frappe/frappe/blob/5921915ad69a1f557cad9dfe6bca8a2cb947bb08/frappe/custom/fixtures/temp_doctype.json) · [Fixture two](https://github.com/frappe/frappe/blob/5921915ad69a1f557cad9dfe6bca8a2cb947bb08/frappe/custom/fixtures/temp_singles.json)
 
 ## Fields, identity and storage
 
@@ -66,7 +66,7 @@ For ordinary metadata, first add installed custom fields, then apply property se
 
 ## Acceptance and reproduction
 
-The [24 fixtures](acceptance.json) exercise field projections, imports with incomplete order, dynamic selectors, protected and virtual fields, declared rights, profile-local missing fields and records, and release differences. A grant observation matches role, permission level and the named bit. Effective access requires a separate site and document test. The offline verifier checks the schema, all index and part totals, all fixed, child and dynamic bindings, full delta counts and the expected results.
+The [24 fixtures](acceptance.json) exercise field projections, imports with incomplete order, dynamic selectors, protected and virtual fields, declared rights, profile-local missing fields and records, and required schema bindings. A grant observation matches role, permission level and the named bit. Effective access requires a separate site and document test. The offline verifier checks the schema, all index and part totals, all fixed, child and dynamic bindings, full delta counts and the expected results.
 
 Run from the repository root. The standalone structural and fixture checks use the standard library. The optional schema pass additionally uses a Draft 2020-12 validator.
 

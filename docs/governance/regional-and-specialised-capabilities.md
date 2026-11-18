@@ -1,6 +1,6 @@
 # Regional and specialised capabilities
 
-Read this chapter with [taxation and pricing](../transactions/taxation-and-pricing.md), [financial accounting](../transactions/financial-accounting.md), [company governance](company-and-master-governance.md), [supplier payables](../transactions/accounts-payable.md) and [external integrations](../services/external-integrations.md). The structured [customer and service calculations](../calculations/customer-and-service-calculations.json) and [acceptance cases](../calculations/customer-and-service-acceptance-cases.json) define exact examples for the calculations below.
+Read this chapter with [taxation and pricing](../transactions/taxation-and-pricing.md), [financial accounting](../transactions/financial-accounting.md), [company governance](company-and-master-governance.md), [supplier payables](../transactions/accounts-payable.md) and [external integrations](../services/external-integrations.md). The structured [customer and service calculations](../../schemas/mathematics/customer-and-service-calculations.json) and [acceptance cases](../../schemas/mathematics/customer-and-service-acceptance-cases.json) define exact examples for the calculations below.
 
 ## Regional selection
 
@@ -166,3 +166,8 @@ When fulfilment is required, count fulfilled checklist rows. Zero gives unfulfil
 The daily contract update selects signed submitted contracts and refreshes activation status. It does not call the fulfilment calculation in that daily path, so elapsed deadlines alone do not establish automatic lapse until a path recomputes fulfilment. Permitted submitted-record updates recalculate both states. Cancellation/discard records cancelled activation. Neither signing nor fulfilment posts accounting; explicit purchase, customer, payroll or project documents carry financial consequences.
 
 Acceptance cases cover inclusive validity and overlap endpoints, zero versus absent values, full and partial imports, inherited row values, missing postal/contact keys, payment adjustment, credit-document magnitudes, currency/rate grouping, future unbounded contracts and checklist lapse recalculation. Calculations are independently checkable; complete jurisdictional behavior remains gated by the external receiver contracts and executed report/invoice fixtures.
+
+## Linked specifications
+
+- **Calculation and acceptance cases** · [customer and service calculations](../../schemas/mathematics/customer-and-service-calculations.json) · [acceptance cases](../../schemas/mathematics/customer-and-service-acceptance-cases.json)
+- **Record definitions** · [reduced withholding certificate](../../schemas/data/record-types/lower_deduction_certificate.json) · [supplier invoice import](../../schemas/data/record-types/import_supplier_invoice.json) · [contract](../../schemas/data/record-types/contract.json)

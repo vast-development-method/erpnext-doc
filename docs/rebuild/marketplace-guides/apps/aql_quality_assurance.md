@@ -1,5 +1,7 @@
 # AQL Quality Assurance By HavaraTech
 
+[Business workflow and acceptance cases](../../../capabilities/guides/supply.md#lot-acceptance-sampling).
+
 The publisher lists Frappe versions 15 and 16 and a nightly channel. It describes incoming, in-process, transfer and outgoing inspections linked to Purchase Receipts, Job Cards, Stock Entries and Delivery Notes. Item templates define parameters, classifications and required readings. The published workflow derives sample size from a lot and inspection level, records results per sample and decides whether to release a lot. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/aql_quality_assurance) · [HavaraTech product guide](https://havaratech.com/aql-quality-assurance/)
 
 ## What the recovered source implements
@@ -12,12 +14,6 @@ A public copy under BABLU855 carries the marketplace app identifier, HavaraTech 
 
 ## Proposed rebuild contract and acceptance
 
-Record the source document line, item, lot, unit, inspection stage, plan/table version, level, limits, parameter and sample number for each observation. Store the table decision separately from execution status and override disposition. A supervisor’s exception carries an actor, time and reason. A stage action must distinguish releasing saleable stock, accepting a receipt into a rejected warehouse and halting shipment.
-
-| Fixture | Expected observation |
-|---|---|
-| All required readings accepted for a completed inspection | Eligible for release under the configured gate. Report the captured plan and count zero rejected rows in each class. |
-| Major limit 1, one rejected major reading, all other readings accepted, no override | The recovered controller yields rejected. A rebuild implementing threshold-only sampling must name that policy explicitly and return its different outcome in this fixture. |
-| Receipt for 12 units linked to a submitted rejected inspection | Under the recovered receipt disposition the line has 0 accepted and 12 rejected. A draft inspection cannot satisfy the submission check. |
-
 Translate inspector prompts, defect descriptions, dispositions and customer certificate captions. Keep numeric readings, AQL scales, inspection-level codes, sample numbers and identifiers invariant. A German certificate and an English inspection screen must report the same counts and disposition. Record the language of free-text observations. Localised status captions must never be compared by the decision engine. Public materials and static source do not establish certification or runtime equivalence.
+
+[Read the consolidated acceptance cases](../../../capabilities/guides/supply.md#lot-acceptance-sampling-2).

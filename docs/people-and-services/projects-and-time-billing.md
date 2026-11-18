@@ -110,3 +110,27 @@ A dependent task's rescheduling preserves the difference between its old expecte
 Project membership determines direct project sharing. Removing a member revokes the share introduced by that membership, but permissions obtained through another role must still be evaluated normally. A website task association change requires project write permission or membership; maintaining the unchanged project does not repeat that particular association-change check.
 
 Acceptance must compare stored results after the complete command, including related task status, project totals, assignments and invoice links. Submit a time record referencing several tasks with different completed markers; then cancel it and verify that aggregates use the surviving submitted time. A detected cycle rejects the save before rescheduling. Exercise a cycle beyond the ordinary bounded traversal separately.
+
+## Project aggregation matrix
+
+| Measure | Included records and attribution |
+|---|---|
+| Actual time and dates | Sum hours on submitted time rows for the project and take their earliest beginning and latest ending. |
+| Labour cost and billable time | The core aggregate sums the base amounts on those rows. The employee-expense controller uses sheet-currency time amounts. The costing view uses base columns. |
+| Order value | Submitted customer order header names the project. |
+| Billed value | Signed base net invoice item amount. An explicit item project takes precedence. The header project receives the amount only if the row project is null. |
+| Direct purchasing | Explicitly attributed, qualifying supplier invoice rows. Include services and supplier-delivered items, apply subcontracting exclusions and deduct landed-cost amounts capitalised on project receipts. |
+| Consumed material | Take the negative of qualifying signed stock-ledger value changes, with qualifying stock-entry additional and landed costs. A receipt can create inventory value before any project consumption. |
+| Gross margin | Subtract labour, direct purchasing and consumed material from net billing. The expense-claim controller also includes sanctioned claim details. |
+
+A customer invoice with a 100 row for Project East and a 200 row with null project under a Project West header contributes 100 to East and 200 to West. A supplier invoice with a West header and a 200 row lacking a project contributes no direct purchase cost to West. See [cost selectors, landed costs and the multicurrency reconciliation](../transactions/project-costing.md) for the exclusive predicates and recomputation rules.
+
+## Progress examples
+
+Four tasks, of which two are completed, one cancelled and one open, give 75% by completion count. Four open tasks with stored progress of 100, 50, 0 and 0 give 37.5% by average progress. Two open tasks at 50% and 100%, weighted 1 and 3, give 87.5%. Three equally weighted, completed tasks give 100% because the calculation rounds the final mean. The selected method changes the project indicator without reopening or completing any task.
+
+## Linked specifications
+
+- **Record definitions** · [project](../../schemas/data/record-types/project.json) · [task](../../schemas/data/record-types/task.json) · [timesheet](../../schemas/data/record-types/timesheet.json) · [time row](../../schemas/data/record-types/timesheet_detail.json)
+- **Calculation and acceptance cases** · [customer and service calculations](../../schemas/mathematics/customer-and-service-calculations.json) · [customer and service acceptance cases](../../schemas/mathematics/customer-and-service-acceptance-cases.json)
+- **Related decisions** · [customer receivables](../transactions/accounts-receivable.md) · [supplier payables](../transactions/accounts-payable.md) · [inventory](../operations/inventory-and-valuation.md) · [master eligibility](../governance/company-and-master-governance.md)

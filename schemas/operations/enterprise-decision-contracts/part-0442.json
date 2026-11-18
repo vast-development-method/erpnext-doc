@@ -1,0 +1,584 @@
+{
+  "catalog_kind": "ordered_decision_contracts",
+  "partition_of": "enterprise-decision-contracts.json",
+  "contracts": [
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_validate_warehouse",
+      "name": "validate_warehouse",
+      "owner_scope": [
+        "stock_controller"
+      ],
+      "parameters": [],
+      "scope": "current_candidate",
+      "source_symbol": "validate_warehouse",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L296-L315"
+      ],
+      "decision_steps": [
+        "Read ordinary item rows. Gather distinct nonempty warehouse values separately for warehouse, target warehouse and from warehouse.",
+        "Concatenate those three groups. Validate each warehouse for disabled status and then company ownership; propagate failure. The same warehouse may be checked in more than one group."
+      ],
+      "acceptance_example": "If a transfer’s source belongs to the voucher company but its target belongs to another company, target validation fails.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_update_billing_percentage",
+      "name": "update_billing_percentage",
+      "owner_scope": [
+        "stock_controller"
+      ],
+      "parameters": [
+        {
+          "name": "update_modified",
+          "position": 1,
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "literal",
+            "value": true
+          }
+        }
+      ],
+      "scope": "current_candidate",
+      "source_symbol": "update_billing_percentage",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L317-L331"
+      ],
+      "decision_steps": [
+        "Prepare the child record type from the voucher type and the Item suffix. Select the parent voucher/name, per_billed parent field, amount reference field and billed_amt progress field.",
+        "For a delivery note compute and supply its specialized billing percentage. Invoke the shared percent-field updater with the original update-modified flag."
+      ],
+      "acceptance_example": "A delivery note requests the delivery-specific quantity/amount calculation; another supported voucher uses the generic amount mapping.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_get_delivery_note_billing_percentage",
+      "name": "get_delivery_note_billing_percentage",
+      "owner_scope": [
+        "stock_controller"
+      ],
+      "parameters": [],
+      "scope": "current_candidate",
+      "source_symbol": "get_delivery_note_billing_percentage",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L333-L373"
+      ],
+      "decision_steps": [
+        "Fetch invoiced quantities by delivery item and freshly persisted delivery rows. Prefer open rows, falling back to all if all are closed.",
+        "Sum amount and returned quantity times rate. If aggregate returns meet or exceed the aggregate amount, use original row amounts; otherwise subtract each row’s returned amount. Use absolute reference amounts and skip zero references.",
+        "For each row, take the larger of (a) the absolute billed amount capped at its reference and (b) reference times the lesser of 1 and invoiced quantity divided by net quantity. The quantity contribution is zero when net quantity is zero.",
+        "Accumulate both bases and return 100 times total recognized divided by total reference, rounded to six decimal places. A zero reference total yields zero."
+      ],
+      "acceptance_example": "A delivery line of 10 units at 10, with all 10 invoiced for 80 after a price reduction, reaches 100 percent. With only 6 invoiced for 60 it reaches 60 percent.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_get_invoiced_quantity_map",
+      "name": "get_invoiced_quantity_map",
+      "owner_scope": [
+        "stock_controller"
+      ],
+      "parameters": [],
+      "scope": "current_candidate",
+      "source_symbol": "get_invoiced_qty_map",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L375-L389"
+      ],
+      "decision_steps": [
+        "Start with quantities billed directly against this delivery note. Read the set of distinct nonempty sales-order line references in the note.",
+        "For each, update the map with the quantities distributed by the sales-order billing helper. Matching keys are replaced by that result. Return the combined map."
+      ],
+      "acceptance_example": "Two delivery rows referring to the same order line trigger one sales-order allocation lookup. Its mapped quantity replaces a direct quantity under the same delivery-row key.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_validate_inspection",
+      "name": "validate_inspection",
+      "owner_scope": [
+        "stock_controller"
+      ],
+      "parameters": [],
+      "scope": "current_candidate",
+      "source_symbol": "validate_inspection",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L391-L394",
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/stock/services/quality_inspection_service.py#L56-L163"
+      ],
+      "decision_steps": [
+        "Restrict invoice checks to invoices that update stock. For purchases and deliveries read the relevant per-item inspection requirement. Stock Entries require their own inspection switch and use the purpose and row direction; Manufacture checks the finished item. Exempt secondary rows under the stated purpose rules.",
+        "For supported purchases and deliveries, a site setting can defer inspection. Otherwise missing required inspection warns while saving and blocks submission. At submission, separately handle a linked unsubmitted or rejected inspection using the respective Stop-or-warn setting."
+      ],
+      "acceptance_example": "With deferred inspections disabled, save a delivery draft containing an item that requires inspection but has none. Expect a warning at save and a refusal at submit. If a rejected inspection is linked, the rejection setting controls whether submission is blocked or warned.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_update_blanket_order",
+      "name": "update_blanket_order",
+      "owner_scope": [
+        "stock_controller"
+      ],
+      "parameters": [],
+      "scope": "current_candidate",
+      "source_symbol": "update_blanket_order",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L396-L399"
+      ],
+      "decision_steps": [
+        "Collect distinct, nonempty blanket order references from ordinary item rows. Load each referenced blanket order and invoke its ordered-quantity recalculation once."
+      ],
+      "acceptance_example": "Three lines referring to A, A and B cause two blanket-order recalculations.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_validate_customer_provided_item",
+      "name": "validate_customer_provided_item",
+      "owner_scope": [
+        "stock_controller"
+      ],
+      "parameters": [],
+      "scope": "current_candidate",
+      "source_symbol": "validate_customer_provided_item",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L401-L405"
+      ],
+      "decision_steps": [
+        "Look up the cached customer-provided flag for each ordinary item. On a true flag set the row’s zero-valuation allowance to 1. Other rows keep their current value."
+      ],
+      "acceptance_example": "With customer-provided part C and ordinary part D, both initially disallowing zero valuation, only C becomes eligible.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_set_rate_of_stock_unit_of_measure",
+      "name": "set_rate_of_stock_unit_of_measure",
+      "owner_scope": [
+        "stock_controller"
+      ],
+      "parameters": [],
+      "scope": "current_candidate",
+      "source_symbol": "set_rate_of_stock_uom",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L407-L418"
+      ],
+      "decision_steps": [
+        "Apply to purchase receipts, purchase invoices and orders, sales invoices and orders, delivery notes and quotations. For each item divide the commercial line rate by the conversion factor, substituting 1 when the factor is absent or zero. Store the result as rate per stock unit."
+      ],
+      "acceptance_example": "A case at 120 with 12 stock units per case gives 10 per stock unit. With conversion factor zero, the row keeps 120 as the stock-unit rate.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_repost_future_stock_ledger_entry_and_general_ledger_entry",
+      "name": "repost_future_stock_ledger_entry_and_general_ledger_entry",
+      "owner_scope": [
+        "stock_controller"
+      ],
+      "parameters": [
+        {
+          "name": "force",
+          "position": 1,
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "literal",
+            "value": false
+          }
+        },
+        {
+          "name": "via_landed_cost_voucher",
+          "position": 2,
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "literal",
+            "value": false
+          }
+        }
+      ],
+      "scope": "current_candidate",
+      "source_symbol": "repost_future_sle_and_gle",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L420-L423",
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/stock/services/stock_ledger_service.py#L219-L250"
+      ],
+      "decision_steps": [
+        "Build a repost context with voucher, company, posting date/time and landed-cost indicator. Cancellation forces a repost decision. Otherwise create work only when forced, when future stock entries exist, or when the queue rule requires it.",
+        "Choose item/warehouse-based reposting or one voucher-based valuation repost according to Stock Reposting Settings. This schedules valuation work; it does not demonstrate that a worker has completed the recalculation."
+      ],
+      "acceptance_example": "Backdate a receipt before a later stock issue. With future ledger entries present and voucher-based reposting selected, expect a valuation repost for the receipt. Check completion before comparing the later issue’s revised stock and GL amounts.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_add_general_ledger_entry",
+      "name": "add_general_ledger_entry",
+      "owner_scope": [
+        "stock_controller"
+      ],
+      "parameters": [
+        {
+          "name": "general_ledger_entries",
+          "position": 1,
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "account",
+          "position": 2,
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "cost_center",
+          "position": 3,
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "debit",
+          "position": 4,
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "credit",
+          "position": 5,
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "remarks",
+          "position": 6,
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "against_account",
+          "position": 7,
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "debit_in_account_currency",
+          "position": 8,
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "literal",
+            "value": null
+          }
+        },
+        {
+          "name": "credit_in_account_currency",
+          "position": 9,
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "literal",
+            "value": null
+          }
+        },
+        {
+          "name": "account_currency",
+          "position": 10,
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "literal",
+            "value": null
+          }
+        },
+        {
+          "name": "project",
+          "position": 11,
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "literal",
+            "value": null
+          }
+        },
+        {
+          "name": "voucher_detail_number",
+          "position": 12,
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "literal",
+            "value": null
+          }
+        },
+        {
+          "name": "item",
+          "position": 13,
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "literal",
+            "value": null
+          }
+        },
+        {
+          "name": "posting_date",
+          "position": 14,
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "literal",
+            "value": null
+          }
+        },
+        {
+          "name": "dimensions",
+          "position": 15,
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "literal",
+            "value": null
+          }
+        }
+      ],
+      "scope": "current_candidate",
+      "source_symbol": "add_gl_entry",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L425-L462",
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/accounts/services/base_gl_composer.py#L129-L179"
+      ],
+      "decision_steps": [
+        "Create a line with account, cost center, debit, credit, opposing account and remarks. Attach supplied project, voucher detail, posting date and nonzero explicit account-currency amounts.",
+        "Apply explicit dimension values to the arguments passed into the shared GL builder, overriding derived values. Append one built line to the caller’s list; this helper does not create the counter-entry or commit a journal."
+      ],
+      "acceptance_example": "Append a debit of NAD 120 in the company books with EUR 6 in the account currency. Pass a project and a branch dimension override. The resulting candidate retains those explicit fields and the caller must build its balancing credit separately.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_update_stock_reservation_entries",
+      "name": "update_stock_reservation_entries",
+      "owner_scope": [
+        "stock_controller"
+      ],
+      "parameters": [],
+      "scope": "current_candidate",
+      "source_symbol": "update_stock_reservation_entries",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L464-L584"
+      ],
+      "decision_steps": [
+        "Process subcontracting deliveries, sends to subcontractor whose order reserves stock, and non-return subcontracting receipts with reserved stock. Resolve the row table, related voucher and target counter from the mapping.",
+        "For each eligible row, load submitted reservation identifiers in creation order. Use transfer quantity when present, otherwise consumed quantity. Skip rows with no matching reservation and stop when quantity is exhausted.",
+        "For serial-based reservations, mark matching child serials delivered on submit or undelivered otherwise; count each match once per local list. For batch-based reservations, negate bundle quantities, cap each matched child by available or delivered quantity, then persist the child.",
+        "Ordinary reservations take the smaller of the remaining row quantity and available reserved quantity (submit) or already applied counter (reverse). Increase or decrease the chosen reservation counter, persist it, refresh reserved quantity on the voucher, reservation status and warehouse bin, then reduce the remainder."
+      ],
+      "acceptance_example": "Submitting 5 untracked units against successive eligible reservations with headroom 3 and 4 increments the first by 3 and the second by 2. Both reservations refresh their voucher and bin quantities.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_update_stock_reservation_entries_get_stock_reservation_entry_list",
+      "name": "get_stock_reservation_entry_list",
+      "owner_scope": [
+        "stock_controller",
+        "update_stock_reservation_entries"
+      ],
+      "parameters": [],
+      "scope": "current_candidate",
+      "source_symbol": "get_sre_list",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L465-L489"
+      ],
+      "decision_steps": [
+        "Within the current reservation-update row, select submitted Stock Reservation Entry records whose voucher type matches the purpose mapping. Match its configured voucher number, taking the row subcontracting order only when that mapping has no voucher-number key.",
+        "With a detail reference field, compare the reservation’s voucher-detail number with that row field. Otherwise match raw material code and the document’s supplier warehouse. Return reservation names in ascending creation order."
+      ],
+      "acceptance_example": "A subcontracting receipt for material RM at supplier warehouse W selects submitted reservations for that order, RM and W, oldest first.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_update_stock_reservation_entries_get_data_map",
+      "name": "get_data_map",
+      "owner_scope": [
+        "stock_controller",
+        "update_stock_reservation_entries"
+      ],
+      "parameters": [],
+      "scope": "current_candidate",
+      "source_symbol": "get_data_map",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L491-L512"
+      ],
+      "decision_steps": [
+        "For Subcontracting Delivery use items, a Subcontracting Inward Order from the document, its scio_detail row reference and delivered_qty.",
+        "For Send to Subcontractor use items, a Subcontracting Order from the document, its sco_rm_detail reference and transferred_qty.",
+        "For Subcontracting Receipt use supplied_items, a Subcontracting Order and consumed_qty; obtain order and raw material from the row through the selection operation."
+      ],
+      "acceptance_example": "A send increments transferred quantity on the reservation. A receipt increments consumed quantity even when both relate to the same subcontracting order.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_check_for_on_hold_or_closed_status",
+      "name": "check_for_on_hold_or_closed_status",
+      "owner_scope": [
+        "stock_controller"
+      ],
+      "parameters": [
+        {
+          "name": "reference_record_type",
+          "position": 1,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "text"
+          }
+        },
+        {
+          "name": "reference_fieldname",
+          "position": 2,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "text"
+          }
+        },
+        {
+          "name": "exclude_if_field",
+          "position": 3,
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "literal",
+            "value": null
+          },
+          "declared_value_shape": {
+            "kind": "binary_operation",
+            "operator": "bitwise_or",
+            "left": {
+              "kind": "variable",
+              "name": "text"
+            },
+            "right": {
+              "kind": "literal",
+              "value": null
+            }
+          }
+        }
+      ],
+      "scope": "current_candidate",
+      "source_symbol": "check_for_on_hold_or_closed_status",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L586-L621"
+      ],
+      "decision_steps": [
+        "Keep eligible rows with a reference and without the requested exclusion flag. If none remain complete without querying. Fetch statuses for their distinct reference identifiers.",
+        "In the original eligible order inspect each identifier once. Collect one translated message per Closed or On Hold reference. Other or missing status values yield no message here.",
+        "Raise one invalid-status error containing all collected messages if any are present."
+      ],
+      "acceptance_example": "Rows referencing a held A twice and a closed B once raise one combined error containing A and B once each.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_stock_controller_check_for_on_hold_or_closed_status_include",
+      "name": "include",
+      "owner_scope": [
+        "stock_controller",
+        "check_for_on_hold_or_closed_status"
+      ],
+      "parameters": [
+        {
+          "name": "d",
+          "position": 0,
+          "binding": "positional_or_named",
+          "required": true
+        }
+      ],
+      "scope": "current_candidate",
+      "source_symbol": "_include",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L589-L590"
+      ],
+      "decision_steps": [
+        "Evaluate the selected row reference field. An empty reference is falsey; a populated reference qualifies unless an exclusion field was configured and its row value is truthy. This nested predicate reads its enclosing reference and exclusion field names."
+      ],
+      "acceptance_example": "An item with purchase order A and exclusion flag 1 is skipped when that exclusion field is configured.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    },
+    {
+      "identifier": "operation_enterprise_controllers_stock_controller_business_behavior_show_accounting_ledger_preview",
+      "name": "show_accounting_ledger_preview",
+      "owner_scope": [],
+      "parameters": [
+        {
+          "name": "company",
+          "position": 0,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "text"
+          }
+        },
+        {
+          "name": "record_type",
+          "position": 1,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "text"
+          }
+        },
+        {
+          "name": "record_name",
+          "position": 2,
+          "binding": "positional_or_named",
+          "required": true,
+          "declared_value_shape": {
+            "kind": "variable",
+            "name": "text"
+          }
+        }
+      ],
+      "scope": "current_candidate",
+      "source_symbol": "show_accounting_ledger_preview",
+      "source_locations": [
+        "https://github.com/frappe/erpnext/blob/4671d1a6658107df592f88f8eb7485847e3d7ae2/erpnext/controllers/stock_controller.py#L624-L637"
+      ],
+      "decision_steps": [
+        "Accept company, voucher type and voucher name. Prepare a company filter with dimensions enabled, retrieve the voucher and require read permission.",
+        "Invoke the before-general-ledger-preview hook, compute accounting columns and rows, then roll back the database transaction before returning those two arrays under gl_columns and gl_data."
+      ],
+      "acceptance_example": "A permitted reader receives ledger dimensions in the accounting preview and the preview’s transaction is rolled back. A failed read check prevents computation.",
+      "component": "component_enterprise_controllers_stock_controller_business_behavior",
+      "contract_representation": "ordered_business_steps_with_acceptance_example",
+      "validation_level": "source_review_with_derived_acceptance_example"
+    }
+  ]
+}

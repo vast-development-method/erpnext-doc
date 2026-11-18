@@ -77,7 +77,9 @@ The [privacy boundaries](#privacy-boundaries-for-business-records) require separ
 | Report exported by user without export permission | Export fails even if ordinary report viewing succeeds |
 | Task progress requested by another user | Release progress only when the subscriber may read the task and its business context. |
 
-Capture the initiating tenant and actor on the work record. On every attempt reestablish that identity, check current permissions, and stop if the actor is no longer authorized. Retries of the same business event use the same duplicate-detection key.
+**Required retry policy.** Capture the initiating tenant and actor on the work record. On every attempt reestablish that identity, check current permissions, and stop if the actor is no longer authorized. Retries of the same business event use the same duplicate-detection key.
+
+**Qualification.** The inspected retry path did not establish preservation of the original user on every attempt. Record the effective tenant and actor for each attempt when verifying this requirement.
 
 ## Permission decision inputs
 
@@ -116,3 +118,7 @@ Company deactivation, closed accounting periods, revoked workflow authority, and
 Employee pay, bank details, protected credentials, private attachments, and customer communications require explicit field and record rules. Masking must occur before data enters ordinary read responses and applicable reports. Search, notification payloads, background failure messages, and report downloads require their own exposure analysis; masking one form field alone does not establish system-wide confidentiality.
 
 Retain the initiating user on every retry and apply the effective field grants to create, update and read responses. Record permission changes between enqueue and execution alongside the attempt outcome.
+
+## Linked specifications
+
+- **Related decisions** · [domain model](../governance/domain-model.md#identity-and-relationship-decision-table) · [normalization table](persistence-identity-and-values.md#absence-empty-values-and-normalization)

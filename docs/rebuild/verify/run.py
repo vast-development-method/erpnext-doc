@@ -13,7 +13,7 @@ import sys
 sys.dont_write_bytecode = True
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry
-from evidence import extensions, finance, live_cases, platform, require, surfaces
+from evidence import business_dictionary, extensions, finance, live_cases, platform, require, surfaces
 from links import check_archives, check_pins, git, markdown, pins
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -178,13 +178,15 @@ def main():
     for path in data:
         read(path)
         locators.update(pins(path.read_text()))
-    md_files = [p for p in files if p.suffix == ".md"]
+    md_files = [REPO / "README.md"]
+    for directory in ("docs", "schema", "schemas", "checkpoints"):
+        md_files.extend(sorted((REPO / directory).rglob("*.md")))
     link_count = 0
     for path in md_files:
         n, extra = markdown(path, REPO)
         link_count += n
         locators.update(extra)
-    print(f"PASS parsed {len(data)} strict JSON files; resolved {link_count} local Markdown links "
+    print(f"PASS parsed {len(data)} strict evidence JSON files; resolved {link_count} local Markdown links "
           f"in {len(md_files)} pages", flush=True)
     checked, unresolved = check_pins(locators, repos)
     if args.marketplace_archives:
@@ -198,6 +200,7 @@ def main():
     schemas = [p for p in data if p.name.endswith(".schema.json")]
     total = schema_check(schemas)
     print(f"PASS {total} schema-to-instance validations using {len(schemas)} Draft 2020-12 schemas", flush=True)
+    print("PASS", business_dictionary(REPO, read, validator), flush=True)
     print("PASS", platform(read, validator), flush=True)
     print("PASS", finance(read), flush=True)
     print("PASS", surfaces(ROOT, read), flush=True)

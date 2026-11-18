@@ -4,8 +4,9 @@ Use the following entries together with the [documentation index](../README.md) 
 
 | Entry | Content |
 |---|---|
-| [Desktop and mobile workspaces](desktop-workflows.md) | Specification |
-| [External integrations](external-integrations.md) | Specification |
-| [Remote transport contracts](remote-transport-contracts.md) | Specification |
-| [Reporting and exports](reporting-and-exports.md) | Specification |
-| [Service contracts](service-contracts.md) | Specification |
+| [Embedded form behaviour](../services/embedded-client-behaviors.md) | Product selection, defaults, discount changes and the boundary between form hints and persisted decisions |
+| [Desktop and mobile workspaces](../services/desktop-workflows.md) | Specification |
+| [External integrations](../services/external-integrations.md) | Specification |
+| [Remote transport contracts](../services/remote-transport-contracts.md) | Specification |
+| [Reporting and exports](../services/reporting-and-exports.md) | Specification |
+| [Service contracts](../services/service-contracts.md) | Specification |

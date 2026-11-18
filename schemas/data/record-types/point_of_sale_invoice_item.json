@@ -3,11 +3,10 @@
   "identifier": "record_type_point_of_sale_invoice_item",
   "name": "point_of_sale_invoice_item",
   "display_name": "point of sale invoice item",
-  "source_name_digest": "bd91beeb5825190f30c1f1400b0e189306894acc2107354d7cb5f8c7cd97021f",
-  "source_pack": "enterprise",
-  "source_artifact": "source-artifact-f2d1103f5ba022c3921e",
+  "capability_group": "enterprise",
+  "component_identifier": "component_enterprise_accounts_record_definitions_point_of_sale_invoice_item_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "owned_child_record",
   "supports_posting_and_cancellation": false,
   "ordered_field_names": [
@@ -166,14 +165,13 @@
   },
   "declared_permission_grants": [],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 102,
   "fields": [
     {
       "identifier": "record_type_point_of_sale_invoice_item.barcode",
       "name": "barcode",
-      "source_field_ordinal": 0,
-      "source_name_digest": "cdde23af0fb16632ecf0985500afa64813c94ffdb284c4857dfa02c7adf3d12e",
+      "field_ordinal": 0,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -182,13 +180,18 @@
       "properties": {
         "print_hide": 1
       },
-      "display_name": "barcode"
+      "display_name": "barcode",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "cdde23af0fb16632ecf0985500afa64813c94ffdb284c4857dfa02c7adf3d12e"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.item_code",
       "name": "item_code",
-      "source_field_ordinal": 1,
-      "source_name_digest": "443cfb53582c763eea9ef67839a4839e3c7d53c96c555112608de62a5c6bada6",
+      "field_ordinal": 1,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -205,6 +208,18 @@
         "indexed_for_search": 1
       },
       "display_name": "item",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_item"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "443cfb53582c763eea9ef67839a4839e3c7d53c96c555112608de62a5c6bada6",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "443cfb53582c763eea9ef67839a4839e3c7d53c96c555112608de62a5c6bada6",
@@ -219,8 +234,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.is_product_bundle",
       "name": "is_product_bundle",
-      "source_field_ordinal": 2,
-      "source_name_digest": "95780d59cfd44b833911e4a76e3181b3a290eab39ad00029180f21edb3aaa1a1",
+      "field_ordinal": 2,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -235,13 +249,30 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "is product bundle"
+      "display_name": "is product bundle",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "95780d59cfd44b833911e4a76e3181b3a290eab39ad00029180f21edb3aaa1a1",
+      "applicability": "compatibility_field",
+      "entity_field": "is_product_bundle"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.product_bundle",
       "name": "product_bundle",
-      "source_field_ordinal": 3,
-      "source_name_digest": "69f2f91d57d640f3bc7577c84098b8df642a884ab357cb310ee68b80b3eb04b6",
+      "field_ordinal": 3,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -258,8 +289,10 @@
             },
             "name": "is_product_bundle"
           },
-          "source_value_digest": "2813ab509c5b2047c0b7803d30b6f04f90194bb0a8c615effde6883949107962",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.is product bundle",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "2813ab509c5b2047c0b7803d30b6f04f90194bb0a8c615effde6883949107962"
         },
         "target_record_type": {
           "kind": "record_type",
@@ -275,29 +308,51 @@
             },
             "name": "sales_order_detail"
           },
-          "source_value_digest": "04b59308a98774ef103ca1def363e4a385a62707c9ce8a0d58ead50330fde0f4",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.sales order detail",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "04b59308a98774ef103ca1def363e4a385a62707c9ce8a0d58ead50330fde0f4"
         }
       },
-      "display_name": "product bundle"
+      "display_name": "product bundle",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_product_bundle"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "69f2f91d57d640f3bc7577c84098b8df642a884ab357cb310ee68b80b3eb04b6",
+      "applicability": "compatibility_field",
+      "entity_field": "product_bundle_identifier"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.column_break_1",
       "name": "column_break_1",
-      "source_field_ordinal": 4,
-      "source_name_digest": "2708a5816071b3d6b2d10b96ea3148f145b43f92275831699c43b1f48ad0415e",
+      "field_ordinal": 4,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 5
+      },
+      "source_field_ordinal": 4,
+      "source_name_digest": "2708a5816071b3d6b2d10b96ea3148f145b43f92275831699c43b1f48ad0415e"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.item_name",
       "name": "item_name",
-      "source_field_ordinal": 5,
-      "source_name_digest": "56d289fa435cb78ba69ab8c6b56857d9985248cd530a57f59d120a1d5047423e",
+      "field_ordinal": 5,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -309,6 +364,12 @@
         "required": 1
       },
       "display_name": "item name",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 5,
+      "source_name_digest": "56d289fa435cb78ba69ab8c6b56857d9985248cd530a57f59d120a1d5047423e",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "56d289fa435cb78ba69ab8c6b56857d9985248cd530a57f59d120a1d5047423e",
@@ -323,8 +384,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.customer_item_code",
       "name": "customer_item_code",
-      "source_field_ordinal": 6,
-      "source_name_digest": "cff3d28ca6e6096d20404b2694287c7f0c6b136ae6b81de931c3b216fc6201c4",
+      "field_ordinal": 6,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -335,13 +395,18 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "customer s item code"
+      "display_name": "customer s item code",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 6,
+      "source_name_digest": "cff3d28ca6e6096d20404b2694287c7f0c6b136ae6b81de931c3b216fc6201c4"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.description_section",
       "name": "description_section",
-      "source_field_ordinal": 7,
-      "source_name_digest": "158a96be2d4469657483e806bde771748d698216bbaa2e699cc8b7048e22d808",
+      "field_ordinal": 7,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -350,13 +415,20 @@
       "properties": {
         "collapsible": 1
       },
-      "display_name": "description"
+      "display_name": "description",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 8
+      },
+      "source_field_ordinal": 7,
+      "source_name_digest": "158a96be2d4469657483e806bde771748d698216bbaa2e699cc8b7048e22d808"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.description",
       "name": "description",
-      "source_field_ordinal": 8,
-      "source_name_digest": "27a3a501b7f9ac1da6779f2bbeda50ddae3f75c1166e9726c69af88d5c770325",
+      "field_ordinal": 8,
       "value_type": "rich_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -375,6 +447,13 @@
         }
       },
       "display_name": "description",
+      "value_contract": {
+        "value_kind": "rich_document_text",
+        "rendering": "Preserve supported formatting while applying the configured content sanitization policy.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 8,
+      "source_name_digest": "27a3a501b7f9ac1da6779f2bbeda50ddae3f75c1166e9726c69af88d5c770325",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "27a3a501b7f9ac1da6779f2bbeda50ddae3f75c1166e9726c69af88d5c770325",
@@ -389,8 +468,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.item_group",
       "name": "item_group",
-      "source_field_ordinal": 9,
-      "source_name_digest": "166cba2b10891241e60868763465fce5459ebac2d0fd5d606b6fe04407f4a3ea",
+      "field_ordinal": 9,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -406,6 +484,18 @@
         "read_only": 1
       },
       "display_name": "item group",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_item_group"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 9,
+      "source_name_digest": "166cba2b10891241e60868763465fce5459ebac2d0fd5d606b6fe04407f4a3ea",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "166cba2b10891241e60868763465fce5459ebac2d0fd5d606b6fe04407f4a3ea",
@@ -420,8 +510,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.brand",
       "name": "brand",
-      "source_field_ordinal": 10,
-      "source_name_digest": "30c7193b5d3568b32debbac3fed27393e3a7101326f45929c0024ca8666704ee",
+      "field_ordinal": 10,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -432,6 +521,12 @@
         "print_hide": 1
       },
       "display_name": "brand name",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 10,
+      "source_name_digest": "30c7193b5d3568b32debbac3fed27393e3a7101326f45929c0024ca8666704ee",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "30c7193b5d3568b32debbac3fed27393e3a7101326f45929c0024ca8666704ee",
@@ -446,8 +541,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.image_section",
       "name": "image_section",
-      "source_field_ordinal": 11,
-      "source_name_digest": "55cddd97ac41961829a11be77c557d3b79824c80e53db550766f8d6f11d4467b",
+      "field_ordinal": 11,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -456,13 +550,20 @@
       "properties": {
         "collapsible": 1
       },
-      "display_name": "image"
+      "display_name": "image",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 12
+      },
+      "source_field_ordinal": 11,
+      "source_name_digest": "55cddd97ac41961829a11be77c557d3b79824c80e53db550766f8d6f11d4467b"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.image",
       "name": "image",
-      "source_field_ordinal": 12,
-      "source_name_digest": "affa657b3c3e9337bdf3c879c0561b74d54a9197fdc6acd834dcdc02837454fc",
+      "field_ordinal": 12,
       "value_type": "attachment_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -478,13 +579,26 @@
         },
         "hidden": 1
       },
-      "display_name": "image"
+      "display_name": "image",
+      "value_contract": {
+        "value_kind": "file_reference",
+        "authorization": "Resolve attachment access using the file and attached-record permissions.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "item_code",
+            "image"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 12,
+      "source_name_digest": "affa657b3c3e9337bdf3c879c0561b74d54a9197fdc6acd834dcdc02837454fc"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.image_view",
       "name": "image_view",
-      "source_field_ordinal": 13,
-      "source_name_digest": "f79e3682556628be2761cdadeea7d8ac69c7753316af2996c3bbf37629d808e9",
+      "field_ordinal": 13,
       "value_type": "image_display",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -498,25 +612,39 @@
         },
         "print_hide": 1
       },
-      "display_name": "image view"
+      "display_name": "image view",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "image_display",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 14
+      },
+      "source_field_ordinal": 13,
+      "source_name_digest": "f79e3682556628be2761cdadeea7d8ac69c7753316af2996c3bbf37629d808e9"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.quantity_and_rate",
       "name": "quantity_and_rate",
-      "source_field_ordinal": 14,
-      "source_name_digest": "85bbea533daa26abc07f0237254509204ebfec6270f44114b9ad57bd6486cb25",
+      "field_ordinal": 14,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 15
+      },
+      "source_field_ordinal": 14,
+      "source_name_digest": "85bbea533daa26abc07f0237254509204ebfec6270f44114b9ad57bd6486cb25"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.quantity",
       "name": "quantity",
-      "source_field_ordinal": 15,
-      "source_name_digest": "4174f079d6b8bfae27997daf08b2ff5796fd76cb2f053510d6cea04226a0c65f",
+      "field_ordinal": 15,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -528,6 +656,17 @@
         "visible_in_list": 1
       },
       "display_name": "quantity",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 15,
+      "source_name_digest": "4174f079d6b8bfae27997daf08b2ff5796fd76cb2f053510d6cea04226a0c65f",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "4174f079d6b8bfae27997daf08b2ff5796fd76cb2f053510d6cea04226a0c65f",
@@ -542,8 +681,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.stock_unit_of_measure",
       "name": "stock_unit_of_measure",
-      "source_field_ordinal": 16,
-      "source_name_digest": "105bf992a9e34faf283bab5d3fcae9fdf476fedbfc1ee4f18e5c44fdce9b582c",
+      "field_ordinal": 16,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -556,25 +694,43 @@
         },
         "read_only": 1
       },
-      "display_name": "stock unit of measure"
+      "display_name": "stock unit of measure",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_unit_of_measure"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 16,
+      "source_name_digest": "105bf992a9e34faf283bab5d3fcae9fdf476fedbfc1ee4f18e5c44fdce9b582c"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.column_break_2",
       "name": "column_break_2",
-      "source_field_ordinal": 17,
-      "source_name_digest": "60db981d80f5c336c8767c4f2bcdc48c4e1f02d94402c4ca86d1cfa0219989f8",
+      "field_ordinal": 17,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 18
+      },
+      "source_field_ordinal": 17,
+      "source_name_digest": "60db981d80f5c336c8767c4f2bcdc48c4e1f02d94402c4ca86d1cfa0219989f8"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.unit_of_measure",
       "name": "unit_of_measure",
-      "source_field_ordinal": 18,
-      "source_name_digest": "6ff6bf29bdb4777f2e9e02de72def7b71a422da2aeb2e8a1541f9122f466e694",
+      "field_ordinal": 18,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -587,13 +743,24 @@
         },
         "required": 1
       },
-      "display_name": "unit of measure"
+      "display_name": "unit of measure",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_unit_of_measure"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 18,
+      "source_name_digest": "6ff6bf29bdb4777f2e9e02de72def7b71a422da2aeb2e8a1541f9122f466e694"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.conversion_factor",
       "name": "conversion_factor",
-      "source_field_ordinal": 19,
-      "source_name_digest": "c42f14efba5cab0891dbe4bb1cf032d62df906ac1ba4d82a4483a4984e50c9b9",
+      "field_ordinal": 19,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -607,13 +774,23 @@
         "print_hide": 1,
         "required": 1
       },
-      "display_name": "unit of measure conversion factor"
+      "display_name": "unit of measure conversion factor",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "integer_text",
+          "value": "9"
+        },
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 19,
+      "source_name_digest": "c42f14efba5cab0891dbe4bb1cf032d62df906ac1ba4d82a4483a4984e50c9b9"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.stock_quantity",
       "name": "stock_quantity",
-      "source_field_ordinal": 20,
-      "source_name_digest": "5661c0109395c4aa0dc2a0e4997a86e25fff6904a9462acbde3d641dc3dfc882",
+      "field_ordinal": 20,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -624,25 +801,42 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "quantity as per stock unit of measure"
+      "display_name": "quantity as per stock unit of measure",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 20,
+      "source_name_digest": "5661c0109395c4aa0dc2a0e4997a86e25fff6904a9462acbde3d641dc3dfc882"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.section_break_17",
       "name": "section_break_17",
-      "source_field_ordinal": 21,
-      "source_name_digest": "ac2138366ddd01807d592b9a6c07ee81c755cb50c707a9a0f3a8723046e07d00",
+      "field_ordinal": 21,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 22
+      },
+      "source_field_ordinal": 21,
+      "source_name_digest": "ac2138366ddd01807d592b9a6c07ee81c755cb50c707a9a0f3a8723046e07d00"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.price_list_rate",
       "name": "price_list_rate",
-      "source_field_ordinal": 22,
-      "source_name_digest": "1b9ae5ccd330996647dea7b69b58283dd1870822fbd13e2ae59f2ad6b4b14a58",
+      "field_ordinal": 22,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -658,6 +852,21 @@
         "read_only": 1
       },
       "display_name": "price list rate",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 22,
+      "source_name_digest": "1b9ae5ccd330996647dea7b69b58283dd1870822fbd13e2ae59f2ad6b4b14a58",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "5e0553b6adcb514025b67c0938af9d464914860875b6538727222afc7433e2d3",
@@ -672,8 +881,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.base_price_list_rate",
       "name": "base_price_list_rate",
-      "source_field_ordinal": 23,
-      "source_name_digest": "04dd715ab67c6fc18c45e59781b94bbedec2b0b21d748d201833ef69b24472a7",
+      "field_ordinal": 23,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -689,6 +897,21 @@
         "read_only": 1
       },
       "display_name": "price list rate company currency",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 23,
+      "source_name_digest": "04dd715ab67c6fc18c45e59781b94bbedec2b0b21d748d201833ef69b24472a7",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "48f98671351ec3441fc83f4baaf66c2c9528b7675a851d04bd80410e91e611ae",
@@ -703,8 +926,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.discount_and_margin",
       "name": "discount_and_margin",
-      "source_field_ordinal": 24,
-      "source_name_digest": "5e37690328f99e9b1010d9267204302cf6f61cfc9adbfdd599bbb337797224aa",
+      "field_ordinal": 24,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -713,13 +935,20 @@
       "properties": {
         "collapsible": 1
       },
-      "display_name": "discount and margin"
+      "display_name": "discount and margin",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 25
+      },
+      "source_field_ordinal": 24,
+      "source_name_digest": "5e37690328f99e9b1010d9267204302cf6f61cfc9adbfdd599bbb337797224aa"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.margin_type",
       "name": "margin_type",
-      "source_field_ordinal": 25,
-      "source_name_digest": "cb7bcf867bb39fa6a344b3d7ba4d3bab9f70ba31e567dddb6baf6763c6c0161a",
+      "field_ordinal": 25,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -729,6 +958,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "price_list_rate",
+          "meaning": "the value of price list rate is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "1b9ae5ccd330996647dea7b69b58283dd1870822fbd13e2ae59f2ad6b4b14a58"
         },
         "allowed_values": [
@@ -750,13 +981,26 @@
         ],
         "print_hide": 1
       },
-      "display_name": "margin type"
+      "display_name": "margin type",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "",
+          "percentage",
+          "amount"
+        ],
+        "empty_option_explicitly_listed": true,
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 25,
+      "source_name_digest": "cb7bcf867bb39fa6a344b3d7ba4d3bab9f70ba31e567dddb6baf6763c6c0161a"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.margin_rate_or_amount",
       "name": "margin_rate_or_amount",
-      "source_field_ordinal": 26,
-      "source_name_digest": "43a01a0512afcf24d8a8628a5c6a486eeb3cbb21fe900dd980996e7602943e9b",
+      "field_ordinal": 26,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -787,18 +1031,30 @@
               }
             ]
           },
-          "source_value_digest": "64f6638a4aa24d9f32500ae5e1d8008c25658f756666d0552d2a5c252aeeca03",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.margin type all truthy record.price list rate)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "64f6638a4aa24d9f32500ae5e1d8008c25658f756666d0552d2a5c252aeeca03"
         },
         "print_hide": 1
       },
-      "display_name": "margin rate or amount"
+      "display_name": "margin rate or amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 26,
+      "source_name_digest": "43a01a0512afcf24d8a8628a5c6a486eeb3cbb21fe900dd980996e7602943e9b"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.rate_with_margin",
       "name": "rate_with_margin",
-      "source_field_ordinal": 27,
-      "source_name_digest": "fbfeab1ebfdda7da2aaaff0d24ba9dfcee9d6c2d0d4f47442877d2c9581e5c61",
+      "field_ordinal": 27,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -837,8 +1093,10 @@
               }
             ]
           },
-          "source_value_digest": "0ad3449fd3e069e3765e65b90a44a7fbb639e710bdf190d865e31691b8f1ca5f",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.margin type all truthy record.price list rate all truthy record.margin rate or amount)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "0ad3449fd3e069e3765e65b90a44a7fbb639e710bdf190d865e31691b8f1ca5f"
         },
         "currency_context": {
           "kind": "symbolic_text",
@@ -848,25 +1106,46 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "rate with margin"
+      "display_name": "rate with margin",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 27,
+      "source_name_digest": "fbfeab1ebfdda7da2aaaff0d24ba9dfcee9d6c2d0d4f47442877d2c9581e5c61"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.column_break_19",
       "name": "column_break_19",
-      "source_field_ordinal": 28,
-      "source_name_digest": "5517a29781f527253a6dc26c94f529adb1d51deb21e8a107139f76288f371201",
+      "field_ordinal": 28,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 29
+      },
+      "source_field_ordinal": 28,
+      "source_name_digest": "5517a29781f527253a6dc26c94f529adb1d51deb21e8a107139f76288f371201"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.discount_percentage",
       "name": "discount_percentage",
-      "source_field_ordinal": 29,
-      "source_name_digest": "1d3c09dda8c68e3eb3c31c08e799fa81dab6955587a4264dd7089a7c7b82a91c",
+      "field_ordinal": 29,
       "value_type": "percentage_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -876,6 +1155,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "price_list_rate",
+          "meaning": "the value of price list rate is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "1b9ae5ccd330996647dea7b69b58283dd1870822fbd13e2ae59f2ad6b4b14a58"
         },
         "decimal_precision": {
@@ -885,6 +1166,18 @@
         "print_hide": 1
       },
       "display_name": "discount on price list rate with margin",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "scale": "percentage_points",
+        "conversion_to_fraction": "divide the stored percentage by one hundred",
+        "precision": {
+          "kind": "integer_text",
+          "value": "2"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 29,
+      "source_name_digest": "1d3c09dda8c68e3eb3c31c08e799fa81dab6955587a4264dd7089a7c7b82a91c",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "e47dd6f0b635498460fbced36e3d9aa4df7b49a1f93fffab50714ea4c6077c4a",
@@ -899,8 +1192,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.discount_amount",
       "name": "discount_amount",
-      "source_field_ordinal": 30,
-      "source_name_digest": "d1107ece39429652b24a4c398be0a5592cd0ad6937471238fcb0de7af9c0fb98",
+      "field_ordinal": 30,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -910,6 +1202,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "price_list_rate",
+          "meaning": "the value of price list rate is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "1b9ae5ccd330996647dea7b69b58283dd1870822fbd13e2ae59f2ad6b4b14a58"
         },
         "currency_context": {
@@ -918,13 +1212,27 @@
           "source_value_digest": "0e4989ec47c3d70bba675521906d037a8a6bbb4ca692be343ec2b511ac64e2af"
         }
       },
-      "display_name": "discount amount"
+      "display_name": "discount amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 30,
+      "source_name_digest": "d1107ece39429652b24a4c398be0a5592cd0ad6937471238fcb0de7af9c0fb98"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.base_rate_with_margin",
       "name": "base_rate_with_margin",
-      "source_field_ordinal": 31,
-      "source_name_digest": "236ebd257459d2b2b00c97b3355d0ae7bb2b27a1518e22aac4139847c8689226",
+      "field_ordinal": 31,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -963,8 +1271,10 @@
               }
             ]
           },
-          "source_value_digest": "0ad3449fd3e069e3765e65b90a44a7fbb639e710bdf190d865e31691b8f1ca5f",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.margin type all truthy record.price list rate all truthy record.margin rate or amount)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "0ad3449fd3e069e3765e65b90a44a7fbb639e710bdf190d865e31691b8f1ca5f"
         },
         "currency_context": {
           "kind": "symbolic_text",
@@ -974,25 +1284,46 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "rate with margin company currency"
+      "display_name": "rate with margin company currency",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 31,
+      "source_name_digest": "236ebd257459d2b2b00c97b3355d0ae7bb2b27a1518e22aac4139847c8689226"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.section_break_1",
       "name": "section_break_1",
-      "source_field_ordinal": 32,
-      "source_name_digest": "a7e4cb602a1e53344aa7b00c9ded75981f3d4f21be1abc94ab912936de1671c0",
+      "field_ordinal": 32,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 34
+      },
+      "source_field_ordinal": 32,
+      "source_name_digest": "a7e4cb602a1e53344aa7b00c9ded75981f3d4f21be1abc94ab912936de1671c0"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.rate",
       "name": "rate",
-      "source_field_ordinal": 33,
-      "source_name_digest": "c86a4166da05165d48da5980b7eced9f9be639512856a30838b5e02c756f2e86",
+      "field_ordinal": 33,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -1010,6 +1341,21 @@
         "required": 1
       },
       "display_name": "rate",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 33,
+      "source_name_digest": "c86a4166da05165d48da5980b7eced9f9be639512856a30838b5e02c756f2e86",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "c7c1ed4dc68a008315eb5771c8cb18d71f4a5785232d07ffc23ef5905e949cff",
@@ -1024,8 +1370,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.amount",
       "name": "amount",
-      "source_field_ordinal": 34,
-      "source_name_digest": "bf8be0777c7b38dfae01bc3f63a8b0a6e34481f9ef8fbec6a68f07f5f3a8baec",
+      "field_ordinal": 34,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -1043,6 +1388,21 @@
         "required": 1
       },
       "display_name": "amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 34,
+      "source_name_digest": "bf8be0777c7b38dfae01bc3f63a8b0a6e34481f9ef8fbec6a68f07f5f3a8baec",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "d485872293f792fa4eac0fc6fbfa07225c9fc166b23fc6ae11b1cb38144c03aa",
@@ -1057,8 +1417,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.item_tax_template",
       "name": "item_tax_template",
-      "source_field_ordinal": 35,
-      "source_name_digest": "dc20b5e012d3f15abd05798c46f15930ede95077df3ebbb845418956c5d842df",
+      "field_ordinal": 35,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1071,25 +1430,43 @@
         },
         "print_hide": 1
       },
-      "display_name": "item tax template"
+      "display_name": "item tax template",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_item_tax_template"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 35,
+      "source_name_digest": "dc20b5e012d3f15abd05798c46f15930ede95077df3ebbb845418956c5d842df"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.column_break_3",
       "name": "column_break_3",
-      "source_field_ordinal": 36,
-      "source_name_digest": "f77efcfb6071adaf87a70289361e04353fff5e465a17a6144c63e479f8914986",
+      "field_ordinal": 36,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 38
+      },
+      "source_field_ordinal": 36,
+      "source_name_digest": "f77efcfb6071adaf87a70289361e04353fff5e465a17a6144c63e479f8914986"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.base_rate",
       "name": "base_rate",
-      "source_field_ordinal": 37,
-      "source_name_digest": "a83aaba791800064d6ccda9f7d47d39904d685ad4240e9a5749d1ea1074fe02c",
+      "field_ordinal": 37,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -1106,6 +1483,21 @@
         "required": 1
       },
       "display_name": "rate company currency",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 37,
+      "source_name_digest": "a83aaba791800064d6ccda9f7d47d39904d685ad4240e9a5749d1ea1074fe02c",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "b239f1b64d009f9d01f36f75b805d1ac9c863b1293954babf488b95cd3c60208",
@@ -1120,8 +1512,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.base_amount",
       "name": "base_amount",
-      "source_field_ordinal": 38,
-      "source_name_digest": "188dc09857b5a68d9403d4f1049b9d2c52bdee0b621aba6045e518fd60868bc5",
+      "field_ordinal": 38,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -1138,6 +1529,21 @@
         "required": 1
       },
       "display_name": "amount company currency",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 38,
+      "source_name_digest": "188dc09857b5a68d9403d4f1049b9d2c52bdee0b621aba6045e518fd60868bc5",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "bf8be0777c7b38dfae01bc3f63a8b0a6e34481f9ef8fbec6a68f07f5f3a8baec",
@@ -1152,8 +1558,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.pricing_rules",
       "name": "pricing_rules",
-      "source_field_ordinal": 39,
-      "source_name_digest": "7869b0c9ff4f0e45c4dd285b87687292a4f7394596450d599f09ae443258ab26",
+      "field_ordinal": 39,
       "value_type": "short_multiline_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1164,13 +1569,18 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "pricing rules"
+      "display_name": "pricing rules",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 39,
+      "source_name_digest": "7869b0c9ff4f0e45c4dd285b87687292a4f7394596450d599f09ae443258ab26"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.is_free_item",
       "name": "is_free_item",
-      "source_field_ordinal": 40,
-      "source_name_digest": "ebbdd3aef54a444250d38d05ba348a3e6cc0ba86a1f3f463547777cabd3f7993",
+      "field_ordinal": 40,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1184,25 +1594,47 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "is free item"
+      "display_name": "is free item",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 40,
+      "source_name_digest": "ebbdd3aef54a444250d38d05ba348a3e6cc0ba86a1f3f463547777cabd3f7993"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.section_break_21",
       "name": "section_break_21",
-      "source_field_ordinal": 41,
-      "source_name_digest": "518cc3e4a64d982baae916288879cb5167f31284e25b69934bd1cf55e2bc27d7",
+      "field_ordinal": 41,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 44
+      },
+      "source_field_ordinal": 41,
+      "source_name_digest": "518cc3e4a64d982baae916288879cb5167f31284e25b69934bd1cf55e2bc27d7"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.net_rate",
       "name": "net_rate",
-      "source_field_ordinal": 42,
-      "source_name_digest": "386408589c39326a23d1d0b99901d47bf8df57949de58e56bfc7cf9710c68f3a",
+      "field_ordinal": 42,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1217,13 +1649,27 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "net rate"
+      "display_name": "net rate",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 42,
+      "source_name_digest": "386408589c39326a23d1d0b99901d47bf8df57949de58e56bfc7cf9710c68f3a"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.net_amount",
       "name": "net_amount",
-      "source_field_ordinal": 43,
-      "source_name_digest": "6c03e336ee5c969e5891a6efdc0478e4b2da6124a711248d6d788022a9833b63",
+      "field_ordinal": 43,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1238,25 +1684,46 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "net amount"
+      "display_name": "net amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 43,
+      "source_name_digest": "6c03e336ee5c969e5891a6efdc0478e4b2da6124a711248d6d788022a9833b63"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.column_break_24",
       "name": "column_break_24",
-      "source_field_ordinal": 44,
-      "source_name_digest": "ce07d50987df4f923d72a30830dfe4c1b4c89b892966c9851d8a0025283b8269",
+      "field_ordinal": 44,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 47
+      },
+      "source_field_ordinal": 44,
+      "source_name_digest": "ce07d50987df4f923d72a30830dfe4c1b4c89b892966c9851d8a0025283b8269"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.base_net_rate",
       "name": "base_net_rate",
-      "source_field_ordinal": 45,
-      "source_name_digest": "a6a72a1377d9ab2fd848d1743b771d078343093d0a3ad3f29178264e398c5a46",
+      "field_ordinal": 45,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1271,13 +1738,27 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "net rate company currency"
+      "display_name": "net rate company currency",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 45,
+      "source_name_digest": "a6a72a1377d9ab2fd848d1743b771d078343093d0a3ad3f29178264e398c5a46"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.base_net_amount",
       "name": "base_net_amount",
-      "source_field_ordinal": 46,
-      "source_name_digest": "fb805a9a21f1963e21f67167c344c32a5663e49f01b4fd3c3fb8a4e075ae5c0e",
+      "field_ordinal": 46,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1292,13 +1773,27 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "net amount company currency"
+      "display_name": "net amount company currency",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 46,
+      "source_name_digest": "fb805a9a21f1963e21f67167c344c32a5663e49f01b4fd3c3fb8a4e075ae5c0e"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.drop_ship",
       "name": "drop_ship",
-      "source_field_ordinal": 47,
-      "source_name_digest": "97425572592edcbb6ea3260513e153fcb1e98bc44c9110d0f713aef9c86ffd5e",
+      "field_ordinal": 47,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -1328,17 +1823,26 @@
               }
             ]
           },
-          "source_value_digest": "63f30babe149892b29d36a6d05147529ab8017fc2ef53d2b89f61a2076b87246",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.delivered by supplier equals 1",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "63f30babe149892b29d36a6d05147529ab8017fc2ef53d2b89f61a2076b87246"
         }
       },
-      "display_name": "drop ship"
+      "display_name": "drop ship",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 50
+      },
+      "source_field_ordinal": 47,
+      "source_name_digest": "97425572592edcbb6ea3260513e153fcb1e98bc44c9110d0f713aef9c86ffd5e"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.delivered_by_supplier",
       "name": "delivered_by_supplier",
-      "source_field_ordinal": 48,
-      "source_name_digest": "7229c620e8c2f8752beed5f5c7fba42733f0675de11032dcfda3cbe5ff5bb20b",
+      "field_ordinal": 48,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1352,13 +1856,28 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "delivered by supplier"
+      "display_name": "delivered by supplier",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 48,
+      "source_name_digest": "7229c620e8c2f8752beed5f5c7fba42733f0675de11032dcfda3cbe5ff5bb20b"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.accounting",
       "name": "accounting",
-      "source_field_ordinal": 49,
-      "source_name_digest": "cea816ec4aa04210a56a3568b3501da16fe22bf35a6447e47d981e0415da1c8f",
+      "field_ordinal": 49,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -1367,13 +1886,20 @@
       "properties": {
         "collapsible": 1
       },
-      "display_name": "accounting details"
+      "display_name": "accounting details",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 52
+      },
+      "source_field_ordinal": 49,
+      "source_name_digest": "cea816ec4aa04210a56a3568b3501da16fe22bf35a6447e47d981e0415da1c8f"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.income_account",
       "name": "income_account",
-      "source_field_ordinal": 50,
-      "source_name_digest": "fe1dc187dabe85087e0c273eb03602efbfa1ceb06c17e66d234d3fa656322f50",
+      "field_ordinal": 50,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -1398,6 +1924,18 @@
         }
       },
       "display_name": "income account",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 50,
+      "source_name_digest": "fe1dc187dabe85087e0c273eb03602efbfa1ceb06c17e66d234d3fa656322f50",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "fe1dc187dabe85087e0c273eb03602efbfa1ceb06c17e66d234d3fa656322f50",
@@ -1412,8 +1950,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.is_fixed_asset",
       "name": "is_fixed_asset",
-      "source_field_ordinal": 51,
-      "source_name_digest": "dc6a721a022c0b3a4adfbb5f5cab34c2c8423351788c8366f35b142de0b46408",
+      "field_ordinal": 51,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1429,13 +1966,28 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "is fixed asset"
+      "display_name": "is fixed asset",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 51,
+      "source_name_digest": "dc6a721a022c0b3a4adfbb5f5cab34c2c8423351788c8366f35b142de0b46408"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.asset",
       "name": "asset",
-      "source_field_ordinal": 52,
-      "source_name_digest": "9d9381a7bcafb9a1a679ad224011965c68a2584c4a4828ec8eea0bd67e619be0",
+      "field_ordinal": 52,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1448,13 +2000,24 @@
           "identifier": "record_type_asset"
         }
       },
-      "display_name": "asset"
+      "display_name": "asset",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_asset"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 52,
+      "source_name_digest": "9d9381a7bcafb9a1a679ad224011965c68a2584c4a4828ec8eea0bd67e619be0"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.finance_book",
       "name": "finance_book",
-      "source_field_ordinal": 53,
-      "source_name_digest": "36de49bb5d05638c3cacf0c15e60e8a9511fdb75e3e447eecc68540e532e2594",
+      "field_ordinal": 53,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1464,6 +2027,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "asset",
+          "meaning": "the value of asset is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "9d9381a7bcafb9a1a679ad224011965c68a2584c4a4828ec8eea0bd67e619be0"
         },
         "target_record_type": {
@@ -1471,25 +2036,43 @@
           "identifier": "record_type_finance_book"
         }
       },
-      "display_name": "finance book"
+      "display_name": "finance book",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_finance_book"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 53,
+      "source_name_digest": "36de49bb5d05638c3cacf0c15e60e8a9511fdb75e3e447eecc68540e532e2594"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.column_break_4",
       "name": "column_break_4",
-      "source_field_ordinal": 54,
-      "source_name_digest": "c40537f1fdb0802bef7785a5114c0f6e6a3df7d772a0ee81122bd0ba222160d0",
+      "field_ordinal": 54,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 57
+      },
+      "source_field_ordinal": 54,
+      "source_name_digest": "c40537f1fdb0802bef7785a5114c0f6e6a3df7d772a0ee81122bd0ba222160d0"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.expense_account",
       "name": "expense_account",
-      "source_field_ordinal": 55,
-      "source_name_digest": "a76c8a3c88b75606d1d5b9245c97d557310f7ab46d92039572536f12bd10a325",
+      "field_ordinal": 55,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1507,13 +2090,24 @@
           "source_value_digest": "b1824c5fbe41f72b7589a52f3f4bc9a6b00761a0cf46c5a7b3e48856d98115e8"
         }
       },
-      "display_name": "expense account"
+      "display_name": "expense account",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 55,
+      "source_name_digest": "a76c8a3c88b75606d1d5b9245c97d557310f7ab46d92039572536f12bd10a325"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.deferred_revenue",
       "name": "deferred_revenue",
-      "source_field_ordinal": 56,
-      "source_name_digest": "69e9cb3cf5b8eae2d78c4679fd7ea67ba5ffa1ac041e870d2d779bb5014e0597",
+      "field_ordinal": 56,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -1522,13 +2116,20 @@
       "properties": {
         "collapsible": 1
       },
-      "display_name": "deferred revenue"
+      "display_name": "deferred revenue",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 59
+      },
+      "source_field_ordinal": 56,
+      "source_name_digest": "69e9cb3cf5b8eae2d78c4679fd7ea67ba5ffa1ac041e870d2d779bb5014e0597"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.deferred_revenue_account",
       "name": "deferred_revenue_account",
-      "source_field_ordinal": 57,
-      "source_name_digest": "25a446c63c859e57ff7c6a54c629571930166cf8d44f431d0b5e801bac84e016",
+      "field_ordinal": 57,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1538,6 +2139,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "enable_deferred_revenue",
+          "meaning": "the value of enable deferred revenue is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "6749976ade4ecc2941f526b9520929631467196e205668a6a847a62a65aa3c79"
         },
         "target_record_type": {
@@ -1545,13 +2148,24 @@
           "identifier": "record_type_account"
         }
       },
-      "display_name": "deferred revenue account"
+      "display_name": "deferred revenue account",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 57,
+      "source_name_digest": "25a446c63c859e57ff7c6a54c629571930166cf8d44f431d0b5e801bac84e016"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.service_stop_date",
       "name": "service_stop_date",
-      "source_field_ordinal": 58,
-      "source_name_digest": "ab2464a2fee7b03435c3f4bb4172acaa98c670cfd126f59a5506e41f2db55051",
+      "field_ordinal": 58,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1562,17 +2176,26 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "enable_deferred_revenue",
+          "meaning": "the value of enable deferred revenue is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "6749976ade4ecc2941f526b9520929631467196e205668a6a847a62a65aa3c79"
         },
         "excluded_from_record_copy": 1
       },
-      "display_name": "service stop date"
+      "display_name": "service stop date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 58,
+      "source_name_digest": "ab2464a2fee7b03435c3f4bb4172acaa98c670cfd126f59a5506e41f2db55051"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.enable_deferred_revenue",
       "name": "enable_deferred_revenue",
-      "source_field_ordinal": 59,
-      "source_name_digest": "6749976ade4ecc2941f526b9520929631467196e205668a6a847a62a65aa3c79",
+      "field_ordinal": 59,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1584,25 +2207,47 @@
           "value": "0"
         }
       },
-      "display_name": "enable deferred revenue"
+      "display_name": "enable deferred revenue",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 59,
+      "source_name_digest": "6749976ade4ecc2941f526b9520929631467196e205668a6a847a62a65aa3c79"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.column_break_50",
       "name": "column_break_50",
-      "source_field_ordinal": 60,
-      "source_name_digest": "2535e77ad847cfa6e64fadbc76618c69fa3e04ea6c670ffe81d94ee0e3f3722b",
+      "field_ordinal": 60,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 63
+      },
+      "source_field_ordinal": 60,
+      "source_name_digest": "2535e77ad847cfa6e64fadbc76618c69fa3e04ea6c670ffe81d94ee0e3f3722b"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.service_start_date",
       "name": "service_start_date",
-      "source_field_ordinal": 61,
-      "source_name_digest": "b7a0a9190134ddde0cb5d7e25424659584b17244601f95336fbfab2d7174bcac",
+      "field_ordinal": 61,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1612,17 +2257,26 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "enable_deferred_revenue",
+          "meaning": "the value of enable deferred revenue is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "6749976ade4ecc2941f526b9520929631467196e205668a6a847a62a65aa3c79"
         },
         "excluded_from_record_copy": 1
       },
-      "display_name": "service start date"
+      "display_name": "service start date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 61,
+      "source_name_digest": "b7a0a9190134ddde0cb5d7e25424659584b17244601f95336fbfab2d7174bcac"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.service_end_date",
       "name": "service_end_date",
-      "source_field_ordinal": 62,
-      "source_name_digest": "d983b12a57b0e54efb8e6c7055b68a3bf9c2a75cb74d4af886aba7f54a46f47e",
+      "field_ordinal": 62,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1632,17 +2286,26 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "enable_deferred_revenue",
+          "meaning": "the value of enable deferred revenue is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "6749976ade4ecc2941f526b9520929631467196e205668a6a847a62a65aa3c79"
         },
         "excluded_from_record_copy": 1
       },
-      "display_name": "service end date"
+      "display_name": "service end date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 62,
+      "source_name_digest": "d983b12a57b0e54efb8e6c7055b68a3bf9c2a75cb74d4af886aba7f54a46f47e"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.section_break_18",
       "name": "section_break_18",
-      "source_field_ordinal": 63,
-      "source_name_digest": "5d261c05b299ece2bfb2fcd63420895d413ffd90175012572f70b759a2e64251",
+      "field_ordinal": 63,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -1651,13 +2314,20 @@
       "properties": {
         "collapsible": 1
       },
-      "display_name": "item weight details"
+      "display_name": "item weight details",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 66
+      },
+      "source_field_ordinal": 63,
+      "source_name_digest": "5d261c05b299ece2bfb2fcd63420895d413ffd90175012572f70b759a2e64251"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.weight_per_unit",
       "name": "weight_per_unit",
-      "source_field_ordinal": 64,
-      "source_name_digest": "afe6e8c2d3c36d6758e0e2abf650cfdbd2f6369b3f7af4dfed3bdabebeea06fe",
+      "field_ordinal": 64,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1667,13 +2337,23 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "weight per unit"
+      "display_name": "weight per unit",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 64,
+      "source_name_digest": "afe6e8c2d3c36d6758e0e2abf650cfdbd2f6369b3f7af4dfed3bdabebeea06fe"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.total_weight",
       "name": "total_weight",
-      "source_field_ordinal": 65,
-      "source_name_digest": "e1a2d77df37ff72e9275d8bf3fcceb523b1a5b628aa5bc72e297f0a3d70ab8be",
+      "field_ordinal": 65,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1683,25 +2363,42 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "total weight"
+      "display_name": "total weight",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 65,
+      "source_name_digest": "e1a2d77df37ff72e9275d8bf3fcceb523b1a5b628aa5bc72e297f0a3d70ab8be"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.column_break_21",
       "name": "column_break_21",
-      "source_field_ordinal": 66,
-      "source_name_digest": "fb1c596dc0abd5f5818b4e2824b1f11a236fd77c1dc6fef776594cb88fa8bcdc",
+      "field_ordinal": 66,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 69
+      },
+      "source_field_ordinal": 66,
+      "source_name_digest": "fb1c596dc0abd5f5818b4e2824b1f11a236fd77c1dc6fef776594cb88fa8bcdc"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.weight_unit_of_measure",
       "name": "weight_unit_of_measure",
-      "source_field_ordinal": 67,
-      "source_name_digest": "41b1dbaccde7af55732d93aca61db6b033bd400a7188505578d1a338ffa73d49",
+      "field_ordinal": 67,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1715,13 +2412,24 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "weight unit of measure"
+      "display_name": "weight unit of measure",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_unit_of_measure"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 67,
+      "source_name_digest": "41b1dbaccde7af55732d93aca61db6b033bd400a7188505578d1a338ffa73d49"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.warehouse_and_reference",
       "name": "warehouse_and_reference",
-      "source_field_ordinal": 68,
-      "source_name_digest": "0a58ae21abc44386ab5548f321bd4cad7c03b52a2443ba33eeb08351105e3a30",
+      "field_ordinal": 68,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -1753,17 +2461,26 @@
               }
             ]
           },
-          "source_value_digest": "b72d12a67fac293f84b0b701936c1796b568daf4b16225461391a7d988babdbd",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.serial number first truthy record.batch number)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "b72d12a67fac293f84b0b701936c1796b568daf4b16225461391a7d988babdbd"
         }
       },
-      "display_name": "stock details"
+      "display_name": "stock details",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 71
+      },
+      "source_field_ordinal": 68,
+      "source_name_digest": "0a58ae21abc44386ab5548f321bd4cad7c03b52a2443ba33eeb08351105e3a30"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.warehouse",
       "name": "warehouse",
-      "source_field_ordinal": 69,
-      "source_name_digest": "7cbbd0184f4d2461ac868af79bb683454c0d4ef36325ad99cb29cbd682c8a55a",
+      "field_ordinal": 69,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1778,6 +2495,18 @@
         "print_hide": 1
       },
       "display_name": "warehouse",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_warehouse"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 69,
+      "source_name_digest": "7cbbd0184f4d2461ac868af79bb683454c0d4ef36325ad99cb29cbd682c8a55a",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "7cbbd0184f4d2461ac868af79bb683454c0d4ef36325ad99cb29cbd682c8a55a",
@@ -1792,8 +2521,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.target_warehouse",
       "name": "target_warehouse",
-      "source_field_ordinal": 70,
-      "source_name_digest": "1c1403466244ea002e09fea0de6ed4fedf9d45365c2b2280420bc71216e18b27",
+      "field_ordinal": 70,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1809,13 +2537,24 @@
         },
         "print_hide": 1
       },
-      "display_name": "customer warehouse optional"
+      "display_name": "customer warehouse optional",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_warehouse"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 70,
+      "source_name_digest": "1c1403466244ea002e09fea0de6ed4fedf9d45365c2b2280420bc71216e18b27"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.quality_inspection",
       "name": "quality_inspection",
-      "source_field_ordinal": 71,
-      "source_name_digest": "a06ea87332148f3c169df5c98ac06ae362ea819162d401d3121aab07b0811d23",
+      "field_ordinal": 71,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1836,21 +2575,34 @@
               "name": "islocal"
             }
           },
-          "source_value_digest": "8377b122dc57ff5d1b05087d46b073a0a02a7215abe4b05afc3ac95f2dbeac52",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "logical not (record.islocal)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "8377b122dc57ff5d1b05087d46b073a0a02a7215abe4b05afc3ac95f2dbeac52"
         },
         "target_record_type": {
           "kind": "record_type",
           "identifier": "record_type_quality_inspection"
         }
       },
-      "display_name": "quality inspection"
+      "display_name": "quality inspection",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_quality_inspection"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 71,
+      "source_name_digest": "a06ea87332148f3c169df5c98ac06ae362ea819162d401d3121aab07b0811d23"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.batch_number",
       "name": "batch_number",
-      "source_field_ordinal": 72,
-      "source_name_digest": "ad00779693dffafaa32020649b4c0352fd3af4684cd509eb7a84c6ad9f9d9f03",
+      "field_ordinal": 72,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1879,8 +2631,10 @@
               }
             ]
           },
-          "source_value_digest": "9723500af7016066a59f5263cc43901fa45e24e71dc5071201ea50a5119ad50e",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.use serial batch fields equals 1",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "9723500af7016066a59f5263cc43901fa45e24e71dc5071201ea50a5119ad50e"
         },
         "target_record_type": {
           "kind": "record_type",
@@ -1888,25 +2642,43 @@
         },
         "print_hide": 1
       },
-      "display_name": "batch no"
+      "display_name": "batch no",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_batch"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 72,
+      "source_name_digest": "ad00779693dffafaa32020649b4c0352fd3af4684cd509eb7a84c6ad9f9d9f03"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.column_break_5",
       "name": "column_break_5",
-      "source_field_ordinal": 73,
-      "source_name_digest": "188161ae891a96c50f89c042f65e9a67b97f1e82218847f80d3430bdedd33d43",
+      "field_ordinal": 73,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 77
+      },
+      "source_field_ordinal": 73,
+      "source_name_digest": "188161ae891a96c50f89c042f65e9a67b97f1e82218847f80d3430bdedd33d43"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.allow_zero_valuation_rate",
       "name": "allow_zero_valuation_rate",
-      "source_field_ordinal": 74,
-      "source_name_digest": "57cd7f0799f6f33ded6fe74b2347b9955b1f50b5ded134581d4bf3457fe6cf57",
+      "field_ordinal": 74,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1920,13 +2692,28 @@
         "excluded_from_record_copy": 1,
         "print_hide": 1
       },
-      "display_name": "allow zero valuation rate"
+      "display_name": "allow zero valuation rate",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 74,
+      "source_name_digest": "57cd7f0799f6f33ded6fe74b2347b9955b1f50b5ded134581d4bf3457fe6cf57"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.serial_number",
       "name": "serial_number",
-      "source_field_ordinal": 75,
-      "source_name_digest": "b349d80a8f5dea4f849f1c19a002a96df5989e203dd834c139f103c261ccd02a",
+      "field_ordinal": 75,
       "value_type": "multiline_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1955,12 +2742,20 @@
               }
             ]
           },
-          "source_value_digest": "9723500af7016066a59f5263cc43901fa45e24e71dc5071201ea50a5119ad50e",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.use serial batch fields equals 1",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "9723500af7016066a59f5263cc43901fa45e24e71dc5071201ea50a5119ad50e"
         },
         "visible_in_list": 1
       },
       "display_name": "serial no",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 75,
+      "source_name_digest": "b349d80a8f5dea4f849f1c19a002a96df5989e203dd834c139f103c261ccd02a",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "b349d80a8f5dea4f849f1c19a002a96df5989e203dd834c139f103c261ccd02a",
@@ -1975,8 +2770,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.item_tax_rate",
       "name": "item_tax_rate",
-      "source_field_ordinal": 76,
-      "source_name_digest": "aa352e6a31715bc59b29bac93f6fc1d5c8f441c4fd8085c607ef13ee47d07c0b",
+      "field_ordinal": 76,
       "value_type": "short_multiline_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1988,6 +2782,12 @@
         "read_only": 1
       },
       "display_name": "item tax rate",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 76,
+      "source_name_digest": "aa352e6a31715bc59b29bac93f6fc1d5c8f441c4fd8085c607ef13ee47d07c0b",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "aa352e6a31715bc59b29bac93f6fc1d5c8f441c4fd8085c607ef13ee47d07c0b",
@@ -2002,8 +2802,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.actual_batch_quantity",
       "name": "actual_batch_quantity",
-      "source_field_ordinal": 77,
-      "source_name_digest": "49276a42ebe3f827b2ece2c59b4db6514d36a5a2f5549e2b34697c6d4c302117",
+      "field_ordinal": 77,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2025,13 +2824,23 @@
           "source_value_digest": "cbeb4ee53cf9e02b5cd7f49bce67c3ec39516c7f1fd8bce4668302aa5698275a"
         }
       },
-      "display_name": "available batch quantity at warehouse"
+      "display_name": "available batch quantity at warehouse",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 77,
+      "source_name_digest": "49276a42ebe3f827b2ece2c59b4db6514d36a5a2f5549e2b34697c6d4c302117"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.actual_quantity",
       "name": "actual_quantity",
-      "source_field_ordinal": 78,
-      "source_name_digest": "a57d774fe722e10319c753cfa403e76fc85b950839ac505b03cd10799eb77e1d",
+      "field_ordinal": 78,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2043,6 +2852,17 @@
         "read_only": 1
       },
       "display_name": "available quantity at warehouse",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 78,
+      "source_name_digest": "a57d774fe722e10319c753cfa403e76fc85b950839ac505b03cd10799eb77e1d",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "a57d774fe722e10319c753cfa403e76fc85b950839ac505b03cd10799eb77e1d",
@@ -2057,8 +2877,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.edit_references",
       "name": "edit_references",
-      "source_field_ordinal": 79,
-      "source_name_digest": "fca784063e99c5294ca792f9439a626c2a96825803644538fc34e38f98a3416e",
+      "field_ordinal": 79,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -2067,13 +2886,20 @@
       "properties": {
         "collapsible": 1
       },
-      "display_name": "references"
+      "display_name": "references",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 88
+      },
+      "source_field_ordinal": 79,
+      "source_name_digest": "fca784063e99c5294ca792f9439a626c2a96825803644538fc34e38f98a3416e"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.sales_order",
       "name": "sales_order",
-      "source_field_ordinal": 80,
-      "source_name_digest": "be9be24ac8e2488328f225a5cbcf4254a9f725bc465eea4443f135da97c3570d",
+      "field_ordinal": 80,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2090,6 +2916,18 @@
         "indexed_for_search": 1
       },
       "display_name": "sales order",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_sales_order"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 80,
+      "source_name_digest": "be9be24ac8e2488328f225a5cbcf4254a9f725bc465eea4443f135da97c3570d",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "be9be24ac8e2488328f225a5cbcf4254a9f725bc465eea4443f135da97c3570d",
@@ -2104,8 +2942,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.sales_order_detail",
       "name": "sales_order_detail",
-      "source_field_ordinal": 81,
-      "source_name_digest": "9879627a539b5d00324fc0f4f871fdf7881c33b81f4b39fbca7f75a0e02d07bd",
+      "field_ordinal": 81,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2119,6 +2956,12 @@
         "indexed_for_search": 1
       },
       "display_name": "sales order item",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 81,
+      "source_name_digest": "9879627a539b5d00324fc0f4f871fdf7881c33b81f4b39fbca7f75a0e02d07bd",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "9879627a539b5d00324fc0f4f871fdf7881c33b81f4b39fbca7f75a0e02d07bd",
@@ -2133,20 +2976,26 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.column_break_74",
       "name": "column_break_74",
-      "source_field_ordinal": 82,
-      "source_name_digest": "27d618a3ef5293ec1fd79217eabe1304c05ec3e88da2bf2809e0a0c959f81a3c",
+      "field_ordinal": 82,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 92
+      },
+      "source_field_ordinal": 82,
+      "source_name_digest": "27d618a3ef5293ec1fd79217eabe1304c05ec3e88da2bf2809e0a0c959f81a3c"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.delivery_note",
       "name": "delivery_note",
-      "source_field_ordinal": 83,
-      "source_name_digest": "062c7508b2606196965da4a55ebeae2e2527e517465ec7de02774ff017064dbd",
+      "field_ordinal": 83,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2163,6 +3012,18 @@
         "indexed_for_search": 1
       },
       "display_name": "delivery note",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_delivery_note"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 83,
+      "source_name_digest": "062c7508b2606196965da4a55ebeae2e2527e517465ec7de02774ff017064dbd",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "062c7508b2606196965da4a55ebeae2e2527e517465ec7de02774ff017064dbd",
@@ -2177,8 +3038,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.record_name_detail",
       "name": "record_name_detail",
-      "source_field_ordinal": 84,
-      "source_name_digest": "af82cdfe80ff4506400a88850cd3b4c5681a10491fb05365a59b535ca81af096",
+      "field_ordinal": 84,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2192,6 +3052,12 @@
         "indexed_for_search": 1
       },
       "display_name": "delivery note item",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 84,
+      "source_name_digest": "af82cdfe80ff4506400a88850cd3b4c5681a10491fb05365a59b535ca81af096",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "af82cdfe80ff4506400a88850cd3b4c5681a10491fb05365a59b535ca81af096",
@@ -2206,8 +3072,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.delivered_quantity",
       "name": "delivered_quantity",
-      "source_field_ordinal": 85,
-      "source_name_digest": "607862e2b7e39b34d0910f35d0b7e7e8e554d38317a9e1fbb90f6fbd7c9dde6d",
+      "field_ordinal": 85,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2218,6 +3083,17 @@
         "read_only": 1
       },
       "display_name": "delivered quantity",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 85,
+      "source_name_digest": "607862e2b7e39b34d0910f35d0b7e7e8e554d38317a9e1fbb90f6fbd7c9dde6d",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "607862e2b7e39b34d0910f35d0b7e7e8e554d38317a9e1fbb90f6fbd7c9dde6d",
@@ -2232,8 +3108,7 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.accounting_dimensions_section",
       "name": "accounting_dimensions_section",
-      "source_field_ordinal": 86,
-      "source_name_digest": "fed6c78ee355407d0216b558d400a7f85281f8a0361a2b86e947f300e3cf5f3e",
+      "field_ordinal": 86,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -2242,13 +3117,20 @@
       "properties": {
         "collapsible": 1
       },
-      "display_name": "accounting dimensions"
+      "display_name": "accounting dimensions",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 96
+      },
+      "source_field_ordinal": 86,
+      "source_name_digest": "fed6c78ee355407d0216b558d400a7f85281f8a0361a2b86e947f300e3cf5f3e"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.cost_center",
       "name": "cost_center",
-      "source_field_ordinal": 87,
-      "source_name_digest": "efbbf0a4b73ea019ed0c0f4c3aacdbf8c2af4f11f0364d9bff705d68158d5c2a",
+      "field_ordinal": 87,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -2278,6 +3160,23 @@
         }
       },
       "display_name": "cost center",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_cost_center"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "default": {
+          "kind": "symbolic_text",
+          "value": "company"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 87,
+      "source_name_digest": "efbbf0a4b73ea019ed0c0f4c3aacdbf8c2af4f11f0364d9bff705d68158d5c2a",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "efbbf0a4b73ea019ed0c0f4c3aacdbf8c2af4f11f0364d9bff705d68158d5c2a",
@@ -2292,32 +3191,45 @@
     {
       "identifier": "record_type_point_of_sale_invoice_item.dimension_column_break",
       "name": "dimension_column_break",
-      "source_field_ordinal": 88,
-      "source_name_digest": "635b3bf44ffaca22b905f6de6061612bbd01db3b66a20b429db2d7cf276eacc4",
+      "field_ordinal": 88,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 98
+      },
+      "source_field_ordinal": 88,
+      "source_name_digest": "635b3bf44ffaca22b905f6de6061612bbd01db3b66a20b429db2d7cf276eacc4"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.section_break_54",
       "name": "section_break_54",
-      "source_field_ordinal": 89,
-      "source_name_digest": "ccc1ad26133e56ec53c844e998b0b89baff0d530e186d383ffd8d6e9e3bb6bbf",
+      "field_ordinal": 89,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 100
+      },
+      "source_field_ordinal": 89,
+      "source_name_digest": "ccc1ad26133e56ec53c844e998b0b89baff0d530e186d383ffd8d6e9e3bb6bbf"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.page_break",
       "name": "page_break",
-      "source_field_ordinal": 90,
-      "source_name_digest": "48267162502bbc42960186a1859c7b8cd85c5d370f645df7d9616ba03f123d6e",
+      "field_ordinal": 90,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2333,13 +3245,28 @@
         "print_hide": 1,
         "report_hide": 1
       },
-      "display_name": "page break"
+      "display_name": "page break",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 90,
+      "source_name_digest": "48267162502bbc42960186a1859c7b8cd85c5d370f645df7d9616ba03f123d6e"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.project",
       "name": "project",
-      "source_field_ordinal": 91,
-      "source_name_digest": "471cacee86a419f75111098ba664eeb1e7db51b9436a9821c23851df5ed52c15",
+      "field_ordinal": 91,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2351,13 +3278,24 @@
           "identifier": "record_type_project"
         }
       },
-      "display_name": "project"
+      "display_name": "project",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_project"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 91,
+      "source_name_digest": "471cacee86a419f75111098ba664eeb1e7db51b9436a9821c23851df5ed52c15"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.point_of_sale_invoice_item",
       "name": "point_of_sale_invoice_item",
-      "source_field_ordinal": 92,
-      "source_name_digest": "1b8491cc7476917f2f272840125756a56ac934959e53ffd66f0aa832a73c3962",
+      "field_ordinal": 92,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2369,13 +3307,18 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "point of sale invoice item"
+      "display_name": "point of sale invoice item",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 92,
+      "source_name_digest": "1b8491cc7476917f2f272840125756a56ac934959e53ffd66f0aa832a73c3962"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.grant_commission",
       "name": "grant_commission",
-      "source_field_ordinal": 93,
-      "source_name_digest": "80551c403a45efc32a49a548d2b694ad8f1dd4a1319cbaf022d38bff786ca13b",
+      "field_ordinal": 93,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2395,13 +3338,35 @@
         },
         "read_only": 1
       },
-      "display_name": "grant commission"
+      "display_name": "grant commission",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "item_code",
+            "grant_commission"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 93,
+      "source_name_digest": "80551c403a45efc32a49a548d2b694ad8f1dd4a1319cbaf022d38bff786ca13b"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.has_item_scanned",
       "name": "has_item_scanned",
-      "source_field_ordinal": 94,
-      "source_name_digest": "507f198cc558078dc6765ff22f5ff7c931b5fb48a76aa1cee5faa8ca0cb2eee9",
+      "field_ordinal": 94,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2415,17 +3380,34 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "barcode",
+          "meaning": "the value of barcode is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "cdde23af0fb16632ecf0985500afa64813c94ffdb284c4857dfa02c7adf3d12e"
         },
         "read_only": 1
       },
-      "display_name": "has item scanned"
+      "display_name": "has item scanned",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 94,
+      "source_name_digest": "507f198cc558078dc6765ff22f5ff7c931b5fb48a76aa1cee5faa8ca0cb2eee9"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.serial_and_batch_bundle",
       "name": "serial_and_batch_bundle",
-      "source_field_ordinal": 95,
-      "source_name_digest": "05f955cb5aaf669291968120fd4393c287619936ac32ef2797c90c7a22744269",
+      "field_ordinal": 95,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2468,8 +3450,10 @@
               }
             ]
           },
-          "source_value_digest": "b7868033bffde34129c762c0f9977faba9b50510e5504b3ed3d8a2a8c9e93108",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.use serial batch fields equals 0 first truthy record.serial and batch bundle)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "b7868033bffde34129c762c0f9977faba9b50510e5504b3ed3d8a2a8c9e93108"
         },
         "excluded_from_record_copy": 1,
         "target_record_type": {
@@ -2478,13 +3462,24 @@
         },
         "print_hide": 1
       },
-      "display_name": "serial and batch bundle"
+      "display_name": "serial and batch bundle",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_serial_and_batch_bundle"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 95,
+      "source_name_digest": "05f955cb5aaf669291968120fd4393c287619936ac32ef2797c90c7a22744269"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.use_serial_batch_fields",
       "name": "use_serial_batch_fields",
-      "source_field_ordinal": 96,
-      "source_name_digest": "5ade6c2ba4da21bad81aadf3c86003484cc5980c65feaefcbbdf2b461e930b34",
+      "field_ordinal": 96,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2496,38 +3491,69 @@
           "value": "0"
         }
       },
-      "display_name": "use serial no batch fields"
+      "display_name": "use serial no batch fields",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 96,
+      "source_name_digest": "5ade6c2ba4da21bad81aadf3c86003484cc5980c65feaefcbbdf2b461e930b34"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.serial_batch_entries_section",
       "name": "serial_batch_entries_section",
-      "source_field_ordinal": 97,
-      "source_name_digest": "ff841356445271ae08cc4df1a2a9a9eac1d9aed58b02089f137b9a3cefc9b93e",
+      "field_ordinal": 97,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "serial batch entries"
+      "display_name": "serial batch entries",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 82
+      },
+      "source_field_ordinal": 97,
+      "source_name_digest": "ff841356445271ae08cc4df1a2a9a9eac1d9aed58b02089f137b9a3cefc9b93e",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.serial_batch_entries_document_markup",
       "name": "serial_batch_entries_document_markup",
-      "source_field_ordinal": 98,
-      "source_name_digest": "e60ff6ca20d8354c524e723c57dbeac121ad2bc59c7561bec7cfcc3a7b434760",
+      "field_ordinal": 98,
       "value_type": "rendered_markup",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "rendered_markup",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 83
+      },
+      "source_field_ordinal": 98,
+      "source_name_digest": "e60ff6ca20d8354c524e723c57dbeac121ad2bc59c7561bec7cfcc3a7b434760",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.section_break_tlhi",
       "name": "section_break_tlhi",
-      "source_field_ordinal": 99,
-      "source_name_digest": "9dbc5a32747271d28bf3452a26115b7bd58e67ca9db6ee987a9a5a4c07a20821",
+      "field_ordinal": 99,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -2556,28 +3582,44 @@
               }
             ]
           },
-          "source_value_digest": "9723500af7016066a59f5263cc43901fa45e24e71dc5071201ea50a5119ad50e",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.use serial batch fields equals 1",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "9723500af7016066a59f5263cc43901fa45e24e71dc5071201ea50a5119ad50e"
         }
-      }
+      },
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 84
+      },
+      "source_field_ordinal": 99,
+      "source_name_digest": "9dbc5a32747271d28bf3452a26115b7bd58e67ca9db6ee987a9a5a4c07a20821"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.column_break_ciit",
       "name": "column_break_ciit",
-      "source_field_ordinal": 100,
-      "source_name_digest": "2ec3fd900ef8826ac19099b77b1eb3d87d5b0f1f904aa39dbaa816c45661698c",
+      "field_ordinal": 100,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 86
+      },
+      "source_field_ordinal": 100,
+      "source_name_digest": "2ec3fd900ef8826ac19099b77b1eb3d87d5b0f1f904aa39dbaa816c45661698c"
     },
     {
       "identifier": "record_type_point_of_sale_invoice_item.distributed_discount_amount",
       "name": "distributed_discount_amount",
-      "source_field_ordinal": 101,
-      "source_name_digest": "7d9d5378e2564efbe673d313bb86fb13bfeed3751131d48521af977bf447a83c",
+      "field_ordinal": 101,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -2590,9 +3632,40 @@
           "source_value_digest": "0e4989ec47c3d70bba675521906d037a8a6bbb4ca692be343ec2b511ac64e2af"
         }
       },
-      "display_name": "distributed discount amount"
+      "display_name": "distributed discount amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 101,
+      "source_name_digest": "7d9d5378e2564efbe673d313bb86fb13bfeed3751131d48521af977bf447a83c"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "ordinary record rename disabled",
+    "strategy": "generated_collision_checked_identifier",
+    "minimum_length": 10
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "owned_child_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "This record type does not independently implement the post-and-cancel lifecycle."
+  },
+  "source_name_digest": "bd91beeb5825190f30c1f1400b0e189306894acc2107354d7cb5f8c7cd97021f",
+  "source_pack": "enterprise",
+  "source_artifact": "source-artifact-f2d1103f5ba022c3921e",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "779e971d7a4651ce41f5e341e9f07211a99137c01eaea0a3207716685e50d036",
@@ -2614,5 +3687,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "accounting.point_of_sale_invoice_item",
+    "status": "declared",
+    "dictionary": "schema/entities/accounting-02.json",
+    "declaration_name": "POS Invoice Item",
+    "declaration_catalog": "docs/rebuild/model/catalog/erpnext-accounts-03.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

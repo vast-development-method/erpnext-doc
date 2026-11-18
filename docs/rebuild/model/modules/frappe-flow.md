@@ -1,4 +1,4 @@
-# Flow declarations in frappe
+# Flow declarations in shared foundation
 
 Each dictionary part contains an ordered field list, source location, record settings and grants. The source column opens the declaration at the reviewed revision.
 

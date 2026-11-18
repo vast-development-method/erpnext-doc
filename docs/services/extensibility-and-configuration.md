@@ -113,3 +113,7 @@ For example, adding a warehouse reference to a custom child row requires more th
 Employee-linked payment, payroll journal cancellation, contact-channel updates, product catalog projection, time billing, and project costing can each invoke behavior from several business domains. Treat these as one installed capability graph. Combining overlapping forms does not permit dropping an expense-claim update from payment submission or a payroll reference cleanup from journal cancellation.
 
 An extension acceptance fixture must therefore include both its own result and the base record's invariants. For a payment extension, verify balanced posting, correct party or employee allocation, dependent claim update, and cancellation reversal. For a contact extension, verify identity preservation, protected fields, and related communication or lead views.
+
+## Linked specifications
+
+- **Related decisions** · [application architecture](../overview/application-architecture.md#extension-composition)

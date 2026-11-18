@@ -14,6 +14,20 @@ Keep the source site and canonical record type, projection, typed predicate, tar
 
 Keep source field IDs and typed decimal, currency-code and datetime values stable when the operator changes language. Export translatable content as specifically selected columns or separate records keyed by document, field and language. Preserve Unicode values and their language tags. The dashboard presents translated dimension names and localized numbers; filters and groupings retain canonical values. An available-language fallback in the dashboard must not silently manufacture a missing translation in the warehouse.
 
+### Detailed workflow and cases
+
+<a id="analytical-dataset-export-3"></a>
+
+#### Operating rules
+
+| Acceptance example | Expected result |
+|---|---|
+| `INV-001` and `INV-002` have the same modification timestamp and the page size is one. The worker stops after the first destination write but before its cursor update. | Replay upserts `INV-001`, then exports `INV-002`; exactly two business keys remain. Rerunning from a German interface leaves both keys and column names unchanged. |
+| An export selects item ID and English and Chinese descriptions. The Chinese translation is absent on one item. | The Chinese value remains absent or explicitly marked missing per schema. A dashboard may display a labeled fallback. |
+| A destination rejects a page or a user without export permission requests a run. | Failed writes leave the last committed cursor intact. The unauthorized request starts no job and cannot read the service credential. |
+
+[Implementation evidence and scope](../../rebuild/marketplace-guides/apps/frappe_bigquery.md).
+
 ## Multilingual chat composition
 
 An administrator selects the text service and generation settings. Staff compose a turn and explicitly send it from their workspace. Preserve input-method composition and the requested reply language independently of the interface language.
@@ -24,6 +38,19 @@ An administrator selects the text service and generation settings. Staff compose
 
 A chat session belongs to a tenant and actor. Sending a turn requires that session ID, client message ID, ordered user text and an optional response-language preference. Track pending, completed or failed delivery on that turn. Store the provider response separately from the input so a retry cannot overwrite what the user wrote. Restrict any retained history to the owner or an expressly authorized role. Switching pages or closing the window preserves the chosen session until the explicit new-chat action or the site's configured expiry. Opening a record must not implicitly transmit its content to the provider.
 
+### Detailed workflow and cases
+
+<a id="multilingual-chat-composition-4"></a>
+
+#### Acceptance cases
+
+- A German-speaking employee opens the panel from an Afrikaans invoice, types a message in Chinese and requests an English answer. Send the original Chinese string with the explicit output-language preference. Interface labels remain German and the invoice contents stay outside the request. Record the actual response text regardless of the language the provider returns.
+- While a user is composing a Chinese character through an input method editor, Enter confirms that character. Only the subsequent send action creates the message. Escape dismisses the panel without recording a second turn.
+- If the provider rejects a model or times out, show a translated explanation keyed to a stable failure code. Retain the user’s draft or failed message for explicit retry. A repeated client message ID returns its existing result once a successful response is recorded.
+- A missing chat-label translation falls back to the configured interface language. Previously submitted messages keep their original wording when the UI changes to a right-to-left language.
+
+[Implementation evidence and scope](../../rebuild/marketplace-guides/apps/instagpt.md).
+
 ## Hijri civil day conversion
 
 A calendar selector displays the same civil day using Hijri or Gregorian notation. Record the chosen month-start convention and its valid range. Convert for display and entry while preserving the canonical civil day through a round trip.
@@ -33,6 +60,20 @@ A calendar selector displays the same civil day using Hijri or Gregorian notatio
 ### Additional decisions
 
 Model UI language, numeral system, calendar choice, version of the calendar table, and display zone independently. A civil date is stored as an ISO date. A timestamp additionally carries its instant and uses the chosen zone when deriving a local day. Calendar switching for a date-only field must never move the stored day through a UTC conversion. Display a clear calendar label and localize month names, field instructions and errors. If a label lacks a translation, retain the correct numeric date and calendar identifier.
+
+### Detailed workflow and cases
+
+<a id="hijri-civil-day-conversion-3"></a>
+
+#### Operating rules
+
+| Example | Expected result |
+|---|---|
+| Select 1448-06-08 using the pinned Umm al-Qura table | Canonical date is 2026-11-18. Switch to a German Gregorian view, save, reopen in Arabic and render the same Hijri day. The analytical filter for 2026-11-18 returns the same record. |
+| A user switches language from Arabic to English while keeping Hijri selected | Date and calendar identifier stay fixed. Month/weekday words and digit display follow configured locale preferences. |
+| A user selects a nonexistent day in that calendar month or a date outside the table coverage | Return a localizable validation error before saving. Retain the prior valid date and offer an explicit alternative entry mode. |
+
+[Implementation evidence and scope](../../rebuild/marketplace-guides/apps/islamic_calendar.md).
 
 ## Nepali civil day conversion
 
@@ -46,6 +87,8 @@ For each Date field, maintain one canonical civil date. Accept a calendar identi
 
 Treat language, numeral system and calendar as separate preferences. A Nepali-speaking clerk can choose Gregorian input, and an English-speaking clerk can choose Bikram Sambat input. Identify the calendar beside editable and ambiguous printed dates. If approved local month names are unavailable, use an explicitly labelled numeric format. Preserve the actual conversion-table range and report a localized error outside it. A fixed offset in years cannot perform the conversion across irregular month boundaries.
 
+[Implementation evidence and scope](../../rebuild/marketplace-guides/apps/nepali_calendar.md).
+
 ## Multilingual business record questions
 
 Attach the original question, conversation history and permitted record context to a user-owned session. Persist the returned answer separately. Resolve document and field permissions before supplying business data.
@@ -57,3 +100,17 @@ Attach the original question, conversation history and permitted record context 
 Accept a question, private conversation ID, message ID, requested response language and optional record or workspace reference. Check access to that conversation and any business context before materializing history or forwarding context to a provider. Record only the approved disclosure scope. A successful answer records the original message, answer text, generated language, sources when available and provider outcome. An unavailable service leaves the message in a retryable state. A retry with the same message ID must attach to the original turn.
 
 Keep the user's original words, document names and quoted excerpts. Store answer translations as derivatives tied to the original. Render navigation labels, language names and errors from a catalog. Distinguish the language used to ask a question from the language requested for its answer. Define unsupported-language and missing-source outcomes. Advice about a form should never itself post or approve that form.
+
+### Detailed workflow and cases
+
+<a id="multilingual-business-record-questions-1"></a>
+
+#### Operating rules
+
+| Proposed acceptance case | Expected result |
+|---|---|
+| A German UI user asks in Afrikaans how to locate the outstanding amount for an invoice they may read, and requests an Afrikaans answer. | The response is in Afrikaans, names the correct invoice and identifies the source field. The invoice remains unchanged and the original question is retained. |
+| A question refers to an employee record outside the user's HR scope. | The provider receives no restricted employee data or history and the user receives a localized access response. |
+| A provider times out and the same message is retried. | One visible user turn remains. Its status resolves to an answer or a localized failure without duplicating conversation entries. |
+
+[Implementation evidence and scope](../../rebuild/marketplace-guides/apps/nextai.md).

@@ -106,3 +106,8 @@ A final statement preserves each obligation's kind, originating record, amount, 
 An asset marked return must no longer belong to the employee when the statement is submitted. An asset marked recover cost remains a custody and recovery record and contributes to receivables; it does not become a returned asset by changing the label. The settled status on each monetary row must be backed by its corresponding settlement transaction for reconciliation. The personnel statement itself is not evidence that a bank payment or cash receipt occurred.
 
 The optional loan boundary accepts independently computed loan obligations and recovery references. The provided functional boundary does not define a complete loan origination, interest, amortization and delinquency engine. A replacement claiming those additional capabilities needs a separate complete contract rather than inferring loan mechanics from payroll deductions.
+
+## Linked specifications
+
+- **Calculation and acceptance cases** · [workforce calculations](../../schemas/mathematics/workforce-calculations.json) · [workforce acceptance cases](../../schemas/mathematics/workforce-acceptance-cases.json)
+- **Record definitions** · [employee definition](../../schemas/data/record-types/employee.json) · [promotion definition](../../schemas/data/record-types/employee_promotion.json) · [transfer definition](../../schemas/data/record-types/employee_transfer.json) · [onboarding definition](../../schemas/data/record-types/employee_onboarding.json) · [separation definition](../../schemas/data/record-types/employee_separation.json) · [final settlement definition](../../schemas/data/record-types/full_and_final_statement.json)

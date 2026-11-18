@@ -3,11 +3,10 @@
   "identifier": "record_type_discounted_invoice",
   "name": "discounted_invoice",
   "display_name": "discounted invoice",
-  "source_name_digest": "582df7b85fd23f54f9339e9b98230f07fbb3c241677f56b80cc3fd8dfca6fca1",
-  "source_pack": "enterprise",
-  "source_artifact": "source-artifact-24eeb3c6837923693a20",
+  "capability_group": "enterprise",
+  "component_identifier": "component_enterprise_accounts_record_definitions_discounted_invoice_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "owned_child_record",
   "supports_posting_and_cancellation": false,
   "ordered_field_names": [
@@ -40,14 +39,13 @@
   },
   "declared_permission_grants": [],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 6,
   "fields": [
     {
       "identifier": "record_type_discounted_invoice.sales_invoice",
       "name": "sales_invoice",
-      "source_field_ordinal": 0,
-      "source_name_digest": "0daed0841224ae12016c6496409a7b8b1ae6a8596e83a123d1f8935665d24d92",
+      "field_ordinal": 0,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -62,13 +60,24 @@
         "required": 1,
         "indexed_for_search": 1
       },
-      "display_name": "invoice"
+      "display_name": "invoice",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_sales_invoice"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "0daed0841224ae12016c6496409a7b8b1ae6a8596e83a123d1f8935665d24d92"
     },
     {
       "identifier": "record_type_discounted_invoice.customer",
       "name": "customer",
-      "source_field_ordinal": 1,
-      "source_name_digest": "2e11f7f6e11df49ae8edf97db7606b01ced26939b92649a1e4ec5aba38b68c46",
+      "field_ordinal": 1,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -89,13 +98,31 @@
         },
         "read_only": 1
       },
-      "display_name": "customer"
+      "display_name": "customer",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_customer"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "sales_invoice",
+            "customer"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "2e11f7f6e11df49ae8edf97db7606b01ced26939b92649a1e4ec5aba38b68c46"
     },
     {
       "identifier": "record_type_discounted_invoice.posting_date",
       "name": "posting_date",
-      "source_field_ordinal": 2,
-      "source_name_digest": "602769780e0d8121d17105dbdf8b7ced77ed42da219e4bf1c104951b0b542d55",
+      "field_ordinal": 2,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -112,13 +139,27 @@
         "visible_in_list": 1,
         "read_only": 1
       },
-      "display_name": "date"
+      "display_name": "date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "sales_invoice",
+            "posting_date"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "602769780e0d8121d17105dbdf8b7ced77ed42da219e4bf1c104951b0b542d55"
     },
     {
       "identifier": "record_type_discounted_invoice.outstanding_amount",
       "name": "outstanding_amount",
-      "source_field_ordinal": 3,
-      "source_name_digest": "58833a1b37919426e234db0de70bdb111e326160d2eaa093a8ac9b5e474a60d3",
+      "field_ordinal": 3,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -140,25 +181,53 @@
           "source_value_digest": "d2e4e7fa84c007dd945a09e4d70e3d76f16cd80993a4861c524ebbff75838325"
         }
       },
-      "display_name": "outstanding amount"
+      "display_name": "outstanding amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "sales_invoice",
+            "outstanding_amount"
+          ]
+        },
+        "copy_only_when_destination_empty": true
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "58833a1b37919426e234db0de70bdb111e326160d2eaa093a8ac9b5e474a60d3"
     },
     {
       "identifier": "record_type_discounted_invoice.column_break_3",
       "name": "column_break_3",
-      "source_field_ordinal": 4,
-      "source_name_digest": "cb518558cee856071d0b298b365831cff26130a1d1431b65d2ac74b08f9248c9",
+      "field_ordinal": 4,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 2
+      },
+      "source_field_ordinal": 4,
+      "source_name_digest": "cb518558cee856071d0b298b365831cff26130a1d1431b65d2ac74b08f9248c9"
     },
     {
       "identifier": "record_type_discounted_invoice.debit_to",
       "name": "debit_to",
-      "source_field_ordinal": 5,
-      "source_name_digest": "c3b83b99946cba8e624dcdd8fe01a218fac1d0f6c1e29334af2c7d4092ec5c51",
+      "field_ordinal": 5,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -178,9 +247,44 @@
         },
         "read_only": 1
       },
-      "display_name": "debit to"
+      "display_name": "debit to",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "sales_invoice",
+            "debit_to"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 5,
+      "source_name_digest": "c3b83b99946cba8e624dcdd8fe01a218fac1d0f6c1e29334af2c7d4092ec5c51"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "ordinary record rename disabled",
+    "strategy": "record_type_default_or_controller_assignment",
+    "rule": "The create operation assigns identity through the record-type naming policy; explicitly named records retain their validated identity."
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "owned_child_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "This record type does not independently implement the post-and-cancel lifecycle."
+  },
+  "source_name_digest": "582df7b85fd23f54f9339e9b98230f07fbb3c241677f56b80cc3fd8dfca6fca1",
+  "source_pack": "enterprise",
+  "source_artifact": "source-artifact-24eeb3c6837923693a20",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "df153d62a45bce41c44749f5f9d18929fd97af664c225e5a1e30dfecf421e628",
@@ -202,5 +306,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "accounting.discounted_invoice",
+    "status": "declared",
+    "dictionary": "schema/entities/accounting-01.json",
+    "declaration_name": "Discounted Invoice",
+    "declaration_catalog": "docs/rebuild/model/catalog/erpnext-accounts-01.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

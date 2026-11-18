@@ -159,3 +159,9 @@ A scheduled visit can reference one schedule detail at the parent or details on 
 Service response measurements, warranty registration, schedules, visits and installations do not post a receivable, payable or stock movement on their own. Chargeable labour uses a customer invoice or [time billing](projects-and-time-billing.md). Issued replacement parts use [inventory movement](../operations/README.md), and purchased services use [supplier payables](../transactions/README.md). Retain these financial document identities on the service case to explain the cost and revenue consequence without duplicating ledgers.
 
 Acceptance must cover a reply and hold arriving concurrently, a reset attempted without authorisation, a split retried after its communications moved, duplicate maintenance event creation, and cancellation while another submitted visit remains. Assess the persisted effects after both concurrent operations and verify service communications against actual delivery receipts.
+
+## Linked specifications
+
+- **Record definitions** · [issue records](../../schemas/data/record-types/issue.json) · [issue response agreements](../../schemas/data/record-types/service_level_agreement.json) · [conversation response agreements](../../schemas/data/record-types/customer_relationship_service_level_agreement.json) · [maintenance schedules](../../schemas/data/record-types/maintenance_schedule.json) · [maintenance visits](../../schemas/data/record-types/maintenance_visit.json) · [warranty cases](../../schemas/data/record-types/warranty_claim.json)
+- **Calculation and acceptance cases** · [customer and service calculations](../../schemas/mathematics/customer-and-service-calculations.json) · [customer and service acceptance cases](../../schemas/mathematics/customer-and-service-acceptance-cases.json)
+- **Related decisions** · [inventory movement](../operations/inventory-and-valuation.md) · [supplier payables](../transactions/accounts-payable.md)

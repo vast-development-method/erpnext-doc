@@ -1,16 +1,16 @@
 # Valuation, tracked inventory and historical correction
 
-These contracts extend the [inventory domain](../../domains/inventory-and-valuation.md), the [stock-count and closing workflow](../operations/inventory-control.md) and the [integrated FIFO example](../integrated/README.md) at the pinned [ERPNext v16.60.0 source revision](https://github.com/frappe/erpnext/tree/886ab6ae187244e7f1b852393384ab6019d56264).
+These contracts extend the [inventory domain](../../domains/inventory-and-valuation.md), the [stock-count and closing workflow](../../operations/inventory-control.md) · [evidence](../operations/inventory-control.md) and the [integrated FIFO example](../integrated/README.md) at the pinned [Business application source definition](https://github.com/frappe/erpnext/tree/886ab6ae187244e7f1b852393384ab6019d56264).
 
 | Rebuild question | Contract |
 |---|---|
-| Which rate is used when an issue has a supplied cost, stock runs negative or a returned receipt's layer has already sold? | [Moving average and rate-matched FIFO/LIFO](rates-and-layers.md) |
-| Which physical units may be selected, which cost pool prices them, and which reservation is released on reversal? | [Serial/batch selection, valuation and reservation release](identity-and-reservation.md) |
-| Which later vouchers and accounts change when a late receipt changes a transfer source? | [Repost scheduling, dependencies, failure and numerical trace](reposting.md) |
+| Which rate is used when an issue has a supplied cost, stock runs negative or a returned receipt's layer has already sold? | [Moving average and rate-matched FIFO/LIFO](../../operations/rates-and-layers.md) · [evidence](rates-and-layers.md) |
+| Which physical units may be selected, which cost pool prices them, and which reservation is released on reversal? | [Serial/batch selection, valuation and reservation release](../../operations/identity-and-reservation.md) · [evidence](identity-and-reservation.md) |
+| Which later vouchers and accounts change when a late receipt changes a transfer source? | [Repost scheduling, dependencies, failure and numerical trace](../../operations/reposting.md) · [evidence](reposting.md) |
 
 ## Qualification
 
-The [50 acceptance cases](acceptance.json) conform to the [Draft 2020-12 schema](acceptance.schema.json). The optional [reference witness](verify-witnesses.py) checks six pinned upstream files by hash and evaluates selected reference decisions with controlled balances, rates, date ordering, field precision and identity data. From this blueprint and an adjacent ERPNext v16.60.0 checkout:
+The [50 acceptance cases](acceptance.json) conform to the [Draft 2020-12 schema](acceptance.schema.json). The optional [reference witness](verify-witnesses.py) checks six pinned upstream files by hash and evaluates selected reference decisions with controlled balances, rates, date ordering, field precision and identity data. From this blueprint and an adjacent reference checkout:
 
 ```sh
 python3 docs/rebuild/valuation/verify-witnesses.py ../erpnext

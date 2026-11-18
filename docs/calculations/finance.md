@@ -1,6 +1,6 @@
 # Financial recognition, pricing and settlement
 
-[Complete definitions, units, exceptions and examples](financial-calculations.json) · [Transaction and boundary cases](accounting-acceptance-cases.json)
+[Complete definitions, units, exceptions and examples](../../schemas/mathematics/financial-calculations.json) · [Transaction and boundary cases](../../schemas/mathematics/accounting-acceptance-cases.json)
 
 ## Convert a commercial amount to company currency
 
@@ -410,8 +410,8 @@
 `disposal_result = selling_amount − carrying_value`
 
 - Recognize required depreciation through disposal
-- Credit cost account for asset net purchase cost
-- Debit accumulated depreciation
+- Credit the fixed-asset account for net purchase amount plus capitalized additions and net value adjustments at purchase-amount precision
+- Debit accumulated depreciation for gross asset value less carrying value at purchase-amount precision
 - Credit positive gain or debit negative loss
 - Use sales claim or scrap journal as remaining counter-entry
 

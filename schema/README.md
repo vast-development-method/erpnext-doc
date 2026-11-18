@@ -59,7 +59,7 @@ Use the [alphabetical entity index](index.tsv) to find a qualified entity and it
 | Web Publishing | 39 | 310 | 45 | [Dictionary](entities/web-publishing.json) |
 | Workforce | 166 | 1633 | 657 | [1](entities/workforce-01.json), [2](entities/workforce-02.json), [3](entities/workforce-03.json) |
 
-The dictionaries contain 1,575 scoped entity definitions, 17,331 value and collection fields, 5,660 relationship fields and 2,702 declared role grants. Relationship fields include owned rows, fixed references and fields whose target entity is selected at runtime. Presentation controls appear separately. The counts describe this logical model. Configuration variants may be mutually exclusive.
+The dictionaries contain 1,575 scoped entity definitions, 17,331 value and collection fields, 5,660 relationship fields and 2,702 declared role grants. Relationship fields include owned rows, fixed references and fields whose target entity is selected at runtime. Presentation controls appear separately. The [entity cross-reference](../docs/rebuild/coverage-review/entity-cross-reference.tsv) identifies 1,561 declared entities and 14 layouts retained for interpreting existing data. The [compatibility field register](../docs/rebuild/coverage-review/compatibility-fields.tsv) identifies 155 retired fields on otherwise active entities. Counts in this table include those retained layouts and fields. New entries and postings use the active definitions for the installed capabilities.
 
 Every fixed entity reference in these dictionaries resolves to a defined entity. A deployment must enable the corresponding capability or supply an equivalent identity contract before accepting a mandatory reference. A polymorphic reference also requires a registered target type at runtime.
 

@@ -170,31 +170,15 @@ Concatenate those three groups. Validate each warehouse for disabled status and 
 
 ## Recalculate the billed proportion
 
-Use the voucher’s item line collection. Identify the parent by its voucher identity and use the reference amount and billed amount to calculate the parent percentage billed.
-
-For a delivery note compute and supply its specialized billing percentage. Invoke the shared percent-field updater with the original update-modified flag.
-
-**Example.** A delivery note requests the delivery-specific quantity/amount calculation; another supported voucher uses the generic amount mapping.
+Use the billed amount on each voucher item. For deliveries, subtract returned quantity times rate from each reference amount when total returned value is below the total delivery amount. Otherwise use the original row amount. Divide the sum of row-capped absolute billed amounts by total absolute reference amount. A zero denominator yields zero. Snap the stored parent percentage to 100 at the full boundary. The [progress contract](../operations/transaction-progress-and-row-closure.md#billing-a-delivery-after-a-price-change) gives the distinct zero-net-total quantity path.
 
 ## Recognise delivery billing by amount and quantity
 
-Fetch invoiced quantities by delivery item and freshly persisted delivery rows. Prefer open rows, falling back to all if all are closed.
-
-Sum amount and returned quantity times rate. If aggregate returns meet or exceed the aggregate amount, use original row amounts; otherwise subtract each row’s returned amount. Use absolute reference amounts and skip zero references.
-
-For each row, take the larger of (a) the absolute billed amount capped at its reference and (b) reference times the lesser of 1 and invoiced quantity divided by net quantity. The quantity contribution is zero when net quantity is zero.
-
-Accumulate both bases and return 100 times total recognized divided by total reference, rounded to six decimal places. A zero reference total yields zero.
-
-**Example.** A delivery line of 10 units at 10, with all 10 invoiced for 80 after a price reduction, reaches 100 percent. With only 6 invoiced for 60 it reaches 60 percent.
+For a direct invoice against a 100-value delivery, a billed amount of 80 gives 80% ordinary monetary billing even when every unit has been invoiced. A separate quantity-inclusive policy can report 100% on that same pair. Its per-row calculation and filtering are specified in the [alternative measure](../operations/transaction-progress-and-row-closure.md#billing-a-delivery-after-a-price-change).
 
 ## Distribute invoiced quantities to delivery lines
 
-Start with quantities billed directly against this delivery note. Read the set of distinct nonempty sales-order line references in the note.
-
-For each, update the map with the quantities distributed by the sales-order billing helper. Matching keys are replaced by that result. Return the combined map.
-
-**Example.** Two delivery rows referring to the same order line trigger one sales-order allocation lookup. Its mapped quantity replaces a direct quantity under the same delivery-row key.
+The optional quantity-inclusive measure begins with quantities directly billed against delivery rows. For each distinct, nonempty sales-order line reference in the delivery, overlay the quantities distributed by the order allocation. An allocation for the same delivery-row identity replaces the direct value. Two rows referencing one order line trigger one allocation lookup. Ordinary monetary billing distributes order-only invoice amounts using the delivery sequence.
 
 ## Enforce the inspection policy
 

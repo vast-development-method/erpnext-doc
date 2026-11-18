@@ -1,5 +1,7 @@
 # LumenPOS
 
+[Business workflow and acceptance cases](../../../capabilities/guides/sales.md#offline-till-sales).
+
 Mahmood Husam's listing identifies versions 13–16 and nightly. A cashier assigned to a POS Profile opens a shift with a float, scans or selects stock, takes payment and issues a receipt. The guide also covers split payments, promotions, held sales, deposits, exchanges, gift cards, store credit, loyalty, cashback, blind drawer counts and stock reconciliation. Cashiers can select English, Arabic, Spanish, German, Simplified Chinese, French, Thai, Indonesian, Vietnamese, Brazilian Portuguese, Persian, Russian or Turkish. The publisher says settings, contextual help and server messages follow that choice, with right-to-left layouts for Arabic and Persian. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/lumenpos) · [Publisher's operating guide](https://lumen-solutions.co/lumenpos-docs/)
 
 The guide describes a first online visit to cache product and promotion data. During an outage an eligible sale enters a local queue with a safety key. The log distinguishes pending, uploaded and rejected sales, retains the failure reason and records the assigned invoice number. Other eligible sales can continue past a rejected entry. An offline return on this device's sale waits for the sale to upload. Certain operations need a connection, including serialized sales, loyalty or gift-card redemption, and opening or closing a shift. Version 13 requires keeping the tab open during an outage. Later versions can reopen offline after preparation. Shift closure requires uploaded queued sales. [Publisher's operating guide, “Working offline”](https://lumen-solutions.co/lumenpos-docs/)
@@ -8,14 +10,6 @@ A historical copy identifies the same publisher and installation repository. Its
 
 ## Proposed rebuild contract
 
-Bind a sale to a company, outlet, open shift, device, cashier and client-generated sale ID. Preserve item identifiers, quantities, pricing context, tax amounts, payment legs, exchange rate where applicable and the receipt language in the sale snapshot. The server acknowledges each accepted submission with the original sale ID and invoice reference. Use a durable uniqueness constraint and reconcile the prior result after an acknowledgement is lost. A return references its sale and source lines. Constrain refundable quantities across online and offline returns at posting time.
-
-Keep cashier interface, receipt language and accounting currency independently selectable. The offline cache needs the active locale's UI bundle, rendering fonts and readable rejection messages. Queue state, item identity, decimal amounts and tender codes remain stable when a cashier changes language mid-shift. Pass a preferred language for server errors and preserve a stable rejection code when localized text falls back. Retain customer/item names as recorded and render barcodes in their native direction.
-
-| Proposed acceptance case | Expected result |
-|---|---|
-| An Arabic-speaking cashier sells two units offline, switches the till to German and reconnects after a lost acknowledgement. | One invoice and one set of stock/ledger effects exist. German status text identifies the uploaded invoice. Receipt reprint uses the stored output language. |
-| A cashier tries to sell a serialized item offline while a separate eligible cash sale is queued. | The serialized sale is held for online validation, the eligible sale remains queued and shift close is blocked until the queue is settled. |
-| Two devices return the last refundable unit of the same sale. | At most one return posts. The other shows a translated conflict with the original sale reference and retains its review state. |
-
 The publisher guide and historical code represent distinct builds. The complete thirteen-language catalog for the advertised build and its exact posting/replay behaviour remain unverified. [Named app repository](https://github.com/ma7mod7osam/LumenPOS) · [Core POS Invoice record](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/accounts/doctype/pos_invoice/pos_invoice.json)
+
+[Read the consolidated workflow](../../../capabilities/guides/sales.md#offline-till-sales-1).

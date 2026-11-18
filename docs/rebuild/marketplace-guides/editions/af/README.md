@@ -2,7 +2,7 @@
 
 [English](../en/README.md) · Afrikaans · [Deutsch](../de/README.md) · [简体中文](../zh-Hans/README.md)
 
-Kies ’n uitbreiding volgens die werk wat jy wil doen. Elke inskrywing beskryf die gedokumenteerde werkvloei en gee ’n voorbeeld waarmee jy ’n veeltalige ERP kan toets. Die volledige Engelse profiel gee die rekords, uitsonderings, bronne en oop vrae.
+Kies die werkvloei volgens die taak. Elke inskrywing skakel na die werkvloei en sy toetsgeval. Die bronprofiel gee die ondersoekte rekords en oop vrae.
 
 | Bedryfsgebied | Uitbreidings |
 |---|---:|

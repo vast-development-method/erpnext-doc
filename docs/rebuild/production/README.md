@@ -1,10 +1,10 @@
 # Production execution, rework and recovery
 
-[Shop-floor execution](shop-floor.md) follows workstation capacity, employee time, operation sequence, loss, corrective labour and reservation handoff. [Material cost and recovery](material-cost-and-recovery.md) follows the actual substitute from Stores to WIP, through a completed product, and back to stock on a return or disassembly. It includes a balanced movement trace and the different cost treatment when a spare part repairs company equipment. Planning inputs and subcontracting are covered in the [operations contracts](../operations/README.md).
+[Shop-floor execution](../../operations/shop-floor.md) · [evidence](shop-floor.md) follows workstation capacity, employee time, operation sequence, loss, corrective labour and reservation handoff. [Material cost and recovery](../../operations/material-cost-and-recovery.md) · [evidence](material-cost-and-recovery.md) follows the actual substitute from Stores to WIP, through a completed product, and back to stock on a return or disassembly. It includes a balanced movement trace and the different cost treatment when a spare part repairs company equipment. Planning inputs and subcontracting are covered in the [operations contracts](../operations/README.md).
 
 ## Conformance evidence
 
-The [acceptance suite](acceptance.json) uses [JSON Schema 2020-12](acceptance.schema.json). All 30 expected outcomes were compared with seven isolated decisions from the [ERPNext v16.60.0 revision](https://github.com/frappe/erpnext/tree/886ab6ae187244e7f1b852393384ab6019d56264). The inputs describe domain state using neutral quantities, minute offsets and accounting values.
+The [acceptance suite](acceptance.json) uses [JSON Schema 2020-12](acceptance.schema.json). All 30 expected outcomes were compared with seven isolated decisions from the [production decision functions](https://github.com/frappe/erpnext/tree/886ab6ae187244e7f1b852393384ab6019d56264). The inputs describe domain state using neutral quantities, minute offsets and accounting values.
 
 | Independent decision | Cases | Dependencies supplied by the witness |
 |---|---:|---|
@@ -16,7 +16,7 @@ The [acceptance suite](acceptance.json) uses [JSON Schema 2020-12](acceptance.sc
 | Convert operation loss to finished-good units | 3 | Effective operation quantity and field precision |
 | Select planned or actual operating cost at work-order level | 3 | Already-calculated row amounts, additional and corrective costs |
 
-The optional [witness runner](verify-witnesses.py) uses only the Python 3.10+ standard library to execute small functions from the pinned reference implementation. The rebuilt system may use any language. From a clone of this blueprint, with a separate checkout of ERPNext v16.60.0 in a sibling directory named erpnext, run:
+The optional [witness runner](verify-witnesses.py) uses only the Python 3.10+ standard library to execute small functions from the pinned reference implementation. The rebuilt system may use any language. From a clone of this blueprint, with a separate checkout in the sibling directory used by the command, run:
 
 ```sh
 python3 docs/rebuild/production/verify-witnesses.py ../erpnext

@@ -1,5 +1,7 @@
 # FCM Notification
 
+[Business workflow and acceptance cases](../../../capabilities/guides/communications.md#device-notification-delivery).
+
 Omar Mohammed lists a version 13 integration that delivers an ERP notification to a subscribed user's device via Firebase Cloud Messaging. The publisher's steps name `FCM Notification Settings`, `User Device` and a `Notification Log` event that runs before insertion. The notification is associated with the intended user rather than broadcast to every site device. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/fcm_notification)
 
 ## Evidence and delivery boundary
@@ -12,10 +14,6 @@ An administrator selects the messaging project. Each device registration identif
 
 Standard events can use platform localization keys plus ordered arguments and bundled translations. Where a device cannot resolve a supported template revision, send the configured fallback rendering in the recipient's language. Preserve user-authored content verbatim. Keep record type and name as stable navigation values. Opening the target requires the current user's permission even if the notification was delivered earlier. [Provider localization reference](https://firebase.google.com/docs/cloud-messaging/customize-messages/localize-messages)
 
-| Acceptance example | Expected result |
-|---|---|
-| A recipient registers two devices with Afrikaans and German interfaces for an approval event on `PO-18`. | Each active device receives its language rendering and the same document reference. Reprocessing an acknowledged dispatch creates no new delivery attempt for it. |
-| A notification transaction rolls back, or a device is unsubscribed before dispatch. | The rollback produces no dispatch. The unsubscribed device is skipped without suppressing delivery to the user's other active device. |
-| Access to the order is removed between push delivery and opening the app. | The app denies the document read and uses a translated, non-disclosing message. Delivery does not grant document access. |
-
 The public evidence does not establish current provider compatibility, token rotation, retry behavior or translation coverage of the marketplace build.
+
+[Read the consolidated workflow](../../../capabilities/guides/communications.md#device-notification-delivery-2).

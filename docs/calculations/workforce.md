@@ -1,6 +1,6 @@
 # Workforce, pay and benefits
 
-[Complete definitions, units, exceptions and examples](workforce-calculations.json) · [Transaction and boundary cases](workforce-acceptance-cases.json)
+[Complete definitions, units, exceptions and examples](../../schemas/mathematics/workforce-calculations.json) · [Transaction and boundary cases](../../schemas/mathematics/workforce-acceptance-cases.json)
 
 ## Whole-period working days
 

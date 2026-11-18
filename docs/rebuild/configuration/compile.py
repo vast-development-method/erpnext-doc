@@ -126,19 +126,19 @@ def observe(case, effective, sites):
 def check_compatibility():
     cases = read(ROOT / "compatibility-cases.json")
     for case in cases:
-        file = MODEL.parents[2] / "schemas/data/record-types" / (case["baseline_record"] + ".json")
-        old = read(file)
+        file = MODEL.parents[2] / "schemas/data/record-types" / (case["domain_record"] + ".json")
+        domain_record = read(file)
         key = sha256(json.dumps(case["field"]).encode()).hexdigest()
-        # The full September checkpoint uses neutral field identities. The curated
-        # catalog additionally carries source-name digests for exact upstream lookup.
+        # Record contracts use neutral field identities. Where source-name digests
+        # are present, use them to bind the same field across both representations.
         identity = "name"
-        expected = case.get("baseline_field", case["field"])
-        if any("source_name_digest" in f for f in old["fields"]):
+        expected = case["field"]
+        if any("source_name_digest" in f for f in domain_record["fields"]):
             identity, expected = "source_name_digest", key
-        old_field = next((f for f in old["fields"] if f.get(identity) == expected), {})
-        new_field = next((f for f in record_for(case["record"])["fields"] if f["name"] == case["field"]), {})
-        if (old_field.get("value_type"), new_field.get("type")) != (
-                case["expected_september"], case["expected_november"]):
+        domain_field = next((f for f in domain_record["fields"] if f.get(identity) == expected), {})
+        declared_field = next((f for f in record_for(case["record"])["fields"] if f["name"] == case["field"]), {})
+        if (domain_field.get("value_type"), declared_field.get("type")) != (
+                case["domain_value_type"], case["declared_field_type"]):
             raise ValueError("incompatible profile dependency: " + case["field"])
     return len(cases)
 
@@ -173,7 +173,7 @@ def main():
             raise ValueError(f"{case['id']}: expected {case['expect']}, observed {actual}")
     compatibility_cases = check_compatibility()
     print(f"Verified {len(compiled)} site profiles, {len(cases)} ordered observations "
-          f"and {compatibility_cases} cross-version dependencies")
+          f"and {compatibility_cases} schema dependencies")
 
 
 if __name__ == "__main__":

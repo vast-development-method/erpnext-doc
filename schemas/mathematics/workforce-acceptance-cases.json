@@ -1,14 +1,7 @@
 {
   "catalog_name": "Workforce acceptance cases",
-  "catalog_version": "1.0",
   "scope": "Employment, attendance, leave, payroll, expenses, recruitment and performance as one integrated application",
   "purpose": "Self-contained arrangements and expected outputs for reimplementation. Values are deliberately invented conformance fixtures, not statutory rates.",
-  "verification_policy": {
-    "inspected_transaction": "Expected decision or transition read from the available decision routines; database operation and concurrency not executed.",
-    "isolated_calculation": "Selected decision routine invoked with controlled inputs and substituted context and numeric helpers; fixture results verified without complete runtime, persistence or rounding-policy equivalence.",
-    "required_enterprise_invariant": "Acceptance obligation needed for reliable replacement; not represented as already proved by a controller check.",
-    "compatibility_decision": "Observed branch or failure whose preservation versus correction must be explicitly decided; the expected observed result is retained."
-  },
   "cases": [
     {
       "identifier": "workforce-inclusive-working-days-example-1",
@@ -17,7 +10,8 @@
       "name": "Whole-period working days",
       "arrange": {
         "calendar_day_count": 30,
-        "excluded_holiday_days": 4
+        "excluded_full_holiday_count": 4,
+        "excluded_half_holiday_count": 0
       },
       "action": "Apply the named calculation and its stated branch/precision conditions.",
       "expected": {
@@ -100,12 +94,12 @@
       "kind": "calculation",
       "name": "Attendance-mode partial-pay equivalent",
       "arrange": {
-        "leave_day_fraction": 1,
-        "configured_daily_salary_fraction": 0.75
+        "attendance_leave_day_fraction": 1,
+        "retained_daily_salary_fraction": 0.75
       },
       "action": "Apply the named calculation and its stated branch/precision conditions.",
       "expected": {
-        "expected": 0.75
+        "expected": 0.25
       },
       "financial_effect": "Arithmetic comparison only; no document submission or ledger posting is implied.",
       "calculation_identifier": "workforce-attendance-mode-partial-pay",
@@ -1567,9 +1561,16 @@
           "employee_advance_receivable": 500,
           "payroll_payable": 8000
         },
-        "displayed_contribution_posted_by_this_builder": false
+        "separate_employer_contribution_journal": {
+          "debit": {
+            "employer_contribution_expense": 700
+          },
+          "credit": {
+            "employer_contribution_payable": 700
+          }
+        }
       },
-      "financial_effect": "Balanced debits and credits of 10,000. Separate employer contribution posting needs its own supported contract.",
+      "financial_effect": "The wage accrual balances at 10,000 and the employer contribution journal balances at 700. The employer contribution leaves employee net pay unchanged.",
       "specification_references": [
         "../../docs/domains/payroll-and-benefits.md"
       ],
@@ -2419,13 +2420,13 @@
         "Create and submit repayment",
         "Cancel linked repayment"
       ],
-      "specification": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary",
       "excluded_inferences": [
         "Interest rate",
         "Amortization method",
         "Delinquency policy",
         "Loan origination eligibility"
-      ]
+      ],
+      "specification": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary"
     },
     {
       "record_name": "loan_product",
@@ -2433,10 +2434,10 @@
       "fields": {
         "identity": "Stable loan-product identity referenced by loan and repayment"
       },
-      "specification": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary",
       "excluded_inferences": [
         "No product fields beyond the identity are required or established by this workforce integration"
-      ]
+      ],
+      "specification": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary"
     },
     {
       "record_name": "loan_repayment",
@@ -2457,12 +2458,18 @@
         "employee_based_accounting": "Whether employee-specific accounting is enabled",
         "document_state": "Returned draft is saved and submitted; cancellation follows external reversal contract"
       },
-      "specification": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary",
       "excluded_inferences": [
         "Internal payment allocation order",
         "Principal-interest recalculation after edited total",
         "Complete lending ledger posting implementation"
-      ]
+      ],
+      "specification": "../../docs/domains/payroll-and-benefits.md#optional-loan-service-boundary"
     }
-  ]
+  ],
+  "verification_policy": {
+    "inspected_transaction": "Expected decision or transition read from the available decision routines; database operation and concurrency not executed.",
+    "isolated_calculation": "Selected decision routine invoked with controlled inputs and substituted context and numeric helpers; fixture results verified without complete runtime, persistence or rounding-policy equivalence.",
+    "required_enterprise_invariant": "Acceptance obligation needed for reliable replacement; not represented as already proved by a controller check.",
+    "compatibility_decision": "Observed branch or failure whose preservation versus correction must be explicitly decided; the expected observed result is retained."
+  }
 }

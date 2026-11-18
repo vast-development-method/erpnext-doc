@@ -12,7 +12,7 @@ The [capability directory](directory.md) organizes 366 distinct business purpose
 
 ## Worked decisions
 
-Each English chapter defines the workflow and a testable acceptance case. The other language columns present the operator objective and its worked case in that language.
+Each English chapter defines the workflow and a testable acceptance case. The other language columns present the operator objective, workflow and worked case in that language.
 
 | Workflow | English | Afrikaans | Deutsch | 简体中文 |
 |---|---|---|---|---|
@@ -26,6 +26,12 @@ Each English chapter defines the workflow and a testable acceptance case. The ot
 | Selling and customer management | [Workflow and case](guides/sales.md) | [Praktykgevalle](guides/af/sales.md) | [Beispielfälle](guides/de/sales.md) | [业务示例](guides/zh-Hans/sales.md) |
 | Purchasing and inventory | [Workflow and case](guides/supply.md) | [Praktykgevalle](guides/af/supply.md) | [Beispielfälle](guides/de/supply.md) | [业务示例](guides/zh-Hans/supply.md) |
 | Workspace and permissions | [Workflow and case](guides/workspace.md) | [Praktykgevalle](guides/af/workspace.md) | [Beispielfälle](guides/de/workspace.md) | [业务示例](guides/zh-Hans/workspace.md) |
+
+## Implementation detail
+
+The [extension transaction chapters](../rebuild/extensions/README.md) connect salary deductions to loan repayment, fee schedules to invoicing, customer carts to stock and settlement, and statutory submissions to their external acknowledgements. The [support, analytics, document and learning contracts](../rebuild/companion/README.md) identify the owner of each record when these services run alongside the core.
+
+Each English worked decision links to the profile that documents its implementation evidence, source-specific variations and unresolved questions. The [declaration catalog](../rebuild/marketplace-model/README.md) locates record fields, permissions, services and reports. The [event and language catalog](../rebuild/marketplace-workflows/README.md) locates handlers for each record event and the available message resources.
 
 ## Scope of the contracts
 

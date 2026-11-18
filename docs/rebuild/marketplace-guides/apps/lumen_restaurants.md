@@ -1,5 +1,7 @@
 # Lumen Restaurants
 
+[Business workflow and acceptance cases](../../../capabilities/guides/sales.md#restaurant-orders-and-kitchen-rounds).
+
 ## Publisher evidence
 
 Mahmood Husam describes a restaurant mode per POS Profile. Staff, company, warehouse, price list and payment methods are assigned per outlet. The app includes LumenPOS capabilities and the vendor directs a site to run one of the two apps because they share records. Restaurant screens, receipts and public bookings are advertised in English and Arabic with RTL. A table can stay open through several kitchen rounds. Takeaway and delivery are paid first and receive a shift-linked short number. Sales create POS Invoices. The prepayment table bill is identified separately from a tax invoice. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/lumen_restaurants) · [Vendor product guide](https://lumen-solutions.co/lumen-restaurants/) · [Listed repository](https://github.com/ma7mod7osam/LumenRestaurants)
@@ -12,12 +14,9 @@ A third-party copy links installation to the listed repository. Opening a table 
 
 ## Proposed workflow and multilingual acceptance
 
-1. Reserve four seats on the public Arabic booking page at outlet A. Enforce slot capacity atomically, return a stable reservation reference and show the guest’s original name to authorized staff. An English cashier marks that reservation seated. It links to the same table and one open order.
-2. Two waiters open that table concurrently. At most one order remains open. Add one dish priced at 60 and its own taxable add-on priced at 5 in the outlet's currency; a free “omit onions” instruction adds zero. Before tax, billable lines sum to 65. The Arabic kitchen ticket and English till reference the same line IDs. Preserve free-text allergy notes and explicitly mark any translated copy.
-3. Record a distinct dispatch ID for the first round. Retrying it returns the same ticket. Adding one more dish starts another round with only the newly ordered quantity. A cross-outlet merge fails and both existing orders retain their lines.
-4. On payment, submit one POS Invoice for the final cart with the configured tax and tender rules. Switching receipt language cannot generate a second sale or change the applicable tax. If the kitchen printer fails after ticket creation, allow a reprint of that ticket with its original reference.
-
 The copy has English/Arabic resources in the main bundle and additional lazy-loaded till dictionaries. The restaurant-specific resource inspected supplies Arabic messages. Full translation of restaurant workflows in every till language needs screen, receipt and booking fixtures. For a missing add-on translation, show the menu’s configured fallback and transmit its original choice ID. [Till language selection](https://github.com/abdullla00/LumenRestaurants/blob/083820186e282e76add31d3c30fd0e62ca35cd32/frontend/src/i18n.js) · [Restaurant messages](https://github.com/abdullla00/LumenRestaurants/blob/083820186e282e76add31d3c30fd0e62ca35cd32/frontend/src/messages-restaurant.js)
+
+[Read the consolidated acceptance cases](../../../capabilities/guides/sales.md#restaurant-orders-and-kitchen-rounds-3).
 
 ## Remaining evidence
 

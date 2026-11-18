@@ -1,5 +1,7 @@
 # IPCONNEX Stripe Payment
 
+[Business workflow and acceptance cases](../../../capabilities/guides/banking.md#saved-payment-method-collections).
+
 ## Publisher and recovered source evidence
 
 IPCONNEX describes a version 14 integration that collects Sales Invoice payments. The listing names Payment Method, Stripe Settings, SIP Subscription and SIP Server. Once configured, the user can invoke Pay Invoice. A public copy identifies the same app and IPCONNEX authorship, but refers to different customer, card and subscription records. Keep the two field inventories versioned independently. [Marketplace documentation](https://cloud.frappe.io/marketplace/apps/ipconnex_stripe_payment) · [Listed repository](https://github.com/IPCONNEX-Services/IPCONNEX-Stripe-Payment) · [Copy identity and event registration](https://github.com/EDSTeam/IPCONNEX-Stripe-Payment/blob/c3c96a2761f97c871898a3b7be23fcbbb91f70af/ipconnex_stripe_payment/hooks.py)

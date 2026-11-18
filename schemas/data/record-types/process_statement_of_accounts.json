@@ -3,11 +3,10 @@
   "identifier": "record_type_process_statement_of_accounts",
   "name": "process_statement_of_accounts",
   "display_name": "process statement of accounts",
-  "source_name_digest": "3372458af8d385cba64df415e57db6b5fd32d5867d0f94adf063c7417f5b1038",
-  "source_pack": "enterprise",
-  "source_artifact": "source-artifact-4fdaf8a8cf0dfbcf930f",
+  "capability_group": "enterprise",
+  "component_identifier": "component_enterprise_accounts_record_definitions_process_statement_of_accounts_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "independent_record",
   "supports_posting_and_cancellation": false,
   "ordered_field_names": [
@@ -143,14 +142,13 @@
     }
   ],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 58,
   "fields": [
     {
       "identifier": "record_type_process_statement_of_accounts.frequency",
       "name": "frequency",
-      "source_field_ordinal": 0,
-      "source_name_digest": "cc15689f24b30c3f0761fa5bac55cce210e46fbcc9c942700b4c7ed62d5154d4",
+      "field_ordinal": 0,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -185,13 +183,28 @@
           }
         ]
       },
-      "display_name": "frequency"
+      "display_name": "frequency",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "daily",
+          "weekly",
+          "biweekly",
+          "monthly",
+          "quarterly"
+        ],
+        "empty_option_explicitly_listed": false,
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "cc15689f24b30c3f0761fa5bac55cce210e46fbcc9c942700b4c7ed62d5154d4"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.company",
       "name": "company",
-      "source_field_ordinal": 1,
-      "source_name_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d",
+      "field_ordinal": 1,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -205,13 +218,24 @@
         },
         "required": 1
       },
-      "display_name": "company"
+      "display_name": "company",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_company"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.from_date",
       "name": "from_date",
-      "source_field_ordinal": 2,
-      "source_name_digest": "0d914d968dd2838df5d7b4196da88f9dd868df36b4c8dc2515967f265b0c10d0",
+      "field_ordinal": 2,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -220,11 +244,13 @@
       "properties": {
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "8b9665d2b2b0a2cc22107cf46f86e8c4565ee13e353b4f682a2a4905177e3233",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_8b9665d2b2b0a2cc2210",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_from_date_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_from_date_visibility_condition",
+          "meaning": "Automatic email is disabled and the selected report is the general ledger.",
+          "source_value_digest": "8b9665d2b2b0a2cc22107cf46f86e8c4565ee13e353b4f682a2a4905177e3233"
         },
         "required_condition": {
           "kind": "expression_tree",
@@ -267,17 +293,70 @@
               }
             ]
           },
-          "source_value_digest": "bcb9486f467406525516c0e1d0a8eca6c2080bf0bf8092d17380ddb6d13a5606",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(logical not (record.enable auto email) all truthy record.report equals general_ledger)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "bcb9486f467406525516c0e1d0a8eca6c2080bf0bf8092d17380ddb6d13a5606"
         }
       },
-      "display_name": "from date"
+      "display_name": "from date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "required_when_no_conditional_override": false,
+        "requiredness_condition": {
+          "kind": "expression_tree",
+          "tree": {
+            "kind": "logical_operation",
+            "operator": "all_truthy",
+            "operands": [
+              {
+                "kind": "unary_operation",
+                "operator": "logical_not",
+                "operand": {
+                  "kind": "member",
+                  "owner": {
+                    "kind": "variable",
+                    "name": "record"
+                  },
+                  "name": "enable_auto_email"
+                }
+              },
+              {
+                "kind": "comparison_chain",
+                "first": {
+                  "kind": "member",
+                  "owner": {
+                    "kind": "variable",
+                    "name": "record"
+                  },
+                  "name": "report"
+                },
+                "comparisons": [
+                  {
+                    "operator": "equal",
+                    "value": {
+                      "kind": "symbolic_text",
+                      "value": "general_ledger"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(logical not (record.enable auto email) all truthy record.report equals general_ledger)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract"
+        }
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "0d914d968dd2838df5d7b4196da88f9dd868df36b4c8dc2515967f265b0c10d0"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.to_date",
       "name": "to_date",
-      "source_field_ordinal": 3,
-      "source_name_digest": "6ace9c493399a6d7c16e136c1ecacaa2a1547fd96e2c79c23d551976662b5b7c",
+      "field_ordinal": 3,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -286,11 +365,13 @@
       "properties": {
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "8b9665d2b2b0a2cc22107cf46f86e8c4565ee13e353b4f682a2a4905177e3233",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_8b9665d2b2b0a2cc2210",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_from_date_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_from_date_visibility_condition",
+          "meaning": "Automatic email is disabled and the selected report is the general ledger.",
+          "source_value_digest": "8b9665d2b2b0a2cc22107cf46f86e8c4565ee13e353b4f682a2a4905177e3233"
         },
         "required_condition": {
           "kind": "expression_tree",
@@ -333,17 +414,70 @@
               }
             ]
           },
-          "source_value_digest": "bcb9486f467406525516c0e1d0a8eca6c2080bf0bf8092d17380ddb6d13a5606",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(logical not (record.enable auto email) all truthy record.report equals general_ledger)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "bcb9486f467406525516c0e1d0a8eca6c2080bf0bf8092d17380ddb6d13a5606"
         }
       },
-      "display_name": "to date"
+      "display_name": "to date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "required_when_no_conditional_override": false,
+        "requiredness_condition": {
+          "kind": "expression_tree",
+          "tree": {
+            "kind": "logical_operation",
+            "operator": "all_truthy",
+            "operands": [
+              {
+                "kind": "unary_operation",
+                "operator": "logical_not",
+                "operand": {
+                  "kind": "member",
+                  "owner": {
+                    "kind": "variable",
+                    "name": "record"
+                  },
+                  "name": "enable_auto_email"
+                }
+              },
+              {
+                "kind": "comparison_chain",
+                "first": {
+                  "kind": "member",
+                  "owner": {
+                    "kind": "variable",
+                    "name": "record"
+                  },
+                  "name": "report"
+                },
+                "comparisons": [
+                  {
+                    "operator": "equal",
+                    "value": {
+                      "kind": "symbolic_text",
+                      "value": "general_ledger"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(logical not (record.enable auto email) all truthy record.report equals general_ledger)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract"
+        }
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "6ace9c493399a6d7c16e136c1ecacaa2a1547fd96e2c79c23d551976662b5b7c"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.cost_center",
       "name": "cost_center",
-      "source_field_ordinal": 4,
-      "source_name_digest": "efbbf0a4b73ea019ed0c0f4c3aacdbf8c2af4f11f0364d9bff705d68158d5c2a",
+      "field_ordinal": 4,
       "value_type": "owned_reference_collection",
       "persistence": "owned_child_records",
       "required_when_no_conditional_override": false,
@@ -355,13 +489,24 @@
           "identifier": "record_type_process_statement_of_accounts_cost_center"
         }
       },
-      "display_name": "cost center"
+      "display_name": "cost center",
+      "value_contract": {
+        "value_kind": "ordered_owned_records",
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_process_statement_of_accounts_cost_center"
+        },
+        "ownership": "Each row stores one parent record identity, parent record type, parent field, and row position. Preserve row ordering and prevent attachment of the same owned row to a second parent.",
+        "save_boundary": "Persist the parent and its owned rows in the same transaction.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 4,
+      "source_name_digest": "efbbf0a4b73ea019ed0c0f4c3aacdbf8c2af4f11f0364d9bff705d68158d5c2a"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.project",
       "name": "project",
-      "source_field_ordinal": 5,
-      "source_name_digest": "471cacee86a419f75111098ba664eeb1e7db51b9436a9821c23851df5ed52c15",
+      "field_ordinal": 5,
       "value_type": "owned_reference_collection",
       "persistence": "owned_child_records",
       "required_when_no_conditional_override": false,
@@ -370,74 +515,115 @@
       "properties": {
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "678cf8b5db1f16f537a94f539721039ef35de36047c021474f92412963ff5430",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_678cf8b5db1f16f537a9",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_project_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_project_visibility_condition",
+          "meaning": "The selected report is the general ledger.",
+          "source_value_digest": "678cf8b5db1f16f537a94f539721039ef35de36047c021474f92412963ff5430"
         },
         "target_record_type": {
           "kind": "record_type",
           "identifier": "record_type_process_statement_of_accounts_project"
         }
       },
-      "display_name": "project"
+      "display_name": "project",
+      "value_contract": {
+        "value_kind": "ordered_owned_records",
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_process_statement_of_accounts_project"
+        },
+        "ownership": "Each row stores one parent record identity, parent record type, parent field, and row position. Preserve row ordering and prevent attachment of the same owned row to a second parent.",
+        "save_boundary": "Persist the parent and its owned rows in the same transaction.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 5,
+      "source_name_digest": "471cacee86a419f75111098ba664eeb1e7db51b9436a9821c23851df5ed52c15"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.section_break_3",
       "name": "section_break_3",
-      "source_field_ordinal": 6,
-      "source_name_digest": "f41b15203c1928e9493409684b4d9b897bf7f11fac42d151d017c62871125676",
+      "field_ordinal": 6,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "customers"
+      "display_name": "customers",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 23
+      },
+      "source_field_ordinal": 6,
+      "source_name_digest": "f41b15203c1928e9493409684b4d9b897bf7f11fac42d151d017c62871125676"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.column_break_6",
       "name": "column_break_6",
-      "source_field_ordinal": 7,
-      "source_name_digest": "0a7c7686b9d8b47b6a7c44ec7e93a17321a5b09cfcbe054eefd1aa27e926ecee",
+      "field_ordinal": 7,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 27
+      },
+      "source_field_ordinal": 7,
+      "source_name_digest": "0a7c7686b9d8b47b6a7c44ec7e93a17321a5b09cfcbe054eefd1aa27e926ecee"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.section_break_11",
       "name": "section_break_11",
-      "source_field_ordinal": 8,
-      "source_name_digest": "74fdfebd0ad520127f9840199bec79167f8b5a5e943f2f7f60d61525486b603b",
+      "field_ordinal": 8,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "report filters"
+      "display_name": "report filters",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 1
+      },
+      "source_field_ordinal": 8,
+      "source_name_digest": "74fdfebd0ad520127f9840199bec79167f8b5a5e943f2f7f60d61525486b603b"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.column_break_14",
       "name": "column_break_14",
-      "source_field_ordinal": 9,
-      "source_name_digest": "5b3e366405f98132f36374753976e6bbef7f72c6d924cb76435c6ddbd5a54b18",
+      "field_ordinal": 9,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 12
+      },
+      "source_field_ordinal": 9,
+      "source_name_digest": "5b3e366405f98132f36374753976e6bbef7f72c6d924cb76435c6ddbd5a54b18"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.column_break_17",
       "name": "column_break_17",
-      "source_field_ordinal": 10,
-      "source_name_digest": "269926aac96de3f48cd5e8f0ac9e90b91dbeeb4ad89bc099334926257b61b756",
+      "field_ordinal": 10,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -445,13 +631,20 @@
       "editable_after_posting": false,
       "properties": {
         "hide_border": 1
-      }
+      },
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 30
+      },
+      "source_field_ordinal": 10,
+      "source_name_digest": "269926aac96de3f48cd5e8f0ac9e90b91dbeeb4ad89bc099334926257b61b756"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.customer_collection",
       "name": "customer_collection",
-      "source_field_ordinal": 11,
-      "source_name_digest": "ab1261f42609a14133ade393f99976cd511028cf9ac3c1dbd1261aab52e33d8f",
+      "field_ordinal": 11,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -486,13 +679,28 @@
           }
         ]
       },
-      "display_name": "select customers by"
+      "display_name": "select customers by",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "",
+          "customer_group",
+          "territory",
+          "sales_partner",
+          "sales_person"
+        ],
+        "empty_option_explicitly_listed": true,
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 11,
+      "source_name_digest": "ab1261f42609a14133ade393f99976cd511028cf9ac3c1dbd1261aab52e33d8f"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.collection_name",
       "name": "collection_name",
-      "source_field_ordinal": 12,
-      "source_name_digest": "ad0627769421f590cae683d5359af5ada7d443f59dbc3d93525ffcd9580b49ec",
+      "field_ordinal": 12,
       "value_type": "dynamic_record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -515,38 +723,55 @@
               {
                 "operator": "not_equal",
                 "value": {
-                  "kind": "symbolic_text",
-                  "value": "unnamed",
+                  "kind": "literal",
+                  "value": "",
                   "source_value_digest": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
                 }
               }
             ]
           },
-          "source_value_digest": "1ca016291a6d0ca64e666ed1c0ae64e84e07c357722c1d30ea13e231efddcec1",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.customer collection does not equal \"\"",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "1ca016291a6d0ca64e666ed1c0ae64e84e07c357722c1d30ea13e231efddcec1"
         },
         "target_type_field": "customer_collection"
       },
-      "display_name": "recipient"
+      "display_name": "recipient",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target_type_field": "customer_collection",
+        "validation": "Read the target record type from the companion type field and validate the identity against that selected type. Type and identity form one reference.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 12,
+      "source_name_digest": "ad0627769421f590cae683d5359af5ada7d443f59dbc3d93525ffcd9580b49ec"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.section_break_1",
       "name": "section_break_1",
-      "source_field_ordinal": 13,
-      "source_name_digest": "3060356d5467619b2630478e42fc3b258f39a707d7ba19f39147b35ccbac740f",
+      "field_ordinal": 13,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "email settings"
+      "display_name": "email settings",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 41
+      },
+      "source_field_ordinal": 13,
+      "source_name_digest": "3060356d5467619b2630478e42fc3b258f39a707d7ba19f39147b35ccbac740f"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.account",
       "name": "account",
-      "source_field_ordinal": 14,
-      "source_name_digest": "a2b520d68009c64e1dcdf8cbc40f0f870d1427d455bfe18d4963b7f154b76cda",
+      "field_ordinal": 14,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -558,13 +783,24 @@
           "identifier": "record_type_account"
         }
       },
-      "display_name": "account"
+      "display_name": "account",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 14,
+      "source_name_digest": "a2b520d68009c64e1dcdf8cbc40f0f870d1427d455bfe18d4963b7f154b76cda"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.finance_book",
       "name": "finance_book",
-      "source_field_ordinal": 15,
-      "source_name_digest": "36de49bb5d05638c3cacf0c15e60e8a9511fdb75e3e447eecc68540e532e2594",
+      "field_ordinal": 15,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -576,26 +812,44 @@
           "identifier": "record_type_finance_book"
         }
       },
-      "display_name": "finance book"
+      "display_name": "finance book",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_finance_book"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 15,
+      "source_name_digest": "36de49bb5d05638c3cacf0c15e60e8a9511fdb75e3e447eecc68540e532e2594"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.preferences",
       "name": "preferences",
-      "source_field_ordinal": 16,
-      "source_name_digest": "51042df00b5d7230399521eabed19aea09e8983e83e6581ecb61aa1484d2944c",
+      "field_ordinal": 16,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "print preferences"
+      "display_name": "print preferences",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 32
+      },
+      "source_field_ordinal": 16,
+      "source_name_digest": "51042df00b5d7230399521eabed19aea09e8983e83e6581ecb61aa1484d2944c"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.orientation",
       "name": "orientation",
-      "source_field_ordinal": 17,
-      "source_name_digest": "5e7a14dcccc683c0dd50a0214cea4a0ef2c898d0a1f082044adb9db01a3396d7",
+      "field_ordinal": 17,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -615,13 +869,25 @@
           }
         ]
       },
-      "display_name": "orientation"
+      "display_name": "orientation",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "landscape",
+          "portrait"
+        ],
+        "empty_option_explicitly_listed": false,
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 17,
+      "source_name_digest": "5e7a14dcccc683c0dd50a0214cea4a0ef2c898d0a1f082044adb9db01a3396d7"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.start_date",
       "name": "start_date",
-      "source_field_ordinal": 18,
-      "source_name_digest": "c8044235216a437ff3e53bff4af5fd28ce3045c4a3067271e2200e574eb7ac89",
+      "field_ordinal": 18,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -634,13 +900,25 @@
           "source_value_digest": "5397d8be1e29249b78a1dad485a7dfc8cf9cbf685f8f7084a1dea271ab8dcd67"
         }
       },
-      "display_name": "start date"
+      "display_name": "start date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "default": {
+          "kind": "symbolic_text",
+          "value": "today"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 18,
+      "source_name_digest": "c8044235216a437ff3e53bff4af5fd28ce3045c4a3067271e2200e574eb7ac89"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.currency",
       "name": "currency",
-      "source_field_ordinal": 19,
-      "source_name_digest": "0e4989ec47c3d70bba675521906d037a8a6bbb4ca692be343ec2b511ac64e2af",
+      "field_ordinal": 19,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -649,24 +927,37 @@
       "properties": {
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "678cf8b5db1f16f537a94f539721039ef35de36047c021474f92412963ff5430",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_678cf8b5db1f16f537a9",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_project_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_project_visibility_condition",
+          "meaning": "The selected report is the general ledger.",
+          "source_value_digest": "678cf8b5db1f16f537a94f539721039ef35de36047c021474f92412963ff5430"
         },
         "target_record_type": {
           "kind": "record_type",
           "identifier": "record_type_currency"
         }
       },
-      "display_name": "currency"
+      "display_name": "currency",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_currency"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 19,
+      "source_name_digest": "0e4989ec47c3d70bba675521906d037a8a6bbb4ca692be343ec2b511ac64e2af"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.include_ageing",
       "name": "include_ageing",
-      "source_field_ordinal": 20,
-      "source_name_digest": "67268f9babbc41bc5c4774b38523b5447c3ab2714f483507dde9c27d13cef700",
+      "field_ordinal": 20,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -679,13 +970,28 @@
         },
         "visible_in_list": 1
       },
-      "display_name": "include ageing summary"
+      "display_name": "include ageing summary",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 20,
+      "source_name_digest": "67268f9babbc41bc5c4774b38523b5447c3ab2714f483507dde9c27d13cef700"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.ageing_based_on",
       "name": "ageing_based_on",
-      "source_field_ordinal": 21,
-      "source_name_digest": "490afab2999263e4bf34c30e0a51bb0a4da7d104f0e0aa02a546d417d4f24662",
+      "field_ordinal": 21,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -719,8 +1025,10 @@
               }
             ]
           },
-          "source_value_digest": "097400633c75d4fbcd7cee2e8899cfb1273a028c02c1d4c60f0505aaa3cd3588",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.include ageing equals 1",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "097400633c75d4fbcd7cee2e8899cfb1273a028c02c1d4c60f0505aaa3cd3588"
         },
         "allowed_values": [
           {
@@ -735,13 +1043,30 @@
           }
         ]
       },
-      "display_name": "ageing based on"
+      "display_name": "ageing based on",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "due_date",
+          "posting_date"
+        ],
+        "empty_option_explicitly_listed": false,
+        "default": {
+          "kind": "symbolic_text",
+          "value": "due_date"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 21,
+      "source_name_digest": "490afab2999263e4bf34c30e0a51bb0a4da7d104f0e0aa02a546d417d4f24662"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.enable_auto_email",
       "name": "enable_auto_email",
-      "source_field_ordinal": 22,
-      "source_name_digest": "78e757aad3329142bec34d686964f6440b5d32dca8facd6bd8227cd5fbbff39a",
+      "field_ordinal": 22,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -754,13 +1079,28 @@
         },
         "visible_in_list": 1
       },
-      "display_name": "enable auto email"
+      "display_name": "enable auto email",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 22,
+      "source_name_digest": "78e757aad3329142bec34d686964f6440b5d32dca8facd6bd8227cd5fbbff39a"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.section_break_14",
       "name": "section_break_14",
-      "source_field_ordinal": 23,
-      "source_name_digest": "eba79991cc4a15d0692db77eefa3a38949dd3f04847bfc2fcd48db86070bde91",
+      "field_ordinal": 23,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -768,13 +1108,20 @@
       "editable_after_posting": false,
       "properties": {
         "hide_border": 1
-      }
+      },
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 38
+      },
+      "source_field_ordinal": 23,
+      "source_name_digest": "eba79991cc4a15d0692db77eefa3a38949dd3f04847bfc2fcd48db86070bde91"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.section_break_18",
       "name": "section_break_18",
-      "source_field_ordinal": 24,
-      "source_name_digest": "5d261c05b299ece2bfb2fcd63420895d413ffd90175012572f70b759a2e64251",
+      "field_ordinal": 24,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -803,29 +1150,45 @@
               }
             ]
           },
-          "source_value_digest": "3491183d0f7fb3cf125f28b61ac68d1ebb47665b5e78900e2465ff1e0647757a",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.enable auto email equals 1",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "3491183d0f7fb3cf125f28b61ac68d1ebb47665b5e78900e2465ff1e0647757a"
         },
         "hide_border": 1
-      }
+      },
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 45
+      },
+      "source_field_ordinal": 24,
+      "source_name_digest": "5d261c05b299ece2bfb2fcd63420895d413ffd90175012572f70b759a2e64251"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.column_break_21",
       "name": "column_break_21",
-      "source_field_ordinal": 25,
-      "source_name_digest": "fb1c596dc0abd5f5818b4e2824b1f11a236fd77c1dc6fef776594cb88fa8bcdc",
+      "field_ordinal": 25,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 48
+      },
+      "source_field_ordinal": 25,
+      "source_name_digest": "fb1c596dc0abd5f5818b4e2824b1f11a236fd77c1dc6fef776594cb88fa8bcdc"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.fetch_customers",
       "name": "fetch_customers",
-      "source_field_ordinal": 26,
-      "source_name_digest": "2741df45af5b71679c31ac49ae26b19f9503854b71cd83f0057a1a92d2c8417e",
+      "field_ordinal": 26,
       "value_type": "action_control",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -848,15 +1211,17 @@
               {
                 "operator": "not_equal",
                 "value": {
-                  "kind": "symbolic_text",
-                  "value": "unnamed",
+                  "kind": "literal",
+                  "value": "",
                   "source_value_digest": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
                 }
               }
             ]
           },
-          "source_value_digest": "1ca016291a6d0ca64e666ed1c0ae64e84e07c357722c1d30ea13e231efddcec1",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.customer collection does not equal \"\"",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "1ca016291a6d0ca64e666ed1c0ae64e84e07c357722c1d30ea13e231efddcec1"
         },
         "type_specific_options": {
           "kind": "symbolic_text",
@@ -866,13 +1231,20 @@
         "print_hide": 1,
         "report_hide": 1
       },
-      "display_name": "fetch customers"
+      "display_name": "fetch customers",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "action_control",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 26
+      },
+      "source_field_ordinal": 26,
+      "source_name_digest": "2741df45af5b71679c31ac49ae26b19f9503854b71cd83f0057a1a92d2c8417e"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.primary_mandatory",
       "name": "primary_mandatory",
-      "source_field_ordinal": 27,
-      "source_name_digest": "d3d4bbc6759d2e6283de059663ab7e68b5b67c20c85c0c7aa88f8411b2148720",
+      "field_ordinal": 27,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -885,6 +1257,22 @@
         }
       },
       "display_name": "send to primary contact",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "1"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 27,
+      "source_name_digest": "d3d4bbc6759d2e6283de059663ab7e68b5b67c20c85c0c7aa88f8411b2148720",
       "excluded_source_attributes": {
         "description": {
           "source_value_digest": "637898743cdf3a08de386ead3aae0b89673f3e8d34f473515240530553a9f092",
@@ -895,8 +1283,7 @@
     {
       "identifier": "record_type_process_statement_of_accounts.carbon_copy_to",
       "name": "carbon_copy_to",
-      "source_field_ordinal": 28,
-      "source_name_digest": "af29e9e379812caddbec36b7e01e069654f9c02b8f2dca5fc26423afc37b93db",
+      "field_ordinal": 28,
       "value_type": "owned_reference_collection",
       "persistence": "owned_child_records",
       "required_when_no_conditional_override": false,
@@ -908,13 +1295,24 @@
           "identifier": "record_type_process_statement_of_accounts_carbon_copy"
         }
       },
-      "display_name": "carbon copy to"
+      "display_name": "carbon copy to",
+      "value_contract": {
+        "value_kind": "ordered_owned_records",
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_process_statement_of_accounts_carbon_copy"
+        },
+        "ownership": "Each row stores one parent record identity, parent record type, parent field, and row position. Preserve row ordering and prevent attachment of the same owned row to a second parent.",
+        "save_boundary": "Persist the parent and its owned rows in the same transaction.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 28,
+      "source_name_digest": "af29e9e379812caddbec36b7e01e069654f9c02b8f2dca5fc26423afc37b93db"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.filter_duration",
       "name": "filter_duration",
-      "source_field_ordinal": 29,
-      "source_name_digest": "3b2bb1635da3d86826068b77a176b0aba7b0bb9f218bc47d744ba2f644b9e178",
+      "field_ordinal": 29,
       "value_type": "integer",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -926,13 +1324,29 @@
           "value": "1"
         }
       },
-      "display_name": "filter duration months"
+      "display_name": "filter duration months",
+      "value_contract": {
+        "value_kind": "integer",
+        "fractional_values_allowed": false,
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "default": {
+          "kind": "integer_text",
+          "value": "1"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "input_normalization": "The ordinary record adapter converts numeric input to an integer, including truncating a fractional numeric value toward zero. Invalid or absent numeric input follows the shared numeric-default policy; a domain operation may reject it earlier."
+      },
+      "source_field_ordinal": 29,
+      "source_name_digest": "3b2bb1635da3d86826068b77a176b0aba7b0bb9f218bc47d744ba2f644b9e178"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.customers",
       "name": "customers",
-      "source_field_ordinal": 30,
-      "source_name_digest": "055ab105b7156113b812cde9f7e935768c6d5899150523cd269ba767fb4f8d7f",
+      "field_ordinal": 30,
       "value_type": "owned_record_collection",
       "persistence": "owned_child_records",
       "required_when_no_conditional_override": true,
@@ -945,25 +1359,43 @@
         },
         "required": 1
       },
-      "display_name": "customers"
+      "display_name": "customers",
+      "value_contract": {
+        "value_kind": "ordered_owned_records",
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_process_statement_of_accounts_customer"
+        },
+        "ownership": "Each row stores one parent record identity, parent record type, parent field, and row position. Preserve row ordering and prevent attachment of the same owned row to a second parent.",
+        "save_boundary": "Persist the parent and its owned rows in the same transaction.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 30,
+      "source_name_digest": "055ab105b7156113b812cde9f7e935768c6d5899150523cd269ba767fb4f8d7f"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.column_break_28",
       "name": "column_break_28",
-      "source_field_ordinal": 31,
-      "source_name_digest": "cbb28381798e88bd828fa098d75406a6f4dd8f14ade6a39496f0b8a97ce2c86a",
+      "field_ordinal": 31,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 53
+      },
+      "source_field_ordinal": 31,
+      "source_name_digest": "cbb28381798e88bd828fa098d75406a6f4dd8f14ade6a39496f0b8a97ce2c86a"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.section_break_30",
       "name": "section_break_30",
-      "source_field_ordinal": 32,
-      "source_name_digest": "62ecdc547bde15ffdd4efa8e7d48c7a235ef291eb9e9c1f7cb8604cc1b70c999",
+      "field_ordinal": 32,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -971,13 +1403,20 @@
       "editable_after_posting": false,
       "properties": {
         "hide_border": 1
-      }
+      },
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 55
+      },
+      "source_field_ordinal": 32,
+      "source_name_digest": "62ecdc547bde15ffdd4efa8e7d48c7a235ef291eb9e9c1f7cb8604cc1b70c999"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.section_break_33",
       "name": "section_break_33",
-      "source_field_ordinal": 33,
-      "source_name_digest": "e356ebf1665af9b24cce235e017fb86fb65cc59368240a78e7cedcfdfb063dbc",
+      "field_ordinal": 33,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -985,13 +1424,20 @@
       "editable_after_posting": false,
       "properties": {
         "hide_border": 1
-      }
+      },
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 50
+      },
+      "source_field_ordinal": 33,
+      "source_name_digest": "e356ebf1665af9b24cce235e017fb86fb65cc59368240a78e7cedcfdfb063dbc"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.help_text",
       "name": "help_text",
-      "source_field_ordinal": 34,
-      "source_name_digest": "d892538470b9149202ae24c365e3f6bc3436c962f6b4a97c1bd3f3643d2afcac",
+      "field_ordinal": 34,
       "value_type": "rendered_markup",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -999,44 +1445,63 @@
       "editable_after_posting": false,
       "properties": {
         "type_specific_options": {
-          "kind": "opaque_source_value",
-          "source_value_digest": "d7376ec528cb602dae7192b2c1cc0c00775f5e9e68533d531eaf9fdc5c750f1f",
-          "reason": "Source prose, address, markup, template, or executable content is excluded from the neutral specification; semantics require review."
+          "kind": "semantic_value",
+          "meaning": "Statement email subject and body are templates. The context contains the statement request and the recipient customer. A template can insert customer name, starting date, and ending date; the generated message accompanies the statement attachment.",
+          "value_role": "field_instruction",
+          "source_value_digest": "d7376ec528cb602dae7192b2c1cc0c00775f5e9e68533d531eaf9fdc5c750f1f"
         }
       },
-      "display_name": "help text"
+      "display_name": "help text",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "rendered_markup",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 57
+      },
+      "source_field_ordinal": 34,
+      "source_name_digest": "d892538470b9149202ae24c365e3f6bc3436c962f6b4a97c1bd3f3643d2afcac"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.subject",
       "name": "subject",
-      "source_field_ordinal": 35,
-      "source_name_digest": "38fc6472e03ee504e7264c4f3290cf953722d1c1aae66dfbcee6bf6098edc651",
+      "field_ordinal": 35,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "subject"
+      "display_name": "subject",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 35,
+      "source_name_digest": "38fc6472e03ee504e7264c4f3290cf953722d1c1aae66dfbcee6bf6098edc651"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.body",
       "name": "body",
-      "source_field_ordinal": 36,
-      "source_name_digest": "bfd4d039e9f8aca33b52a877ded02f73846f28f9095c2bba178316be62ef7c1f",
+      "field_ordinal": 36,
       "value_type": "rich_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "body"
+      "display_name": "body",
+      "value_contract": {
+        "value_kind": "rich_document_text",
+        "rendering": "Preserve supported formatting while applying the configured content sanitization policy.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 36,
+      "source_name_digest": "bfd4d039e9f8aca33b52a877ded02f73846f28f9095c2bba178316be62ef7c1f"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.letter_head",
       "name": "letter_head",
-      "source_field_ordinal": 37,
-      "source_name_digest": "05cc73ebc2e4f56f5961f05f3a9305b1b018f1f1364fb21984701ffed13f8a6e",
+      "field_ordinal": 37,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1048,13 +1513,24 @@
           "identifier": "record_type_letter_head"
         }
       },
-      "display_name": "letter head"
+      "display_name": "letter head",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_letter_head"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 37,
+      "source_name_digest": "05cc73ebc2e4f56f5961f05f3a9305b1b018f1f1364fb21984701ffed13f8a6e"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.terms_and_conditions",
       "name": "terms_and_conditions",
-      "source_field_ordinal": 38,
-      "source_name_digest": "bc8c57ead0a7817a7b6345848bc77b1c16a99c3588472673c28ddb295f5a0171",
+      "field_ordinal": 38,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1066,13 +1542,24 @@
           "identifier": "record_type_terms_and_conditions"
         }
       },
-      "display_name": "terms and conditions"
+      "display_name": "terms and conditions",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_terms_and_conditions"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 38,
+      "source_name_digest": "bc8c57ead0a7817a7b6345848bc77b1c16a99c3588472673c28ddb295f5a0171"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.include_break",
       "name": "include_break",
-      "source_field_ordinal": 39,
-      "source_name_digest": "1bb0660b1f425d9b85d20358cebda8939ae9da97c4d9ddf5cf9ea72fd0dfcb07",
+      "field_ordinal": 39,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1084,13 +1571,28 @@
           "value": "1"
         }
       },
-      "display_name": "page break after each sales order a"
+      "display_name": "page break after each sales order a",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "1"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 39,
+      "source_name_digest": "1bb0660b1f425d9b85d20358cebda8939ae9da97c4d9ddf5cf9ea72fd0dfcb07"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.show_net_values_in_party_account",
       "name": "show_net_values_in_party_account",
-      "source_field_ordinal": 40,
-      "source_name_digest": "abaeb07c6877a3d10b0b511a8ae574ae94de77b7a7c6980f4cf6fb5bef174f8b",
+      "field_ordinal": 40,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1103,20 +1605,37 @@
         },
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "678cf8b5db1f16f537a94f539721039ef35de36047c021474f92412963ff5430",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_678cf8b5db1f16f537a9",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_project_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_project_visibility_condition",
+          "meaning": "The selected report is the general ledger.",
+          "source_value_digest": "678cf8b5db1f16f537a94f539721039ef35de36047c021474f92412963ff5430"
         }
       },
-      "display_name": "show net values in party account"
+      "display_name": "show net values in party account",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 40,
+      "source_name_digest": "abaeb07c6877a3d10b0b511a8ae574ae94de77b7a7c6980f4cf6fb5bef174f8b"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.sender",
       "name": "sender",
-      "source_field_ordinal": 41,
-      "source_name_digest": "bf285de8186ed34a2f66e780f76d3dc3eeb3ae4927226900bbdb7b077767e87f",
+      "field_ordinal": 41,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1128,25 +1647,43 @@
           "identifier": "record_type_email_account"
         }
       },
-      "display_name": "sender"
+      "display_name": "sender",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_email_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 41,
+      "source_name_digest": "bf285de8186ed34a2f66e780f76d3dc3eeb3ae4927226900bbdb7b077767e87f"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.column_break_ocfq",
       "name": "column_break_ocfq",
-      "source_field_ordinal": 42,
-      "source_name_digest": "2f20163d7384ab59206edc2ac4f0e57ca450cf03f59baba957bc6874cda18bc9",
+      "field_ordinal": 42,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 43
+      },
+      "source_field_ordinal": 42,
+      "source_name_digest": "2f20163d7384ab59206edc2ac4f0e57ca450cf03f59baba957bc6874cda18bc9"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.report",
       "name": "report",
-      "source_field_ordinal": 43,
-      "source_name_digest": "8d0ccb734a265b631becd953b550e449e730498de4ee931d4ada5a3ce3783ae1",
+      "field_ordinal": 43,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -1167,13 +1704,25 @@
         ],
         "required": 1
       },
-      "display_name": "report"
+      "display_name": "report",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "general_ledger",
+          "accounts_receivable"
+        ],
+        "empty_option_explicitly_listed": false,
+        "required_when_no_conditional_override": true,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 43,
+      "source_name_digest": "8d0ccb734a265b631becd953b550e449e730498de4ee931d4ada5a3ce3783ae1"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.posting_date",
       "name": "posting_date",
-      "source_field_ordinal": 44,
-      "source_name_digest": "602769780e0d8121d17105dbdf8b7ced77ed42da219e4bf1c104951b0b542d55",
+      "field_ordinal": 44,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1187,28 +1736,53 @@
         },
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "e2dfc5569a45eba81dc5307fcbbb7137c97d80873fc452b352ed5c24f914fbdd",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_e2dfc5569a45eba81dc5",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_posting_date_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_posting_date_visibility_condition",
+          "meaning": "The selected report is accounts receivable.",
+          "source_value_digest": "e2dfc5569a45eba81dc5307fcbbb7137c97d80873fc452b352ed5c24f914fbdd"
         },
         "required_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "e2dfc5569a45eba81dc5307fcbbb7137c97d80873fc452b352ed5c24f914fbdd",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_e2dfc5569a45eba81dc5",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_posting_date_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_posting_date_visibility_condition",
+          "meaning": "The selected report is accounts receivable.",
+          "source_value_digest": "e2dfc5569a45eba81dc5307fcbbb7137c97d80873fc452b352ed5c24f914fbdd"
         }
       },
-      "display_name": "posting date"
+      "display_name": "posting date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "default": {
+          "kind": "symbolic_text",
+          "value": "today"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "requiredness_condition": {
+          "kind": "supplemental_semantic_reference",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_posting_date_visibility_condition",
+          "semantic_catalog": "schemas/data/conditional-field-semantics.json",
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_posting_date_visibility_condition",
+          "meaning": "The selected report is accounts receivable."
+        }
+      },
+      "source_field_ordinal": 44,
+      "source_name_digest": "602769780e0d8121d17105dbdf8b7ced77ed42da219e4bf1c104951b0b542d55"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.payment_terms_template",
       "name": "payment_terms_template",
-      "source_field_ordinal": 45,
-      "source_name_digest": "5e59b3d7f57eb26940da107f8ce5e0c5c310aabfa0773e6be42aabe823acdc29",
+      "field_ordinal": 45,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1217,24 +1791,37 @@
       "properties": {
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "d9a341a247e1e990dbc57621a54c20ac8e171c5591a3f48af9cc401052bdd8b4",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_d9a341a247e1e990dbc5",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_payment_terms_template_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_payment_terms_template_visibility_condition",
+          "meaning": "The selected report is accounts receivable.",
+          "source_value_digest": "d9a341a247e1e990dbc57621a54c20ac8e171c5591a3f48af9cc401052bdd8b4"
         },
         "target_record_type": {
           "kind": "record_type",
           "identifier": "record_type_payment_terms_template"
         }
       },
-      "display_name": "payment terms template"
+      "display_name": "payment terms template",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_payment_terms_template"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 45,
+      "source_name_digest": "5e59b3d7f57eb26940da107f8ce5e0c5c310aabfa0773e6be42aabe823acdc29"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.sales_partner",
       "name": "sales_partner",
-      "source_field_ordinal": 46,
-      "source_name_digest": "5967bc2ae9078f3d15b158ece897488066e7667b0d2064875afe06ec801ecdb3",
+      "field_ordinal": 46,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1243,24 +1830,37 @@
       "properties": {
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "d9a341a247e1e990dbc57621a54c20ac8e171c5591a3f48af9cc401052bdd8b4",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_d9a341a247e1e990dbc5",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_payment_terms_template_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_payment_terms_template_visibility_condition",
+          "meaning": "The selected report is accounts receivable.",
+          "source_value_digest": "d9a341a247e1e990dbc57621a54c20ac8e171c5591a3f48af9cc401052bdd8b4"
         },
         "target_record_type": {
           "kind": "record_type",
           "identifier": "record_type_sales_partner"
         }
       },
-      "display_name": "sales partner"
+      "display_name": "sales partner",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_sales_partner"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 46,
+      "source_name_digest": "5967bc2ae9078f3d15b158ece897488066e7667b0d2064875afe06ec801ecdb3"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.sales_person",
       "name": "sales_person",
-      "source_field_ordinal": 47,
-      "source_name_digest": "44c8b6043bc31a9b445215f20b28db0a5bf0fc04cdf82ed83215868b768014bd",
+      "field_ordinal": 47,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1269,24 +1869,37 @@
       "properties": {
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "d9a341a247e1e990dbc57621a54c20ac8e171c5591a3f48af9cc401052bdd8b4",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_d9a341a247e1e990dbc5",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_payment_terms_template_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_payment_terms_template_visibility_condition",
+          "meaning": "The selected report is accounts receivable.",
+          "source_value_digest": "d9a341a247e1e990dbc57621a54c20ac8e171c5591a3f48af9cc401052bdd8b4"
         },
         "target_record_type": {
           "kind": "record_type",
           "identifier": "record_type_sales_person"
         }
       },
-      "display_name": "sales person"
+      "display_name": "sales person",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_sales_person"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 47,
+      "source_name_digest": "44c8b6043bc31a9b445215f20b28db0a5bf0fc04cdf82ed83215868b768014bd"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.territory",
       "name": "territory",
-      "source_field_ordinal": 48,
-      "source_name_digest": "4c27ad510dcaf84acaa67679f33efb27deec45832ae2bdff4353b22ee4dd5981",
+      "field_ordinal": 48,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1295,24 +1908,37 @@
       "properties": {
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "d9a341a247e1e990dbc57621a54c20ac8e171c5591a3f48af9cc401052bdd8b4",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_d9a341a247e1e990dbc5",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_payment_terms_template_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_payment_terms_template_visibility_condition",
+          "meaning": "The selected report is accounts receivable.",
+          "source_value_digest": "d9a341a247e1e990dbc57621a54c20ac8e171c5591a3f48af9cc401052bdd8b4"
         },
         "target_record_type": {
           "kind": "record_type",
           "identifier": "record_type_territory"
         }
       },
-      "display_name": "territory"
+      "display_name": "territory",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_territory"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 48,
+      "source_name_digest": "4c27ad510dcaf84acaa67679f33efb27deec45832ae2bdff4353b22ee4dd5981"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.based_on_payment_terms",
       "name": "based_on_payment_terms",
-      "source_field_ordinal": 49,
-      "source_name_digest": "59085a7c2ffd643b6e06fd9bd4cd1e8fde219aabd513276d9bc5f1521077e387",
+      "field_ordinal": 49,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1325,33 +1951,55 @@
         },
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "e2dfc5569a45eba81dc5307fcbbb7137c97d80873fc452b352ed5c24f914fbdd",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_e2dfc5569a45eba81dc5",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_posting_date_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_posting_date_visibility_condition",
+          "meaning": "The selected report is accounts receivable.",
+          "source_value_digest": "e2dfc5569a45eba81dc5307fcbbb7137c97d80873fc452b352ed5c24f914fbdd"
         }
       },
-      "display_name": "based on payment terms"
+      "display_name": "based on payment terms",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 49,
+      "source_name_digest": "59085a7c2ffd643b6e06fd9bd4cd1e8fde219aabd513276d9bc5f1521077e387"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.portable_document_name",
       "name": "portable_document_name",
-      "source_field_ordinal": 50,
-      "source_name_digest": "5b3543cdb42a3e213079bce15e79f31469833c97b0e13a988e0ec00665d41442",
+      "field_ordinal": 50,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "portable document name"
+      "display_name": "portable document name",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 50,
+      "source_name_digest": "5b3543cdb42a3e213079bce15e79f31469833c97b0e13a988e0ec00665d41442"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.ignore_exchange_rate_revaluation_journals",
       "name": "ignore_exchange_rate_revaluation_journals",
-      "source_field_ordinal": 51,
-      "source_name_digest": "c93173408c39f98aee44f5a380bcf7a1a7866fdbea99f28ab00a6cccdead9386",
+      "field_ordinal": 51,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1363,13 +2011,28 @@
           "value": "0"
         }
       },
-      "display_name": "ignore exchange rate revaluation and gain loss journals"
+      "display_name": "ignore exchange rate revaluation and gain loss journals",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 51,
+      "source_name_digest": "c93173408c39f98aee44f5a380bcf7a1a7866fdbea99f28ab00a6cccdead9386"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.ignore_credit_debit_notes",
       "name": "ignore_credit_debit_notes",
-      "source_field_ordinal": 52,
-      "source_name_digest": "dd8eb734b69a2dd2bd933c76f0d615e790641bf49deda11c2dea75ce1026fdec",
+      "field_ordinal": 52,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1381,13 +2044,28 @@
           "value": "0"
         }
       },
-      "display_name": "ignore system generated credit debit notes"
+      "display_name": "ignore system generated credit debit notes",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 52,
+      "source_name_digest": "dd8eb734b69a2dd2bd933c76f0d615e790641bf49deda11c2dea75ce1026fdec"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.show_remarks",
       "name": "show_remarks",
-      "source_field_ordinal": 53,
-      "source_name_digest": "21458dc7c56ee195a3310257d2830910ea3830175f8e5942673969f8d2574b03",
+      "field_ordinal": 53,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1399,13 +2077,28 @@
           "value": "0"
         }
       },
-      "display_name": "show remarks"
+      "display_name": "show remarks",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 53,
+      "source_name_digest": "21458dc7c56ee195a3310257d2830910ea3830175f8e5942673969f8d2574b03"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.categorize_by",
       "name": "categorize_by",
-      "source_field_ordinal": 54,
-      "source_name_digest": "798bce45b0df63b35cfc79d0e258290a75d15c99961e01f66b86f903b3b4ceaa",
+      "field_ordinal": 54,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1419,11 +2112,13 @@
         },
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "fcdaf82a3c34616443329a323c3279bc065a9a4d087a465ef228051640c6d86e",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_fcdaf82a3c3461644332",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_categorize_by_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_categorize_by_visibility_condition",
+          "meaning": "The selected report is the general ledger.",
+          "source_value_digest": "fcdaf82a3c34616443329a323c3279bc065a9a4d087a465ef228051640c6d86e"
         },
         "allowed_values": [
           {
@@ -1443,13 +2138,31 @@
           }
         ]
       },
-      "display_name": "categorize by"
+      "display_name": "categorize by",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "",
+          "categorize_by_voucher",
+          "categorize_by_voucher_consolidated"
+        ],
+        "empty_option_explicitly_listed": true,
+        "default": {
+          "kind": "symbolic_text",
+          "value": "categorize_by_voucher_consolidated"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 54,
+      "source_name_digest": "798bce45b0df63b35cfc79d0e258290a75d15c99961e01f66b86f903b3b4ceaa"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.show_future_payments",
       "name": "show_future_payments",
-      "source_field_ordinal": 55,
-      "source_name_digest": "297e6474450dff3b7cbc1864540c43c8c3225c46be5b1e06389176706e7df4f4",
+      "field_ordinal": 55,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1462,20 +2175,37 @@
         },
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "e2dfc5569a45eba81dc5307fcbbb7137c97d80873fc452b352ed5c24f914fbdd",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_e2dfc5569a45eba81dc5",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_posting_date_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_posting_date_visibility_condition",
+          "meaning": "The selected report is accounts receivable.",
+          "source_value_digest": "e2dfc5569a45eba81dc5307fcbbb7137c97d80873fc452b352ed5c24f914fbdd"
         }
       },
-      "display_name": "show future payments"
+      "display_name": "show future payments",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 55,
+      "source_name_digest": "297e6474450dff3b7cbc1864540c43c8c3225c46be5b1e06389176706e7df4f4"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.print_format",
       "name": "print_format",
-      "source_field_ordinal": 56,
-      "source_name_digest": "92e83a26f44ba8238709a1227ce44999e1709066e1e027ea9acc79f74eb1b5e1",
+      "field_ordinal": 56,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1487,13 +2217,24 @@
           "identifier": "record_type_print_format"
         }
       },
-      "display_name": "print format"
+      "display_name": "print format",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_print_format"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 56,
+      "source_name_digest": "92e83a26f44ba8238709a1227ce44999e1709066e1e027ea9acc79f74eb1b5e1"
     },
     {
       "identifier": "record_type_process_statement_of_accounts.show_opening_entries",
       "name": "show_opening_entries",
-      "source_field_ordinal": 57,
-      "source_name_digest": "2f33370beaa6d58dff4867dcc2f5be8ac4324c16ebf6381270e5a5a5efa7fb4e",
+      "field_ordinal": 57,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1506,16 +2247,50 @@
         },
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "fcdaf82a3c34616443329a323c3279bc065a9a4d087a465ef228051640c6d86e",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_fcdaf82a3c3461644332",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_process_statement_of_accounts_categorize_by_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_process_statement_of_accounts_categorize_by_visibility_condition",
+          "meaning": "The selected report is the general ledger.",
+          "source_value_digest": "fcdaf82a3c34616443329a323c3279bc065a9a4d087a465ef228051640c6d86e"
         }
       },
-      "display_name": "show opening entries"
+      "display_name": "show opening entries",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 57,
+      "source_name_digest": "2f33370beaa6d58dff4867dcc2f5be8ac4324c16ebf6381270e5a5a5efa7fb4e"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "explicit rename operation required",
+    "strategy": "configured_number_series",
+    "rule": "Expand configured prefix and calendar segments and increment the resulting sequence counter."
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "independent_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "This record type does not independently implement the post-and-cancel lifecycle."
+  },
+  "source_name_digest": "3372458af8d385cba64df415e57db6b5fd32d5867d0f94adf063c7417f5b1038",
+  "source_pack": "enterprise",
+  "source_artifact": "source-artifact-4fdaf8a8cf0dfbcf930f",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "e8619ffec3e330d885a925756c11d5e06c85a5c40d453ae9219a61a21117a91f",
@@ -1537,5 +2312,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "accounting.process_statement_of_accounts",
+    "status": "declared",
+    "dictionary": "schema/entities/accounting-03.json",
+    "declaration_name": "Process Statement Of Accounts",
+    "declaration_catalog": "docs/rebuild/model/catalog/erpnext-accounts-04.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

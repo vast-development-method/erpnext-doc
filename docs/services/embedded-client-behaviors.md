@@ -112,3 +112,10 @@ Normal user editing of an existing standard registration is constrained outside 
 The resulting specification separates standard behavior identity from executable implementation format. An implementation can implement these ordered rules in any language or declarative engine while preserving when each behavior loads, which mutable values it changes and what gets reset during maintenance.
 
 ## Form acceptance
+
+Use controlled service responses to exercise ordinary, cleared and complete discounts, stale zero amounts, row removal, empty totals, null and zero rates, rate replacement, repeated selection, responses arriving out of order, duplicate action registration, service failure and default resets. Check the final form separately from saved data, permissions, taxes and ledger entries. An isolated event sequence establishes only its stated form transitions.
+
+## Linked specifications
+
+- **Structured contracts** · [machine-readable behavior contracts](../../schemas/interfaces/embedded-client-behaviors.json)
+- **Related decisions** · [customer relationships and sales](../people-and-services/customer-relationships-and-sales.md) · [pricing and taxation](../transactions/taxation-and-pricing.md) · [stage probability defaults](../people-and-services/customer-relationships-and-sales.md#monetary-calculations-and-forecasts)

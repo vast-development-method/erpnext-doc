@@ -1,5 +1,7 @@
 # Esign App
 
+[Business workflow and acceptance cases](../../../capabilities/guides/documents.md#multiple-signer-agreement-completion).
+
 Apoorv Soral's listing describes a signing workspace for reusable PDFs, assigned fields, email invitations and completion tracking. Its documentation link leads to the publisher's public implementation, package `esign_app`, at revision `66d62017a173e9cc93f26f8c355c3bdae771c73b`. The marketplace's separately named repository and the exact release installed by customers remain unverified. The snapshot lists major version 15. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/esign_app) · [Publisher-linked package](https://github.com/asoral/E-sign-App/blob/66d62017a173e9cc93f26f8c355c3bdae771c73b/README.md)
 
 ## Publisher workflow and inspected records
@@ -12,12 +14,6 @@ Apoorv Soral's listing describes a signing workspace for reusable PDFs, assigned
 
 Bind the envelope to the exact PDF bytes, template revision, page coordinates and required components. An authenticated assignee submits a value against an envelope revision and assigned field. Record signer, time, component ID, outcome and document digest. Finalise only when every required assignment is complete. Preserve rejected envelopes with the reason and outstanding actions. Treat certificate verification and applicable legal requirements as separate qualification steps.
 
-Choose the document language and approved template variant before dispatch. The sender and signers may each use a different interface language. Translating navigation or reminder emails must leave the original signed text, glyph positions, names and bytes intact. For a missing agreement translation, require selection of an available approved variant before sending. A translation after signature creates a separately identified rendition.
-
-| Acceptance example | Expected result |
-|---|---|
-| Two signers receive the same Afrikaans agreement, one using German controls and one English. Each signs their own field. | The editable template retains its original contents. One final document identifies the same signed agreement, both completed assignments and a digest; inbox labels follow each signer. |
-| The first signer submits twice and attempts a field assigned to the second signer. | A retry cannot add a signing act; the other assignment stays pending and the document cannot finalise. |
-| One signer rejects the assigned document and supplies a Chinese reason. | The reason is preserved verbatim, the preparer sees the translated rejection status, and no completed certificate is issued. |
-
 The pinned code is static implementation evidence. Signature validity, multilingual rendering, authorization enforcement and the installed signing flow require runtime qualification.
+
+[Read the consolidated workflow](../../../capabilities/guides/documents.md#multiple-signer-agreement-completion-2).

@@ -1,0 +1,565 @@
+{
+  "catalog_kind": "ordered_decision_contracts",
+  "partition_of": "enterprise-decision-contracts.json",
+  "contracts": [
+    {
+      "identifier": "operation_enterprise_accounts_record_definitions_purchase_invoice_services_general_ledger_composer_business_behavior_purchase_invoice_general_ledger_composer_add_supplier_general_ledger_entry",
+      "name": "add supplier general ledger entry",
+      "component": "component_enterprise_accounts_record_definitions_purchase_invoice_services_general_ledger_composer_business_behavior",
+      "scope": "current_candidate",
+      "procedure_semantics": "decision-semantics.json",
+      "contract_role": "operational_behavior",
+      "validation_level": "structural_decision_translation_with_domain_review_separate",
+      "parameters": [
+        {
+          "name": "self",
+          "public_parameter_name": "self",
+          "external_parameter_text": "self",
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "general_ledger_entries",
+          "public_parameter_name": "general_ledger_entries",
+          "external_parameter_text": "gl_entries",
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "base_grand_total",
+          "public_parameter_name": "base_grand_total",
+          "external_parameter_text": "base_grand_total",
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "grand_total",
+          "public_parameter_name": "grand_total",
+          "external_parameter_text": "grand_total",
+          "binding": "positional_or_named",
+          "required": true
+        },
+        {
+          "name": "against_account",
+          "public_parameter_name": "against_account",
+          "external_parameter_text": "against_account",
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "absence"
+          }
+        },
+        {
+          "name": "remarks",
+          "public_parameter_name": "remarks",
+          "external_parameter_text": "remarks",
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "absence"
+          }
+        },
+        {
+          "name": "skip_merge",
+          "public_parameter_name": "skip_merge",
+          "external_parameter_text": "skip_merge",
+          "binding": "positional_or_named",
+          "required": false,
+          "default": {
+            "kind": "truth_value",
+            "value": false
+          }
+        }
+      ],
+      "definition_wrappers": [],
+      "wrapper_application_order": "Evaluate wrapper expressions at definition; apply wrappers from the last listed expression toward the first. Their authorization, regional dispatch, caching and optional-capability behavior must be bound separately.",
+      "module_context_requirement": "Bind referenced module values, imports, class inheritance and shared state before invoking the operation body.",
+      "decision_steps": [
+        {
+          "action": "set_values",
+          "targets": [
+            {
+              "kind": "value_reference",
+              "name": "record"
+            }
+          ],
+          "value": {
+            "kind": "member_value",
+            "owner": {
+              "kind": "value_reference",
+              "name": "self"
+            },
+            "name": "record"
+          }
+        },
+        {
+          "action": "set_values",
+          "targets": [
+            {
+              "kind": "value_reference",
+              "name": "against_voucher"
+            }
+          ],
+          "value": {
+            "kind": "member_value",
+            "owner": {
+              "kind": "value_reference",
+              "name": "record"
+            },
+            "name": "record_name",
+            "name_when_not_record_member": "name",
+            "binding_requirement": "Resolve the receiver record type and select its canonical schema member before reading or writing; ambiguous candidates have no default. For ordinary non-record objects bind the alternate member according to its capability."
+          }
+        },
+        {
+          "action": "choose_branch",
+          "when": {
+            "kind": "short_circuit_choice",
+            "operator": "first_false_or_last",
+            "operands": [
+              {
+                "kind": "member_value",
+                "owner": {
+                  "kind": "value_reference",
+                  "name": "record"
+                },
+                "name": "is_return"
+              },
+              {
+                "kind": "member_value",
+                "owner": {
+                  "kind": "value_reference",
+                  "name": "record"
+                },
+                "name": "return_against"
+              },
+              {
+                "kind": "unary_value",
+                "operator": "negate_truth",
+                "operand": {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "record"
+                  },
+                  "name": "update_outstanding_for_self"
+                }
+              }
+            ]
+          },
+          "then": [
+            {
+              "action": "set_values",
+              "targets": [
+                {
+                  "kind": "value_reference",
+                  "name": "against_voucher"
+                }
+              ],
+              "value": {
+                "kind": "member_value",
+                "owner": {
+                  "kind": "value_reference",
+                  "name": "record"
+                },
+                "name": "return_against"
+              }
+            }
+          ],
+          "otherwise": []
+        },
+        {
+          "action": "set_values",
+          "targets": [
+            {
+              "kind": "value_reference",
+              "name": "general_ledger"
+            }
+          ],
+          "value": {
+            "kind": "keyed_collection",
+            "entries": [
+              {
+                "key": {
+                  "kind": "symbolic_value",
+                  "value": "account",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "account",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "value": {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "record"
+                  },
+                  "name": "credit_to"
+                },
+                "expand_mapping": false
+              },
+              {
+                "key": {
+                  "kind": "symbolic_value",
+                  "value": "party_type",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "party_type",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "value": {
+                  "kind": "symbolic_value",
+                  "value": "supplier",
+                  "identifier_roles": [
+                    "record_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "Supplier",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "expand_mapping": false
+              },
+              {
+                "key": {
+                  "kind": "symbolic_value",
+                  "value": "party",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "party",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "value": {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "record"
+                  },
+                  "name": "supplier"
+                },
+                "expand_mapping": false
+              },
+              {
+                "key": {
+                  "kind": "symbolic_value",
+                  "value": "due_date",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "due_date",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "value": {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "record"
+                  },
+                  "name": "due_date"
+                },
+                "expand_mapping": false
+              },
+              {
+                "key": {
+                  "kind": "symbolic_value",
+                  "value": "against",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "against",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "value": {
+                  "kind": "short_circuit_choice",
+                  "operator": "first_true_or_last",
+                  "operands": [
+                    {
+                      "kind": "value_reference",
+                      "name": "against_account"
+                    },
+                    {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "value_reference",
+                        "name": "record"
+                      },
+                      "name": "against_expense_account"
+                    }
+                  ]
+                },
+                "expand_mapping": false
+              },
+              {
+                "key": {
+                  "kind": "symbolic_value",
+                  "value": "credit",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "credit",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "value": {
+                  "kind": "value_reference",
+                  "name": "base_grand_total"
+                },
+                "expand_mapping": false
+              },
+              {
+                "key": {
+                  "kind": "symbolic_value",
+                  "value": "credit_in_account_currency",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "credit_in_account_currency",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "value": {
+                  "kind": "conditional_value",
+                  "when": {
+                    "kind": "ordered_comparison_chain",
+                    "initial": {
+                      "kind": "member_value",
+                      "owner": {
+                        "kind": "value_reference",
+                        "name": "record"
+                      },
+                      "name": "party_account_currency"
+                    },
+                    "comparisons": [
+                      {
+                        "operator": "equal",
+                        "right": {
+                          "kind": "member_value",
+                          "owner": {
+                            "kind": "value_reference",
+                            "name": "record"
+                          },
+                          "name": "company_currency"
+                        }
+                      }
+                    ]
+                  },
+                  "then": {
+                    "kind": "value_reference",
+                    "name": "base_grand_total"
+                  },
+                  "otherwise": {
+                    "kind": "value_reference",
+                    "name": "grand_total"
+                  }
+                },
+                "expand_mapping": false
+              },
+              {
+                "key": {
+                  "kind": "symbolic_value",
+                  "value": "credit_in_transaction_currency",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "credit_in_transaction_currency",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "value": {
+                  "kind": "value_reference",
+                  "name": "grand_total"
+                },
+                "expand_mapping": false
+              },
+              {
+                "key": {
+                  "kind": "symbolic_value",
+                  "value": "against_voucher",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "against_voucher",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "value": {
+                  "kind": "value_reference",
+                  "name": "against_voucher"
+                },
+                "expand_mapping": false
+              },
+              {
+                "key": {
+                  "kind": "symbolic_value",
+                  "value": "against_voucher_type",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "against_voucher_type",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "value": {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "record"
+                  },
+                  "name": "record_type"
+                },
+                "expand_mapping": false
+              },
+              {
+                "key": {
+                  "kind": "symbolic_value",
+                  "value": "project",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "project",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "value": {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "record"
+                  },
+                  "name": "project"
+                },
+                "expand_mapping": false
+              },
+              {
+                "key": {
+                  "kind": "symbolic_value",
+                  "value": "cost_center",
+                  "identifier_roles": [
+                    "member_identifier"
+                  ],
+                  "text_when_not_used_as_identifier": "cost_center",
+                  "interpretation_contract": "decision-semantics.json#identifier_literals"
+                },
+                "value": {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "record"
+                  },
+                  "name": "cost_center"
+                },
+                "expand_mapping": false
+              },
+              {
+                "key": {
+                  "kind": "text",
+                  "value": "_skip_merge"
+                },
+                "value": {
+                  "kind": "value_reference",
+                  "name": "skip_merge"
+                },
+                "expand_mapping": false
+              }
+            ]
+          }
+        },
+        {
+          "action": "choose_branch",
+          "when": {
+            "kind": "value_reference",
+            "name": "remarks"
+          },
+          "then": [
+            {
+              "action": "set_values",
+              "targets": [
+                {
+                  "kind": "indexed_value",
+                  "collection": {
+                    "kind": "value_reference",
+                    "name": "general_ledger"
+                  },
+                  "selection": {
+                    "kind": "symbolic_value",
+                    "value": "remarks",
+                    "identifier_roles": [
+                      "member_identifier"
+                    ],
+                    "text_when_not_used_as_identifier": "remarks",
+                    "interpretation_contract": "decision-semantics.json#identifier_literals"
+                  }
+                }
+              ],
+              "value": {
+                "kind": "value_reference",
+                "name": "remarks"
+              }
+            }
+          ],
+          "otherwise": []
+        },
+        {
+          "action": "evaluate",
+          "value": {
+            "kind": "operation_result",
+            "operation": {
+              "kind": "member_value",
+              "owner": {
+                "kind": "value_reference",
+                "name": "general_ledger_entries"
+              },
+              "name": "append"
+            },
+            "arguments": [
+              {
+                "kind": "operation_result",
+                "operation": {
+                  "kind": "member_value",
+                  "owner": {
+                    "kind": "value_reference",
+                    "name": "self"
+                  },
+                  "name": "get_general_ledger_mapping"
+                },
+                "arguments": [
+                  {
+                    "kind": "value_reference",
+                    "name": "general_ledger"
+                  },
+                  {
+                    "kind": "member_value",
+                    "owner": {
+                      "kind": "value_reference",
+                      "name": "record"
+                    },
+                    "name": "party_account_currency"
+                  }
+                ],
+                "named_arguments": [
+                  {
+                    "name": "item",
+                    "value": {
+                      "kind": "value_reference",
+                      "name": "record"
+                    },
+                    "external_parameter_text": "item",
+                    "parameter_binding": "callee_public_name_requires_context_binding"
+                  }
+                ],
+                "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+              }
+            ],
+            "named_arguments": [],
+            "resolution_requirement": "Resolve the external, dynamic or shadowed callable and its named-parameter namespace before execution."
+          }
+        }
+      ],
+      "asynchronous": false,
+      "declared_result_shape": {
+        "kind": "inferred_from_completion_branches"
+      },
+      "locally_resolved_operations": [],
+      "context_bound_capabilities": [
+        "general_ledger_entries_append",
+        "self_get_general_ledger_mapping"
+      ],
+      "implicit_completion": "Absent an earlier completion or propagated failure, complete with an absent value."
+    }
+  ]
+}

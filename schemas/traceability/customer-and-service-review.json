@@ -410,8 +410,8 @@
       "name": "Project completion mathematics",
       "specification_reference": "../../docs/domains/projects-and-time-billing.md#project-completion-mathematics",
       "business_rule_summary": [
-        "The project chooses one calculation method:",
-        "Calculated results are rounded to two decimal places. With no tasks, calculated progress is zero. A project with no tasks can nevertheless be explicitly completed, which switches the method to manual and sets 100. Calculated completion updates status to completed exactly at 100 and otherwise open, except that a manually selected cancelled or on-hold state is preserved. Task cancellation counting as complete is an observed rule, not an assumption that cancelled work was performed. The weight share is calculated by safe division, which returns zero for a zero denominator and rounds each division to two decimal places before multiplication by task progress. Final project progress is also rounded to two decimal places. Consequently, three equally weighted tasks at 100 percent each produce 99 percent, because each share is 0.33. Do not defer all rounding to the final sum or normalise the rounded weights to one."
+        "Calculated progress is zero with no tasks. Explicit completion of a taskless project switches it to manual 100. Cancelled and on-hold statuses survive recalculation. A manual attempt to mark an existing calculated project Completed with unfinished progress is rejected. On an ordinary task update, entering Completed requires all listed dependencies to be completed or cancelled. It sets completion date if absent, closes assignments and sets task progress to 100. A time log marked completed can finish a task. Recomputing from surviving time logs keeps a task already completed or cancelled in that state.",
+        "Saving a task checks its dependency graph in each direction. The bounded dependency check expands at most 15 list entries in each direction. Do not claim full cycle detection on arbitrary graphs from this bounded search. In ordinary rescheduling, an open, working or overdue dependent in the same project with both dates and a start strictly before its prerequisite's end moves to the following day. Preserve the difference between its original dates. The owning parent task is excluded from that rescheduling query. A prerequisite ending 12 June moves a 10–15 June dependent to 13–18 June, while a dependent beginning on the 12th stays put. The explicit project completion/cancellation service checks project write access, applies the target status to tasks in dependency order with rescheduling suppressed, and then saves the project. Switching the project's language cannot change the dependency edges or their status identities."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -422,7 +422,7 @@
         },
         {
           "catalog": "../mathematics/customer-and-service-acceptance-cases.json",
-          "case_identifier": "project-equal-weight-intermediate-rounding"
+          "case_identifier": "project-equal-weight-final-rounding"
         },
         {
           "catalog": "../mathematics/customer-and-service-acceptance-cases.json",
@@ -505,7 +505,7 @@
       "specification_reference": "../../docs/domains/projects-and-time-billing.md#invoice-linkage-and-remaining-value-allocation",
       "business_rule_summary": [
         "The time-to-invoice command takes a time-record identity and optional product, customer and currency. The invoice is initially a draft. When a product is supplied, its generated line represents remaining billable hours at the effective remaining rate, while its time associations identify the unbilled rows. Without a product, the command still supplies the time associations and the caller must complete the invoice. The generation operation checks billable-hour availability but does not itself establish a submitted-time or record-permission guard. Authoritative invoice submission must apply its own linked-time and permission rules; caller visibility is not proof of authorisation. Customer, project, company and currency must remain coherent with the invoice's own validation. Creating a draft invoice must not be treated as a cash receipt or as final ledger recognition.",
-        "Example: recorded billable hours ten and billable amount 1,000, with four hours and 360 already billed, leave six hours and 640. The remaining effective rate is the exact fraction 320 divided by three, approximately 106.6667. An implementation must not take the original average rate 100 and bill 600, since that would lose 40 of remaining value. Apply invoice precision after computing the remaining value, and retain any document rounding adjustment under the invoice contract."
+        "For example, recorded billable hours ten and billable amount 1,000, with four hours and 360 already billed, leave six hours and 640. The remaining effective rate is the exact fraction 320 divided by three, approximately 106.6667. An implementation must not take the original average rate 100 and bill 600, since that would lose 40 of remaining value. Apply invoice precision after computing the remaining value, and retain any document rounding adjustment under the invoice contract."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",

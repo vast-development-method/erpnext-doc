@@ -1,10 +1,14 @@
 # Report catalog
 
-Use the following entries together with the [documentation index](../../../docs/README.md) and [coverage report](../../../docs/references/coverage-and-evidence.md).
+This directory holds ordered parts of [Report catalog](../report-catalog.json). The manifest is authoritative for order, entry counts and interpretation. Read each row with the shared semantics named by the manifest.
 
-| Entry | Content |
+[Parent index](../README.md)
+
+## Definitions
+
+| Entry | Contents |
 |---|---|
-| [Part 0001](part-0001.json) | Structured catalog |
-| [Part 0002](part-0002.json) | Structured catalog |
-| [Part 0003](part-0003.json) | Structured catalog |
-| [Part 0004](part-0004.json) | Structured catalog |
+| [Part 0001](part-0001.json) | 64 reports. |
+| [Part 0002](part-0002.json) | 66 reports. |
+| [Part 0003](part-0003.json) | 57 reports. |
+| [Part 0004](part-0004.json) | 39 reports. |

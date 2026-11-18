@@ -3,11 +3,10 @@
   "identifier": "record_type_expense_claim",
   "name": "expense_claim",
   "display_name": "expense claim",
-  "source_name_digest": "d4702fa874ca38acf7e5c82c74a8ed73025a39a2e87a71e554eded39097bda62",
-  "source_pack": "workforce",
-  "source_artifact": "source-artifact-bcb9439b09c786ca7edf",
+  "capability_group": "workforce",
+  "component_identifier": "component_workforce_human_resources_record_definitions_expense_claim_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "independent_record",
   "supports_posting_and_cancellation": true,
   "ordered_field_names": [
@@ -26,9 +25,9 @@
     "exchange_rate",
     "expense_details",
     "expenses",
-    "taxes_and_charges_sb",
+    "taxes_and_charges_section_break",
     "taxes",
-    "advance_payments_sb",
+    "advance_payments_section_break",
     "advances",
     "transactions_section",
     "column_break_nexp",
@@ -61,7 +60,7 @@
     "project",
     "dimension_column_break",
     "cost_center",
-    "more_info_tab",
+    "more_information_tab",
     "more_details",
     "status",
     "task",
@@ -258,14 +257,13 @@
     }
   ],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 59,
   "fields": [
     {
       "identifier": "record_type_expense_claim.naming_series",
       "name": "naming_series",
-      "source_field_ordinal": 0,
-      "source_name_digest": "ed7b1e84181330b272050e4d84407de1e5548d0e135de2877d922be70adfe57e",
+      "field_ordinal": 0,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -284,13 +282,25 @@
         "required": 1,
         "immutable_after_first_value": 1
       },
-      "display_name": "series"
+      "display_name": "series",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "human_resources_expense_four_digit_year"
+        ],
+        "empty_option_explicitly_listed": false,
+        "required_when_no_conditional_override": true,
+        "change_policy": "Once a nonempty value has been saved, changing the value is prohibited through ordinary edits.",
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "ed7b1e84181330b272050e4d84407de1e5548d0e135de2877d922be70adfe57e"
     },
     {
       "identifier": "record_type_expense_claim.employee",
       "name": "employee",
-      "source_field_ordinal": 1,
-      "source_name_digest": "820a692e43bb9ae6aa56dc0e57bb06cf058d21b6e97d35547acb8d0402f18b14",
+      "field_ordinal": 1,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -307,6 +317,18 @@
         "indexed_for_search": 1
       },
       "display_name": "from employee",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_employee"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "820a692e43bb9ae6aa56dc0e57bb06cf058d21b6e97d35547acb8d0402f18b14",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "820a692e43bb9ae6aa56dc0e57bb06cf058d21b6e97d35547acb8d0402f18b14",
@@ -321,8 +343,7 @@
     {
       "identifier": "record_type_expense_claim.employee_name",
       "name": "employee_name",
-      "source_field_ordinal": 2,
-      "source_name_digest": "71d77313b7273ee700607b0d1c6eb399c431a77653470e475346252e8e63d380",
+      "field_ordinal": 2,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -345,6 +366,19 @@
         }
       },
       "display_name": "employee name",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "employee",
+            "employee_name"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "71d77313b7273ee700607b0d1c6eb399c431a77653470e475346252e8e63d380",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "71d77313b7273ee700607b0d1c6eb399c431a77653470e475346252e8e63d380",
@@ -359,8 +393,7 @@
     {
       "identifier": "record_type_expense_claim.department",
       "name": "department",
-      "source_field_ordinal": 3,
-      "source_name_digest": "8abdb5a568f18bc0fef5a9e0a638fda4dbd8f233bdac1c9c96fb4f4ffcae0455",
+      "field_ordinal": 3,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -380,25 +413,50 @@
           "identifier": "record_type_department"
         }
       },
-      "display_name": "department"
+      "display_name": "department",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_department"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "employee",
+            "department"
+          ]
+        },
+        "copy_only_when_destination_empty": true
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "8abdb5a568f18bc0fef5a9e0a638fda4dbd8f233bdac1c9c96fb4f4ffcae0455"
     },
     {
       "identifier": "record_type_expense_claim.column_break_5",
       "name": "column_break_5",
-      "source_field_ordinal": 4,
-      "source_name_digest": "f41c913c2744104d385fb8e7dd5dd9e52f8fc8ec5407571f6feb57c49fb0ec13",
+      "field_ordinal": 4,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 6
+      },
+      "source_field_ordinal": 4,
+      "source_name_digest": "f41c913c2744104d385fb8e7dd5dd9e52f8fc8ec5407571f6feb57c49fb0ec13"
     },
     {
       "identifier": "record_type_expense_claim.expense_approver",
       "name": "expense_approver",
-      "source_field_ordinal": 5,
-      "source_name_digest": "272bf54da4308ee50bc092c870aee4f649cc6bfee48dc4b58ee17fbaddc72374",
+      "field_ordinal": 5,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -410,13 +468,24 @@
           "identifier": "record_type_user"
         }
       },
-      "display_name": "expense approver"
+      "display_name": "expense approver",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_user"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 5,
+      "source_name_digest": "272bf54da4308ee50bc092c870aee4f649cc6bfee48dc4b58ee17fbaddc72374"
     },
     {
       "identifier": "record_type_expense_claim.approval_status",
       "name": "approval_status",
-      "source_field_ordinal": 6,
-      "source_name_digest": "87baf0b5aa097e9a27001a5b747831cafecbe7245e1a90e0db57028f3930dce7",
+      "field_ordinal": 6,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -454,13 +523,33 @@
         "permission_level": 1,
         "indexed_for_search": 1
       },
-      "display_name": "approval status"
+      "display_name": "approval status",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "draft",
+          "approved",
+          "rejected",
+          "cancelled"
+        ],
+        "empty_option_explicitly_listed": false,
+        "default": {
+          "kind": "symbolic_text",
+          "value": "draft"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "permission_level": 1,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 6,
+      "source_name_digest": "87baf0b5aa097e9a27001a5b747831cafecbe7245e1a90e0db57028f3930dce7"
     },
     {
       "identifier": "record_type_expense_claim.total_claimed_amount",
       "name": "total_claimed_amount",
-      "source_field_ordinal": 7,
-      "source_name_digest": "b911a2eba346fb774794468ccb05b213f9da3d4c5172bd27bf052940974c4547",
+      "field_ordinal": 7,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -482,6 +571,21 @@
         }
       },
       "display_name": "total claimed amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 7,
+      "source_name_digest": "b911a2eba346fb774794468ccb05b213f9da3d4c5172bd27bf052940974c4547",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "b911a2eba346fb774794468ccb05b213f9da3d4c5172bd27bf052940974c4547",
@@ -496,8 +600,7 @@
     {
       "identifier": "record_type_expense_claim.total_sanctioned_amount",
       "name": "total_sanctioned_amount",
-      "source_field_ordinal": 8,
-      "source_name_digest": "c3c53900051601a8f0e215199f353c04d0f70ddb63f44580cdf80dfa27d4c964",
+      "field_ordinal": 8,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -518,6 +621,21 @@
         }
       },
       "display_name": "total sanctioned amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 8,
+      "source_name_digest": "c3c53900051601a8f0e215199f353c04d0f70ddb63f44580cdf80dfa27d4c964",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "c3c53900051601a8f0e215199f353c04d0f70ddb63f44580cdf80dfa27d4c964",
@@ -532,8 +650,7 @@
     {
       "identifier": "record_type_expense_claim.is_paid",
       "name": "is_paid",
-      "source_field_ordinal": 9,
-      "source_name_digest": "66e322c99619b7a5faa42ebccf2fa72034b1e5d9a114cfa4baead68b583da47a",
+      "field_ordinal": 9,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -580,23 +697,48 @@
               }
             ]
           },
-          "source_value_digest": "a3b1d3ba5f4021724b3138f05b1a52865e56ef2ca713a023af4a2ff8fdd6e2f7",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.record state equals 0 first truthy record.is paid)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "a3b1d3ba5f4021724b3138f05b1a52865e56ef2ca713a023af4a2ff8fdd6e2f7"
         }
       },
-      "display_name": "is paid"
+      "display_name": "is paid",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 9,
+      "source_name_digest": "66e322c99619b7a5faa42ebccf2fa72034b1e5d9a114cfa4baead68b583da47a"
     },
     {
       "identifier": "record_type_expense_claim.expense_details",
       "name": "expense_details",
-      "source_field_ordinal": 10,
-      "source_name_digest": "9fc5c56b12935c13a19481d9de8cf8c81b85a46d6c867b5f4f31742fe76ed4b4",
+      "field_ordinal": 10,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 13
+      },
+      "source_field_ordinal": 10,
+      "source_name_digest": "9fc5c56b12935c13a19481d9de8cf8c81b85a46d6c867b5f4f31742fe76ed4b4",
       "excluded_source_attributes": {
         "historical_field_type": {
           "source_value_digest": "260cce9ac4caf503aae3aee7982b898b0e2332ad3fd5ef989c434b36cce2ad72",
@@ -607,8 +749,7 @@
     {
       "identifier": "record_type_expense_claim.expenses",
       "name": "expenses",
-      "source_field_ordinal": 11,
-      "source_name_digest": "49d39e821495cd901865387b893df12d0400b9ccec86c13bd7f545290a92ae3c",
+      "field_ordinal": 11,
       "value_type": "owned_record_collection",
       "persistence": "owned_child_records",
       "required_when_no_conditional_override": true,
@@ -622,6 +763,18 @@
         "required": 1
       },
       "display_name": "expenses",
+      "value_contract": {
+        "value_kind": "ordered_owned_records",
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_expense_claim_detail"
+        },
+        "ownership": "Each row stores one parent record identity, parent record type, parent field, and row position. Preserve row ordering and prevent attachment of the same owned row to a second parent.",
+        "save_boundary": "Persist the parent and its owned rows in the same transaction.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 11,
+      "source_name_digest": "49d39e821495cd901865387b893df12d0400b9ccec86c13bd7f545290a92ae3c",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "7f2868e4608ef697c44137ab39d2cb9de53f0dc2fc4903af8a251b72060425ab",
@@ -636,8 +789,7 @@
     {
       "identifier": "record_type_expense_claim.posting_date",
       "name": "posting_date",
-      "source_field_ordinal": 12,
-      "source_name_digest": "602769780e0d8121d17105dbdf8b7ced77ed42da219e4bf1c104951b0b542d55",
+      "field_ordinal": 12,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -653,6 +805,19 @@
         "required": 1
       },
       "display_name": "posting date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "default": {
+          "kind": "symbolic_text",
+          "value": "today"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 12,
+      "source_name_digest": "602769780e0d8121d17105dbdf8b7ced77ed42da219e4bf1c104951b0b542d55",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "602769780e0d8121d17105dbdf8b7ced77ed42da219e4bf1c104951b0b542d55",
@@ -667,8 +832,7 @@
     {
       "identifier": "record_type_expense_claim.vehicle_log",
       "name": "vehicle_log",
-      "source_field_ordinal": 13,
-      "source_name_digest": "4cf8ca4eb2ffe65fe18e9c71efa9c935807ecbb3138df5f1f6becd1ab559be65",
+      "field_ordinal": 13,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -681,13 +845,24 @@
         },
         "read_only": 1
       },
-      "display_name": "vehicle log"
+      "display_name": "vehicle log",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_vehicle_log"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 13,
+      "source_name_digest": "4cf8ca4eb2ffe65fe18e9c71efa9c935807ecbb3138df5f1f6becd1ab559be65"
     },
     {
       "identifier": "record_type_expense_claim.project",
       "name": "project",
-      "source_field_ordinal": 14,
-      "source_name_digest": "471cacee86a419f75111098ba664eeb1e7db51b9436a9821c23851df5ed52c15",
+      "field_ordinal": 14,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -700,13 +875,24 @@
           "identifier": "record_type_project"
         }
       },
-      "display_name": "project"
+      "display_name": "project",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_project"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 14,
+      "source_name_digest": "471cacee86a419f75111098ba664eeb1e7db51b9436a9821c23851df5ed52c15"
     },
     {
       "identifier": "record_type_expense_claim.task",
       "name": "task",
-      "source_field_ordinal": 15,
-      "source_name_digest": "b9ce06a01002b74d199af6ebe3f5fb94ceba07ec633822e44fec47b29b9edb7d",
+      "field_ordinal": 15,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -719,13 +905,24 @@
         },
         "remember_last_selected_value": 1
       },
-      "display_name": "task"
+      "display_name": "task",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_task"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 15,
+      "source_name_digest": "b9ce06a01002b74d199af6ebe3f5fb94ceba07ec633822e44fec47b29b9edb7d"
     },
     {
       "identifier": "record_type_expense_claim.total_amount_reimbursed",
       "name": "total_amount_reimbursed",
-      "source_field_ordinal": 16,
-      "source_name_digest": "28cdd9ff45cfe6362f30d70692642052453160976c8f4d692b0beb3fc19df750",
+      "field_ordinal": 16,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -741,13 +938,27 @@
         },
         "read_only": 1
       },
-      "display_name": "total amount reimbursed"
+      "display_name": "total amount reimbursed",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 16,
+      "source_name_digest": "28cdd9ff45cfe6362f30d70692642052453160976c8f4d692b0beb3fc19df750"
     },
     {
       "identifier": "record_type_expense_claim.remark",
       "name": "remark",
-      "source_field_ordinal": 17,
-      "source_name_digest": "bb47e6872cc5d2de43a5b7fc2bcb671da1eb3929b5d9c5565a0b5948c3dcd6c8",
+      "field_ordinal": 17,
       "value_type": "short_multiline_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -757,6 +968,12 @@
         "excluded_from_record_copy": 1
       },
       "display_name": "remark",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 17,
+      "source_name_digest": "bb47e6872cc5d2de43a5b7fc2bcb671da1eb3929b5d9c5565a0b5948c3dcd6c8",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "bb47e6872cc5d2de43a5b7fc2bcb671da1eb3929b5d9c5565a0b5948c3dcd6c8",
@@ -771,21 +988,27 @@
     {
       "identifier": "record_type_expense_claim.accounting_details",
       "name": "accounting_details",
-      "source_field_ordinal": 18,
-      "source_name_digest": "c28875ea33e08998901df68861b93633495bee4badd19248e9cd7cbd7ea85b5b",
+      "field_ordinal": 18,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "accounting details"
+      "display_name": "accounting details",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 37
+      },
+      "source_field_ordinal": 18,
+      "source_name_digest": "c28875ea33e08998901df68861b93633495bee4badd19248e9cd7cbd7ea85b5b"
     },
     {
       "identifier": "record_type_expense_claim.company",
       "name": "company",
-      "source_field_ordinal": 19,
-      "source_name_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d",
+      "field_ordinal": 19,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -808,6 +1031,25 @@
         "required": 1
       },
       "display_name": "company",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_company"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true,
+        "reference_value_copy": {
+          "path": [
+            "employee",
+            "company"
+          ]
+        },
+        "copy_only_when_destination_empty": true
+      },
+      "source_field_ordinal": 19,
+      "source_name_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d",
@@ -822,8 +1064,7 @@
     {
       "identifier": "record_type_expense_claim.mode_of_payment",
       "name": "mode_of_payment",
-      "source_field_ordinal": 20,
-      "source_name_digest": "c8676ea86b5b8d5477f487d16a254e45cffecd9d6d7bd2422749d5248ff761a5",
+      "field_ordinal": 20,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -833,6 +1074,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "is_paid",
+          "meaning": "the value of is paid is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "66e322c99619b7a5faa42ebccf2fa72034b1e5d9a114cfa4baead68b583da47a"
         },
         "target_record_type": {
@@ -840,38 +1083,63 @@
           "identifier": "record_type_mode_of_payment"
         }
       },
-      "display_name": "mode of payment"
+      "display_name": "mode of payment",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_mode_of_payment"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 20,
+      "source_name_digest": "c8676ea86b5b8d5477f487d16a254e45cffecd9d6d7bd2422749d5248ff761a5"
     },
     {
       "identifier": "record_type_expense_claim.clearance_date",
       "name": "clearance_date",
-      "source_field_ordinal": 21,
-      "source_name_digest": "910c03ed01fb4a193548a94015cd93f463e0a48f8bd86cf356d364ba47e2302e",
+      "field_ordinal": 21,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "clearance date"
+      "display_name": "clearance date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 21,
+      "source_name_digest": "910c03ed01fb4a193548a94015cd93f463e0a48f8bd86cf356d364ba47e2302e"
     },
     {
       "identifier": "record_type_expense_claim.column_break_24",
       "name": "column_break_24",
-      "source_field_ordinal": 22,
-      "source_name_digest": "ce07d50987df4f923d72a30830dfe4c1b4c89b892966c9851d8a0025283b8269",
+      "field_ordinal": 22,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 43
+      },
+      "source_field_ordinal": 22,
+      "source_name_digest": "ce07d50987df4f923d72a30830dfe4c1b4c89b892966c9851d8a0025283b8269"
     },
     {
       "identifier": "record_type_expense_claim.payable_account",
       "name": "payable_account",
-      "source_field_ordinal": 23,
-      "source_name_digest": "ebcd98c3be480a24d3dbde27393d562874e7853de96694425cc48d84c2814462",
+      "field_ordinal": 23,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -900,21 +1168,59 @@
               "name": "is_paid"
             }
           },
-          "source_value_digest": "7907e688d3a803c81d2f2e9b6eb035271f8cdb9ff5329323e2987dd3e7926801",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "logical not (record.is paid)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "7907e688d3a803c81d2f2e9b6eb035271f8cdb9ff5329323e2987dd3e7926801"
         },
         "target_record_type": {
           "kind": "record_type",
           "identifier": "record_type_account"
         }
       },
-      "display_name": "payable account"
+      "display_name": "payable account",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false,
+        "requiredness_condition": {
+          "kind": "expression_tree",
+          "tree": {
+            "kind": "unary_operation",
+            "operator": "logical_not",
+            "operand": {
+              "kind": "member",
+              "owner": {
+                "kind": "variable",
+                "name": "record"
+              },
+              "name": "is_paid"
+            }
+          },
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "logical not (record.is paid)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract"
+        },
+        "reference_value_copy": {
+          "path": [
+            "company",
+            "default_expense_claim_payable_account"
+          ]
+        },
+        "copy_only_when_destination_empty": true
+      },
+      "source_field_ordinal": 23,
+      "source_name_digest": "ebcd98c3be480a24d3dbde27393d562874e7853de96694425cc48d84c2814462"
     },
     {
       "identifier": "record_type_expense_claim.cost_center",
       "name": "cost_center",
-      "source_field_ordinal": 24,
-      "source_name_digest": "efbbf0a4b73ea019ed0c0f4c3aacdbf8c2af4f11f0364d9bff705d68158d5c2a",
+      "field_ordinal": 24,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -935,25 +1241,50 @@
           "identifier": "record_type_cost_center"
         }
       },
-      "display_name": "cost center"
+      "display_name": "cost center",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_cost_center"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "company",
+            "cost_center"
+          ]
+        },
+        "copy_only_when_destination_empty": true
+      },
+      "source_field_ordinal": 24,
+      "source_name_digest": "efbbf0a4b73ea019ed0c0f4c3aacdbf8c2af4f11f0364d9bff705d68158d5c2a"
     },
     {
       "identifier": "record_type_expense_claim.more_details",
       "name": "more_details",
-      "source_field_ordinal": 25,
-      "source_name_digest": "344a5f92da85744c513a912608c449b7e6202a7484aae38d4490cc84c83d765c",
+      "field_ordinal": 25,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 51
+      },
+      "source_field_ordinal": 25,
+      "source_name_digest": "344a5f92da85744c513a912608c449b7e6202a7484aae38d4490cc84c83d765c"
     },
     {
       "identifier": "record_type_expense_claim.status",
       "name": "status",
-      "source_field_ordinal": 26,
-      "source_name_digest": "cfc31bcc34ed7f4cc7895026ae8a54f0494f73757e9f914d0f6ed90f9bc34f51",
+      "field_ordinal": 26,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1007,13 +1338,35 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "status"
+      "display_name": "status",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "draft",
+          "paid",
+          "partially_paid",
+          "unpaid",
+          "rejected",
+          "submitted",
+          "cancelled"
+        ],
+        "empty_option_explicitly_listed": false,
+        "default": {
+          "kind": "symbolic_text",
+          "value": "draft"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 26,
+      "source_name_digest": "cfc31bcc34ed7f4cc7895026ae8a54f0494f73757e9f914d0f6ed90f9bc34f51"
     },
     {
       "identifier": "record_type_expense_claim.amended_from",
       "name": "amended_from",
-      "source_field_ordinal": 27,
-      "source_name_digest": "b43b52ad6f6c613ab2fb1330e5f616e71c8b496566b87009de27f6c7b11ed774",
+      "field_ordinal": 27,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1036,6 +1389,18 @@
         }
       },
       "display_name": "amended from",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_expense_claim"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 27,
+      "source_name_digest": "b43b52ad6f6c613ab2fb1330e5f616e71c8b496566b87009de27f6c7b11ed774",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "b43b52ad6f6c613ab2fb1330e5f616e71c8b496566b87009de27f6c7b11ed774",
@@ -1048,10 +1413,9 @@
       }
     },
     {
-      "identifier": "record_type_expense_claim.advance_payments_sb",
-      "name": "advance_payments_sb",
-      "source_field_ordinal": 28,
-      "source_name_digest": "ea009225115a49ef0d78a33c93e1ec42253641d249089807c19fea61fbc212db",
+      "identifier": "record_type_expense_claim.advance_payments_section_break",
+      "name": "advance_payments_section_break",
+      "field_ordinal": 28,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -1061,20 +1425,31 @@
         "collapsible": 1,
         "section_expansion_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "cd9096eec5b107ccd831de3d4da8f5f912cc0a33d4f6f5b10896ff504de893cc",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_cd9096eec5b107ccd831",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_expense_claim_advance_payments_sb_section_expansion_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_expense_claim_advance_payments_sb_section_expansion_condition",
+          "meaning": "The expense claim has at least one advance row.",
+          "source_value_digest": "cd9096eec5b107ccd831de3d4da8f5f912cc0a33d4f6f5b10896ff504de893cc"
         }
       },
-      "display_name": "advance payments"
+      "display_name": "advance payments",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 17
+      },
+      "source_field_ordinal": 28,
+      "source_name_digest": "ea009225115a49ef0d78a33c93e1ec42253641d249089807c19fea61fbc212db",
+      "source_identifier": "record_type_expense_claim.advance_payments_sb",
+      "source_name": "advance_payments_sb"
     },
     {
       "identifier": "record_type_expense_claim.advances",
       "name": "advances",
-      "source_field_ordinal": 29,
-      "source_name_digest": "746a11486efe75c7e64dded55e7ead6f58e593be0324e37d1981590cfa077774",
+      "field_ordinal": 29,
       "value_type": "owned_record_collection",
       "persistence": "owned_child_records",
       "required_when_no_conditional_override": false,
@@ -1086,13 +1461,24 @@
           "identifier": "record_type_expense_claim_advance"
         }
       },
-      "display_name": "advances"
+      "display_name": "advances",
+      "value_contract": {
+        "value_kind": "ordered_owned_records",
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_expense_claim_advance"
+        },
+        "ownership": "Each row stores one parent record identity, parent record type, parent field, and row position. Preserve row ordering and prevent attachment of the same owned row to a second parent.",
+        "save_boundary": "Persist the parent and its owned rows in the same transaction.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 29,
+      "source_name_digest": "746a11486efe75c7e64dded55e7ead6f58e593be0324e37d1981590cfa077774"
     },
     {
       "identifier": "record_type_expense_claim.total_advance_amount",
       "name": "total_advance_amount",
-      "source_field_ordinal": 30,
-      "source_name_digest": "c46527817f6a383a378a3b5c6a9ef740c703835f0b52e636a90b87c4de19a227",
+      "field_ordinal": 30,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1106,38 +1492,66 @@
         },
         "read_only": 1
       },
-      "display_name": "total advance amount"
+      "display_name": "total advance amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 30,
+      "source_name_digest": "c46527817f6a383a378a3b5c6a9ef740c703835f0b52e636a90b87c4de19a227"
     },
     {
       "identifier": "record_type_expense_claim.accounting_dimensions_section",
       "name": "accounting_dimensions_section",
-      "source_field_ordinal": 31,
-      "source_name_digest": "fed6c78ee355407d0216b558d400a7f85281f8a0361a2b86e947f300e3cf5f3e",
+      "field_ordinal": 31,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "accounting dimensions"
+      "display_name": "accounting dimensions",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 46
+      },
+      "source_field_ordinal": 31,
+      "source_name_digest": "fed6c78ee355407d0216b558d400a7f85281f8a0361a2b86e947f300e3cf5f3e"
     },
     {
       "identifier": "record_type_expense_claim.dimension_column_break",
       "name": "dimension_column_break",
-      "source_field_ordinal": 32,
-      "source_name_digest": "635b3bf44ffaca22b905f6de6061612bbd01db3b66a20b429db2d7cf276eacc4",
+      "field_ordinal": 32,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 48
+      },
+      "source_field_ordinal": 32,
+      "source_name_digest": "635b3bf44ffaca22b905f6de6061612bbd01db3b66a20b429db2d7cf276eacc4"
     },
     {
       "identifier": "record_type_expense_claim.taxes",
       "name": "taxes",
-      "source_field_ordinal": 33,
-      "source_name_digest": "017c9860d7b4e3363eaecf77dbdd2812f95fce8090d8abd027d56df3b2563ae7",
+      "field_ordinal": 33,
       "value_type": "owned_record_collection",
       "persistence": "owned_child_records",
       "required_when_no_conditional_override": false,
@@ -1149,26 +1563,44 @@
           "identifier": "record_type_expense_taxes_and_charges"
         }
       },
-      "display_name": "expense taxes and charges"
+      "display_name": "expense taxes and charges",
+      "value_contract": {
+        "value_kind": "ordered_owned_records",
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_expense_taxes_and_charges"
+        },
+        "ownership": "Each row stores one parent record identity, parent record type, parent field, and row position. Preserve row ordering and prevent attachment of the same owned row to a second parent.",
+        "save_boundary": "Persist the parent and its owned rows in the same transaction.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 33,
+      "source_name_digest": "017c9860d7b4e3363eaecf77dbdd2812f95fce8090d8abd027d56df3b2563ae7"
     },
     {
       "identifier": "record_type_expense_claim.transactions_section",
       "name": "transactions_section",
-      "source_field_ordinal": 34,
-      "source_name_digest": "74dc7efe4cb4219267e99e6dc39af9334af60d4ab7cfc09c31312ba581e46f3b",
+      "field_ordinal": 34,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "totals"
+      "display_name": "totals",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 19
+      },
+      "source_field_ordinal": 34,
+      "source_name_digest": "74dc7efe4cb4219267e99e6dc39af9334af60d4ab7cfc09c31312ba581e46f3b"
     },
     {
       "identifier": "record_type_expense_claim.grand_total",
       "name": "grand_total",
-      "source_field_ordinal": 35,
-      "source_name_digest": "f09cb938379e06ea868b50b133e27c0c4a1ac8e0d85f923fb08bfd5e293aeb38",
+      "field_ordinal": 35,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1183,13 +1615,27 @@
         },
         "read_only": 1
       },
-      "display_name": "grand total"
+      "display_name": "grand total",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 35,
+      "source_name_digest": "f09cb938379e06ea868b50b133e27c0c4a1ac8e0d85f923fb08bfd5e293aeb38"
     },
     {
       "identifier": "record_type_expense_claim.total_taxes_and_charges",
       "name": "total_taxes_and_charges",
-      "source_field_ordinal": 36,
-      "source_name_digest": "e72f81cdb435d07d0db90c33e02ef513454746d649c34ba0104565257f993600",
+      "field_ordinal": 36,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1203,13 +1649,27 @@
         },
         "read_only": 1
       },
-      "display_name": "total taxes and charges"
+      "display_name": "total taxes and charges",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 36,
+      "source_name_digest": "e72f81cdb435d07d0db90c33e02ef513454746d649c34ba0104565257f993600"
     },
     {
       "identifier": "record_type_expense_claim.delivery_trip",
       "name": "delivery_trip",
-      "source_field_ordinal": 37,
-      "source_name_digest": "7dc18d42341e0a90a244a01bbceec6926155a61c2184b18d03b6d43ce36707a6",
+      "field_ordinal": 37,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1226,59 +1686,95 @@
             },
             "name": "delivery_trip"
           },
-          "source_value_digest": "38973cba15ee7d753f87334c0f7c6ee4cfa80f5a43301c270013ece0cb924dc9",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.delivery trip",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "38973cba15ee7d753f87334c0f7c6ee4cfa80f5a43301c270013ece0cb924dc9"
         },
         "target_record_type": {
           "kind": "record_type",
           "identifier": "record_type_delivery_trip"
         }
       },
-      "display_name": "delivery trip"
+      "display_name": "delivery trip",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_delivery_trip"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 37,
+      "source_name_digest": "7dc18d42341e0a90a244a01bbceec6926155a61c2184b18d03b6d43ce36707a6"
     },
     {
       "identifier": "record_type_expense_claim.column_break_xdzn",
       "name": "column_break_xdzn",
-      "source_field_ordinal": 38,
-      "source_name_digest": "20a63cd4aa93474472656eebd7d2886ab34b19e91e4364c76021f88d66c6ba7b",
+      "field_ordinal": 38,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 55
+      },
+      "source_field_ordinal": 38,
+      "source_name_digest": "20a63cd4aa93474472656eebd7d2886ab34b19e91e4364c76021f88d66c6ba7b"
     },
     {
       "identifier": "record_type_expense_claim.accounting_details_tab",
       "name": "accounting_details_tab",
-      "source_field_ordinal": 39,
-      "source_name_digest": "a71ecaaf039df7d5b4e0fbe8236f391cc435107d9e6b98ce06f662aa58e2a2f8",
+      "field_ordinal": 39,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "accounting"
+      "display_name": "accounting",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 36
+      },
+      "source_field_ordinal": 39,
+      "source_name_digest": "a71ecaaf039df7d5b4e0fbe8236f391cc435107d9e6b98ce06f662aa58e2a2f8"
     },
     {
-      "identifier": "record_type_expense_claim.more_info_tab",
-      "name": "more_info_tab",
-      "source_field_ordinal": 40,
-      "source_name_digest": "50fb5c6f72345cd1a7c4cb02cca61d3701b295ec7faa8767501069fb1166291a",
+      "identifier": "record_type_expense_claim.more_information_tab",
+      "name": "more_information_tab",
+      "field_ordinal": 40,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "more info"
+      "display_name": "more info",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 50
+      },
+      "source_field_ordinal": 40,
+      "source_name_digest": "50fb5c6f72345cd1a7c4cb02cca61d3701b295ec7faa8767501069fb1166291a",
+      "source_identifier": "record_type_expense_claim.more_info_tab",
+      "source_name": "more_info_tab"
     },
     {
       "identifier": "record_type_expense_claim.dashboard_tab",
       "name": "dashboard_tab",
-      "source_field_ordinal": 41,
-      "source_name_digest": "c2e9b8da1800cfff4133d5726899fccd26947c4dfb9297887835cf0ba802a8b8",
+      "field_ordinal": 41,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -1287,26 +1783,40 @@
       "properties": {
         "show_dashboard": 1
       },
-      "display_name": "dashboard"
+      "display_name": "dashboard",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 58
+      },
+      "source_field_ordinal": 41,
+      "source_name_digest": "c2e9b8da1800cfff4133d5726899fccd26947c4dfb9297887835cf0ba802a8b8"
     },
     {
       "identifier": "record_type_expense_claim.expenses_and_advances_tab",
       "name": "expenses_and_advances_tab",
-      "source_field_ordinal": 42,
-      "source_name_digest": "d80ca53d28166706401ab5469da524130d8de1b025d483ba07b1b08b0d039c20",
+      "field_ordinal": 42,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "expenses advances"
+      "display_name": "expenses advances",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 0
+      },
+      "source_field_ordinal": 42,
+      "source_name_digest": "d80ca53d28166706401ab5469da524130d8de1b025d483ba07b1b08b0d039c20"
     },
     {
-      "identifier": "record_type_expense_claim.taxes_and_charges_sb",
-      "name": "taxes_and_charges_sb",
-      "source_field_ordinal": 43,
-      "source_name_digest": "86140b5e836d74de68f3386b987686ab84ed97423e74b23b8c01a24aacc599ff",
+      "identifier": "record_type_expense_claim.taxes_and_charges_section_break",
+      "name": "taxes_and_charges_section_break",
+      "field_ordinal": 43,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -1316,11 +1826,13 @@
         "collapsible": 1,
         "section_expansion_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "bf9c8c32d4a4c3b15d315117e0c94cd418a53611bc168aed2b9ab6ad22fab9c1",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_bf9c8c32d4a4c3b15d31",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_expense_claim_taxes_and_charges_sb_section_expansion_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_expense_claim_taxes_and_charges_sb_section_expansion_condition",
+          "meaning": "The expense claim has at least one tax row.",
+          "source_value_digest": "bf9c8c32d4a4c3b15d315117e0c94cd418a53611bc168aed2b9ab6ad22fab9c1"
         },
         "type_specific_options": {
           "kind": "symbolic_text",
@@ -1328,13 +1840,22 @@
           "source_value_digest": "a05a390ae205fdd8b59c12ea052e9abe27a3848d98f90ac8ee981547761b62a9"
         }
       },
-      "display_name": "taxes charges"
+      "display_name": "taxes charges",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 15
+      },
+      "source_field_ordinal": 43,
+      "source_name_digest": "86140b5e836d74de68f3386b987686ab84ed97423e74b23b8c01a24aacc599ff",
+      "source_identifier": "record_type_expense_claim.taxes_and_charges_sb",
+      "source_name": "taxes_and_charges_sb"
     },
     {
       "identifier": "record_type_expense_claim.currency_section",
       "name": "currency_section",
-      "source_field_ordinal": 44,
-      "source_name_digest": "27e5d9fcac09d2a79f7a4bf3ea7ce6fece93dbd1bf6f342b81f2fea915a1ded0",
+      "field_ordinal": 44,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -1343,13 +1864,20 @@
       "properties": {
         "collapsible": 1
       },
-      "display_name": "currency"
+      "display_name": "currency",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 9
+      },
+      "source_field_ordinal": 44,
+      "source_name_digest": "27e5d9fcac09d2a79f7a4bf3ea7ce6fece93dbd1bf6f342b81f2fea915a1ded0"
     },
     {
       "identifier": "record_type_expense_claim.currency",
       "name": "currency",
-      "source_field_ordinal": 45,
-      "source_name_digest": "0e4989ec47c3d70bba675521906d037a8a6bbb4ca692be343ec2b511ac64e2af",
+      "field_ordinal": 45,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -1392,8 +1920,10 @@
               }
             ]
           },
-          "source_value_digest": "5af39682baef33adab1c0f5011eaa7378d25388a67ee851360cd14820e3bd7de",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.record state equals 1 first truthy record.employee)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "5af39682baef33adab1c0f5011eaa7378d25388a67ee851360cd14820e3bd7de"
         },
         "copy_from_reference": {
           "path": [
@@ -1409,25 +1939,50 @@
         },
         "required": 1
       },
-      "display_name": "currency"
+      "display_name": "currency",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_currency"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true,
+        "reference_value_copy": {
+          "path": [
+            "employee",
+            "salary_currency"
+          ]
+        },
+        "copy_only_when_destination_empty": true
+      },
+      "source_field_ordinal": 45,
+      "source_name_digest": "0e4989ec47c3d70bba675521906d037a8a6bbb4ca692be343ec2b511ac64e2af"
     },
     {
       "identifier": "record_type_expense_claim.column_break_imlz",
       "name": "column_break_imlz",
-      "source_field_ordinal": 46,
-      "source_name_digest": "ca3bccfec59c03b46e6ad2e72ad4799506c071ae974e977bcd343701214dd2c6",
+      "field_ordinal": 46,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 11
+      },
+      "source_field_ordinal": 46,
+      "source_name_digest": "ca3bccfec59c03b46e6ad2e72ad4799506c071ae974e977bcd343701214dd2c6"
     },
     {
       "identifier": "record_type_expense_claim.exchange_rate",
       "name": "exchange_rate",
-      "source_field_ordinal": 47,
-      "source_name_digest": "22c6cf63732224f8f136def9b7787cdecc8a0755641fa476aadafc4158395102",
+      "field_ordinal": 47,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -1437,6 +1992,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "currency",
+          "meaning": "the value of currency is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "0e4989ec47c3d70bba675521906d037a8a6bbb4ca692be343ec2b511ac64e2af"
         },
         "decimal_precision": {
@@ -1446,13 +2003,23 @@
         "print_hide": 1,
         "required": 1
       },
-      "display_name": "exchange rate"
+      "display_name": "exchange rate",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "integer_text",
+          "value": "9"
+        },
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 47,
+      "source_name_digest": "22c6cf63732224f8f136def9b7787cdecc8a0755641fa476aadafc4158395102"
     },
     {
       "identifier": "record_type_expense_claim.base_total_sanctioned_amount",
       "name": "base_total_sanctioned_amount",
-      "source_field_ordinal": 48,
-      "source_name_digest": "3f44cba167487d201e7fd1d85f9bdb70d51a67a70de971223d930164d16133d7",
+      "field_ordinal": 48,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1473,6 +2040,21 @@
         }
       },
       "display_name": "total sanctioned amount company currency",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 48,
+      "source_name_digest": "3f44cba167487d201e7fd1d85f9bdb70d51a67a70de971223d930164d16133d7",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "c3c53900051601a8f0e215199f353c04d0f70ddb63f44580cdf80dfa27d4c964",
@@ -1487,8 +2069,7 @@
     {
       "identifier": "record_type_expense_claim.base_grand_total",
       "name": "base_grand_total",
-      "source_field_ordinal": 49,
-      "source_name_digest": "c766e46a63593aa64b6c381bde1e1659da64d0c38de359e6e965a15e0277fa93",
+      "field_ordinal": 49,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1502,25 +2083,46 @@
         },
         "read_only": 1
       },
-      "display_name": "grand total company currency"
+      "display_name": "grand total company currency",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 49,
+      "source_name_digest": "c766e46a63593aa64b6c381bde1e1659da64d0c38de359e6e965a15e0277fa93"
     },
     {
       "identifier": "record_type_expense_claim.column_break_nexp",
       "name": "column_break_nexp",
-      "source_field_ordinal": 50,
-      "source_name_digest": "1b927c85a72b6b6881bfdbd8421f8cf9f0c944e5459a356c5def4fdd9c6d3709",
+      "field_ordinal": 50,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 20
+      },
+      "source_field_ordinal": 50,
+      "source_name_digest": "1b927c85a72b6b6881bfdbd8421f8cf9f0c944e5459a356c5def4fdd9c6d3709"
     },
     {
       "identifier": "record_type_expense_claim.base_total_advance_amount",
       "name": "base_total_advance_amount",
-      "source_field_ordinal": 51,
-      "source_name_digest": "94dff9f6812eb497a396f509cad4733547569ff5572faa898733c869c75e0489",
+      "field_ordinal": 51,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1534,13 +2136,27 @@
         },
         "read_only": 1
       },
-      "display_name": "total advance amount company currency"
+      "display_name": "total advance amount company currency",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 51,
+      "source_name_digest": "94dff9f6812eb497a396f509cad4733547569ff5572faa898733c869c75e0489"
     },
     {
       "identifier": "record_type_expense_claim.base_total_taxes_and_charges",
       "name": "base_total_taxes_and_charges",
-      "source_field_ordinal": 52,
-      "source_name_digest": "a91ad114e85219172e0bcef917f6a5626cfb31a03c6bd1e37ae7235900606d1b",
+      "field_ordinal": 52,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1554,13 +2170,27 @@
         },
         "read_only": 1
       },
-      "display_name": "total taxes and charges company currency"
+      "display_name": "total taxes and charges company currency",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 52,
+      "source_name_digest": "a91ad114e85219172e0bcef917f6a5626cfb31a03c6bd1e37ae7235900606d1b"
     },
     {
       "identifier": "record_type_expense_claim.base_total_claimed_amount",
       "name": "base_total_claimed_amount",
-      "source_field_ordinal": 53,
-      "source_name_digest": "9099ad0e72f7a77af522342f83373ca62e96931012008aaadaf0b3240a94328d",
+      "field_ordinal": 53,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1581,6 +2211,21 @@
         }
       },
       "display_name": "total claimed amount company currency",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 53,
+      "source_name_digest": "9099ad0e72f7a77af522342f83373ca62e96931012008aaadaf0b3240a94328d",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "b911a2eba346fb774794468ccb05b213f9da3d4c5172bd27bf052940974c4547",
@@ -1595,20 +2240,26 @@
     {
       "identifier": "record_type_expense_claim.column_break_quih",
       "name": "column_break_quih",
-      "source_field_ordinal": 54,
-      "source_name_digest": "5f476ce81cfd331d80c4d15564b41cb2115667c49b98cb22ce3011d92723c343",
+      "field_ordinal": 54,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 26
+      },
+      "source_field_ordinal": 54,
+      "source_name_digest": "5f476ce81cfd331d80c4d15564b41cb2115667c49b98cb22ce3011d92723c343"
     },
     {
       "identifier": "record_type_expense_claim.bank_or_cash_account",
       "name": "bank_or_cash_account",
-      "source_field_ordinal": 55,
-      "source_name_digest": "e5f3cfb0f13d2f85c247a8ff6dbbcba7f9b54955ddaff40624160ece46a69764",
+      "field_ordinal": 55,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1618,6 +2269,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "mode_of_payment",
+          "meaning": "the value of mode of payment is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "c8676ea86b5b8d5477f487d16a254e45cffecd9d6d7bd2422749d5248ff761a5"
         },
         "target_record_type": {
@@ -1625,26 +2278,44 @@
           "identifier": "record_type_account"
         }
       },
-      "display_name": "bank cash account"
+      "display_name": "bank cash account",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 55,
+      "source_name_digest": "e5f3cfb0f13d2f85c247a8ff6dbbcba7f9b54955ddaff40624160ece46a69764"
     },
     {
       "identifier": "record_type_expense_claim.gain_loss_section",
       "name": "gain_loss_section",
-      "source_field_ordinal": 56,
-      "source_name_digest": "29a4d4701ff80434c2b350222c5fc0ed3770129e1ebc730e08c779685f461e6b",
+      "field_ordinal": 56,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "exchange gain loss"
+      "display_name": "exchange gain loss",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 33
+      },
+      "source_field_ordinal": 56,
+      "source_name_digest": "29a4d4701ff80434c2b350222c5fc0ed3770129e1ebc730e08c779685f461e6b"
     },
     {
       "identifier": "record_type_expense_claim.gain_loss_account",
       "name": "gain_loss_account",
-      "source_field_ordinal": 57,
-      "source_name_digest": "dc88452858d276edddc87fcc69dbbf589984d4cbb18e792b59ba714960a32fde",
+      "field_ordinal": 57,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1654,6 +2325,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "total_exchange_gain_loss",
+          "meaning": "the value of total exchange gain loss is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "eb9108602d00b02b3dfb3eddc22f260bcbec967870d003681814b4b73934aa0f"
         },
         "target_record_type": {
@@ -1661,13 +2334,24 @@
           "identifier": "record_type_account"
         }
       },
-      "display_name": "gain loss account"
+      "display_name": "gain loss account",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 57,
+      "source_name_digest": "dc88452858d276edddc87fcc69dbbf589984d4cbb18e792b59ba714960a32fde"
     },
     {
       "identifier": "record_type_expense_claim.total_exchange_gain_loss",
       "name": "total_exchange_gain_loss",
-      "source_field_ordinal": 58,
-      "source_name_digest": "eb9108602d00b02b3dfb3eddc22f260bcbec967870d003681814b4b73934aa0f",
+      "field_ordinal": 58,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1677,6 +2361,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "total_exchange_gain_loss",
+          "meaning": "the value of total exchange gain loss is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "eb9108602d00b02b3dfb3eddc22f260bcbec967870d003681814b4b73934aa0f"
         },
         "currency_context": {
@@ -1686,9 +2372,41 @@
         },
         "read_only": 1
       },
-      "display_name": "total exchange gain loss"
+      "display_name": "total exchange gain loss",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 58,
+      "source_name_digest": "eb9108602d00b02b3dfb3eddc22f260bcbec967870d003681814b4b73934aa0f"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "ordinary record rename disabled",
+    "strategy": "selected_number_series",
+    "field_name": "naming_series",
+    "rule": "Expand the selected series variables, lock its resulting prefix counter, increment it once, and format the serial digits using the configured width."
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "independent_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "Use draft, posted, and cancelled record states with explicit posting and cancellation operations."
+  },
+  "source_name_digest": "d4702fa874ca38acf7e5c82c74a8ed73025a39a2e87a71e554eded39097bda62",
+  "source_pack": "workforce",
+  "source_artifact": "source-artifact-bcb9439b09c786ca7edf",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "f5d6e8e7efe90a37b38093eb35bdd3d690911da5a28f61ed7f70de227c54fabd",
@@ -1714,5 +2432,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "workforce.expense_claim",
+    "status": "declared",
+    "dictionary": "schema/entities/workforce-01.json",
+    "declaration_name": "Expense Claim",
+    "declaration_catalog": "docs/rebuild/extensions/catalog/hrms-records-01.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

@@ -1,5 +1,7 @@
 # Persona
 
+[Business workflow and acceptance cases](../../../capabilities/guides/workspace.md#delegated-support-sessions).
+
 Omar Mohammed's version 13 listing describes support staff entering another user's session from the User form. Only an Administrator or System Manager can initiate the action. The listing describes two activity entries, identifying the operator's action and the target's login, and excludes a System Manager acting as another System Manager. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/persona)
 
 ## Source boundaries
@@ -10,10 +12,6 @@ The pinned v16 platform already has a POST operation with a target-specific perm
 
 ## Proposed support-session contract
 
-`beginSupportSession(targetId, reason, requestId)` derives the initiating principal from the authenticated session. Record actor ID, effective user ID, operation ID, reason, timestamps and outcome. Limit the resulting session to the target's ordinary record access. Tie its expiry to the originating authorization. Ending the session invalidates the delegated context and requires a valid operator context before privileged work can resume.
-
-1. With an English-speaking authorized operator and an Afrikaans-speaking target, display the support banner in the active interface language, notify the target in their language, and preserve the submitted reason verbatim. Both activity events reference the same session and stable principal IDs.
-2. Have one System Manager select another. The service denies the transition even if the displayed role names have been translated. The operator remains the active principal and no target-login success event exists.
-3. End an authorized support session and revisit a target document. The expired delegated context grants no further access. Audit exports can be rendered in another language from the same actor, target and event codes.
-
 **Qualification.** The historical marketplace build's session expiry, restoration, notifications, translation catalog and relationship to the related archive remain unverified. [Named publisher repository](https://github.com/aoaicompany/persona)
+
+[Read the consolidated workflow](../../../capabilities/guides/workspace.md#delegated-support-sessions-2).

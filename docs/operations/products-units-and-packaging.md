@@ -126,3 +126,12 @@ Do not persist Small, Medium or Large as a hidden arithmetic multiplier. A size 
 ## Carrier and barcode policies
 
 Carrier tariffs and barcode checksum standards follow the selected service. A carrier may apply volumetric charging independently of parcel weight and quantity as calculated here.
+
+## Warehouse and carrier evidence
+
+Packing-range overlaps and the handling of empty or repeated parcels have explicit acceptance cases above. Physical warehouse optimisation and carrier-specific volumetric tariffs depend on the selected warehouse policy or external carrier contract. A worked packing calculation establishes the expected local quantity or chargeable weight under its stated assumptions.
+
+## Linked specifications
+
+- **Record definitions** · [Product](../../schemas/data/record-types/item.json) · [attribute](../../schemas/data/record-types/item_attribute.json) · [variant settings](../../schemas/data/record-types/item_variant_settings.json) · [Conversion row](../../schemas/data/record-types/unit_of_measure_conversion_detail.json) · [Product price](../../schemas/data/record-types/item_price.json) · [barcode](../../schemas/data/record-types/item_barcode.json) · [Product bundle](../../schemas/data/record-types/product_bundle.json) · [component definition](../../schemas/data/record-types/product_bundle_item.json) · [packed component](../../schemas/data/record-types/packed_item.json) · [Packing slip](../../schemas/data/record-types/packing_slip.json) · [packing row](../../schemas/data/record-types/packing_slip_item.json) · [Shipment](../../schemas/data/record-types/shipment.json) · [parcel](../../schemas/data/record-types/shipment_parcel.json)
+- **Calculation and acceptance cases** · [inventory calculations](../../schemas/mathematics/inventory-calculations.json) · [Machine-readable mixed-pack cases](../../schemas/mathematics/inventory-acceptance-cases.json)

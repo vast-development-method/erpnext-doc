@@ -3,11 +3,10 @@
   "identifier": "record_type_bank_transaction_payments",
   "name": "bank_transaction_payments",
   "display_name": "bank transaction payments",
-  "source_name_digest": "b1ed736cab546586b286a2c602d105f8b1a55e26fd995d60d0a90f4c3740d47e",
-  "source_pack": "enterprise",
-  "source_artifact": "source-artifact-82349d29d54d26009c08",
+  "capability_group": "enterprise",
+  "component_identifier": "component_enterprise_accounts_record_definitions_bank_transaction_payments_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "owned_child_record",
   "supports_posting_and_cancellation": false,
   "ordered_field_names": [
@@ -44,14 +43,13 @@
   },
   "declared_permission_grants": [],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 5,
   "fields": [
     {
       "identifier": "record_type_bank_transaction_payments.payment_document",
       "name": "payment_document",
-      "source_field_ordinal": 0,
-      "source_name_digest": "61895c88aaa23e8189c650aa6eeeeea2860998baa20740eafcbcd7d7d4583759",
+      "field_ordinal": 0,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -65,13 +63,24 @@
         },
         "required": 1
       },
-      "display_name": "payment document"
+      "display_name": "payment document",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_record_type"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "61895c88aaa23e8189c650aa6eeeeea2860998baa20740eafcbcd7d7d4583759"
     },
     {
       "identifier": "record_type_bank_transaction_payments.payment_entry",
       "name": "payment_entry",
-      "source_field_ordinal": 1,
-      "source_name_digest": "98504475eb62228218f51fccdd53813e0d7978f051b8fd810a8af75e373bae91",
+      "field_ordinal": 1,
       "value_type": "dynamic_record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -82,13 +91,21 @@
         "target_type_field": "payment_document",
         "required": 1
       },
-      "display_name": "payment entry"
+      "display_name": "payment entry",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target_type_field": "payment_document",
+        "validation": "Read the target record type from the companion type field and validate the identity against that selected type. Type and identity form one reference.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "98504475eb62228218f51fccdd53813e0d7978f051b8fd810a8af75e373bae91"
     },
     {
       "identifier": "record_type_bank_transaction_payments.allocated_amount",
       "name": "allocated_amount",
-      "source_field_ordinal": 2,
-      "source_name_digest": "04c726ec1c319a8428a7c40f844ded13554e9bda2765209a9ccb5481ca952161",
+      "field_ordinal": 2,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -98,13 +115,23 @@
         "visible_in_list": 1,
         "required": 1
       },
-      "display_name": "allocated amount"
+      "display_name": "allocated amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "04c726ec1c319a8428a7c40f844ded13554e9bda2765209a9ccb5481ca952161"
     },
     {
       "identifier": "record_type_bank_transaction_payments.clearance_date",
       "name": "clearance_date",
-      "source_field_ordinal": 3,
-      "source_name_digest": "910c03ed01fb4a193548a94015cd93f463e0a48f8bd86cf356d364ba47e2302e",
+      "field_ordinal": 3,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -133,20 +160,29 @@
               }
             ]
           },
-          "source_value_digest": "e0b08570529b32a7b183a579ffc53f18c7ae8d99bbdf52f892d898225b5cf85b",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.record state equals 1",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "e0b08570529b32a7b183a579ffc53f18c7ae8d99bbdf52f892d898225b5cf85b"
         },
         "excluded_from_record_copy": 1,
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "clearance date"
+      "display_name": "clearance date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "910c03ed01fb4a193548a94015cd93f463e0a48f8bd86cf356d364ba47e2302e"
     },
     {
       "identifier": "record_type_bank_transaction_payments.reconciliation_type",
       "name": "reconciliation_type",
-      "source_field_ordinal": 4,
-      "source_name_digest": "3ef35ae9e1b9fa37629d461222547420ae16fa6935b9225de15bb589590a572d",
+      "field_ordinal": 4,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -172,9 +208,43 @@
         ],
         "read_only": 1
       },
-      "display_name": "reconciliation type"
+      "display_name": "reconciliation type",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "matched",
+          "voucher_created"
+        ],
+        "empty_option_explicitly_listed": false,
+        "default": {
+          "kind": "symbolic_text",
+          "value": "matched"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 4,
+      "source_name_digest": "3ef35ae9e1b9fa37629d461222547420ae16fa6935b9225de15bb589590a572d"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "ordinary record rename disabled",
+    "strategy": "record_type_default_or_controller_assignment",
+    "rule": "The create operation assigns identity through the record-type naming policy; explicitly named records retain their validated identity."
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "owned_child_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "This record type does not independently implement the post-and-cancel lifecycle."
+  },
+  "source_name_digest": "b1ed736cab546586b286a2c602d105f8b1a55e26fd995d60d0a90f4c3740d47e",
+  "source_pack": "enterprise",
+  "source_artifact": "source-artifact-82349d29d54d26009c08",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "ab5bab009c795c26616bb5f2dbc6039f0f2994600c9345f4a4a7abcc5a2fe0fd",
@@ -196,5 +266,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "accounting.bank_transaction_payments",
+    "status": "declared",
+    "dictionary": "schema/entities/accounting-01.json",
+    "declaration_name": "Bank Transaction Payments",
+    "declaration_catalog": "docs/rebuild/model/catalog/erpnext-accounts-01.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

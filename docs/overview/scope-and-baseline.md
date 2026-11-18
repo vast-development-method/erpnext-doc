@@ -1,8 +1,8 @@
-# Scope and source baseline
+# Enterprise scope and behavioural baseline
 
 ## Specification boundary
 
-The [September source snapshot](../../schemas/traceability/source-snapshot.json) identifies the four pins for this edition. The [reading guide](../../checkpoints/reading-guide.md) locates its complete catalogs. The [November profile](../rebuild/README.md) records release-specific behaviour and external application pins. Every business rule must be available as explanatory text, a record definition, an ordered decision, a calculation or an acceptance case within this repository. No external archive or previous conversation is required to interpret these contracts.
+The [business map](business-compatibility-map.md) assigns each workflow to its accountable domain. Use the [logical records](../../schema/README.md), [ordered decisions](../../schemas/operations/README.md), [calculations](../calculations/README.md) and [posting examples](../transactions/README.md) to follow an operation from input to durable effect. The [coverage register](../references/coverage-and-evidence.md) identifies what has been inventoried, reviewed or executed.
 
 | Capability group | Responsibility |
 |---|---|
@@ -13,7 +13,7 @@ The [September source snapshot](../../schemas/traceability/source-snapshot.json)
 
 These are navigation groups within one logical application. They do not require separate installations, duplicated parties or independently inconsistent accounting systems. Similar records remain distinct when they have different ownership, states, permission boundaries or financial consequences.
 
-The baseline describes a development snapshot. Compatibility findings are documented as actual decision branches; integrated execution and replacement conformance are separate qualification gates. Future revisions enter the specification through explicit contract changes, not an assumption that a moving upstream version is equivalent.
+Where company policy, enabled capabilities or jurisdiction select different outcomes, the relevant chapter identifies the selector, default and affected records. A proposed improvement has its own acceptance result.
 
 ## Current behaviour
 
@@ -33,6 +33,6 @@ Historical migration from the reference database is not required. A new implemen
 
 Specific servers, operating systems, container arrangements, language packages, task runners, database brands and deployment commands are not requirements. Transaction isolation, durable records, monetary precision, permission enforcement and restart-safe business processing remain requirements because they affect outcomes.
 
-Optional applications referenced by a hook but absent from the defined baseline are integration boundaries. Their internals cannot be inferred as implemented merely because a linking field exists. Lending is one such boundary. Detailed jurisdictional compliance outside the supplied regional logic likewise requires an additional authoritative source and its own acceptance set.
+The boundary of each optional service depends on which operations the specification describes. For example, [employee lending](../people-and-services/lending.md) specifies the payroll link, due-date selection, booked repayment and cancellation. A provider's private underwriting decisions require their own contract. Regional reporting also depends on the applicable authority's requirements.
 
 The possible future implementation platform is deliberately absent from the blueprint. Its existing architecture neither narrows this scope nor changes the reference behaviour.

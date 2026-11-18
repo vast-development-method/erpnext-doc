@@ -134,3 +134,7 @@ By contrast, an operational import commits each successful payload. If the third
 ## Domain-command completeness rule
 
 A domain command is implementable only when its contract names its input meanings and defaults; permission and workflow conditions; reference and date constraints; calculation order and rounding; created, updated, and reversed records; source-row and ledger lineage; concurrency and repeat-request behavior; success boundary; failure categories; and exact acceptance outcomes. A service entry that supplies only a callable name or argument signature is discovery information. It cannot establish the missing domain behavior.
+
+## Linked specifications
+
+- **Structured contracts** · [record type index](../../schemas/data/record-type-index.json)

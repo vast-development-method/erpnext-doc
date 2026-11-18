@@ -119,3 +119,9 @@ Approval must validate active employment, company-specific department ownership,
 Reimbursement and advance availability must be rebuilt from surviving posted movements after payment cancellation. Concurrent claims allocating the same 100-unit advance must never produce 160 units of accepted consumption without an explicitly rejected or reversed over-allocation. The row-level amount checks alone do not prove that concurrency invariant. Use transactional revalidation or another documented serialization mechanism and test both claim submissions together. This is an implementation acceptance obligation, not an assertion that the isolated validation routine supplies that guarantee.
 
 Immediate payment, ordinary reimbursement, advance recovery through payroll and employee final settlement are distinct routes. A route selection must identify which financial record settles which obligation and prevent repeated settlement on retry. A failed posting cannot be reported paid solely because a screen flag changed.
+
+## Linked specifications
+
+- **Calculation and acceptance cases** · [workforce calculations](../../schemas/mathematics/workforce-calculations.json) · [workforce acceptance cases](../../schemas/mathematics/workforce-acceptance-cases.json)
+- **Record definitions** · [Expense claim](../../schemas/data/record-types/expense_claim.json) · [Expense claim detail](../../schemas/data/record-types/expense_claim_detail.json) · [Expense claim advance](../../schemas/data/record-types/expense_claim_advance.json) · [Employee advance](../../schemas/data/record-types/employee_advance.json) · [Travel request](../../schemas/data/record-types/travel_request.json) · [Vehicle log](../../schemas/data/record-types/vehicle_log.json)
+- **Related decisions** · [financial accounting](../transactions/financial-accounting.md) · [treasury and reconciliation](../transactions/treasury-and-reconciliation.md)

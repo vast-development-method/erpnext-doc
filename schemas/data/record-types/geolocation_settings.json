@@ -3,11 +3,10 @@
   "identifier": "record_type_geolocation_settings",
   "name": "geolocation_settings",
   "display_name": "geolocation settings",
-  "source_name_digest": "cd568ace8b9deca27f5febbc76ce35c219723740906ed5c523e4597f057ce7f6",
-  "source_pack": "foundation",
-  "source_artifact": "source-artifact-fef52de23fcd2b56c88b",
+  "capability_group": "foundation",
+  "component_identifier": "component_foundation_integrations_record_definitions_geolocation_settings_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "singleton_settings",
   "supports_posting_and_cancellation": false,
   "ordered_field_names": [
@@ -46,14 +45,13 @@
     }
   ],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 4,
   "fields": [
     {
       "identifier": "record_type_geolocation_settings.provider",
       "name": "provider",
-      "source_field_ordinal": 0,
-      "source_name_digest": "ae2250bb2563882a230d0bc3a65275643452aa6461380b2508ef449e9d752f91",
+      "field_ordinal": 0,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -63,6 +61,8 @@
         "required_condition": {
           "kind": "record_field_truth_test",
           "field_name": "enable_address_autocompletion",
+          "meaning": "the value of enable address autocompletion is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "339b01c88e017cda4617862e60a7f1cbf2322372f69dd8828c3177ed6b28c9cc"
         },
         "allowed_values": [
@@ -83,13 +83,32 @@
           }
         ]
       },
-      "display_name": "provider"
+      "display_name": "provider",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "geoapify",
+          "nomatim",
+          "here"
+        ],
+        "empty_option_explicitly_listed": false,
+        "required_when_no_conditional_override": false,
+        "requiredness_condition": {
+          "kind": "record_field_truth_test",
+          "field_name": "enable_address_autocompletion",
+          "meaning": "the value of enable address autocompletion is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract"
+        },
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "ae2250bb2563882a230d0bc3a65275643452aa6461380b2508ef449e9d752f91"
     },
     {
       "identifier": "record_type_geolocation_settings.application_programming_interface_key",
       "name": "application_programming_interface_key",
-      "source_field_ordinal": 1,
-      "source_name_digest": "de9685549b5f39b6143a1c1504d0b3940ec3b87ef03d8572df6333412fbd1fdb",
+      "field_ordinal": 1,
       "value_type": "protected_secret",
       "persistence": "protected_secret_storage",
       "required_when_no_conditional_override": false,
@@ -117,7 +136,9 @@
                   }
                 ]
               },
-              "name": "includes"
+              "name": "contains_value",
+              "contract_catalog": "../conditional-field-semantics.json#/function_contracts",
+              "source_name": "includes"
             },
             "arguments": [
               {
@@ -131,8 +152,10 @@
             ],
             "named_arguments": []
           },
-          "source_value_digest": "3c4a73d5a03c62468600d20b56e40c221ed025d430a1256f299827e455b39580",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "[geoapify, here].contains value applied to record.provider",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "3c4a73d5a03c62468600d20b56e40c221ed025d430a1256f299827e455b39580"
         },
         "required_condition": {
           "kind": "expression_tree",
@@ -167,7 +190,9 @@
                       }
                     ]
                   },
-                  "name": "includes"
+                  "name": "contains_value",
+                  "contract_catalog": "../conditional-field-semantics.json#/function_contracts",
+                  "source_name": "includes"
                 },
                 "arguments": [
                   {
@@ -183,17 +208,77 @@
               }
             ]
           },
-          "source_value_digest": "db827d4371435d0eaefd8041648d1bc4d7f8b341cf13beb4675d05b1015784dc",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.enable address autocompletion all truthy [geoapify, here].contains value applied to record.provider)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "db827d4371435d0eaefd8041648d1bc4d7f8b341cf13beb4675d05b1015784dc"
         }
       },
-      "display_name": "application programming interface key"
+      "display_name": "application programming interface key",
+      "value_contract": {
+        "value_kind": "secret_text",
+        "storage_policy": "Protect the secret separately from ordinary display values. Reads and exports must obey the secret-access contract; a masked display value is not a replacement credential.",
+        "required_when_no_conditional_override": false,
+        "requiredness_condition": {
+          "kind": "expression_tree",
+          "tree": {
+            "kind": "logical_operation",
+            "operator": "all_truthy",
+            "operands": [
+              {
+                "kind": "member",
+                "owner": {
+                  "kind": "variable",
+                  "name": "record"
+                },
+                "name": "enable_address_autocompletion"
+              },
+              {
+                "kind": "function_application",
+                "function": {
+                  "kind": "member",
+                  "owner": {
+                    "kind": "ordered_values",
+                    "values": [
+                      {
+                        "kind": "symbolic_text",
+                        "value": "geoapify"
+                      },
+                      {
+                        "kind": "symbolic_text",
+                        "value": "here"
+                      }
+                    ]
+                  },
+                  "name": "contains_value",
+                  "contract_catalog": "../conditional-field-semantics.json#/function_contracts"
+                },
+                "arguments": [
+                  {
+                    "kind": "member",
+                    "owner": {
+                      "kind": "variable",
+                      "name": "record"
+                    },
+                    "name": "provider"
+                  }
+                ],
+                "named_arguments": []
+              }
+            ]
+          },
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.enable address autocompletion all truthy [geoapify, here].contains value applied to record.provider)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract"
+        }
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "de9685549b5f39b6143a1c1504d0b3940ec3b87ef03d8572df6333412fbd1fdb"
     },
     {
       "identifier": "record_type_geolocation_settings.enable_address_autocompletion",
       "name": "enable_address_autocompletion",
-      "source_field_ordinal": 2,
-      "source_name_digest": "339b01c88e017cda4617862e60a7f1cbf2322372f69dd8828c3177ed6b28c9cc",
+      "field_ordinal": 2,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -205,13 +290,28 @@
           "value": "0"
         }
       },
-      "display_name": "enable address autocompletion"
+      "display_name": "enable address autocompletion",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "339b01c88e017cda4617862e60a7f1cbf2322372f69dd8828c3177ed6b28c9cc"
     },
     {
       "identifier": "record_type_geolocation_settings.base_resource_address",
       "name": "base_resource_address",
-      "source_field_ordinal": 3,
-      "source_name_digest": "74f6e98808de4cf3e990a472889f2e2e6a766fe910a6dad73e9b4648bab519d0",
+      "field_ordinal": 3,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -241,8 +341,10 @@
               }
             ]
           },
-          "source_value_digest": "b8a8271f0c869b224bae460f5d13c077905f90b969856420fb05a76274397922",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.provider equals nomatim",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "b8a8271f0c869b224bae460f5d13c077905f90b969856420fb05a76274397922"
         },
         "required_condition": {
           "kind": "expression_tree",
@@ -281,8 +383,10 @@
               }
             ]
           },
-          "source_value_digest": "a0cf8d67d8716187ce734e1e0f8950c951ff7172414e23ace47adb8992960355",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.provider equals nomatim all truthy record.enable address autocompletion)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "a0cf8d67d8716187ce734e1e0f8950c951ff7172414e23ace47adb8992960355"
         },
         "type_specific_options": {
           "kind": "symbolic_text",
@@ -290,9 +394,71 @@
           "source_value_digest": "c6ef2fb0345c47534dfae5f70cab6e297b808559aa49c11b539e31c3f9d14121"
         }
       },
-      "display_name": "base resource address"
+      "display_name": "base resource address",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false,
+        "requiredness_condition": {
+          "kind": "expression_tree",
+          "tree": {
+            "kind": "logical_operation",
+            "operator": "all_truthy",
+            "operands": [
+              {
+                "kind": "comparison_chain",
+                "first": {
+                  "kind": "member",
+                  "owner": {
+                    "kind": "variable",
+                    "name": "record"
+                  },
+                  "name": "provider"
+                },
+                "comparisons": [
+                  {
+                    "operator": "equal",
+                    "value": {
+                      "kind": "symbolic_text",
+                      "value": "nomatim"
+                    }
+                  }
+                ]
+              },
+              {
+                "kind": "member",
+                "owner": {
+                  "kind": "variable",
+                  "name": "record"
+                },
+                "name": "enable_address_autocompletion"
+              }
+            ]
+          },
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.provider equals nomatim all truthy record.enable address autocompletion)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract"
+        }
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "74f6e98808de4cf3e990a472889f2e2e6a766fe910a6dad73e9b4648bab519d0"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "ordinary record rename disabled",
+    "strategy": "record_type_default_or_controller_assignment",
+    "rule": "The create operation assigns identity through the record-type naming policy; explicitly named records retain their validated identity."
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "singleton_settings",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "This record type does not independently implement the post-and-cancel lifecycle."
+  },
+  "source_name_digest": "cd568ace8b9deca27f5febbc76ce35c219723740906ed5c523e4597f057ce7f6",
+  "source_pack": "foundation",
+  "source_artifact": "source-artifact-fef52de23fcd2b56c88b",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "7215e0eadb3c02b93c5f2d1f1de4ca6b786be375bd5998e7bb272ba713214b00",
@@ -314,5 +480,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "service_integrations.geolocation_settings",
+    "status": "declared",
+    "dictionary": "schema/entities/service-integrations.json",
+    "declaration_name": "Geolocation Settings",
+    "declaration_catalog": "docs/rebuild/model/catalog/frappe-integrations-01.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

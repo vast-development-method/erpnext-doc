@@ -1,5 +1,7 @@
 # One stock transfer, a gate pass and storefront availability
 
+The [dispatch and availability contract](../../capabilities/optional-posting.md#gate-pass-and-external-store-availability) distinguishes posted stock, the carrier document and availability pushed to the store.
+
 Gate Entry and WooCommerce Fusion subscribe to Stock Entry submission. One coordinates a physical dispatch document. The other publishes the latest sellable quantity to an external storefront. Their workers read different records and run under different timing rules. The following trace uses both pinned sources independently. The combined installation scenario is a proposed acceptance fixture.
 
 ## Gate handoff

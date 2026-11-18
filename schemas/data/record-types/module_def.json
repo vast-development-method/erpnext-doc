@@ -3,11 +3,10 @@
   "identifier": "record_type_module_def",
   "name": "module_def",
   "display_name": "module def",
-  "source_name_digest": "f332625dd7cbf4fd929aeb3170045fc76546a808874feb8a6f52d378d1dee46c",
-  "source_pack": "foundation",
-  "source_artifact": "source-artifact-b300d1b07c95c2c38d6f",
+  "capability_group": "foundation",
+  "component_identifier": "component_foundation_core_record_definitions_module_def_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "independent_record",
   "supports_posting_and_cancellation": false,
   "ordered_field_names": [
@@ -221,14 +220,13 @@
     }
   ],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 9,
   "fields": [
     {
       "identifier": "record_type_module_def.module_name",
       "name": "module_name",
-      "source_field_ordinal": 0,
-      "source_name_digest": "8bd382a7051dd7ecef4aff335ea8d3ae12c19e62c6e049d9c5fa54ba6b085bf0",
+      "field_ordinal": 0,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -240,6 +238,15 @@
         "unique": 1
       },
       "display_name": "module name",
+      "value_contract": {
+        "value_kind": "text",
+        "uniqueness_scope": "the record type across saved records",
+        "uniqueness_validation": "Reject another persisted record with the same constrained value; handle empty values according to the field storage contract.",
+        "required_when_no_conditional_override": true,
+        "empty_storage_policy": "An empty or whitespace-only unique value is stored as null rather than a repeated empty string."
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "8bd382a7051dd7ecef4aff335ea8d3ae12c19e62c6e049d9c5fa54ba6b085bf0",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "8bd382a7051dd7ecef4aff335ea8d3ae12c19e62c6e049d9c5fa54ba6b085bf0",
@@ -254,8 +261,7 @@
     {
       "identifier": "record_type_module_def.application_name",
       "name": "application_name",
-      "source_field_ordinal": 1,
-      "source_name_digest": "df96850b143d87b9fb42740a33c7d73f58836ec87a2be3a2d66fd3517744b178",
+      "field_ordinal": 1,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -278,12 +284,41 @@
               "name": "custom"
             }
           },
-          "source_value_digest": "95a9cb5916670eaa97ed5c46848cd0a999d45b11369148d2994b888049fe55de",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "logical not (record.custom)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "95a9cb5916670eaa97ed5c46848cd0a999d45b11369148d2994b888049fe55de"
         },
         "indexed_for_search": 1
       },
       "display_name": "application name",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "option_provider": "Allowed choices are supplied by the field-specific option policy; an omitted static list is not an unrestricted choice list.",
+        "required_when_no_conditional_override": false,
+        "requiredness_condition": {
+          "kind": "expression_tree",
+          "tree": {
+            "kind": "unary_operation",
+            "operator": "logical_not",
+            "operand": {
+              "kind": "member",
+              "owner": {
+                "kind": "variable",
+                "name": "record"
+              },
+              "name": "custom"
+            }
+          },
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "logical not (record.custom)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract"
+        },
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "df96850b143d87b9fb42740a33c7d73f58836ec87a2be3a2d66fd3517744b178",
       "excluded_source_attributes": {
         "description": {
           "source_value_digest": "74ad8bb36704d01dab6890a019b0afb6c1e3868bdb8143e17b51adc1b1155aae",
@@ -294,8 +329,7 @@
     {
       "identifier": "record_type_module_def.restrict_to_domain",
       "name": "restrict_to_domain",
-      "source_field_ordinal": 2,
-      "source_name_digest": "f6979cbdd651d98eff453e9da06ee59fb7d9c7e577792db15d3f8ae8a231355f",
+      "field_ordinal": 2,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -307,13 +341,24 @@
           "identifier": "record_type_domain"
         }
       },
-      "display_name": "restrict to domain"
+      "display_name": "restrict to domain",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_domain"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "f6979cbdd651d98eff453e9da06ee59fb7d9c7e577792db15d3f8ae8a231355f"
     },
     {
       "identifier": "record_type_module_def.custom",
       "name": "custom",
-      "source_field_ordinal": 3,
-      "source_name_digest": "180c2c98506fa69d188721fe3211d6abebca4f13d7e0afc4814d837e99966aff",
+      "field_ordinal": 3,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -325,13 +370,28 @@
           "value": "0"
         }
       },
-      "display_name": "custom"
+      "display_name": "custom",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "180c2c98506fa69d188721fe3211d6abebca4f13d7e0afc4814d837e99966aff"
     },
     {
       "identifier": "record_type_module_def.package",
       "name": "package",
-      "source_field_ordinal": 4,
-      "source_name_digest": "84598746e61014cbb57c4955b2ad02b99aedf0021c559738c26bfd79c1a2809e",
+      "field_ordinal": 4,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -341,6 +401,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "custom",
+          "meaning": "the value of custom is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "180c2c98506fa69d188721fe3211d6abebca4f13d7e0afc4814d837e99966aff"
         },
         "target_record_type": {
@@ -348,13 +410,24 @@
           "identifier": "record_type_package"
         }
       },
-      "display_name": "package"
+      "display_name": "package",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_package"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 4,
+      "source_name_digest": "84598746e61014cbb57c4955b2ad02b99aedf0021c559738c26bfd79c1a2809e"
     },
     {
       "identifier": "record_type_module_def.connections_tab",
       "name": "connections_tab",
-      "source_field_ordinal": 5,
-      "source_name_digest": "b802d177bfa23e3300e938a070e1c40e1c637f184bca612e6ca6c80d98fa3d39",
+      "field_ordinal": 5,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -363,46 +436,92 @@
       "properties": {
         "show_dashboard": 1
       },
-      "display_name": "connections"
+      "display_name": "connections",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 0
+      },
+      "source_field_ordinal": 5,
+      "source_name_digest": "b802d177bfa23e3300e938a070e1c40e1c637f184bca612e6ca6c80d98fa3d39"
     },
     {
       "identifier": "record_type_module_def.details_tab",
       "name": "details_tab",
-      "source_field_ordinal": 6,
-      "source_name_digest": "b2a8e11ea48aa4a1c9abd339ef15486a60f18b2a7fe9665bdc401e55a657d03d",
+      "field_ordinal": 6,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "details"
+      "display_name": "details",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 1
+      },
+      "source_field_ordinal": 6,
+      "source_name_digest": "b2a8e11ea48aa4a1c9abd339ef15486a60f18b2a7fe9665bdc401e55a657d03d"
     },
     {
       "identifier": "record_type_module_def.column_break_giia",
       "name": "column_break_giia",
-      "source_field_ordinal": 7,
-      "source_name_digest": "c46901dc10d254b85eed5c1b86a750c30e78c593b1e380f04b89cc8490898572",
+      "field_ordinal": 7,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 7
+      },
+      "source_field_ordinal": 7,
+      "source_name_digest": "c46901dc10d254b85eed5c1b86a750c30e78c593b1e380f04b89cc8490898572"
     },
     {
       "identifier": "record_type_module_def.section_break_dnma",
       "name": "section_break_dnma",
-      "source_field_ordinal": 8,
-      "source_name_digest": "fca3bfbbce1b175a83e52a147d1e9b637f15e12948248d9373fdd20771cfcabe",
+      "field_ordinal": 8,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 2
+      },
+      "source_field_ordinal": 8,
+      "source_name_digest": "fca3bfbbce1b175a83e52a147d1e9b637f15e12948248d9373fdd20771cfcabe"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "explicit rename operation required",
+    "strategy": "identity_from_field",
+    "field_name": "module_name",
+    "rule": "Use the selected field value as the record identifier after requiredness and uniqueness checks."
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "independent_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "This record type does not independently implement the post-and-cancel lifecycle."
+  },
+  "source_name_digest": "f332625dd7cbf4fd929aeb3170045fc76546a808874feb8a6f52d378d1dee46c",
+  "source_pack": "foundation",
+  "source_artifact": "source-artifact-b300d1b07c95c2c38d6f",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "58698b89422258b8c2865853f1f4b40296639b6bcbc373b201c75c4c1542bbc7",
@@ -428,5 +547,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "information_management.module_def",
+    "status": "declared",
+    "dictionary": "schema/entities/information-management-01.json",
+    "declaration_name": "Module Def",
+    "declaration_catalog": "docs/rebuild/model/catalog/frappe-core-01.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

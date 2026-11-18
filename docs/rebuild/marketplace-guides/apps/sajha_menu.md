@@ -1,5 +1,7 @@
 # Sajha Menu
 
+[Business workflow and acceptance cases](../../../capabilities/guides/sales.md#restaurant-multi-station-fulfilment).
+
 Tuna Technology's version 15 restaurant app supports guest ordering by QR code, staff-operated tablet and POS ordering, tables, billing, inventory and recipes. The listing also describes CRM, staff scheduling and connecting a hotel system. A publisher screenshot shows a table-specific cart with categories and quantities. Its closing report separates sales from collections and distinguishes tender types. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/sajha_menu) · [Table ordering screen](https://cloud.frappe.io/files/screenshot%203.webp) · [Closing report](https://cloud.frappe.io/files/screenshot%204.webp)
 
 ## Inspectable source copy
@@ -8,10 +10,6 @@ A historical third-party copy identifies the package and publisher in its hooks 
 
 ## Proposed dining workflow
 
-The guest selects an outlet, table and menu language from the QR entry point. Store the table visit, menu revision, item and modifier codes, quantities, captured prices and original free-text instructions. Route items by configured station code. The guest, waiter, kitchen, bar and cashier can each select their language independently. Translate curated item and modifier names for each audience. Preserve original notes and identify any accompanying translation. Billing resolves one or more tenders against the same visit. A hotel integration requires an explicit room-account match and acknowledged charge reference.
-
-1. A guest orders two portions of one food item and one drink under a Nepali menu. An English-speaking kitchen and a German-speaking bar each receive the applicable ticket lines. Kitchen quantity is two, bar quantity one, the table check contains all three units and one submission retry produces no further ticket.
-2. A translated item label changes after acceptance. Print the guest receipt in their selected language while retaining the ordered item ID, captured price and modifier code. A missing approved translation for a dietary instruction shows the original text with its language.
-3. A second terminal attempts to settle the same checked-out visit. Return the existing receipt or an explicit conflict without charging a second tender. A copied QR for a closed visit must resolve the current table context before accepting another order.
-
 **Qualification.** Live mobile ordering, the listed release's feature parity with the public copy, inventory depletion timing, recipe yields, hotel charging and shipped language catalogs require product evidence. [Named repository](https://github.com/Buddha-Innovations-Tech/sajha_menu)
+
+[Read the consolidated workflow](../../../capabilities/guides/sales.md#restaurant-multi-station-fulfilment-2).

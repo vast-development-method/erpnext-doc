@@ -1,6 +1,6 @@
 # Inventory, production and fulfilment
 
-[Complete definitions, units, exceptions and examples](inventory-calculations.json) · [Transaction and boundary cases](inventory-acceptance-cases.json)
+[Complete definitions, units, exceptions and examples](../../schemas/mathematics/inventory-calculations.json) · [Transaction and boundary cases](../../schemas/mathematics/inventory-acceptance-cases.json)
 
 ## Transaction quantity to stock quantity
 
@@ -132,6 +132,8 @@ Use standard effective on posting date, then currency precision for stock value.
 
 ## Manufacturing variance under standard cost
 
+This calculation belongs to the [optional standard-cost policy](../operations/inventory-and-valuation.md#standard-cost-and-effective-dating).
+
 `consumed_material_value + additional_cost − finished_standard_value`
 
 For a qualifying finished row, subtract actual posted standard inventory value from its intended actual incoming amount, including allocated material, additional and landed cost. Positive variance is an expense debit and negative variance an expense credit.
@@ -208,14 +210,16 @@ Convert picked quantity before comparing; target stock quantity multiplies the r
 
 `ordered_quantity × (100 + allowance_percentage) ÷ 100`
 
-Increase original ordered quantity by the permitted percentage. This is an upper acceptance limit; ordinary receipt mapping proposes outstanding original demand first, and proposes allowance remainder only once original demand is fulfilled.
+Increase original ordered quantity by the permitted percentage to obtain the upper posting limit. The ordinary mapper proposes ordered quantity less received quantity and the amount already in the draft. It omits a fully allocated ordinary row. For 10 ordered and 10 received, a 10% allowance gives a posting ceiling of 11 and an ordinary proposal of zero.
 
-Mapper first proposes ordinary remainder, then unused allowance when normal remainder is exhausted.
+A deployment may offer a separate proposal for the unused allowance once ordinary demand is exhausted. That policy requires an explicit mapper and remains subject to the posting checks.
 
-- Exclude closed and supplier-direct rows.
+- Exclude closed orders and supplier-direct rows. A deployment with the independent row-closure capability also excludes closed lines.
 - Subtract quantity already included in current draft.
 
 ## Recipe percentage converted to component entry unit
+
+Core input recipes store a component quantity and its unit conversion. Compute input stock quantity as entered quantity times the unit factor, then scale material requirements to production output. A percentage allocation on a secondary output distributes cost and does not set an input ingredient quantity. The following formula applies to the optional percentage-input recipe model, where the material rows explicitly carry percentages and a balance-row designation.
 
 `component_percentage ÷ 100 × recipe_quantity × batch_unit_to_component_unit_factor`
 
@@ -258,7 +262,7 @@ Value own-cost secondary output before percentage rows; do not round derived bas
 
 - Known zero consumed cost remains zero and does not trigger unrelated fallback.
 - Additional costs are allocated separately afterward.
-- Standard cost overrides final inventory carrying amount when selected.
+- An installed standard-cost capability can set the final carrying amount and record its variance.
 
 ## Stock entry valuation rate including charges
 
@@ -304,6 +308,8 @@ Round quantity difference before the strict magnitude comparison.
 - Batch-specific allowance is separately configurable.
 
 ## Purchase price variance under standard cost
+
+This calculation belongs to the [optional standard-cost policy](../operations/inventory-and-valuation.md#standard-cost-and-effective-dating).
 
 `full_incoming_transaction_amount − posted_standard_inventory_value`
 
@@ -377,11 +383,11 @@ Compare at stock movement quantity precision. The loss is not a separately value
 
 `(consumed_material_value − secondary_output_value) ÷ actual_finished_quantity`
 
-Applicable to one fully allocated primary output with positive usable quantity. Standard-cost valuation supersedes this actual rate for carrying value and records a variance.
+Applicable to one fully allocated primary output with positive usable quantity. Under the optional standard-cost policy the approved standard controls carrying value and the difference posts as variance.
 
-Applicable to one fully allocated primary output with positive usable quantity. Standard-cost valuation supersedes this actual rate for carrying value and records a variance.
+Applicable to one fully allocated primary output with positive usable quantity. Under the optional standard-cost policy the approved standard controls carrying value and the difference posts as variance.
 
-- Applicable to one fully allocated primary output with positive usable quantity. Standard-cost valuation supersedes this actual rate for carrying value and records a variance.
+- Applicable to one fully allocated primary output with positive usable quantity. Under the optional standard-cost policy the approved standard controls carrying value and the difference posts as variance.
 
 ## Actual operating cost available for later production
 

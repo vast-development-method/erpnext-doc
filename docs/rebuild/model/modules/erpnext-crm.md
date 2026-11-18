@@ -1,4 +1,4 @@
-# CRM declarations in erpnext
+# CRM declarations in business application
 
 Each dictionary part contains an ordered field list, source location, record settings and grants. The source column opens the declaration at the reviewed revision.
 
@@ -19,7 +19,7 @@ Each dictionary part contains an ordered field list, source location, record set
 | Contract Template | ordinary | 7 | [Part 1](../catalog/erpnext-crm-01.json) | [Source](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/crm/doctype/contract_template/contract_template.json) |
 | Contract Template Fulfilment Terms | child | 1 | [Part 1](../catalog/erpnext-crm-01.json) | [Source](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/crm/doctype/contract_template_fulfilment_terms/contract_template_fulfilment_terms.json) |
 | Email Campaign | ordinary | 8 | [Part 1](../catalog/erpnext-crm-01.json) | [Source](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/crm/doctype/email_campaign/email_campaign.json) |
-| Frappe CRM Allowed User | child | 1 | [Part 1](../catalog/erpnext-crm-01.json) | [Source](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/crm/doctype/frappe_crm_allowed_user/frappe_crm_allowed_user.json) |
+| CRM integration allowed user | child | 1 | [Part 1](../catalog/erpnext-crm-01.json) | [Source](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/crm/doctype/frappe_crm_allowed_user/frappe_crm_allowed_user.json) |
 | Lead | ordinary | 71 | [Part 1](../catalog/erpnext-crm-01.json) | [Source](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/crm/doctype/lead/lead.json) |
 | Lost Reason Detail | child | 1 | [Part 1](../catalog/erpnext-crm-01.json) | [Source](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/crm/doctype/lost_reason_detail/lost_reason_detail.json) |
 | Market Segment | ordinary | 1 | [Part 1](../catalog/erpnext-crm-01.json) | [Source](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/crm/doctype/market_segment/market_segment.json) |

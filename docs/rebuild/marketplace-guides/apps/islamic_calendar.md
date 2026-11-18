@@ -1,5 +1,7 @@
 # Islamic Calendar
 
+[Business workflow and acceptance cases](../../../capabilities/guides/data.md#hijri-civil-day-conversion).
+
 ## Publisher evidence
 
 Kanak Infosystems lists version 15. Users can enter a date through a Hijri picker or switch to Gregorian in date fields across ERP modules. The vendor also describes conversion in forms and reports and RTL layout support. The marketplace calls the license MIT. The publisher's product page identifies proprietary licensing. The terms attached to a particular distributed revision need confirmation. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/islamic_calendar) · [Publisher's v15 feature and license page](https://www.kanakinfosystems.com/frappe/apps/15.0/islamic_calendar) · [Listed repository](https://github.com/kanakinfo/islamic_calendar)
@@ -10,13 +12,7 @@ A third-party copy credits Kanak and loads two date-format preferences for authe
 
 ## Proposed multilingual rebuild contract
 
-Model UI language, numeral system, calendar choice, version of the calendar table, and display zone independently. A civil date is stored as an ISO date. A timestamp additionally carries its instant and uses the chosen zone when deriving a local day. Calendar switching for a date-only field must never move the stored day through a UTC conversion. Display a clear calendar label and localize month names, field instructions and errors. If a label lacks a translation, retain the correct numeric date and calendar identifier.
-
-| Example | Expected result |
-|---|---|
-| Select 1448-06-08 using the pinned Umm al-Qura table | Canonical date is 2026-11-18. Switch to a German Gregorian view, save, reopen in Arabic and render the same Hijri day. The analytical filter for 2026-11-18 returns the same record. |
-| A user switches language from Arabic to English while keeping Hijri selected | Date and calendar identifier stay fixed. Month/weekday words and digit display follow configured locale preferences. |
-| A user selects a nonexistent day in that calendar month or a date outside the table coverage | Return a localizable validation error before saving. Retain the prior valid date and offer an explicit alternative entry mode. |
+[Read the consolidated workflow](../../../capabilities/guides/data.md#hijri-civil-day-conversion-3).
 
 ## Remaining evidence
 

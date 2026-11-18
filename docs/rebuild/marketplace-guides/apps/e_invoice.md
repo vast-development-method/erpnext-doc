@@ -1,5 +1,7 @@
 # E Invoice Egypt
 
+[Business workflow and acceptance cases](../../../capabilities/guides/accounting.md#egyptian-electronic-tax-submission).
+
 X Solutions lists versions 13 and 14. Its adapter offers individual and batch submission, credit and debit notes, cancellation and validation in connection with the Egyptian Tax Authority (ETA). The publisher describes a signing token, product/service coding and a nominated company contact as prerequisites for its setup. Bulk retrieval and obtaining a document printout appear under planned features. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/e_invoice)
 
 ## Authority service and app boundary
@@ -8,11 +10,11 @@ The ETA submission API takes one or more signed documents, correlates each local
 
 ## Proposed rebuild contract
 
-Model issuer, source document revision, document type/version, customer, tax and product codes, original-invoice references, signed content digest, submission attempt, external document ID and validation events. Capture source values and outbound representations separately. The adapter can queue a batch, process accepted and rejected members independently and refresh each accepted document’s status. Keep cancellations and adjustment documents tied to the targeted authority IDs. Do not infer tax acceptance or reverse the ERP ledger from a transport acknowledgement alone.
-
 - For a test submission containing `INV-001` and `INV-002`, ETA responds 202 with a UUID for the first and a structure error for the second. Record one pending final validation, one actionable error and no final approvals. Poll the first without sending it again when the second is corrected.
 - If a user prepares a credit note for an original invoice line that was never present, fail the authority-profile validation before dispatch. ETA’s documented credit type restricts additions of new invoice lines and amounts beyond the referenced invoices. [Document types in the submission contract](https://sdk.invoicing.eta.gov.eg/einvoicingapi/01-submit-documents/)
 - If the network drops after dispatch, retain the exact request fingerprint. Use available submission evidence to reconcile its status before retrying. Treat ETA’s duplicate response and retry timing separately from a permanent data rejection.
+
+[Read the consolidated workflow](../../../capabilities/guides/accounting.md#egyptian-electronic-tax-submission).
 
 ## Language
 

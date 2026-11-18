@@ -1,34 +1,25 @@
 # Repost a backdated change through dependent warehouses and accounts
 
+The [Repost a backdated change through dependent warehouses and accounts](../../operations/reposting.md) chapter defines the business rules, calculations and worked outcomes.
+
+Source cases include late requests, merged queues, failed-merge exclusion, parallel exclusion and restart permissions. The local witness executes ordering and time-window decisions. The concurrency cases require independent sessions and persisted results.
+
 ## Admissible request
 
-Accept either a voucher or an item/location plus effective posting instant. Persist company, purpose (stock and financial or financial only), optional rate recalculation, optional recreation, status and progress. Validate stock-updating invoices when rebuilding stock. Only a purchase receipt or stock-updating purchase invoice in transaction mode qualifies for the explicit rate-recalculation flag. Reject a standalone GL entry as the target of stock-derived GL reconstruction. A closed year, locked accounting period, qualifying stock closing, or later affected voucher in a closed accounting period can prevent a stock revaluation. The last check applies to perpetual inventory and the relevant non-GL-only route. [Eligibility and period gates](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py#L110-L319) · [Operator guide](https://docs.frappe.io/erpnext/repost-item-valuation)
+- [Eligibility and period gates](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py#L110-L319)
+- [Operator guide](https://docs.frappe.io/erpnext/repost-item-valuation)
 
 ## Walk the dependency graph
 
-1. Start a queued or resumable job, record the actual first-start timestamp (preserve it on resume) and mark affected closings outdated. For eligible nonparallel item/location jobs the reference may combine compatible later queued jobs. A saved work list, checkpoint, landed-cost route, financial-only route, enabled parallelism or failed merged job for the company can prevent merging.
-2. Begin with the stock balance immediately preceding the affected row for each item/location. Order pending rows by effective posting datetime, creation datetime and stable insertion sequence for exact ties. At a dependency or newly eligible pending item/location enqueue its future rows and advance the chronological frontier. A source warehouse's transfer-out cost feeds the destination transfer-in. Produced rows can require recomputation from affected consumed rows.
-3. Obtain complete active ledger rows under lock in bounded windows. Recheck when an entry reaches the worker; a row deleted or cancelled since scheduling is skipped. Deduplicate already-processed row identifiers within the pass. Record affected vouchers and per-item/location last processed positions. The walk records progress periodically (every 2,000 iterations on this path) so a worker need not start a long chain from scratch.
-4. After a stock pass rebuild relevant financial entries and update material-consumption costs for affected vouchers. A financial-only job instead runs the financial route and, when linked to a prior repost, waits for its prerequisite to be Completed or Skipped. Mark successfully merged queued jobs Skipped and remove the completed job's saved progress attachment.
-5. A separate same-item/location deduplication query selects later effective timestamps and only requests already created when that pass began. A later edit submitted during the run must retain its own opportunity to execute. Distinguish the normal-success path from failure: the outer executor calls duplicate processing after its repost routine returns. Some production exceptions are caught inside that routine. Test failure combined with queued duplicate jobs before promising that every skipped request was covered by a successful pass.
-
-Single-worker mode honours a configured time window; time windows crossing midnight use an inclusive overnight comparison. Parallel scheduling checks queued/active jobs for this site, prevents scheduling a second item/location job for the same item even at another warehouse, and applies the configured capacity. This dispatcher behaviour does not establish universal serialization across independent producers. An in-progress qualifying repost can block cancellation of its voucher. A qualifying queued one may be skipped and cancelled as part of voucher cancellation. [Queue and worker ordering](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/stock_ledger.py#L833-L1074) · [Job states and deduplication](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py#L392-L532) · [Dispatcher and worker](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py#L628-L1021)
+- [Queue and worker ordering](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/stock_ledger.py#L833-L1074)
+- [Job states and deduplication](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py#L392-L532)
+- [Dispatcher and worker](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py#L628-L1021)
 
 ## Trace a moving-average transfer
 
-Assume one company with perpetual inventory, two distinct inventory accounts and a cost-of-goods-sold account. No reservations, taxes or rounding differences. On day 1 warehouse A receives 10 at 10. On day 3 it transfers 6 to B. On day 4 B delivers 4. Initially A holds 4 worth 40, B holds 2 worth 20, and the delivery charged 40 to cost of goods sold. A late day-2 receipt adds 10 at 20 to A. This changes the day-3 effective rate to 15. The corrected end position must be the one obtained by replaying the actual chronological events:
-
-| Event | A ending qty/value | B ending qty/value | GL effect for this voucher |
-|---|---:|---:|---|
-| Day 1 receipt | 10 / 100 | 0 / 0 | Debit A 100, credit goods received clearing 100 |
-| Day 2 receipt | 20 / 300 | 0 / 0 | Debit A 200, credit goods received clearing 200 |
-| Day 3 transfer | 14 / 210 | 6 / 90 | Debit B 90, credit A 90 |
-| Day 4 delivery | 14 / 210 | 2 / 30 | Debit cost of goods sold 60, credit B 60 |
-
-Compared with recording just the new receipt and leaving later documents untouched, the transfer's value increases by 30 and the subsequent delivery's cost increases by 20. Final inventory 240 plus cost of goods sold 60 equals received value 300. Effective quantities of both historical transactions are unchanged. Replaying the same corrective history should produce the same final balances and attributable GL entries. The fixture for ordinary layered costing is separate. [Integrated cost-flow trace](../integrated/README.md)
+- [Integrated cost-flow trace](../integrated/README.md)
 
 ## Failure and qualification
 
-Persist a failure or retryable status, the diagnostic and enough state to resume. For the inspected background route, timeout and deadlock classes or matching diagnostics can remain In Progress for scheduler retry; other errors mark Failed. A timed-out worker can propagate the timeout so a single-worker dispatcher stops claiming further work. Manual restart reloads saved state, requires write permission and a submitted Failed request, clears indexes/counters/attached progress and returns it to Queued. The original error and the subsequently restarted job need an auditable relationship in the rebuilt system.
-
-Qualification requires simultaneous late receipts, cancellation while a row waits in a work window, a newly queued request after the pass start, a later accounting close that forbids dependent posting, restart after a checkpoint and a crash after stock but before GL publication. Verify voucher-level GL multiplicity, stock quantity/value continuity, after-state of each affected location and closings. Assertions in the pinned test suite include late requests, merged queues, failed-merge exclusion, parallel exclusion and restart permissions. The local witness executes ordering and time-window decisions; these multi-session scenarios require a live site. [Repost regression suite](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/repost_item_valuation/test_repost_item_valuation.py) · [Stock ledger suite](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/tests/test_stock_ledger.py)
+- [Repost regression suite](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/repost_item_valuation/test_repost_item_valuation.py)
+- [Stock ledger suite](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/tests/test_stock_ledger.py)

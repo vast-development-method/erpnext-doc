@@ -13,8 +13,8 @@ Use [acceptance strategy](acceptance-strategy.md) for execution rules and [confo
 | Numeric values | Monetary precisions, unit-rate and valuation precisions, unit-factor precision, selected decimal tie policy, tax row rounding, cash fraction and cash tie handling |
 | Dates | Business timezone, posting and transaction dates, financial calendar, business calendars, shift crossing, inclusive or exclusive interval rules |
 | Financial posting | General-ledger cancellation policy, reporting-rate date, financial-book selection, separate advance accounts, rounding accounts, dimensions and closing controls |
-| Inventory | Enabled valuation methods, negative-stock policy and tolerance, quantity units and whole-unit constraints, standard-cost policy, reservations, serial and batch allocation, valuation completion boundary |
-| Commercial behavior | Credit and overdue policy, order/delivery exposure, allowable over-fulfilment, row closure, taxes, discounts, withholding and payment terms |
+| Inventory | Enabled valuation methods, negative-stock policy and tolerance, quantity units and whole-unit constraints, reservations, serial and batch allocation, valuation completion boundary |
+| Commercial behavior | Credit and overdue policy, order/delivery exposure, allowable over-fulfilment, order closure, taxes, discounts, withholding and payment terms |
 | Workforce | Attendance basis, leave policy, compensation frequency, salary proration, benefit and tax rules, expense settlement, employment transfer and final settlement |
 | Customer and service | Shared identity choices, lead/deal conversion, forecast, project progress, time billing, service calendar, pause and cancellation policies |
 | Extensions and operations | Supported configurable predicates, custom fields, reports, integrations, durable background work, retries, backup, restore, workload and recovery limits |
@@ -35,7 +35,7 @@ Compatibility does not excuse an unresolved accounting discrepancy or insecure a
 
 This scope retains all business domains but deliberately changes one or more identified behaviors. Each correction names the old decision, the new decision, the affected data and operations, expected numerical or state differences, and the gates rerun. It requires the same integrated and operational evidence as complete compatibility.
 
-A corrected profile does not claim strict equivalence on its declared deviations. For example, restoring an asset's original residual value on adjustment cancellation is a reasonable corrected policy, but the observed double-sign arithmetic has a different output. The profile must choose the appropriate expected result before testing.
+A profile that changes an observed outcome identifies the new acceptance result before testing. For example, recognition through an intra-month cutoff can use daily accrual in place of the documented final-period residual rule.
 
 ### Limited capability assessment
 
@@ -53,7 +53,7 @@ Limited assessment results are useful progress evidence. They do not become comp
 | Pre-posting imbalance | Ordinary journals/payments and other vouchers have different repair allowances; final posted company debits and credits must balance after permitted repair |
 | Currency measurement | Company, account, transaction and reporting measurements preserve their own values and rate dates |
 | Advance accounting | Party credit/debit balances and separate advance accounts produce different application entries while preserving the original money movement |
-| Inventory valuation | Moving average, ordered valuation layers and standard cost produce different unit cost, return and variance behavior |
+| Inventory valuation | Moving average, FIFO and LIFO produce distinct costs on issue and return. The separately documented standard-cost extension introduces variance postings |
 | Depreciation | Fixed-period, daily-prorated, declining and shift-weighted methods have different denominators and residual corrections |
 | Deferred recognition | Daily and monthly calculations differ in date counting, rounding, partial intervals and final residual handling |
 
@@ -63,13 +63,13 @@ The [financial calculations](../../schemas/mathematics/financial-calculations.js
 
 | Decision | Observed behavior that must remain visible | Corrected alternative, if selected | Local case |
 |---|---|---|---|
-| Asset residual on value-adjustment cancellation | The documented double sign can increase residual again while carrying value restores | Restore the pre-adjustment residual and revalidate future depreciation | `asset_adjustment_residual_cancellation_boundary` in [accounting cases](../../schemas/mathematics/accounting-acceptance-cases.json) |
+| Asset residual on value-adjustment cancellation | Apply the opposite signed amount to restore the residual and carrying value for the selected book | The reversal is part of ordinary conformance | `asset_adjustment_residual_cancellation_boundary` in [accounting cases](../../schemas/mathematics/accounting-acceptance-cases.json) |
 | Recognition cutoff in final service month | A final marker can survive a cutoff and recognize all remaining value early | Recognize only the declared elapsed interval until actual service end | `deferred_final_month_cutoff_boundary` in [accounting cases](../../schemas/mathematics/accounting-acceptance-cases.json) |
 | Supplier and invoice holds | Supplier expiry, payment discovery, invoice generation and final invoice-reference checks have different predicates | Define one explicit expiry transition and apply it consistently before each operation | `supplier_hold_through_release_date` and `invoice_hold_date_and_flag_differ` in [accounting cases](../../schemas/mathematics/accounting-acceptance-cases.json) |
 | Supplier bill-number uniqueness | Matching supplier and financial interval can reject a duplicate in another company | Scope duplicate detection by company as an explicitly changed policy | `supplier_number_uniqueness_cross_company_boundary` in [accounting cases](../../schemas/mathematics/accounting-acceptance-cases.json) |
 | Employee advance exchange aggregation | Cumulative processing can make row order affect the final exchange amount | Aggregate each advance's independent exchange difference once | `workforce-advance-row-reorder` and `workforce-advance-offsetting-exchange-difference-example-1` in [workforce cases](../../schemas/mathematics/workforce-acceptance-cases.json) |
 | Zero-value task and billing measurements | Specific zero-value and completed-percentage boundaries differ from ordinary nonzero paths | Adopt a separately defined uniform policy and record changed outcomes | `time-zero-price-billing-progress` in [customer and service cases](../../schemas/mathematics/customer-and-service-acceptance-cases.json) and progress boundary cases |
-| Reporting-currency reversal | Reversal can remeasure reporting amounts using the applicable reversal-date policy | Preserve original reporting amounts or create a separately defined reporting adjustment | [Financial cancellation contract](../domains/financial-accounting.md#cancellation-and-correction) |
+| Reporting-currency reversal | Reversal can remeasure reporting amounts using the applicable reversal-date policy | Preserve original reporting amounts or create a separately defined reporting adjustment | [Financial cancellation contract](../transactions/financial-accounting.md#cancellation-and-correction) |
 
 This table identifies concrete decisions; it does not grant blanket permission to change every unexpected result. Review each deviation's effect on persisted history, reports, integration payloads and dependent calculations. A changed default without a new profile revision invalidates previously recorded qualification results for affected gates.
 

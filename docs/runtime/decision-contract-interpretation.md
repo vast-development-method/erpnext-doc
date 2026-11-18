@@ -10,7 +10,7 @@ Read the applicable domain chapter and mathematical contract first to establish 
 
 The catalog distinguishes operational behavior, acceptance support, and excluded reference behavior. A test helper, deployment choice, or historical operation does not become a required application service merely because its structure is retained. An empty decision list in an unmatched operation must not be interpreted as a successfully specified no-op; its unresolved-decision field is authoritative about that limitation.
 
-The canonical data and operational foundations remain [persistence, identity, and values](../data/persistence-identity-and-values.md), [document lifecycle and transactions](document-lifecycle-and-transactions.md), [permissions](identity-permissions-and-tenancy.md), and [background work](background-work-and-consistency.md). Local evaluation does not replace those business contracts.
+The canonical data and operational foundations remain [persistence, identity, and values](../services/persistence-identity-and-values.md), [document lifecycle and transactions](../services/document-lifecycle-and-transactions.md), [permissions](../services/identity-permissions-and-tenancy.md), and [background work](../services/background-work-and-consistency.md). Local evaluation does not replace those business contracts.
 
 ## References and catalog namespaces
 
@@ -232,7 +232,7 @@ Action lists execute in order until an action requests completion, failure, iter
 
 `update_value` resolves and reads its target once, then evaluates its right value. Its in-place protocol may mutate an object visible through other aliases before a later target write fails. Replacing this with a duplicated textual target expression can invoke accessors twice and change the result. `remove_values` removes a binding or object member; it is not the business delete-document command.
 
-None of these actions automatically saves a record, checks accounting periods, enforces workflow, writes balanced ledger rows, commits, rolls back, or emits a notification. An `operation_result` can invoke any of those effects only through its actual bound capability. Similarly, catching a failure is control flow and does not itself roll back storage or reverse an external payment. The transaction scope comes from the [document lifecycle contract](document-lifecycle-and-transactions.md#transaction-boundaries-and-concurrency).
+None of these actions automatically saves a record, checks accounting periods, enforces workflow, writes balanced ledger rows, commits, rolls back, or emits a notification. An `operation_result` can invoke any of those effects only through its actual bound capability. Similarly, catching a failure is control flow and does not itself roll back storage or reverse an external payment. The transaction scope comes from the [document lifecycle contract](../services/document-lifecycle-and-transactions.md#transaction-boundaries-and-concurrency).
 
 ## Iteration, projections, and natural completion
 
@@ -283,7 +283,7 @@ An operation whose own body yields values is a generating operation. Merely cons
 
 An asynchronous operation creates a deferred operation value under its asynchronous protocol. `await_completion` suspends until the awaited result, failure, or cancellation is available. Asynchronous iteration and resource scopes await their iterator, entry, and exit protocols while retaining declared order. These constructs do not automatically create parallel workers, persistent jobs, commits, or durable notifications.
 
-Pending cleanup must run according to generator close, failure, cancellation, and completion protocols. Abandoning an unconsumed generator does not establish immediate deterministic cleanup. Durable business processing remains governed by [background work and consistency](background-work-and-consistency.md), not by the presence of an await or yield node.
+Pending cleanup must run according to generator close, failure, cancellation, and completion protocols. Abandoning an unconsumed generator does not establish immediate deterministic cleanup. Durable business processing remains governed by [background work and consistency](../services/background-work-and-consistency.md), not by the presence of an await or yield node.
 
 ## Relational selection templates
 

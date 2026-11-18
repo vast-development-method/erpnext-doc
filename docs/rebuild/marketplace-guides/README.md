@@ -1,8 +1,8 @@
-# Multilingual implementation guides for 69 marketplace extensions
+# Source evidence for 69 optional business workflows
 
 [English](editions/en/README.md) · [Afrikaans](editions/af/README.md) · [Deutsch](editions/de/README.md) · [简体中文](editions/zh-Hans/README.md)
 
-An invoice, a sales order or an assessment answer keeps its identity when a different person reads it in another language. The 69 guides in this collection show how that requirement applies to buying, stock, sales, banking, payroll, messaging and other business tasks. Each application has a detailed English evidence profile and a documented workflow and worked acceptance example in all four reading editions. The four editions are publication languages. Individual products disclose different language support.
+The [optional business capabilities](../../capabilities/README.md) contain the implementation contracts and acceptance cases in English, Afrikaans, German and Simplified Chinese. The tables below locate each publisher’s observations and link to the same workflow. Published language support for an individual application is recorded separately.
 
 ## Find a workflow
 
@@ -27,7 +27,7 @@ The [shared language contract](languages/README.md) covers the reader, party and
 
 ## How to read the evidence
 
-The cohort is exactly the 69 records with `head_status = unresolved` in the [398-listing snapshot](../extensions/marketplace.json). On November 18, 2026 all 69 exact repository metadata lookups returned HTTP 404 to the research client. That result leaves the reason for unavailability open. Each profile starts from the publisher’s product page. Some publishers also expose manuals, screenshots, alternate repositories or downloadable distributions. The underlying [source inventory](../marketplace-model/README.md) retains its original denominator and revision history.
+The cohort is exactly the 69 records with `head_status = unresolved` in the [398-listing snapshot](../extensions/marketplace.json). At the recorded observation date, all 69 exact repository metadata lookups returned HTTP 404 to the research client. That result leaves the reason for unavailability open. Each profile starts from the publisher’s product page. Some publishers also expose manuals, screenshots, alternate repositories or downloadable distributions. The underlying [source inventory](../marketplace-model/README.md) retains its original denominator and revision history.
 
 | Strongest additional material for a listing | Listings | Interpretation |
 |---|---:|---|

@@ -25,9 +25,9 @@ A submitted sales order can therefore be on hold, partly delivered, partly bille
 
 ## Transaction architecture
 
-A service operation validates identity and permissions, loads the authoritative record state, checks dependencies, calculates consequences, persists the document and dependent records, and schedules any after-commit work. The exact event order and transaction boundaries are specified in [document lifecycle and transactions](../runtime/document-lifecycle-and-transactions.md).
+A service operation validates identity and permissions, loads the authoritative record state, checks dependencies, calculates consequences, persists the document and dependent records, and schedules any after-commit work. The exact event order and transaction boundaries are specified in [document lifecycle and transactions](../services/document-lifecycle-and-transactions.md).
 
-Inventory movement and financial movement are related but not identical. A reservation changes availability without posting an inventory movement. A purchase receipt can establish value and an accrued liability before an invoice exists. An invoice can recognise a party balance without moving stock when the movement already occurred. Payment can settle a party balance without changing revenue. See [cross-domain transactions](../domains/cross-domain-transactions.md).
+Inventory movement and financial movement are related but not identical. A reservation changes availability without posting an inventory movement. A purchase receipt can establish value and an accrued liability before an invoice exists. An invoice can recognise a party balance without moving stock when the movement already occurred. Payment can settle a party balance without changing revenue. See [cross-domain transactions](../transactions/cross-domain-transactions.md).
 
 ## Metadata as active behaviour
 
@@ -80,8 +80,8 @@ A unified implementation may eliminate internal synchronization between duplicat
 
 ## Replacement sequence and completion gates
 
-First implement [identity and persistence](../data/persistence-identity-and-values.md), [effective configuration](../runtime/extensibility-and-configuration.md), and [permissions](../runtime/identity-permissions-and-tenancy.md). Then implement the [document lifecycle and transactions](../runtime/document-lifecycle-and-transactions.md) with verified rollback and concurrency boundaries. Build financial and stock domains on those common guarantees, followed by commercial, workforce, service, project, and integration workflows with their shared consequences.
+First implement [identity and persistence](../services/persistence-identity-and-values.md), [effective configuration](../services/extensibility-and-configuration.md), and [permissions](../services/identity-permissions-and-tenancy.md). Then implement the [document lifecycle and transactions](../services/document-lifecycle-and-transactions.md) with verified rollback and concurrency boundaries. Build financial and stock domains on those common guarantees, followed by commercial, workforce, service, project, and integration workflows with their shared consequences.
 
 A domain is behaviorally complete only when its records, decision rules, calculations, exceptions, state transitions, authorized services, projections, and acceptance outcomes are all specified and verified to the declared level. A structural catalog is complete only for the definitions it enumerates. An endpoint inventory proves discovery, not financial correctness. Execution-dependent or provider-dependent behavior must remain identified until it has a measured fixture; documented proposed improvements must not be relabelled as observed behavior.
 
-The [domain model](../data/domain-model.md) defines shared business ownership, the [service matrix](../interfaces/service-contracts.md#operation-contract-matrix) defines reusable operations, and [background processing](../runtime/background-work-and-consistency.md) defines delayed completion and recovery. These repository-local contracts are the implementation references; no external code listing is required to follow their rules.
+The [domain model](../governance/domain-model.md) defines shared business ownership, the [service matrix](../services/service-contracts.md#operation-contract-matrix) defines reusable operations, and [background processing](../services/background-work-and-consistency.md) defines delayed completion and recovery. These repository-local contracts are the implementation references; no external code listing is required to follow their rules.

@@ -3,11 +3,10 @@
   "identifier": "record_type_bill_of_materials_creator",
   "name": "bill_of_materials_creator",
   "display_name": "bill of materials creator",
-  "source_name_digest": "bb0790919942db8c5030c94bf226963d000e94042f6b37aca01e1f1426cbfbc0",
-  "source_pack": "enterprise",
-  "source_artifact": "source-artifact-0bc2cf5b32a5e7cb0408",
+  "capability_group": "enterprise",
+  "component_identifier": "component_enterprise_manufacturing_record_definitions_bill_of_materials_creator_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "independent_record",
   "supports_posting_and_cancellation": true,
   "ordered_field_names": [
@@ -31,7 +30,7 @@
     "set_rate_based_on_warehouse",
     "buying_price_list",
     "price_list_currency",
-    "plc_conversion_rate",
+    "price_list_currency_conversion_rate",
     "column_break_ivyw",
     "currency",
     "conversion_rate",
@@ -154,14 +153,13 @@
     }
   ],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 40,
   "fields": [
     {
       "identifier": "record_type_bill_of_materials_creator.company",
       "name": "company",
-      "source_field_ordinal": 0,
-      "source_name_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d",
+      "field_ordinal": 0,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -175,26 +173,45 @@
         "remember_last_selected_value": 1,
         "required": 1
       },
-      "display_name": "company"
+      "display_name": "company",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_company"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.currency_detail",
       "name": "currency_detail",
-      "source_field_ordinal": 1,
-      "source_name_digest": "45739f89a9cc86618671e1e1416e14055d45d4aeca3c608b445c06da0f9bd936",
+      "field_ordinal": 1,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "costing"
+      "display_name": "costing",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 15
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "45739f89a9cc86618671e1e1416e14055d45d4aeca3c608b445c06da0f9bd936",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.raw_material_cost_as_per",
       "name": "raw_material_cost_as_per",
-      "source_field_ordinal": 2,
-      "source_name_digest": "c555354847cc513fa83ad17e3593ee6c3368e6b7ad6cea78503545779dca8a62",
+      "field_ordinal": 2,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -226,13 +243,31 @@
         ],
         "required": 1
       },
-      "display_name": "rate of materials based on"
+      "display_name": "rate of materials based on",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "valuation_rate",
+          "last_purchase_rate",
+          "price_list"
+        ],
+        "empty_option_explicitly_listed": false,
+        "default": {
+          "kind": "symbolic_text",
+          "value": "valuation_rate"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": true,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "c555354847cc513fa83ad17e3593ee6c3368e6b7ad6cea78503545779dca8a62"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.buying_price_list",
       "name": "buying_price_list",
-      "source_field_ordinal": 3,
-      "source_name_digest": "d0e2849c062ef3e73718f6f7d7ee99052de0fa4145cfdd493ecc9e4c20e2f9a8",
+      "field_ordinal": 3,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -263,21 +298,34 @@
               }
             ]
           },
-          "source_value_digest": "4604dc9c997c3742c4e82e43e2f72c889568fd227218d7ae7f4cf1c13b391251",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.raw material cost as per equals price_list",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "4604dc9c997c3742c4e82e43e2f72c889568fd227218d7ae7f4cf1c13b391251"
         },
         "target_record_type": {
           "kind": "record_type",
           "identifier": "record_type_price_list"
         }
       },
-      "display_name": "price list"
+      "display_name": "price list",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_price_list"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "d0e2849c062ef3e73718f6f7d7ee99052de0fa4145cfdd493ecc9e4c20e2f9a8"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.price_list_currency",
       "name": "price_list_currency",
-      "source_field_ordinal": 4,
-      "source_name_digest": "1f51b7fc75a5e2b8372e4650ce4d00f63de2f9867365df55739ef092375926ea",
+      "field_ordinal": 4,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -308,8 +356,10 @@
               }
             ]
           },
-          "source_value_digest": "a82f63fb0b6973d5c7778937ce4af4b4b83223f92f45e680989cd3aef843aece",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.raw material cost as per equals price_list",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "a82f63fb0b6973d5c7778937ce4af4b4b83223f92f45e680989cd3aef843aece"
         },
         "target_record_type": {
           "kind": "record_type",
@@ -318,13 +368,24 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "price list currency"
+      "display_name": "price list currency",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_currency"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 4,
+      "source_name_digest": "1f51b7fc75a5e2b8372e4650ce4d00f63de2f9867365df55739ef092375926ea"
     },
     {
-      "identifier": "record_type_bill_of_materials_creator.plc_conversion_rate",
-      "name": "plc_conversion_rate",
-      "source_field_ordinal": 5,
-      "source_name_digest": "725b7c338c477e05b551863e7bba798d81d7780a790ad1a0cc1c6f11d62d6637",
+      "identifier": "record_type_bill_of_materials_creator.price_list_currency_conversion_rate",
+      "name": "price_list_currency_conversion_rate",
+      "field_ordinal": 5,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -355,29 +416,51 @@
               }
             ]
           },
-          "source_value_digest": "a82f63fb0b6973d5c7778937ce4af4b4b83223f92f45e680989cd3aef843aece",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.raw material cost as per equals price_list",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "a82f63fb0b6973d5c7778937ce4af4b4b83223f92f45e680989cd3aef843aece"
         }
       },
-      "display_name": "price list exchange rate"
+      "display_name": "price list exchange rate",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 5,
+      "source_name_digest": "725b7c338c477e05b551863e7bba798d81d7780a790ad1a0cc1c6f11d62d6637",
+      "source_identifier": "record_type_bill_of_materials_creator.plc_conversion_rate",
+      "source_name": "plc_conversion_rate"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.column_break_ivyw",
       "name": "column_break_ivyw",
-      "source_field_ordinal": 6,
-      "source_name_digest": "5611f43aa163259b64ac4a66f4a20f72d06a89b7b06c582513cb91c5e643843c",
+      "field_ordinal": 6,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 21
+      },
+      "source_field_ordinal": 6,
+      "source_name_digest": "5611f43aa163259b64ac4a66f4a20f72d06a89b7b06c582513cb91c5e643843c",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.currency",
       "name": "currency",
-      "source_field_ordinal": 7,
-      "source_name_digest": "0e4989ec47c3d70bba675521906d037a8a6bbb4ca692be343ec2b511ac64e2af",
+      "field_ordinal": 7,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -391,13 +474,29 @@
         },
         "required": 1
       },
-      "display_name": "currency"
+      "display_name": "currency",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_currency"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 7,
+      "source_name_digest": "0e4989ec47c3d70bba675521906d037a8a6bbb4ca692be343ec2b511ac64e2af",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "currency",
+      "reconciled_properties": [
+        "in_list_view"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.conversion_rate",
       "name": "conversion_rate",
-      "source_field_ordinal": 8,
-      "source_name_digest": "55c7669b9312aa185675c4ec2e3a4c5565b9afe4f2646ea30755bafe99b87b66",
+      "field_ordinal": 8,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -413,31 +512,59 @@
           "value": "9"
         }
       },
-      "display_name": "conversion rate"
+      "display_name": "conversion rate",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "integer_text",
+          "value": "9"
+        },
+        "default": {
+          "kind": "integer_text",
+          "value": "1"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 8,
+      "source_name_digest": "55c7669b9312aa185675c4ec2e3a4c5565b9afe4f2646ea30755bafe99b87b66",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "conversion_rate",
+      "reconciled_properties": [
+        "allow_on_submit"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.materials_section",
       "name": "materials_section",
-      "source_field_ordinal": 9,
-      "source_name_digest": "1206fb015207be58135c52b30af45df88bed78c5c2e82dbe2792c32837b39f56",
+      "field_ordinal": 9,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 28
+      },
+      "source_field_ordinal": 9,
+      "source_name_digest": "1206fb015207be58135c52b30af45df88bed78c5c2e82dbe2792c32837b39f56",
       "excluded_source_attributes": {
         "historical_field_type": {
           "source_value_digest": "260cce9ac4caf503aae3aee7982b898b0e2332ad3fd5ef989c434b36cce2ad72",
           "exclusion_reason": "historical_mapping"
         }
-      }
+      },
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.items",
       "name": "items",
-      "source_field_ordinal": 10,
-      "source_name_digest": "3c22349f8d0b6077e455e7638fb49a4eee40103dc09ce17ed889569f429c91cb",
+      "field_ordinal": 10,
       "value_type": "owned_record_collection",
       "persistence": "owned_child_records",
       "required_when_no_conditional_override": false,
@@ -451,6 +578,18 @@
         }
       },
       "display_name": "items",
+      "value_contract": {
+        "value_kind": "ordered_owned_records",
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_bill_of_materials_creator_item"
+        },
+        "ownership": "Each row stores one parent record identity, parent record type, parent field, and row position. Preserve row ordering and prevent attachment of the same owned row to a second parent.",
+        "save_boundary": "Persist the parent and its owned rows in the same transaction.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 10,
+      "source_name_digest": "3c22349f8d0b6077e455e7638fb49a4eee40103dc09ce17ed889569f429c91cb",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "fff139b09e5d6292fd5c2343da7059b4c97c27f0759518c6c8e766059ed80c05",
@@ -460,26 +599,40 @@
           "source_value_digest": "0b982d8e0e671a516a46a9a24f94fe01723774dc396ca29cca22f44ac3226a3c",
           "exclusion_reason": "historical_mapping"
         }
-      }
+      },
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "items",
+      "reconciled_properties": [
+        "allow_bulk_edit",
+        "allow_on_submit",
+        "hidden"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.costing_detail",
       "name": "costing_detail",
-      "source_field_ordinal": 11,
-      "source_name_digest": "900c696259adb128e297e280fc9db52e2215a0869ba15644082ca50473f790b9",
+      "field_ordinal": 11,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "costing details"
+      "display_name": "costing details",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 30
+      },
+      "source_field_ordinal": 11,
+      "source_name_digest": "900c696259adb128e297e280fc9db52e2215a0869ba15644082ca50473f790b9",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.raw_material_cost",
       "name": "raw_material_cost",
-      "source_field_ordinal": 12,
-      "source_name_digest": "73e059b42706d8d9bb6fec734a0b52a93a20d1789b3f251aed0e89df256c6f4e",
+      "field_ordinal": 12,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -495,38 +648,71 @@
         },
         "read_only": 1
       },
-      "display_name": "total cost"
+      "display_name": "total cost",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 12,
+      "source_name_digest": "73e059b42706d8d9bb6fec734a0b52a93a20d1789b3f251aed0e89df256c6f4e",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "raw_material_cost",
+      "reconciled_properties": [
+        "allow_on_submit"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.remarks",
       "name": "remarks",
-      "source_field_ordinal": 13,
-      "source_name_digest": "70eda6752e24cd3ff7db368213bb3066f9f30389aad2cd268b0239fedc7d210e",
+      "field_ordinal": 13,
       "value_type": "rich_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "remarks"
+      "display_name": "remarks",
+      "value_contract": {
+        "value_kind": "rich_document_text",
+        "rendering": "Preserve supported formatting while applying the configured content sanitization policy.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 13,
+      "source_name_digest": "70eda6752e24cd3ff7db368213bb3066f9f30389aad2cd268b0239fedc7d210e"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.column_break_ikj_7",
       "name": "column_break_ikj_7",
-      "source_field_ordinal": 14,
-      "source_name_digest": "9cdae2e7aa01b8f905d8c15f7001b50cf17b8c7fc3b46f3cc0d40e91b8704f57",
+      "field_ordinal": 14,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 8
+      },
+      "source_field_ordinal": 14,
+      "source_name_digest": "9cdae2e7aa01b8f905d8c15f7001b50cf17b8c7fc3b46f3cc0d40e91b8704f57",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.project",
       "name": "project",
-      "source_field_ordinal": 15,
-      "source_name_digest": "471cacee86a419f75111098ba664eeb1e7db51b9436a9821c23851df5ed52c15",
+      "field_ordinal": 15,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -538,13 +724,24 @@
           "identifier": "record_type_project"
         }
       },
-      "display_name": "project"
+      "display_name": "project",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_project"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 15,
+      "source_name_digest": "471cacee86a419f75111098ba664eeb1e7db51b9436a9821c23851df5ed52c15"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.item_code",
       "name": "item_code",
-      "source_field_ordinal": 16,
-      "source_name_digest": "443cfb53582c763eea9ef67839a4839e3c7d53c96c555112608de62a5c6bada6",
+      "field_ordinal": 16,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -559,13 +756,29 @@
         },
         "required": 1
       },
-      "display_name": "finished good"
+      "display_name": "finished good",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_item"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 16,
+      "source_name_digest": "443cfb53582c763eea9ef67839a4839e3c7d53c96c555112608de62a5c6bada6",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "item_code",
+      "reconciled_properties": [
+        "allow_on_submit"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.quantity",
       "name": "quantity",
-      "source_field_ordinal": 17,
-      "source_name_digest": "4174f079d6b8bfae27997daf08b2ff5796fd76cb2f053510d6cea04226a0c65f",
+      "field_ordinal": 17,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -574,13 +787,34 @@
       "properties": {
         "required": 1
       },
-      "display_name": "quantity"
+      "display_name": "quantity",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 17,
+      "source_name_digest": "4174f079d6b8bfae27997daf08b2ff5796fd76cb2f053510d6cea04226a0c65f",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "qty",
+      "reconciled_properties": [
+        "allow_on_submit",
+        "default",
+        "depends_on",
+        "description",
+        "label",
+        "non_negative",
+        "show_description_on_click"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.item_name",
       "name": "item_name",
-      "source_field_ordinal": 18,
-      "source_name_digest": "56d289fa435cb78ba69ab8c6b56857d9985248cd530a57f59d120a1d5047423e",
+      "field_ordinal": 18,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -595,13 +829,32 @@
           "source_value_digest": "da79ad258ceaeaf51cece6cd67edaf5f05fa314a66b22565b2715f887bef6179"
         }
       },
-      "display_name": "item name"
+      "display_name": "item name",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "item_code",
+            "item_name"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 18,
+      "source_name_digest": "56d289fa435cb78ba69ab8c6b56857d9985248cd530a57f59d120a1d5047423e",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "item_name",
+      "reconciled_properties": [
+        "allow_on_submit",
+        "hidden",
+        "read_only"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.unit_of_measure",
       "name": "unit_of_measure",
-      "source_field_ordinal": 19,
-      "source_name_digest": "6ff6bf29bdb4777f2e9e02de72def7b71a422da2aeb2e8a1541f9122f466e694",
+      "field_ordinal": 19,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -620,65 +873,127 @@
           "identifier": "record_type_unit_of_measure"
         }
       },
-      "display_name": "unit of measure"
+      "display_name": "unit of measure",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_unit_of_measure"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "item_code",
+            "stock_unit_of_measure"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 19,
+      "source_name_digest": "6ff6bf29bdb4777f2e9e02de72def7b71a422da2aeb2e8a1541f9122f466e694",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "uom",
+      "reconciled_properties": [
+        "allow_on_submit",
+        "hidden",
+        "read_only"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.tab_2_tab",
       "name": "tab_2_tab",
-      "source_field_ordinal": 20,
-      "source_name_digest": "cc1493f908dbf563244d649884e7b41a9d55eac31f7ab6d0dd1c9828acd42cb3",
+      "field_ordinal": 20,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "bill of materials tree"
+      "display_name": "bill of materials tree",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 0
+      },
+      "source_field_ordinal": 20,
+      "source_name_digest": "cc1493f908dbf563244d649884e7b41a9d55eac31f7ab6d0dd1c9828acd42cb3",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.details_tab",
       "name": "details_tab",
-      "source_field_ordinal": 21,
-      "source_name_digest": "b2a8e11ea48aa4a1c9abd339ef15486a60f18b2a7fe9665bdc401e55a657d03d",
+      "field_ordinal": 21,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "final product"
+      "display_name": "final product",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 2
+      },
+      "source_field_ordinal": 21,
+      "source_name_digest": "b2a8e11ea48aa4a1c9abd339ef15486a60f18b2a7fe9665bdc401e55a657d03d",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "details_tab",
+      "reconciled_properties": [
+        "depends_on",
+        "label"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.raw_materials_tab",
       "name": "raw_materials_tab",
-      "source_field_ordinal": 22,
-      "source_name_digest": "52b105e24101c7414b41f5d4b95ef63f02f1e5a6c81050c51a77668d3d656c5b",
+      "field_ordinal": 22,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "subordinate assemblies raw materials"
+      "display_name": "subordinate assemblies raw materials",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 14
+      },
+      "source_field_ordinal": 22,
+      "source_name_digest": "52b105e24101c7414b41f5d4b95ef63f02f1e5a6c81050c51a77668d3d656c5b",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.remarks_tab",
       "name": "remarks_tab",
-      "source_field_ordinal": 23,
-      "source_name_digest": "8d66b0eb63eb7ef08fb46d3d3dafeab9510611a1b1ad6ac97121a2cafcb26a7d",
+      "field_ordinal": 23,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "remarks"
+      "display_name": "remarks",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 32
+      },
+      "source_field_ordinal": 23,
+      "source_name_digest": "8d66b0eb63eb7ef08fb46d3d3dafeab9510611a1b1ad6ac97121a2cafcb26a7d",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.connections_tab",
       "name": "connections_tab",
-      "source_field_ordinal": 24,
-      "source_name_digest": "b802d177bfa23e3300e938a070e1c40e1c637f184bca612e6ca6c80d98fa3d39",
+      "field_ordinal": 24,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -687,13 +1002,20 @@
       "properties": {
         "show_dashboard": 1
       },
-      "display_name": "connections"
+      "display_name": "connections",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 38
+      },
+      "source_field_ordinal": 24,
+      "source_name_digest": "b802d177bfa23e3300e938a070e1c40e1c637f184bca612e6ca6c80d98fa3d39"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.item_group",
       "name": "item_group",
-      "source_field_ordinal": 25,
-      "source_name_digest": "166cba2b10891241e60868763465fce5459ebac2d0fd5d606b6fe04407f4a3ea",
+      "field_ordinal": 25,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -712,13 +1034,40 @@
           "identifier": "record_type_item_group"
         }
       },
-      "display_name": "item group"
+      "display_name": "item group",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_item_group"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "item_code",
+            "item_group"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 25,
+      "source_name_digest": "166cba2b10891241e60868763465fce5459ebac2d0fd5d606b6fe04407f4a3ea",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "item_group",
+      "reconciled_properties": [
+        "allow_on_submit",
+        "description",
+        "fetch_from",
+        "label",
+        "show_description_on_click"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.amended_from",
       "name": "amended_from",
-      "source_field_ordinal": 26,
-      "source_name_digest": "b43b52ad6f6c613ab2fb1330e5f616e71c8b496566b87009de27f6c7b11ed774",
+      "field_ordinal": 26,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -733,38 +1082,65 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "amended from"
+      "display_name": "amended from",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_bill_of_materials_creator"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 26,
+      "source_name_digest": "b43b52ad6f6c613ab2fb1330e5f616e71c8b496566b87009de27f6c7b11ed774"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.section_break_zcfg",
       "name": "section_break_zcfg",
-      "source_field_ordinal": 27,
-      "source_name_digest": "da56ea7dc2feff30754805d041efdaf01ed71aa43151b16d1e677e07b9f83160",
+      "field_ordinal": 27,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "warehouse"
+      "display_name": "warehouse",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 24
+      },
+      "source_field_ordinal": 27,
+      "source_name_digest": "da56ea7dc2feff30754805d041efdaf01ed71aa43151b16d1e677e07b9f83160",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.column_break_tzot",
       "name": "column_break_tzot",
-      "source_field_ordinal": 28,
-      "source_name_digest": "12506fed101c77092cf32b935defc668a6ee5ca638e562583c64979f54c1436e",
+      "field_ordinal": 28,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 26
+      },
+      "source_field_ordinal": 28,
+      "source_name_digest": "12506fed101c77092cf32b935defc668a6ee5ca638e562583c64979f54c1436e",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.default_warehouse",
       "name": "default_warehouse",
-      "source_field_ordinal": 29,
-      "source_name_digest": "d534212c6babf32d3dec9dc4e3e520acd6b9229c0afde27d1b4e85a58c3a86e8",
+      "field_ordinal": 29,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -776,37 +1152,70 @@
           "identifier": "record_type_warehouse"
         }
       },
-      "display_name": "default source warehouse"
+      "display_name": "default source warehouse",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_warehouse"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 29,
+      "source_name_digest": "d534212c6babf32d3dec9dc4e3e520acd6b9229c0afde27d1b4e85a58c3a86e8",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "default_warehouse",
+      "reconciled_properties": [
+        "allow_on_submit",
+        "depends_on"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.bill_of_materials_creator",
       "name": "bill_of_materials_creator",
-      "source_field_ordinal": 30,
-      "source_name_digest": "a2e9f65b22eed15a1bfc721ef7886293e269ccd280c8ff9ead78660d8be90b2d",
+      "field_ordinal": 30,
       "value_type": "rendered_markup",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "rendered_markup",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 1
+      },
+      "source_field_ordinal": 30,
+      "source_name_digest": "a2e9f65b22eed15a1bfc721ef7886293e269ccd280c8ff9ead78660d8be90b2d",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.section_break_ylsl",
       "name": "section_break_ylsl",
-      "source_field_ordinal": 31,
-      "source_name_digest": "4e300f5a8c10fa6c515366ab8db41cbe8b3c59c4ce3e4b19d231a4370ef2e87a",
+      "field_ordinal": 31,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 3
+      },
+      "source_field_ordinal": 31,
+      "source_name_digest": "4e300f5a8c10fa6c515366ab8db41cbe8b3c59c4ce3e4b19d231a4370ef2e87a",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.set_rate_based_on_warehouse",
       "name": "set_rate_based_on_warehouse",
-      "source_field_ordinal": 32,
-      "source_name_digest": "aea2cf2b2eac0a3d8336d7f2b40fcbc6b64fdfaf88eb452a44bb842f1e2431b7",
+      "field_ordinal": 32,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -840,29 +1249,59 @@
               }
             ]
           },
-          "source_value_digest": "6fff4820dac33f3d385847b3b7be057b46c121a8b6473e7de6de0e9cc7570a07",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.raw material cost as per equals valuation_rate",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "6fff4820dac33f3d385847b3b7be057b46c121a8b6473e7de6de0e9cc7570a07"
         }
       },
-      "display_name": "set valuation rate based on source warehouse"
+      "display_name": "set valuation rate based on source warehouse",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 32,
+      "source_name_digest": "aea2cf2b2eac0a3d8336d7f2b40fcbc6b64fdfaf88eb452a44bb842f1e2431b7",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "set_rate_based_on_warehouse",
+      "reconciled_properties": [
+        "allow_on_submit"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.section_break_yixm",
       "name": "section_break_yixm",
-      "source_field_ordinal": 33,
-      "source_name_digest": "ed9b655ad73e2396ebc59c13deff1292a8372372ea1d0cd524d10642d63a3f65",
+      "field_ordinal": 33,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 34
+      },
+      "source_field_ordinal": 33,
+      "source_name_digest": "ed9b655ad73e2396ebc59c13deff1292a8372372ea1d0cd524d10642d63a3f65",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.status",
       "name": "status",
-      "source_field_ordinal": 34,
-      "source_name_digest": "cfc31bcc34ed7f4cc7895026ae8a54f0494f73757e9f914d0f6ed90f9bc34f51",
+      "field_ordinal": 34,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -909,25 +1348,60 @@
         ],
         "read_only": 1
       },
-      "display_name": "status"
+      "display_name": "status",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "draft",
+          "submitted",
+          "in_progress",
+          "completed",
+          "failed",
+          "cancelled"
+        ],
+        "empty_option_explicitly_listed": false,
+        "default": {
+          "kind": "symbolic_text",
+          "value": "draft"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 34,
+      "source_name_digest": "cfc31bcc34ed7f4cc7895026ae8a54f0494f73757e9f914d0f6ed90f9bc34f51",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "status",
+      "reconciled_properties": [
+        "in_list_view",
+        "in_standard_filter",
+        "options"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.column_break_irab",
       "name": "column_break_irab",
-      "source_field_ordinal": 35,
-      "source_name_digest": "daf53cffdfab5b714ec0a9e10d9a23f11a7fd8c6a7326cfd473b19110c825a08",
+      "field_ordinal": 35,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 36
+      },
+      "source_field_ordinal": 35,
+      "source_name_digest": "daf53cffdfab5b714ec0a9e10d9a23f11a7fd8c6a7326cfd473b19110c825a08"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.error_log",
       "name": "error_log",
-      "source_field_ordinal": 36,
-      "source_name_digest": "b88595afe48dba82a254665e73184fb26bb6cec019c3d276a8ddd5892a5d36db",
+      "field_ordinal": 36,
       "value_type": "multiline_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -936,13 +1410,24 @@
       "properties": {
         "read_only": 1
       },
-      "display_name": "error log"
+      "display_name": "error log",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 36,
+      "source_name_digest": "b88595afe48dba82a254665e73184fb26bb6cec019c3d276a8ddd5892a5d36db",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "error_log",
+      "reconciled_properties": [
+        "depends_on",
+        "no_copy"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.section_break_xvld",
       "name": "section_break_xvld",
-      "source_field_ordinal": 37,
-      "source_name_digest": "f332877fc35c2d9910697b28931d86bdb32461200cb426cc15cd89645eeeaf84",
+      "field_ordinal": 37,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -963,17 +1448,27 @@
               "name": "is_phantom"
             }
           },
-          "source_value_digest": "a82a096a49947df0c567dac1615daa4df01982fdb1a103c36129f7709f36673f",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "logical not (record.is phantom)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "a82a096a49947df0c567dac1615daa4df01982fdb1a103c36129f7709f36673f"
         }
       },
-      "display_name": "operations routing"
+      "display_name": "operations routing",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 12
+      },
+      "source_field_ordinal": 37,
+      "source_name_digest": "f332877fc35c2d9910697b28931d86bdb32461200cb426cc15cd89645eeeaf84",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_bill_of_materials_creator.routing",
       "name": "routing",
-      "source_field_ordinal": 38,
-      "source_name_digest": "03be40e9ee0f61af536771520187496555e205856ac022ab80d7a11dea79f4f9",
+      "field_ordinal": 38,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -985,13 +1480,31 @@
           "identifier": "record_type_routing"
         }
       },
-      "display_name": "routing"
+      "display_name": "routing",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_routing"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 38,
+      "source_name_digest": "03be40e9ee0f61af536771520187496555e205856ac022ab80d7a11dea79f4f9",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "routing",
+      "reconciled_properties": [
+        "depends_on",
+        "description",
+        "show_description_on_click"
+      ]
     },
     {
       "identifier": "record_type_bill_of_materials_creator.is_phantom",
       "name": "is_phantom",
-      "source_field_ordinal": 39,
-      "source_name_digest": "41fe684be4c3534a0f6f7af6fdd7eae1a9ab3ca9af70f8c3a46506cc527c3ae5",
+      "field_ordinal": 39,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1004,9 +1517,48 @@
         },
         "read_only": 1
       },
-      "display_name": "is phantom item"
+      "display_name": "is phantom item",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 39,
+      "source_name_digest": "41fe684be4c3534a0f6f7af6fdd7eae1a9ab3ca9af70f8c3a46506cc527c3ae5",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "is_phantom",
+      "reconciled_properties": [
+        "depends_on",
+        "label",
+        "read_only"
+      ]
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "ordinary record rename disabled",
+    "strategy": "user_supplied_identifier",
+    "rule": "Require a user-supplied identifier and validate uniqueness."
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "independent_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "Use draft, posted, and cancelled record states with explicit posting and cancellation operations."
+  },
+  "source_name_digest": "bb0790919942db8c5030c94bf226963d000e94042f6b37aca01e1f1426cbfbc0",
+  "source_pack": "enterprise",
+  "source_artifact": "source-artifact-0bc2cf5b32a5e7cb0408",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "3d2efca0a7f8c142475deb9504da6e9afa28e5dfcb1638127f24455fccf91ffd",
@@ -1028,5 +1580,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "manufacturing.bill_of_materials_creator",
+    "status": "declared",
+    "dictionary": "schema/entities/manufacturing.json",
+    "declaration_name": "BOM Creator",
+    "declaration_catalog": "docs/rebuild/model/catalog/erpnext-manufacturing-01.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

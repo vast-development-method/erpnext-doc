@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Audit a restored September operation catalog, or print one resolved contract as JSON."""
+"""Resolve a stable operation identity or audit its declarations, procedures and applicability."""
 
 import argparse
 from collections import Counter, defaultdict
+import csv
 import hashlib
 import json
 from pathlib import Path
@@ -58,7 +59,7 @@ def digest(row):
     return hashlib.sha256(encoded.encode("utf-8")).digest()
 
 
-def inspect(edition, wanted):
+def inspect_original(edition, wanted):
     root = edition / "schemas/operations"
     corrections = load(HERE / "stock-controller.json")
     duplicate_register = load(HERE / "duplicates.json")
@@ -137,16 +138,109 @@ def inspect(edition, wanted):
     }
 
 
+def binding_rows(directory):
+    """Read all indexed binding partitions in order and verify their ranges."""
+    previous = ""
+    with (directory / "index.tsv").open(encoding="utf-8", newline="") as catalog:
+        for part in csv.DictReader(catalog, delimiter="\t"):
+            name = part["partition"]
+            require(Path(name).name == name, f"Invalid partition path: {name}")
+            with (directory / name).open(encoding="utf-8", newline="") as file:
+                rows = list(csv.DictReader(file, delimiter="\t"))
+            identifiers = [row["identifier"] for row in rows]
+            require(len(rows) == int(part["entries"]) and rows, f"Wrong range size: {name}")
+            require(identifiers == sorted(set(identifiers)) and identifiers[0] > previous,
+                    f"Unordered or repeated identifiers: {name}")
+            require((identifiers[0], identifiers[-1]) == (part["first_identifier"], part["last_identifier"]),
+                    f"Incorrect range in {name}")
+            previous = identifiers[-1]
+            yield from rows
+
+
+def inspect(edition, wanted):
+    root = edition / "schemas/operations"
+    latest = root / "current-decisions"
+    if not latest.is_dir():
+        return inspect_original(edition, wanted)
+
+    declarations, locations, found = {}, {}, set()
+    known = {}
+    summaries = {}
+    selected = None
+    for area in AREAS:
+        for path, row in fragments(root, area + "-operation-inventory", "operations"):
+            key = row["identifier"]
+            require(key not in declarations, f"Repeated declaration: {key}")
+            declarations[key] = path
+        for path, row in fragments(root, area + "-decision-contracts", "contracts"):
+            key = row["identifier"]
+            require(key in declarations and key not in locations, f"Unowned or repeated body: {key}")
+            locations[key] = path
+        domain = latest / area
+        expected = defaultdict(set)
+        counts = Counter()
+        for row in binding_rows(domain):
+            key, status, path = row["identifier"], row["availability"], row["current_procedure"]
+            require(key not in known, f"Repeated applicability for {key}")
+            known[key] = status
+            counts[status] += 1
+            if status == "current_definition":
+                require(Path(path).name == path and path, f"Invalid current procedure path: {key}")
+                expected[path].add(key)
+            else:
+                require(status in {"retained_definition", "supporting_or_excluded", "absent_at_binding"}
+                        and key in declarations and path == "-", f"Inconsistent applicability: {key}")
+            if key == wanted:
+                selected = dict(row, area=area)
+        require(set(expected) == {p.name for p in domain.glob("procedures-*.json")},
+                f"Procedure files differ from index for {area}")
+        for name, keys in expected.items():
+            records = load(domain / name)
+            require(len(records) == len(keys) and {r["identifier"] for r in records} == keys,
+                    f"Current procedure identifiers differ: {area}/{name}")
+        summaries[area] = dict(counts)
+    require(set(declarations) == set(locations) and declarations.keys() <= known.keys(),
+            "Declaration, decision body or applicability is missing")
+    for _, row in fragments(root, "operation-index", "operations"):
+        key = row["identifier"]
+        require(key not in found and key in locations and row["catalog"] == locations[key],
+                f"Invalid decision pointer: {key}")
+        found.add(key)
+    require(found == set(declarations), "Some decisions have no lookup entry")
+    require(load(latest / "coverage.json") == summaries, "Current coverage counts differ")
+    if wanted is None:
+        return {"preserved_declarations": len(declarations), "unique_preserved_decisions": len(locations),
+                "bindings_checked": len(known), "availability": summaries}
+    require(selected is not None, f"Unknown operation identifier: {wanted}")
+    status = selected["availability"]
+    result = {"identifier": wanted, "availability": status, "scope": selected["scope"]}
+    if wanted in declarations:
+        result["preserved_declaration"] = "schemas/operations/" + declarations[wanted]
+        result["preserved_decision"] = "schemas/operations/" + locations[wanted]
+    if status == "retained_definition":
+        path = root / locations[wanted]
+        records = load(path)["contracts"]
+    elif status == "current_definition":
+        path = latest / selected["area"] / selected["current_procedure"]
+        records = load(path)
+    else:
+        return result
+    result["applicable_location"] = path.relative_to(edition).as_posix()
+    result["contract"] = next(row for row in records if row["identifier"] == wanted)
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("edition", type=Path, help="Root directory of the expanded edition")
-    parser.add_argument("identifier", nargs="?", help="Exact identifier to retrieve; omit to audit all")
+    parser.add_argument("edition", type=Path, nargs="?", default=HERE.parents[2],
+                        help="Root of the specification checkout (default) or an original research export")
+    parser.add_argument("identifier", nargs="?", help="Stable identifier; omit to audit the catalog")
     args = parser.parse_args()
-    print(json.dumps(inspect(args.edition, args.identifier), ensure_ascii=False, indent=2))
+    print(json.dumps(inspect(args.edition.resolve(), args.identifier), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
     try:
         main()
     except (OSError, ValueError, KeyError) as err:
-        sys.exit("Cannot resolve checkpoint: " + str(err))
+        sys.exit("Cannot resolve operation: " + str(err))

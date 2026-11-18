@@ -1,5 +1,7 @@
 # Dairy Management
 
+[Business workflow and acceptance cases](../../../capabilities/guides/supply.md#milk-collection-and-component-pricing).
+
 Apoorv Soral lists versions 14 and 15. The app covers milk collection, instruments for weight and quality readings, van routes, raw milk reception, fat adjustment and deliveries. The publisher’s broader dairy brochure also describes reconciling supplier bills against fat and solids-not-fat (SNF) variations at the Raw Milk Reception Dock, and keeping a collection ledger per van. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/dairy) · [Publisher’s dairy brochure](https://www.dexciss.io/web/content/2618?unique=3d52519c20bc555970e06e27772ba60aea911c45)
 
 ## What the recovered source implements
@@ -12,10 +14,4 @@ The source also contains Van Collection, a Raw Milk Reception Dock transaction a
 
 ## Proposed rebuild contract and acceptance
 
-A collection agent records producer, centre, collection timestamp, product, measurement unit, device observation IDs, volume and quality. Preserve raw and corrected readings and the rate version. A dispatch groups producer collections into a vehicle run. The receiver records physically accepted quantity, any discrepancy and quality result. Supplier settlement references accepted measurements and the rate contract. A corrected reading or rate version generates an auditable adjustment after settlement.
-
-- In simplified pricing with deductions and incentives disabled, fat rate 80 and SNF rate 30 with readings 4.0% and 8.5% give `(80 × 4 + 30 × 8.5) / 100 = 5.75`. For 100 volume units the value is 575 in the rate’s currency. A replayed device reading cannot double the volume or value.
-- A vehicle picks up 100 and delivers 98 in the same unit. The dock comparison reports a variance of −2. The operator must give an explicit disposition before a discrepancy changes the supplier’s payable.
-- With no applicable rate, show the missing centre, date and milk type, and leave the supplier settlement unposted.
-
-Translate producer receipts, quality terms, discrepancy reasons and units for display. Retain numeric measurements, instrument codes and the original label in the device record. Afrikaans decimal-comma and English decimal-point renderings of the SNF reading must lead to the same rate calculation. Never infer a conversion between litres and kilograms from language.
+[Read the consolidated acceptance cases](../../../capabilities/guides/supply.md#milk-collection-and-component-pricing-2).

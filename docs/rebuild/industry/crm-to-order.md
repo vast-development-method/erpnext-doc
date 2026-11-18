@@ -1,6 +1,8 @@
-# Frappe CRM deal to ERPNext quote, customer and order
+# Sales deal to quotation, customer and order
 
-ERPNext's built-in CRM owns its own Lead, Opportunity and Prospect records. The separate Frappe CRM product owns CRM Lead, CRM Deal, CRM Organization and CRM Product. Their similar names do not make the records interchangeable. A native ERPNext opportunity drives downstream quotation status through the opportunity/quotation links. The extension deal uses explicit cross-application deal, customer and product links. Both routes ultimately hand off to the same ERP selling, stock and accounting domains. [Native opportunity workflow](../business/sales-pipeline-and-approval.md) · [CRM integration settings](https://github.com/frappe/crm/blob/9ace234fceb3c5e7bd630b74f44ba1779e831abe/crm/fcrm/doctype/erpnext_crm_settings/erpnext_crm_settings.py)
+The core sales pipeline owns Lead, Opportunity and Prospect records. The optional deal-management application owns CRM Lead, CRM Deal, CRM Organization and CRM Product. Their similar names do not make the records interchangeable. A sales opportunity drives downstream quotation status through the opportunity/quotation links. The extension deal uses explicit cross-application deal, customer and product links. Both routes ultimately hand off to the same ERP selling, stock and accounting domains. [Native opportunity workflow](../business/sales-pipeline-and-approval.md) · [CRM integration settings](https://github.com/frappe/crm/blob/9ace234fceb3c5e7bd630b74f44ba1779e831abe/crm/fcrm/doctype/erpnext_crm_settings/erpnext_crm_settings.py)
+
+The [commercial handoff](../../people-and-services/commercial-handoff.md) specifies the receiving party and sales records.
 
 | Operation | On one site | Across sites |
 |---|---|---|

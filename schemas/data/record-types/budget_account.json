@@ -3,11 +3,10 @@
   "identifier": "record_type_budget_account",
   "name": "budget_account",
   "display_name": "budget account",
-  "source_name_digest": "f4c158eb0634fe9663973178be2b3df737d1c2cc5faede59e29da81d013daa77",
-  "source_pack": "enterprise",
-  "source_artifact": "source-artifact-ec605a391d9d9ff1b7b8",
+  "capability_group": "enterprise",
+  "component_identifier": "component_enterprise_accounts_record_definitions_budget_account_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "owned_child_record",
   "supports_posting_and_cancellation": false,
   "ordered_field_names": [
@@ -35,14 +34,13 @@
   },
   "declared_permission_grants": [],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 2,
   "fields": [
     {
       "identifier": "record_type_budget_account.account",
       "name": "account",
-      "source_field_ordinal": 0,
-      "source_name_digest": "a2b520d68009c64e1dcdf8cbc40f0f870d1427d455bfe18d4963b7f154b76cda",
+      "field_ordinal": 0,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -57,13 +55,24 @@
         "required": 1,
         "indexed_for_search": 1
       },
-      "display_name": "account"
+      "display_name": "account",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "a2b520d68009c64e1dcdf8cbc40f0f870d1427d455bfe18d4963b7f154b76cda"
     },
     {
       "identifier": "record_type_budget_account.budget_amount",
       "name": "budget_amount",
-      "source_field_ordinal": 1,
-      "source_name_digest": "fd265cd4fc903cec163fb68a7994d5284302f2e8cd3fe1560385abe33f07d49e",
+      "field_ordinal": 1,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -78,9 +87,40 @@
         },
         "required": 1
       },
-      "display_name": "budget amount"
+      "display_name": "budget amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "company_company_default_currency"
+        },
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "fd265cd4fc903cec163fb68a7994d5284302f2e8cd3fe1560385abe33f07d49e"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "ordinary record rename disabled",
+    "strategy": "record_type_default_or_controller_assignment",
+    "rule": "The create operation assigns identity through the record-type naming policy; explicitly named records retain their validated identity."
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "owned_child_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "This record type does not independently implement the post-and-cancel lifecycle."
+  },
+  "source_name_digest": "f4c158eb0634fe9663973178be2b3df737d1c2cc5faede59e29da81d013daa77",
+  "source_pack": "enterprise",
+  "source_artifact": "source-artifact-ec605a391d9d9ff1b7b8",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "10e3e48fc689f7711746a8267f5838221845e8b5accb38a016e756588ef7176d",
@@ -102,5 +142,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "accounting.budget_account",
+    "status": "declared",
+    "dictionary": "schema/entities/accounting-01.json",
+    "declaration_name": "Budget Account",
+    "declaration_catalog": "docs/rebuild/model/catalog/erpnext-accounts-01.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

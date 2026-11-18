@@ -81,3 +81,14 @@ The regenerated report returns rows A, B, and C. A requested visible-index seque
 Export acceptance must inspect raw cell values, column order, hidden-column policy, filter headings, currency and quantity labels, hierarchy indentation, blank versus zero, filename, content type, and permitted download. It must also prove that an unauthorized row or masked salary field cannot reappear through export after being omitted from the interactive view.
 
 ## Report specification boundary
+
+For every implemented report, identify its inclusion predicate, join and grouping keys, formulas, sorting, zero and blank handling, exchange-rate date, permissions, period cutoff and cancellation policy. Specify which ledger or operational balance the result should reconcile to. The report declaration supplies filters and columns. Calculated results need their own cases, including an empty result and a rerun after the data changes.
+
+## Stable export selection
+
+When a user must export exactly the rows seen on screen, retain a prepared result identity or stable record keys. An index-based rerun selects positions from the newly computed result. A row inserted ahead of the selection can therefore change which business record is exported.
+
+## Linked specifications
+
+- **Related decisions** · [regional capability specification](../governance/regional-and-specialised-capabilities.md)
+- **Structured contracts** · [report catalog](../../schemas/interfaces/report-catalog.json)

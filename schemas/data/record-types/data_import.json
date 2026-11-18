@@ -3,11 +3,10 @@
   "identifier": "record_type_data_import",
   "name": "data_import",
   "display_name": "data import",
-  "source_name_digest": "83555bd3d55c7fc6d7232d0c77c07c7c3f678af017cfb9d28437120f3f3d4888",
-  "source_pack": "foundation",
-  "source_artifact": "source-artifact-78c0678a707805192085",
+  "capability_group": "foundation",
+  "component_identifier": "component_foundation_core_record_definitions_data_import_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "independent_record",
   "supports_posting_and_cancellation": false,
   "ordered_field_names": [
@@ -117,14 +116,13 @@
     }
   ],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 30,
   "fields": [
     {
       "identifier": "record_type_data_import.reference_record_type",
       "name": "reference_record_type",
-      "source_field_ordinal": 0,
-      "source_name_digest": "fa57aeb2e82c3a7d9086135c8c4f4b1e7d632d52289990dc5acdbe01f3ed6fd2",
+      "field_ordinal": 0,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -139,13 +137,25 @@
         "required": 1,
         "immutable_after_first_value": 1
       },
-      "display_name": "document type"
+      "display_name": "document type",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_record_type"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true,
+        "change_policy": "Once a nonempty value has been saved, changing the value is prohibited through ordinary edits."
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "fa57aeb2e82c3a7d9086135c8c4f4b1e7d632d52289990dc5acdbe01f3ed6fd2"
     },
     {
       "identifier": "record_type_data_import.import_type",
       "name": "import_type",
-      "source_field_ordinal": 1,
-      "source_name_digest": "b5fcade83e001796777e77c5eee3fb11665dd183e77762fc44586379b5f611c3",
+      "field_ordinal": 1,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -178,13 +188,34 @@
         "required": 1,
         "immutable_after_first_value": 1
       },
-      "display_name": "import type"
+      "display_name": "import type",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "",
+          "insert_new_records",
+          "update_existing_records",
+          "insert_or_update_records"
+        ],
+        "empty_option_explicitly_listed": true,
+        "required_when_no_conditional_override": true,
+        "change_policy": "Once a nonempty value has been saved, changing the value is prohibited through ordinary edits.",
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "b5fcade83e001796777e77c5eee3fb11665dd183e77762fc44586379b5f611c3",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "import_type",
+      "reconciled_properties": [
+        "default",
+        "options"
+      ]
     },
     {
       "identifier": "record_type_data_import.import_file",
       "name": "import_file",
-      "source_field_ordinal": 2,
-      "source_name_digest": "b367b2151f55f49732172595092ae5836909dc35435770cd3fad99ced33562c9",
+      "field_ordinal": 2,
       "value_type": "attachment_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -205,8 +236,10 @@
               "name": "islocal"
             }
           },
-          "source_value_digest": "8377b122dc57ff5d1b05087d46b073a0a02a7215abe4b05afc3ac95f2dbeac52",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "logical not (record.islocal)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "8377b122dc57ff5d1b05087d46b073a0a02a7215abe4b05afc3ac95f2dbeac52"
         },
         "visible_in_list": 1,
         "read_only_condition": {
@@ -230,7 +263,9 @@
                   }
                 ]
               },
-              "name": "includes"
+              "name": "contains_value",
+              "contract_catalog": "../conditional-field-semantics.json#/function_contracts",
+              "source_name": "includes"
             },
             "arguments": [
               {
@@ -244,17 +279,30 @@
             ],
             "named_arguments": []
           },
-          "source_value_digest": "1e7f588c2503c1a45390a42e64c27a917468dcb2cc2db478915f539f9408cbcc",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "[success, partial_success].contains value applied to record.status",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "1e7f588c2503c1a45390a42e64c27a917468dcb2cc2db478915f539f9408cbcc"
         }
       },
-      "display_name": "import file"
+      "display_name": "import file",
+      "value_contract": {
+        "value_kind": "file_reference",
+        "authorization": "Resolve attachment access using the file and attached-record permissions.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "b367b2151f55f49732172595092ae5836909dc35435770cd3fad99ced33562c9",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "import_file",
+      "reconciled_properties": [
+        "depends_on"
+      ]
     },
     {
       "identifier": "record_type_data_import.section_import_tree_preview",
       "name": "section_import_tree_preview",
-      "source_field_ordinal": 3,
-      "source_name_digest": "be3ea0e4836c6c34f98fd825649dc35a021e040d3960950d9e77cfe4d27ac082",
+      "field_ordinal": 3,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -269,13 +317,25 @@
         },
         "hidden": 1
       },
-      "display_name": "tree preview"
+      "display_name": "tree preview",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 23
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "be3ea0e4836c6c34f98fd825649dc35a021e040d3960950d9e77cfe4d27ac082",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "section_import_tree_preview",
+      "reconciled_properties": [
+        "css_class"
+      ]
     },
     {
       "identifier": "record_type_data_import.import_tree_preview",
       "name": "import_tree_preview",
-      "source_field_ordinal": 4,
-      "source_name_digest": "0e5ec8454d8ea4863601e1160ec41beffd01b26237656e5fdb62c38dddcc5628",
+      "field_ordinal": 4,
       "value_type": "rendered_markup",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -284,13 +344,25 @@
       "properties": {
         "hide_label": 1
       },
-      "display_name": "tree preview"
+      "display_name": "tree preview",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "rendered_markup",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 24
+      },
+      "source_field_ordinal": 4,
+      "source_name_digest": "0e5ec8454d8ea4863601e1160ec41beffd01b26237656e5fdb62c38dddcc5628",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "import_tree_preview",
+      "reconciled_properties": [
+        "hide_label"
+      ]
     },
     {
       "identifier": "record_type_data_import.import_preview",
       "name": "import_preview",
-      "source_field_ordinal": 5,
-      "source_name_digest": "30d06eae0f8a60b102797adb29a2000f1644e82ea5f5d318f7d4caccdc11679b",
+      "field_ordinal": 5,
       "value_type": "rendered_markup",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -299,13 +371,25 @@
       "properties": {
         "hide_label": 1
       },
-      "display_name": "import preview"
+      "display_name": "import preview",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "rendered_markup",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 26
+      },
+      "source_field_ordinal": 5,
+      "source_name_digest": "30d06eae0f8a60b102797adb29a2000f1644e82ea5f5d318f7d4caccdc11679b",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "import_preview",
+      "reconciled_properties": [
+        "hide_label"
+      ]
     },
     {
       "identifier": "record_type_data_import.section_import_preview",
       "name": "section_import_preview",
-      "source_field_ordinal": 6,
-      "source_name_digest": "a45cc5a28f3ba3bd23d0f0208c3066fa46870315f9b257f372f1ceff38d71f8f",
+      "field_ordinal": 6,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -337,8 +421,10 @@
               }
             ]
           },
-          "source_value_digest": "92db1f7f92a9169a835d02c5049ef2b8a3ca080127f945aa311c5b77cac3852c",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.import file first truthy record.google sheets resource address)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "92db1f7f92a9169a835d02c5049ef2b8a3ca080127f945aa311c5b77cac3852c"
         },
         "style_sheet_class": {
           "kind": "symbolic_text",
@@ -347,25 +433,44 @@
         },
         "hide_border": 1
       },
-      "display_name": "preview"
+      "display_name": "preview",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 25
+      },
+      "source_field_ordinal": 6,
+      "source_name_digest": "a45cc5a28f3ba3bd23d0f0208c3066fa46870315f9b257f372f1ceff38d71f8f",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "section_import_preview",
+      "reconciled_properties": [
+        "css_class"
+      ]
     },
     {
       "identifier": "record_type_data_import.column_break_5",
       "name": "column_break_5",
-      "source_field_ordinal": 7,
-      "source_name_digest": "f41c913c2744104d385fb8e7dd5dd9e52f8fc8ec5407571f6feb57c49fb0ec13",
+      "field_ordinal": 7,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 8
+      },
+      "source_field_ordinal": 7,
+      "source_name_digest": "f41c913c2744104d385fb8e7dd5dd9e52f8fc8ec5407571f6feb57c49fb0ec13"
     },
     {
       "identifier": "record_type_data_import.template_options",
       "name": "template_options",
-      "source_field_ordinal": 8,
-      "source_name_digest": "e0bdc2633c9d7557ffc3ef23d259bf8ccabeca4a541fd61ab2dab6c7f9e4b539",
+      "field_ordinal": 8,
       "value_type": "source_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -380,13 +485,19 @@
         },
         "read_only": 1
       },
-      "display_name": "template options"
+      "display_name": "template options",
+      "value_contract": {
+        "value_kind": "rule_or_extension_text",
+        "evaluation": "Content is configuration for a declared behavior surface; saving text must not silently execute it as an unrestricted system command.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 8,
+      "source_name_digest": "e0bdc2633c9d7557ffc3ef23d259bf8ccabeca4a541fd61ab2dab6c7f9e4b539"
     },
     {
       "identifier": "record_type_data_import.value_mappings_section",
       "name": "value_mappings_section",
-      "source_field_ordinal": 9,
-      "source_name_digest": "582eb0e551b980c0680761f26123bd1bfeec50ff668739ac6059e6ba642c91f1",
+      "field_ordinal": 9,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -400,13 +511,25 @@
           "source_value_digest": "188fbb294b962ffe205a39230ce30e2e97d8ec407f0f704a6fac641de99bbce9"
         }
       },
-      "display_name": "value mappings"
+      "display_name": "value mappings",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 19
+      },
+      "source_field_ordinal": 9,
+      "source_name_digest": "582eb0e551b980c0680761f26123bd1bfeec50ff668739ac6059e6ba642c91f1",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "value_mappings_section",
+      "reconciled_properties": [
+        "css_class"
+      ]
     },
     {
       "identifier": "record_type_data_import.value_mappings",
       "name": "value_mappings",
-      "source_field_ordinal": 10,
-      "source_name_digest": "d3e0e245a820e9323bb1a429227c37053f02f9409e6c2cc808792bed266f7888",
+      "field_ordinal": 10,
       "value_type": "owned_record_collection",
       "persistence": "owned_child_records",
       "required_when_no_conditional_override": false,
@@ -455,8 +578,10 @@
               }
             ]
           },
-          "source_value_digest": "4fc2314dbe2066d44369ba2a82986936be276078dc51096ad3813927c6970971",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(logical not (record.islocal) all truthy (record.import file first truthy record.google sheets resource address))",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "4fc2314dbe2066d44369ba2a82986936be276078dc51096ad3813927c6970971"
         },
         "target_record_type": {
           "kind": "record_type",
@@ -483,7 +608,9 @@
                   }
                 ]
               },
-              "name": "includes"
+              "name": "contains_value",
+              "contract_catalog": "../conditional-field-semantics.json#/function_contracts",
+              "source_name": "includes"
             },
             "arguments": [
               {
@@ -497,16 +624,34 @@
             ],
             "named_arguments": []
           },
-          "source_value_digest": "1e7f588c2503c1a45390a42e64c27a917468dcb2cc2db478915f539f9408cbcc",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "[success, partial_success].contains value applied to record.status",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "1e7f588c2503c1a45390a42e64c27a917468dcb2cc2db478915f539f9408cbcc"
         }
-      }
+      },
+      "value_contract": {
+        "value_kind": "ordered_owned_records",
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_data_import_value_mapping"
+        },
+        "ownership": "Each row stores one parent record identity, parent record type, parent field, and row position. Preserve row ordering and prevent attachment of the same owned row to a second parent.",
+        "save_boundary": "Persist the parent and its owned rows in the same transaction.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 10,
+      "source_name_digest": "d3e0e245a820e9323bb1a429227c37053f02f9409e6c2cc808792bed266f7888",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "value_mappings",
+      "reconciled_properties": [
+        "label"
+      ]
     },
     {
       "identifier": "record_type_data_import.skipped_rows_section",
       "name": "skipped_rows_section",
-      "source_field_ordinal": 11,
-      "source_name_digest": "459a1e843e856f6f3ae1f6169e7adb88d5d4e01370cafba07af69bef5ac7d036",
+      "field_ordinal": 11,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -555,18 +700,27 @@
               }
             ]
           },
-          "source_value_digest": "4fc2314dbe2066d44369ba2a82986936be276078dc51096ad3813927c6970971",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(logical not (record.islocal) all truthy (record.import file first truthy record.google sheets resource address))",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "4fc2314dbe2066d44369ba2a82986936be276078dc51096ad3813927c6970971"
         },
         "hidden": 1
       },
-      "display_name": "skipped rows"
+      "display_name": "skipped rows",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 21
+      },
+      "source_field_ordinal": 11,
+      "source_name_digest": "459a1e843e856f6f3ae1f6169e7adb88d5d4e01370cafba07af69bef5ac7d036"
     },
     {
       "identifier": "record_type_data_import.skipped_rows",
       "name": "skipped_rows",
-      "source_field_ordinal": 12,
-      "source_name_digest": "90708e46068cf40829212ff93bc3116ec2b6f96e6dc8b30a437a46a339da22eb",
+      "field_ordinal": 12,
       "value_type": "owned_record_collection",
       "persistence": "owned_child_records",
       "required_when_no_conditional_override": false,
@@ -615,8 +769,10 @@
               }
             ]
           },
-          "source_value_digest": "4fc2314dbe2066d44369ba2a82986936be276078dc51096ad3813927c6970971",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(logical not (record.islocal) all truthy (record.import file first truthy record.google sheets resource address))",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "4fc2314dbe2066d44369ba2a82986936be276078dc51096ad3813927c6970971"
         },
         "hidden": 1,
         "target_record_type": {
@@ -644,7 +800,9 @@
                   }
                 ]
               },
-              "name": "includes"
+              "name": "contains_value",
+              "contract_catalog": "../conditional-field-semantics.json#/function_contracts",
+              "source_name": "includes"
             },
             "arguments": [
               {
@@ -658,16 +816,34 @@
             ],
             "named_arguments": []
           },
-          "source_value_digest": "1e7f588c2503c1a45390a42e64c27a917468dcb2cc2db478915f539f9408cbcc",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "[success, partial_success].contains value applied to record.status",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "1e7f588c2503c1a45390a42e64c27a917468dcb2cc2db478915f539f9408cbcc"
         }
-      }
+      },
+      "value_contract": {
+        "value_kind": "ordered_owned_records",
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_data_import_skipped_row"
+        },
+        "ownership": "Each row stores one parent record identity, parent record type, parent field, and row position. Preserve row ordering and prevent attachment of the same owned row to a second parent.",
+        "save_boundary": "Persist the parent and its owned rows in the same transaction.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 12,
+      "source_name_digest": "90708e46068cf40829212ff93bc3116ec2b6f96e6dc8b30a437a46a339da22eb",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "skipped_rows",
+      "reconciled_properties": [
+        "label"
+      ]
     },
     {
       "identifier": "record_type_data_import.import_log_heading",
       "name": "import_log_heading",
-      "source_field_ordinal": 13,
-      "source_name_digest": "da6838981fd328f16bdccb2605719a48304abf2905c3fcc9b1fa4528c106aba0",
+      "field_ordinal": 13,
       "value_type": "rendered_markup",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -676,18 +852,31 @@
       "properties": {
         "hide_label": 1,
         "type_specific_options": {
-          "kind": "opaque_source_value",
-          "source_value_digest": "deea8d50f674616461482ca2658ff917be6f74e835a313e9d6348d24225cd5cd",
-          "reason": "Source prose, address, markup, template, or executable content is excluded from the neutral specification; semantics require review."
+          "kind": "semantic_value",
+          "meaning": "Presentation headings distinguish the import log from alternative input methods.",
+          "value_role": "field_instruction",
+          "source_value_digest": "deea8d50f674616461482ca2658ff917be6f74e835a313e9d6348d24225cd5cd"
         }
       },
-      "display_name": "import log"
+      "display_name": "import log",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "rendered_markup",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 27
+      },
+      "source_field_ordinal": 13,
+      "source_name_digest": "da6838981fd328f16bdccb2605719a48304abf2905c3fcc9b1fa4528c106aba0",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "import_log_heading",
+      "reconciled_properties": [
+        "hide_label"
+      ]
     },
     {
       "identifier": "record_type_data_import.import_log_preview",
       "name": "import_log_preview",
-      "source_field_ordinal": 14,
-      "source_name_digest": "c04b3b32dfac13a10092f9fefe7b6127412d3846abe92c9ec30def40e2360756",
+      "field_ordinal": 14,
       "value_type": "rendered_markup",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -696,13 +885,25 @@
       "properties": {
         "hide_label": 1
       },
-      "display_name": "import log preview"
+      "display_name": "import log preview",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "rendered_markup",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 29
+      },
+      "source_field_ordinal": 14,
+      "source_name_digest": "c04b3b32dfac13a10092f9fefe7b6127412d3846abe92c9ec30def40e2360756",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "import_log_preview",
+      "reconciled_properties": [
+        "hide_label"
+      ]
     },
     {
       "identifier": "record_type_data_import.status",
       "name": "status",
-      "source_field_ordinal": 15,
-      "source_name_digest": "cfc31bcc34ed7f4cc7895026ae8a54f0494f73757e9f914d0f6ed90f9bc34f51",
+      "field_ordinal": 15,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -745,13 +946,38 @@
         ],
         "read_only": 1
       },
-      "display_name": "status"
+      "display_name": "status",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "pending",
+          "success",
+          "partial_success",
+          "error",
+          "timed_out"
+        ],
+        "empty_option_explicitly_listed": false,
+        "default": {
+          "kind": "symbolic_text",
+          "value": "pending"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 15,
+      "source_name_digest": "cfc31bcc34ed7f4cc7895026ae8a54f0494f73757e9f914d0f6ed90f9bc34f51",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "status",
+      "reconciled_properties": [
+        "options"
+      ]
     },
     {
       "identifier": "record_type_data_import.template_warnings",
       "name": "template_warnings",
-      "source_field_ordinal": 16,
-      "source_name_digest": "b8b327bf9e38678038b3f7796cfd3cc15bd24b72f63509d5e300e12db4c2fb2a",
+      "field_ordinal": 16,
       "value_type": "source_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -765,13 +991,19 @@
           "source_value_digest": "910ddabffa76a633c14b26f643bcfe5a948190b19d5e6190acc83fd6ce46ee14"
         }
       },
-      "display_name": "template warnings"
+      "display_name": "template warnings",
+      "value_contract": {
+        "value_kind": "rule_or_extension_text",
+        "evaluation": "Content is configuration for a declared behavior surface; saving text must not silently execute it as an unrestricted system command.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 16,
+      "source_name_digest": "b8b327bf9e38678038b3f7796cfd3cc15bd24b72f63509d5e300e12db4c2fb2a"
     },
     {
       "identifier": "record_type_data_import.submit_after_import",
       "name": "submit_after_import",
-      "source_field_ordinal": 17,
-      "source_name_digest": "4298f9b94fb8bacf67326b8f1c17bae9e94949a4162f7131fbdc064dc39a0fd1",
+      "field_ordinal": 17,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -784,13 +1016,29 @@
         },
         "immutable_after_first_value": 1
       },
-      "display_name": "submit after import"
+      "display_name": "submit after import",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "change_policy": "Once a nonempty value has been saved, changing the value is prohibited through ordinary edits."
+      },
+      "source_field_ordinal": 17,
+      "source_name_digest": "4298f9b94fb8bacf67326b8f1c17bae9e94949a4162f7131fbdc064dc39a0fd1"
     },
     {
       "identifier": "record_type_data_import.import_warnings_section",
       "name": "import_warnings_section",
-      "source_field_ordinal": 18,
-      "source_name_digest": "8e224c7ef82afd7d3c0db207d1a5accf35b4274f41cade5aa19063b347b2ebf0",
+      "field_ordinal": 18,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -804,13 +1052,25 @@
           "source_value_digest": "93637496f2e4a429711a269a4946ea77b2b3805b1e3b7080aa2d3f04f2e4ea58"
         }
       },
-      "display_name": "import file errors and warnings"
+      "display_name": "import file errors and warnings",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 16
+      },
+      "source_field_ordinal": 18,
+      "source_name_digest": "8e224c7ef82afd7d3c0db207d1a5accf35b4274f41cade5aa19063b347b2ebf0",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "import_warnings_section",
+      "reconciled_properties": [
+        "css_class"
+      ]
     },
     {
       "identifier": "record_type_data_import.import_warnings",
       "name": "import_warnings",
-      "source_field_ordinal": 19,
-      "source_name_digest": "506dadee8314dd1c9d9a8b51eb7e83ed4b99739c515ab5dd9e9cdce812eabcd7",
+      "field_ordinal": 19,
       "value_type": "rendered_markup",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -819,13 +1079,25 @@
       "properties": {
         "hide_label": 1
       },
-      "display_name": "import warnings"
+      "display_name": "import warnings",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "rendered_markup",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 18
+      },
+      "source_field_ordinal": 19,
+      "source_name_digest": "506dadee8314dd1c9d9a8b51eb7e83ed4b99739c515ab5dd9e9cdce812eabcd7",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "import_warnings",
+      "reconciled_properties": [
+        "hide_label"
+      ]
     },
     {
       "identifier": "record_type_data_import.download_template",
       "name": "download_template",
-      "source_field_ordinal": 20,
-      "source_name_digest": "7a1cefcfca29d8b8339af9ea97585da0c8ff8f74db8c35fb97ccd17349e227cb",
+      "field_ordinal": 20,
       "value_type": "action_control",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -846,17 +1118,31 @@
               "name": "islocal"
             }
           },
-          "source_value_digest": "8377b122dc57ff5d1b05087d46b073a0a02a7215abe4b05afc3ac95f2dbeac52",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "logical not (record.islocal)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "8377b122dc57ff5d1b05087d46b073a0a02a7215abe4b05afc3ac95f2dbeac52"
         }
       },
-      "display_name": "download template"
+      "display_name": "download template",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "action_control",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 2
+      },
+      "source_field_ordinal": 20,
+      "source_name_digest": "7a1cefcfca29d8b8339af9ea97585da0c8ff8f74db8c35fb97ccd17349e227cb",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "download_template",
+      "reconciled_properties": [
+        "depends_on"
+      ]
     },
     {
       "identifier": "record_type_data_import.mute_emails",
       "name": "mute_emails",
-      "source_field_ordinal": 21,
-      "source_name_digest": "4a76cb417b79e0968d9b5f9adde2413440dcf5ed25456fdf01b0b88c036e988e",
+      "field_ordinal": 21,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -869,13 +1155,29 @@
         },
         "immutable_after_first_value": 1
       },
-      "display_name": "don t send emails"
+      "display_name": "don t send emails",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "1"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "change_policy": "Once a nonempty value has been saved, changing the value is prohibited through ordinary edits."
+      },
+      "source_field_ordinal": 21,
+      "source_name_digest": "4a76cb417b79e0968d9b5f9adde2413440dcf5ed25456fdf01b0b88c036e988e"
     },
     {
       "identifier": "record_type_data_import.show_failed_logs",
       "name": "show_failed_logs",
-      "source_field_ordinal": 22,
-      "source_name_digest": "b34af0d3f85025dc5e4fb650aedb12939bef2ca8346331bd492021c26c5afa32",
+      "field_ordinal": 22,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -887,13 +1189,30 @@
           "value": "0"
         }
       },
-      "display_name": "show only failed logs"
+      "display_name": "show only failed logs",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 22,
+      "source_name_digest": "b34af0d3f85025dc5e4fb650aedb12939bef2ca8346331bd492021c26c5afa32",
+      "applicability": "compatibility_field",
+      "entity_field": "show_failed_logs"
     },
     {
       "identifier": "record_type_data_import.document_markup_5",
       "name": "document_markup_5",
-      "source_field_ordinal": 23,
-      "source_name_digest": "9798f77063a171a0460dee7ba44cbe90db2f03c3e57b1d12dfeef5afdfe5b7e5",
+      "field_ordinal": 23,
       "value_type": "rendered_markup",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -932,21 +1251,32 @@
               }
             ]
           },
-          "source_value_digest": "b6feccca40faa22acbd33467e24ec3627457400db087d95e1a4a745b915ea764",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(logical not (record.islocal) all truthy logical not (record.import file))",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "b6feccca40faa22acbd33467e24ec3627457400db087d95e1a4a745b915ea764"
         },
         "type_specific_options": {
-          "kind": "opaque_source_value",
-          "source_value_digest": "ae05665a9e6430f0fe1d1855f715c5abd7c9041d097069c38770c4d589a2985e",
-          "reason": "Source prose, address, markup, template, or executable content is excluded from the neutral specification; semantics require review."
+          "kind": "semantic_value",
+          "meaning": "Presentation headings distinguish the import log from alternative input methods.",
+          "value_role": "field_instruction",
+          "source_value_digest": "ae05665a9e6430f0fe1d1855f715c5abd7c9041d097069c38770c4d589a2985e"
         }
-      }
+      },
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "rendered_markup",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 5
+      },
+      "source_field_ordinal": 23,
+      "source_name_digest": "9798f77063a171a0460dee7ba44cbe90db2f03c3e57b1d12dfeef5afdfe5b7e5",
+      "applicability": "absent_from_effective_declaration"
     },
     {
       "identifier": "record_type_data_import.google_sheets_resource_address",
       "name": "google_sheets_resource_address",
-      "source_field_ordinal": 24,
-      "source_name_digest": "bd2d02361b418cb2006529ceab48e434eaf734262244e5ca670e82120cde4576",
+      "field_ordinal": 24,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -985,8 +1315,10 @@
               }
             ]
           },
-          "source_value_digest": "b86ee0513ab0c8db6914afb89073fc6a5e85849ab2c829c51ccf9b1275250d76",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(logical not (record.islocal) all truthy logical not (record.import file))",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "b86ee0513ab0c8db6914afb89073fc6a5e85849ab2c829c51ccf9b1275250d76"
         },
         "read_only_condition": {
           "kind": "expression_tree",
@@ -1009,7 +1341,9 @@
                   }
                 ]
               },
-              "name": "includes"
+              "name": "contains_value",
+              "contract_catalog": "../conditional-field-semantics.json#/function_contracts",
+              "source_name": "includes"
             },
             "arguments": [
               {
@@ -1023,23 +1357,35 @@
             ],
             "named_arguments": []
           },
-          "source_value_digest": "1e7f588c2503c1a45390a42e64c27a917468dcb2cc2db478915f539f9408cbcc",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "[success, partial_success].contains value applied to record.status",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "1e7f588c2503c1a45390a42e64c27a917468dcb2cc2db478915f539f9408cbcc"
         }
       },
       "display_name": "import from google sheets",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 24,
+      "source_name_digest": "bd2d02361b418cb2006529ceab48e434eaf734262244e5ca670e82120cde4576",
       "excluded_source_attributes": {
         "description": {
           "source_value_digest": "27d208a8eef32aa9a166f6e55e5b35e8785ac85bbf7a60391d93cb10d4fb28e3",
           "exclusion_reason": "source_prose_or_source_editor_metadata"
         }
-      }
+      },
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "google_sheets_url",
+      "reconciled_properties": [
+        "depends_on"
+      ]
     },
     {
       "identifier": "record_type_data_import.refresh_google_sheet",
       "name": "refresh_google_sheet",
-      "source_field_ordinal": 25,
-      "source_name_digest": "713e56d46f84ebebace93996289cce9aa06018b2400729ac7023ffaf6ccc0e1a",
+      "field_ordinal": 25,
       "value_type": "action_control",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -1091,7 +1437,9 @@
                       }
                     ]
                   },
-                  "name": "includes"
+                  "name": "contains_value",
+                  "contract_catalog": "../conditional-field-semantics.json#/function_contracts",
+                  "source_name": "includes"
                 },
                 "arguments": [
                   {
@@ -1107,17 +1455,31 @@
               }
             ]
           },
-          "source_value_digest": "afff6b8eae24af78d5670c3a3c7525553ca541625c8d1f9493d66d6c3e846239",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.google sheets resource address all truthy logical not (record.unsaved) all truthy [success, partial_success].contains value applied to record.status)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "afff6b8eae24af78d5670c3a3c7525553ca541625c8d1f9493d66d6c3e846239"
         }
       },
-      "display_name": "refresh google sheet"
+      "display_name": "refresh google sheet",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "action_control",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 7
+      },
+      "source_field_ordinal": 25,
+      "source_name_digest": "713e56d46f84ebebace93996289cce9aa06018b2400729ac7023ffaf6ccc0e1a",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "refresh_google_sheet",
+      "reconciled_properties": [
+        "depends_on"
+      ]
     },
     {
       "identifier": "record_type_data_import.payload_count",
       "name": "payload_count",
-      "source_field_ordinal": 26,
-      "source_name_digest": "d0220f2fff52218e2dfbea52885bf535ee697dca6b1743816c9dfc3df848d98a",
+      "field_ordinal": 26,
       "value_type": "integer",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1127,13 +1489,24 @@
         "hidden": 1,
         "read_only": 1
       },
-      "display_name": "payload count"
+      "display_name": "payload count",
+      "value_contract": {
+        "value_kind": "integer",
+        "fractional_values_allowed": false,
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false,
+        "input_normalization": "The ordinary record adapter converts numeric input to an integer, including truncating a fractional numeric value toward zero. Invalid or absent numeric input follows the shared numeric-default policy; a domain operation may reject it earlier."
+      },
+      "source_field_ordinal": 26,
+      "source_name_digest": "d0220f2fff52218e2dfbea52885bf535ee697dca6b1743816c9dfc3df848d98a"
     },
     {
       "identifier": "record_type_data_import.delimiter_options",
       "name": "delimiter_options",
-      "source_field_ordinal": 27,
-      "source_name_digest": "134157036e71b2ba6cf450da3f1b08fcf69d069e4c87b68d44951d95ad079ed6",
+      "field_ordinal": 27,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1205,23 +1578,28 @@
                                       },
                                       "name": "import_file"
                                     },
-                                    "name": "split"
+                                    "name": "split",
+                                    "contract_catalog": "../conditional-field-semantics.json#/function_contracts"
                                   },
                                   "arguments": [
                                     {
-                                      "kind": "symbolic_text",
-                                      "value": "unnamed",
+                                      "kind": "literal",
+                                      "value": ".",
                                       "source_value_digest": "7299b59de0b5dad3b622afc3bdf57544e505249c77a6d4254bd14b1fc9a4ade8"
                                     }
                                   ],
                                   "named_arguments": []
                                 },
-                                "name": "post_office_protocol"
+                                "name": "remove_last_value",
+                                "contract_catalog": "../conditional-field-semantics.json#/function_contracts",
+                                "source_name": "post_office_protocol"
                               },
                               "arguments": [],
                               "named_arguments": []
                             },
-                            "name": "to_lower_case"
+                            "name": "lowercase_text",
+                            "contract_catalog": "../conditional-field-semantics.json#/function_contracts",
+                            "source_name": "to_lower_case"
                           },
                           "arguments": [],
                           "named_arguments": []
@@ -1243,23 +1621,40 @@
               }
             ]
           },
-          "source_value_digest": "f5d6623177e351b427f84f48b562131b9b36bb816e4da07811c80129e8050042",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.custom delimiters all truthy (record.google sheets resource address first truthy (record.import file all truthy record.import file.split applied to \".\".remove last value applied to .lowercase text applied to  equals comma_separated_values)))",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "f5d6623177e351b427f84f48b562131b9b36bb816e4da07811c80129e8050042"
         }
       },
       "display_name": "delimiter options",
+      "value_contract": {
+        "value_kind": "text",
+        "default": {
+          "kind": "symbolic_text",
+          "value": "t"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 27,
+      "source_name_digest": "134157036e71b2ba6cf450da3f1b08fcf69d069e4c87b68d44951d95ad079ed6",
       "excluded_source_attributes": {
         "description": {
           "source_value_digest": "5e01d1f82c9e4fdde67743fe173fb6170c3b97eba6611507ea7802e3ef7a43f0",
           "exclusion_reason": "source_prose_or_source_editor_metadata"
         }
-      }
+      },
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "delimiter_options",
+      "reconciled_properties": [
+        "read_only_depends_on"
+      ]
     },
     {
       "identifier": "record_type_data_import.custom_delimiters",
       "name": "custom_delimiters",
-      "source_field_ordinal": 28,
-      "source_name_digest": "7cfaca7b46d0ee2150f74cf4ef4bbf382bfbde1d80897a864f57e80c994c3485",
+      "field_ordinal": 28,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1318,23 +1713,28 @@
                                   },
                                   "name": "import_file"
                                 },
-                                "name": "split"
+                                "name": "split",
+                                "contract_catalog": "../conditional-field-semantics.json#/function_contracts"
                               },
                               "arguments": [
                                 {
-                                  "kind": "symbolic_text",
-                                  "value": "unnamed",
+                                  "kind": "literal",
+                                  "value": ".",
                                   "source_value_digest": "7299b59de0b5dad3b622afc3bdf57544e505249c77a6d4254bd14b1fc9a4ade8"
                                 }
                               ],
                               "named_arguments": []
                             },
-                            "name": "post_office_protocol"
+                            "name": "remove_last_value",
+                            "contract_catalog": "../conditional-field-semantics.json#/function_contracts",
+                            "source_name": "post_office_protocol"
                           },
                           "arguments": [],
                           "named_arguments": []
                         },
-                        "name": "to_lower_case"
+                        "name": "lowercase_text",
+                        "contract_catalog": "../conditional-field-semantics.json#/function_contracts",
+                        "source_name": "to_lower_case"
                       },
                       "arguments": [],
                       "named_arguments": []
@@ -1354,17 +1754,39 @@
               }
             ]
           },
-          "source_value_digest": "8189711a2e9a183bf49a42620cf7a6da89d43e3cb9a6505dd668a9ed1c2f35d4",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.google sheets resource address first truthy (record.import file all truthy record.import file.split applied to \".\".remove last value applied to .lowercase text applied to  equals comma_separated_values))",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "8189711a2e9a183bf49a42620cf7a6da89d43e3cb9a6505dd668a9ed1c2f35d4"
         }
       },
-      "display_name": "custom delimiters"
+      "display_name": "custom delimiters",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 28,
+      "source_name_digest": "7cfaca7b46d0ee2150f74cf4ef4bbf382bfbde1d80897a864f57e80c994c3485",
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "custom_delimiters",
+      "reconciled_properties": [
+        "read_only_depends_on"
+      ]
     },
     {
       "identifier": "record_type_data_import.use_comma_separated_values_sniffer",
       "name": "use_comma_separated_values_sniffer",
-      "source_field_ordinal": 29,
-      "source_name_digest": "81a09291d5fbd768d3ead8bac59abc2e53e6ae993a30f287a7ecfdc3e188aadc",
+      "field_ordinal": 29,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1423,23 +1845,28 @@
                                   },
                                   "name": "import_file"
                                 },
-                                "name": "split"
+                                "name": "split",
+                                "contract_catalog": "../conditional-field-semantics.json#/function_contracts"
                               },
                               "arguments": [
                                 {
-                                  "kind": "symbolic_text",
-                                  "value": "unnamed",
+                                  "kind": "literal",
+                                  "value": ".",
                                   "source_value_digest": "7299b59de0b5dad3b622afc3bdf57544e505249c77a6d4254bd14b1fc9a4ade8"
                                 }
                               ],
                               "named_arguments": []
                             },
-                            "name": "post_office_protocol"
+                            "name": "remove_last_value",
+                            "contract_catalog": "../conditional-field-semantics.json#/function_contracts",
+                            "source_name": "post_office_protocol"
                           },
                           "arguments": [],
                           "named_arguments": []
                         },
-                        "name": "to_lower_case"
+                        "name": "lowercase_text",
+                        "contract_catalog": "../conditional-field-semantics.json#/function_contracts",
+                        "source_name": "to_lower_case"
                       },
                       "arguments": [],
                       "named_arguments": []
@@ -1459,19 +1886,64 @@
               }
             ]
           },
-          "source_value_digest": "8189711a2e9a183bf49a42620cf7a6da89d43e3cb9a6505dd668a9ed1c2f35d4",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.google sheets resource address first truthy (record.import file all truthy record.import file.split applied to \".\".remove last value applied to .lowercase text applied to  equals comma_separated_values))",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "8189711a2e9a183bf49a42620cf7a6da89d43e3cb9a6505dd668a9ed1c2f35d4"
         }
       },
       "display_name": "detect comma separated values type",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 29,
+      "source_name_digest": "81a09291d5fbd768d3ead8bac59abc2e53e6ae993a30f287a7ecfdc3e188aadc",
       "excluded_source_attributes": {
         "description": {
           "source_value_digest": "9353d939211f2908ab020a765571e0fc2d7b4da98717005490291078df48f975",
           "exclusion_reason": "source_prose_or_source_editor_metadata"
         }
-      }
+      },
+      "applicability": "effective_field_properties_in_declaration",
+      "declaration_field": "use_csv_sniffer",
+      "reconciled_properties": [
+        "read_only_depends_on"
+      ]
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "ordinary record rename disabled",
+    "strategy": "formatted_identifier",
+    "rule": "Expand named record fields, calendar components, and serial placeholders in the declared segment order.",
+    "serial_width": 5,
+    "calendar_components": [],
+    "field_substitutions": [
+      "reference_record_type",
+      "creation"
+    ]
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "independent_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "This record type does not independently implement the post-and-cancel lifecycle."
+  },
+  "source_name_digest": "83555bd3d55c7fc6d7232d0c77c07c7c3f678af017cfb9d28437120f3f3d4888",
+  "source_pack": "foundation",
+  "source_artifact": "source-artifact-78c0678a707805192085",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "cc93ec283f27c202b87cc49cb455316f0b34ad0315473d7d4a54de3593532ee6",
@@ -1493,5 +1965,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "information_management.data_import",
+    "status": "declared",
+    "dictionary": "schema/entities/information-management-01.json",
+    "declaration_name": "Data Import",
+    "declaration_catalog": "docs/rebuild/model/catalog/frappe-core-01.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

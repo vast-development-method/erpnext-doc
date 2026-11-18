@@ -75,3 +75,8 @@ Identifier comparison, collation, and maximum lengths are explicit compatibility
 The following queries must return equivalent business records even when their physical indexes differ: all rows owned by one parent collection; a document and its submitted descendants; entries for a voucher; account movements through a cut-off; stock movements in valuation order; all party allocations for an obligation; a hierarchy's descendants; and permission-filtered list/count pairs. Rebuild projected balances and compare them to retained movements after ordinary posting, cancellation, backdated posting, and restoration.
 
 The [entity and relationship dictionaries](../../schema/README.md) describe individual data structures. The calculation catalog specifies business precision and rounding rules.
+
+## Linked specifications
+
+- **Structured contracts** · [common record attributes](../../schemas/data/common-record-attributes.json) · [numeric fields](../../schemas/data/numeric-field-catalog.json) · [conditional field rules](../../schemas/data/conditional-field-rules.json) · [record definitions](../../schemas/data/record-type-index.json)
+- **Related decisions** · [effective metadata](../services/extensibility-and-configuration.md#effective-metadata)

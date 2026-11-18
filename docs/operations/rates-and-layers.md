@@ -1,6 +1,6 @@
 # Derive effective rates and value changes
 
-Use the product valuation method when set. Otherwise use the company default when a company is supplied. Without company context, use the inventory default, falling back to first in, first out. The following procedures price moving-average and ordered-layer stock. Where an effective standard cost governs the item, apply the [standard cost and variance rules](inventory-and-valuation.md#standard-cost-and-effective-dating).
+Use the product valuation method when set. Otherwise use the company default when a company is supplied. Without company context, use the inventory default, falling back to first in, first out. The following procedures price moving-average and ordered-layer stock. The core valuation choices are FIFO, LIFO and moving average. The [inventory specification](inventory-and-valuation.md) separately describes the design and posting requirements of a standard-cost extension.
 
 ## Calculate one moving-average ledger row
 

@@ -1,5 +1,7 @@
 # Tripetto Survey Integration
 
+[Business workflow and acceptance cases](../../../capabilities/guides/communications.md#branching-surveys-and-response-aggregation).
+
 Apoorv Soral lists this survey application for ERPNext 14 and 15. An author creates a Survey, opens the visual editor, designs questions and branches, saves the design, then publishes a web form at a generated URL. A participant's submission produces a Survey Answer. The publisher also describes sharing or embedding the published form and reviewing responses inside the ERP. The material identifies these records and actions without supplying their database schemas. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/tripetto_survey) · [Dexciss product guide](https://www.dexciss.io/tripetto-survey-form)
 
 ## Proposed publication and response contract
@@ -15,8 +17,4 @@ Tripetto distinguishes built-in runner text such as buttons and validation hints
 
 ## Acceptance examples
 
-- A survey branches to delivery questions when the answer ID is `delivery`. A German respondent selects “Lieferung” and an Afrikaans respondent selects “Aflewering”. Both see their localized follow-up question. The analyst obtains two delivery responses in one group.
-- A respondent opens revision 4 and starts typing a Chinese comment. An author changes the prompt and publishes revision 5. Submission retains the revision-4 prompt, locale and original comment. Refreshing the acknowledgement with the same submission ID creates no extra response.
-- A hidden branch posts an unexpected answer or a public respondent attempts to read another submission. Reject the operation, retain other respondents' confidentiality and return a readable error in the selected locale.
-
-Exact URL expiry, authentication of private surveys, concurrent editor saves, fallback behavior and anonymous answer retention require an installed-release check.
+[Read the consolidated acceptance cases](../../../capabilities/guides/communications.md#branching-surveys-and-response-aggregation-2).

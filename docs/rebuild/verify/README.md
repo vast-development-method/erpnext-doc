@@ -1,6 +1,6 @@
-# Verify the rebuild evidence
+# Verify the enterprise specification
 
-Run the consolidated check from the repository root. It reads the checked-in supplement, validates its machine contracts and runs the documented offline examples. It uses Python 3.12+, `jsonschema` 4.18+ with its format dependencies, and `jq` 1.6+. The entry point and its child commands operate offline. Git and Node 24 are additional prerequisites for checking against upstream checkouts. Python and JavaScript are tools for this documentation audit. The exchange schemas and acceptance outcomes are language-neutral.
+Run the consolidated check from the repository root. It reads the checked-in contracts, validates the business dictionary and runs the documented offline examples. It uses Python 3.12+, `jsonschema` 4.18+ with its format dependencies, and `jq` 1.6+. The entry point and its child commands operate offline. Git and Node 24 are additional prerequisites for checking against upstream checkouts. Python and JavaScript are tools for this documentation audit. The exchange schemas and acceptance outcomes are language-neutral.
 
 ```sh
 python3 -B docs/rebuild/verify/run.py
@@ -8,7 +8,7 @@ python3 -B docs/rebuild/verify/run.py
 
 A successful result prints each executed check and the number of schema files, instance validations and resolved local links. A missing checker, broken reference, schema mismatch, differing expected result or explicitly requested unusable checkout produces a nonzero exit. Generated outputs are compared in memory or in temporary directories. Python bytecode caching is disabled for child processes.
 
-## Supply local source revisions
+## Reproduce the source observations
 
 The full source pass expects the ERPNext and Frappe checkouts at the revisions recorded in [the four-app pins](../model/pins.json). The extension directory contains one checkout per ID in [the extension profiles](../extensions/apps.json). The companion directory uses the checkout names in [the companion profiles](../companion/source-profiles.json). Tracked source files must be clean, and the checkout head must match its named revision. To verify release differences byte-for-byte, the corresponding September commits must already be available in the four Git object stores. Place those sources in sibling directories named `erpnext`, `frappe`, `extensions` and `companions`, then run this from the blueprint root.
 
@@ -36,9 +36,23 @@ python3 -B docs/rebuild/verify/run.py \
 
 Each `SKIP` for a source replay means the corresponding checkout arguments were omitted. A pinned GitHub location with an unavailable historical object or an unsupplied repository contributes to the reported unresolved repository/revision count. Supplying `--compare-model` makes the four historical model pins mandatory. External documentation URLs, moving branches, external pages and their availability are outside the offline link check. The source checker verifies that an immutable file or directory exists at the given commit and any cited line interval lies inside that file. Interpreting the cited business rule still requires review.
 
-## Multilingual marketplace guides
+## Check the current operation procedures
+
+The [operation-procedure verifier](current-procedures.py) compares the published decision operands and symbols against a local source checkout. It uses the Python standard library. Run the enterprise comparison from the repository root.
+
+```sh
+python3 docs/rebuild/verify/current-procedures.py enterprise /path/to/checkout
+```
+
+The verifier's module documentation and the [operation catalog](../../../schemas/operations/README.md) describe the supported source scopes and the checked procedures. This source comparison is optional for reading or using the business specification.
+
+## Multilingual capability evidence
 
 The same entry point validates the ten [marketplace catalog shards](../marketplace-guides/coverage.json) and the [multilingual notice fixture](../marketplace-guides/languages/notice.json). For a historical third-party source outside the 313 archived app declarations, consult the separate [source-location receipt](../marketplace-guides/source-locations.json). It identifies the public revision, observed file or tree, verification method and any line anchor. The [invoice language observations](../marketplace-guides/languages/observed.json) were captured on the disposable trading site; the documentation audit reads the saved results.
+
+## Business records and compatibility
+
+The offline pass checks the [entity cross-reference](../coverage-review/entity-cross-reference.tsv) against the active declaration catalogs, the removed-record comparisons, and the [qualified business dictionary](../../../schema/README.md). It reconciles every compatibility-only field to its removed declaration and validates the business dictionaries against their schema. The [business-area register](../coverage-review/README.md) connects the records to workflows and expected results.
 
 ## Scope of a pass
 

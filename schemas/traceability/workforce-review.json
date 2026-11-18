@@ -266,7 +266,7 @@
       "specification_reference": "../../docs/domains/attendance-and-leave.md#application-validation-and-approval",
       "business_rule_summary": [
         "An application validates active employment, dates, entitlement balance, overlap, maximum duration, blocked days, salary processing, attendance compatibility, optional-leave eligibility, service waiting period and approver requirements. The leave-day count is inclusive. A valid half-day date within the interval subtracts one half only when that day is not a holiday. When the leave type excludes holidays, subtract those holiday quantities. Requests producing zero or fewer leave days are rejected.",
-        "For a Monday-through-Friday application containing one excluded full holiday and one valid half day, consumed leave is three and a half days. A half-day marker on the holiday does not subtract another half day. A partially paid leave may consume one day of leave entitlement while reducing pay by a smaller fraction; the entitlement quantity and unpaid-pay equivalent must not share one overloaded field. The payroll mode discrepancy for partially paid leave is documented in [Payroll and benefits](../../docs/domains/payroll-and-benefits.md)."
+        "For a Monday-through-Friday application containing one excluded full holiday and one valid half day, consumed leave is three and a half days. A half-day marker on the holiday does not subtract another half day. A partially paid leave may consume one day of leave entitlement while reducing pay by a smaller fraction; the entitlement quantity and unpaid-pay equivalent must not share one overloaded field. The half-holiday assessment for partially paid leave is documented in [Payroll and benefits](payroll-and-benefits.md)."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -280,7 +280,7 @@
       "specification_reference": "../../docs/domains/attendance-and-leave.md#compensatory-leave-manual-adjustment-and-encashment",
       "business_rule_summary": [
         "Compensatory leave requires holiday dates and submitted attendance on every requested date, accepting present, working from home or half-day presence. A half-day attendance cannot justify a full-day compensatory claim. The new entitlement equals inclusive worked days minus one half if selected and becomes valid the day after work ends. An existing suitable allocation receives an additional ledger movement; otherwise a new allocation is created within a valid leave period. Cancellation reverses the entitlement movement and adjusts the allocation. Missing a leave period for the day after work prevents submission.",
-        "A manual adjustment adds or reduces entitlement through its own ledger source. Zero adjustments are rejected after precision rounding. A reduction cannot exceed the available balance; an addition cannot exceed the configured allocation maximum. Only one submitted adjustment per employee and allocation is permitted by the inspected duplicate rule; further changes require cancelling and amending that adjustment. Cancellation reverses the adjustment movement."
+        "A manual adjustment adds or reduces entitlement through its own ledger source. Zero adjustments are rejected after precision rounding. A reduction cannot exceed the available balance; an addition cannot exceed the configured allocation maximum. Only one submitted adjustment per employee and allocation is permitted by the duplicate rule; further changes require cancelling and amending that adjustment. Cancellation reverses the adjustment movement."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -293,7 +293,7 @@
       "name": "Record contracts and ownership",
       "specification_reference": "../../docs/domains/attendance-and-leave.md#record-contracts-and-ownership",
       "business_rule_summary": [
-        "The entitlement unit is a leave day, not hours or currency. A fractional leave day can affect payment days, but conversion into money belongs to the payroll or encashment contract. A public-holiday row may carry a half-day quantity; holiday-count conventions are specific to the consuming calculation and must not be globally converted to whole days."
+        "Measure entitlement in leave days. A fractional leave day can affect payment days, but conversion into money belongs to the payroll or encashment contract. A public-holiday row may carry a half-day quantity; holiday-count conventions are specific to the consuming calculation and must not be globally converted to whole days."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -307,7 +307,7 @@
       "specification_reference": "../../docs/domains/attendance-and-leave.md#attendance-duplicate-and-override-rules",
       "business_rule_summary": [
         "The ordinary duplicate query checks non-cancelled attendance for the same employee and date, excluding the record being changed. It includes records with an empty half-day remainder or with half-day modification disabled. When the new attendance has a shift, it rejects an existing attendance without a shift or for the same shift. When the new attendance has no shift, it checks the entire employee/date scope. Existing attendance eligible for half-day remainder modification has a separate path.",
-        "Different shifts on the same date additionally undergo time-overlap validation. A universal unique employee/date constraint would incorrectly disallow legitimate non-overlapping multiple shifts. Conversely, uniqueness only by employee/date/shift would incorrectly admit an unshifted record alongside an ordinary shifted record. The observed duplicate query requests a locking read; concurrent creation still needs a transaction-level test for empty result sets and insertion races."
+        "Different shifts on the same date additionally undergo time-overlap validation. A universal unique employee/date constraint would incorrectly disallow legitimate non-overlapping multiple shifts. Conversely, uniqueness only by employee/date/shift would incorrectly admit an unshifted record alongside an ordinary shifted record. The duplicate query requests a locking read; concurrent creation still needs a transaction-level test for empty result sets and insertion races."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -349,7 +349,7 @@
       "specification_reference": "../../docs/domains/attendance-and-leave.md#leave-calculation-and-reversal-examples",
       "business_rule_summary": [
         "For a five-calendar-day request containing one excluded full holiday and a half day on a nonholiday, consumption is 5 minus 1 minus 0.5, or 3.5 days. If the selected half-day date is the excluded holiday, the separate half-day subtraction does not apply, and consumption is 4.0 days. A single nonholiday request is valid if other policy gates pass, although a one-day allocation interval is rejected by the separate allocation rule.",
-        "Suppose an allocation grants 20 days, approved consumption is 6 and encashment is 3. Its remaining entitlement is 11 before expiry or carry adjustments. Cancelling the 3-day encashment restores those 3 days and reverses its payout route; cancelling the 6-day leave restores 6 days and cancels linked attendance. Reversals retain their distinct originating records. Carry-forward first expires the transferable unused balance in the earlier period and records the admitted quantity in the new period; cancelling one side must not leave both periods spendable for the same quantity."
+        "Suppose an allocation grants 20 days, approved consumption is 6 and encashment is 3. Its remaining entitlement is 11 before expiry or carry adjustments. Cancelling the 3-day encashment restores those 3 days and reverses its payout route; cancelling the 6-day leave restores 6 days and cancels qualifying full- or half-day leave attendance in the employee’s application interval, even if a different application created that attendance. Reversals retain their distinct originating records. Carry-forward first expires the transferable unused balance in the earlier period and records the admitted quantity in the new period; cancelling one side must not leave both periods spendable for the same quantity."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -400,11 +400,11 @@
     },
     {
       "rule_identifier": "payroll-and-benefits--partially-paid-leave-discrepancy",
-      "name": "Partially paid leave discrepancy",
-      "specification_reference": "../../docs/domains/payroll-and-benefits.md#partially-paid-leave-discrepancy",
+      "name": "Partially paid leave",
+      "specification_reference": "../../docs/people-and-services/payroll-and-benefits.md#partially-paid-leave",
       "business_rule_summary": [
-        "In approved-leave mode, a full partially paid leave contributes one minus its configured daily-salary fraction to unpaid-leave equivalents. A half day first contributes one minus the configured half-day wage fraction and then receives the partially paid factor. In attendance mode, the inspected implementation instead multiplies by the configured daily-salary fraction itself, falling back to one when that fraction is zero. Thus a single full partially paid leave with a retained-pay fraction of 0.75 reduces payment days by 0.25 in approved-leave mode and by 0.75 in attendance mode. A fraction of 0.5 conceals the discrepancy.",
-        "This is an unresolved source-behaviour discrepancy, not a universal payroll principle. Behavioural equivalence requires an explicit compatibility decision and a conformance case for fractions other than one half. Do not silently merge the branches into a preferred industry rule. The reviewed tests verify approved-leave calculations at one half and attendance half-day calculations, but do not establish equivalent outcomes for this three-quarter fraction."
+        "Choose either approved leave or attendance as the payroll basis. A fully absent working day with 75% retained pay costs 0.25 days in either basis. For a half-day leave, multiply the unpaid wage share of a half-day by the unpaid share for the leave type. With a half-day wage share of 0.50 and retained pay of 0.75 this is (1 − 0.50) × (1 − 0.75) = 0.125 days.",
+        "An excluded half holiday reduces a full leave day to 0.5 × (1 − retained pay). On that same half holiday, for half-day leave, the attendance basis already represents the working half. Keep its deduction of 0.125 in the example. The application basis applies the holiday fraction as well and deducts 0.0625. Entitlement days, attendance states and pay equivalents must remain independently observable."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",

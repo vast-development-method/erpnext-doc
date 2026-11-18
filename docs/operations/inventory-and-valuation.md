@@ -21,16 +21,18 @@ For a normal movement, next quantity equals previous quantity plus signed moveme
 
 Transaction creation time and business posting time have different meanings. Late entry of a transaction with an earlier posting time can change subsequent valuations, transfer values and financial postings. Reposting is current operational behavior needed for backdated corrections. It is not data migration and remains in scope.
 
-## Four supported valuation methods
+<a id="four-supported-valuation-methods"></a>
 
-Moving average, first in first out, last in first out, and standard cost require different posting rules. They make different financial decisions and must not be collapsed into a single average. Selected serial or batch valuation paths also affect which actual costs are attached to movements. Standard cost takes precedence over serial or batch cost valuation for the monetary carrying amount while identity tracking still matters.
+## Valuation method selection
+
+The core item, company and inventory settings offer moving average, first in first out and last in first out. Serial and batch rules determine which actual costs attach to a tracked movement. An optional standard-cost implementation needs the effective-rate register, selectors, revaluation operation and separate variance postings described below. A navigation reference to a cost register alone cannot activate that policy.
 
 | Method | Ordinary receipt | Ordinary issue | Persisted valuation state |
 |---|---|---|---|
 | Moving average | Recalculate weighted value when prior stock is positive | Usually retain current average | Balance quantity, carried value and rate |
 | First in first out | Append or merge newest cost layer | Consume earliest layer, subject to explicit-rate selection | Ordered remaining quantity and rate layers |
 | Last in first out | Append or merge newest cost layer | Consume latest layer | Ordered remaining quantity and rate layers |
-| Standard cost | Carry at effective approved standard rate | Carry at effective approved standard rate | Effective dated standard and on-hand value |
+| Optional standard-cost policy | Carry at effective approved standard rate | Carry at effective approved standard rate | Effective dated standard and on-hand value |
 
 ## Moving average: precise branches
 
@@ -53,6 +55,8 @@ Receive ten units at four and five units at seven. Issuing twelve under first in
 When stock is exhausted and an allowed issue still has quantity remaining, the layer state retains a negative layer priced from the supplied outgoing rate or the exhausted layer. A new receipt that only reduces the negative layer retains its old rate. A receipt that makes the layer positive replaces the remaining layer with the incoming rate. Near-zero layer quantities and totals with absolute magnitude strictly below one ten-millionth are normalised to zero. A value exactly at that threshold is not covered by the strict less-than normalisation.
 
 ## Standard cost and effective dating
+
+The following contract specifies the optional standard-cost capability. Use it only where the effective configuration supplies the rate register and its posting implementation. Within that policy the approved standard controls monetary carrying value while tracked identities retain their custody history.
 
 A standard cost record binds product, company, effective date and positive standard rate. The effective rate is selected for the posting date. A missing effective standard rate prevents a stock posting. The first standard must be established before any stock ledger activity exists for the product and company. Effective dates cannot be in the future, must strictly increase, and a rate change cannot precede the latest stock activity date. Receipts and issues use the standard, even if purchasing price or consumed manufacturing cost differs. Ten units received with transaction rate 150 and standard rate 100 carry stock value 1,000, not 1,500.
 
@@ -100,7 +104,7 @@ A stock posting is the following ordered business operation. These steps describ
 2. Serialise overlapping product-and-warehouse mutations. Acquire all required product-and-warehouse protections in a consistent sorted order, so two multi-warehouse transfers cannot wait on each other in opposite order. Reservation checks and stock posting must observe the same protected state.
 3. Reject postings prohibited by inventory closing, frozen-period policy, invalid standard-cost effective dates, missing accounts, inappropriate warehouse company, invalid tracked identities or insufficient stock under the applicable tolerance and reservation rules.
 4. Find the immediately preceding effective ledger state for the product and warehouse. Order eligible movements by business posting timestamp and then creation timestamp. Preserve creation timestamp when reproducing historical order. A replacement must not substitute document number sorting. Exact ties beyond both timestamps are an unresolved ordering case and require an explicit compatibility decision.
-5. Resolve transaction incoming or outgoing cost. Standard cost governs monetary value first. Otherwise use tracked serial or batch value when applicable, followed by the ordinary moving-average or ordered-layer procedure. A count reconciliation's absolute target uses its separate adjustment semantics.
+5. Resolve transaction incoming or outgoing cost. When an effective standard-cost implementation is installed, its approved rate governs the monetary value. In the core costing path, use tracked serial or batch value when applicable, followed by the ordinary moving-average or ordered-layer procedure. A count reconciliation's absolute target uses its separate adjustment semantics.
 6. Compute next quantity, value, valuation state and stock-value difference at the documented precisions. Zero quantity forces zero value. Preserve the calculated difference even when transaction selling price is unrelated to that cost.
 7. Persist the movement with its source row and tracking references, update the current warehouse balance and tracked custody, and complete the document-specific progress effects. A saved draft has none of these submitted stock effects.
 8. For perpetual inventory, construct financial postings from the actual stock-value differences, selected inventory accounts and transaction counterpart accounts. Retain company, posting date, source document, source row, cost centre, project and configured dimensions. Enforce total company-currency debits equal credits and reconcile inventory account movement with stock-value movement.
@@ -156,3 +160,13 @@ For every completed operation reconcile: effective warehouse quantity to ledger 
 ## Posting acceptance
 
 Acceptance must compare quantities, inventory values, stock-value differences, ledger debit and credit effects, reservation remainder and serial or batch ownership after every operation. Include normal receipt, partial issue, full issue, zero-value receipt, explicit-rate purchase return, negative-stock transition, backdated receipt, landed cost after delivery, standard revaluation, cancellation, and repeating the same attempted posting after a failure. Document operations must either leave all required effects or leave none.
+
+## Inventory acceptance profile
+
+Record company precision, inventory dimensions, intercompany transfer policy and serial-specific valuation alongside each acceptance case. Compare the stock and financial ledgers after competing postings and after all affected valuations have been recalculated. The arithmetic examples establish the expected values for their named inputs.
+
+## Linked specifications
+
+- **Record definitions** · [Inventory movement](../../schemas/data/record-types/stock_ledger_entry.json) · [warehouse balance](../../schemas/data/record-types/bin.json) · [Stock movement](../../schemas/data/record-types/stock_entry.json) · [movement row](../../schemas/data/record-types/stock_entry_detail.json) · [Allocation document](../../schemas/data/record-types/serial_and_batch_bundle.json) · [allocation entry](../../schemas/data/record-types/serial_and_batch_entry.json) · [serial identity](../../schemas/data/record-types/serial_no.json) · [batch](../../schemas/data/record-types/batch.json) · [Stock reservation](../../schemas/data/record-types/stock_reservation_entry.json) · [Standard cost](../../schemas/data/record-types/item_standard_cost.json) · [landed cost](../../schemas/data/record-types/landed_cost_voucher.json) · [revaluation work](../../schemas/data/record-types/repost_item_valuation.json)
+- **Calculation and acceptance cases** · [Inventory calculations](../../schemas/mathematics/inventory-calculations.json) · [inventory acceptance cases](../../schemas/mathematics/inventory-acceptance-cases.json)
+- **Related decisions** · [financial accounting contract](../transactions/financial-accounting.md)

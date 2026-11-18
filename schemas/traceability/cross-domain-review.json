@@ -114,7 +114,7 @@
       "specification_reference": "../../docs/domains/transaction-progress-and-row-closure.md#responsibility",
       "business_rule_summary": [
         "This policy connects source commitments to submitted downstream execution. Quantities and amounts are updated at source-row level, then summarised to parent percentages and business statuses. It is shared across buying, selling, delivery, receipt, billing and related operations. A replacement needs source-row identity and document lifecycle state to reproduce the result.",
-        "The [transaction-progress calculations](../mathematics/transaction-progress-calculations.json) define the corresponding numeric contracts. Persistence is specified by [sales order rows](../data/record-types/sales_order_item.json), [purchase order rows](../data/record-types/purchase_order_item.json), [delivery rows](../data/record-types/delivery_note_item.json) and [purchase receipt rows](../data/record-types/purchase_receipt_item.json). The row link, closure flag, expected quantity or amount, completed counters and parent lifecycle must all remain available when recalculating progress."
+        "The [transaction-progress calculations](../calculations/README.md) define the corresponding numeric contracts. Persistence is specified by sales order rows, purchase order rows, delivery rows and purchase receipt rows. Persist the source-row link, expected quantity or amount, completed counters and parent lifecycle. Independent row closure additionally requires an explicit row flag and operations to close or reopen that row."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -125,8 +125,8 @@
       "name": "Recalculation order",
       "specification_reference": "../../docs/domains/transaction-progress-and-row-closure.md#recalculation-order",
       "business_rule_summary": [
-        "On updating prior-document progress, validate closed source rows first, recompute affected quantities or amounts, then validate the resulting quantities. On submission, include the current transaction in the contributing set even where it has not yet reached its final stored submitted state. On cancellation, exclude it. Include any explicitly configured second source, such as an alternate transaction capable of fulfilling the same source row.",
-        "Recompute totals from qualifying descendants rather than adding a blind increment. This preserves the relationship under amendments, cancellation and repeated recalculation. It does not, by itself, prove that every calling service serialises concurrent submissions correctly; test the complete service transaction."
+        "The core progress service recomputes affected quantities or amounts and then validates them. A deployment offering independent row closure also checks the row flag when admitting a downstream operation. On submission, include the current transaction in the contributing set even where it has not yet reached its final stored submitted state. On cancellation, exclude it. Include any explicitly configured second source, such as an alternate transaction capable of fulfilling the same source row.",
+        "Recompute totals from qualifying descendants rather than adding a blind increment. This preserves the relationship under amendments, cancellation and repeated recalculation. It does not, by itself, prove that every calling service serialises concurrent submissions correctly. Test the complete service transaction."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -138,7 +138,7 @@
       "specification_reference": "../../docs/domains/transaction-progress-and-row-closure.md#parent-percentage-formula",
       "business_rule_summary": [
         "For a given progress measure, let each row have an expected magnitude and a completed magnitude. Use absolute values so return rows do not incorrectly cancel ordinary progress. Clamp each completed magnitude to that row's expected magnitude. A surplus on one row cannot satisfy a shortage on another.",
-        "When closure applies to the measure, remove closed rows from the calculation basis. If this removes every row, fall back to the full row set and report actual progress. If an explicit exclusion filter removes every row, the helper returns one hundred percent. Otherwise a zero total expected magnitude returns zero percent."
+        "Read every item row for the selected parent type and identity. An empty set or a zero sum of expected magnitudes yields zero. Round the computed value to six decimal places. For the stored parent percentage, snap values of 99.999999% or higher to 100%."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -149,8 +149,8 @@
       "name": "Closing and reopening rows",
       "specification_reference": "../../docs/domains/transaction-progress-and-row-closure.md#closing-and-reopening-rows",
       "business_rule_summary": [
-        "Supported parents are sales orders, purchase orders, delivery records and purchase receipts. The actor needs submission permission, the parent must already be submitted, and at least one row identifier must be selected. The close value is normalised to a boolean representation. Unchanged or nonmatching selections produce no change after the initial checks.",
-        "Before closing, each changed row must have something still pending under its parent's policy. A fully settled row cannot be closed. Parent-specific close validation runs before row flags change. After changed rows are persisted, the parent recomputes its consequences. Closing every row closes the parent. Reopening a row reopens a closed parent through its normal reopening operation; reopening a sales order therefore also reaches its normal credit-check path."
+        "**Optional row-closure capability.** A deployment implementing this extension exposes row-level actions on the following submitted parents. The core parent-close action above remains available independently.",
+        "Supported parents are sales orders, purchase orders, delivery records and purchase receipts. The actor needs submission permission, the parent must already be submitted, and at least one row identifier must be selected. The close value is normalised to a boolean representation. Unchanged or nonmatching selections produce no change after the initial checks."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -161,8 +161,8 @@
       "name": "Closed rows in editing and mapping",
       "specification_reference": "../../docs/domains/transaction-progress-and-row-closure.md#closed-rows-in-editing-and-mapping",
       "business_rule_summary": [
-        "A mapping operation must omit a closed source row. A previously constructed draft referencing a row that is subsequently closed must be rejected when submitted. The guard checks current source state, not only what was true when the draft was created.",
-        "When an item-edit request omits a closed row because the form hides it, omission must not delete that row. A request attempting to change a closed row must fail. A complete request that includes it unchanged is accepted."
+        "These mapping and amendment rules apply when independent row closure is enabled. For measures configured to exclude closed rows, use the remaining open rows. If all are closed, measure actual progress over all of them. If an explicit exclusion filter removes every row, that optional filtered measure reports 100%. With two ten-unit rows and ten units completed on the first, closing only the second makes open-commitment progress 100%. Closing both yields 50% actual progress.",
+        "A mapping operation must omit a closed source row. A previously constructed draft referencing a row that is subsequently closed must be rejected when submitted. The guard checks current source state, not only what was true when the draft was created."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -173,7 +173,7 @@
       "name": "Over-fulfilment and overbilling",
       "specification_reference": "../../docs/domains/transaction-progress-and-row-closure.md#over-fulfilment-and-overbilling",
       "business_rule_summary": [
-        "The helper checks only configured target measures. Quantity-overflow lookups additionally restrict to stock products; this is not a universal quantity rule for every service product. Ordinary rows reject negative quantities, and return rows reject positive quantities under the reviewed validation path. Zero is not rejected merely by those sign checks. Negative prices depend on separate buying and selling settings.",
+        "The calculation checks only configured target measures. Quantity-overflow lookups additionally restrict to stock products. This is not a universal quantity rule for every service product. Ordinary rows reject negative quantities, and return rows reject positive quantities under the validation path. Zero is not rejected merely by those sign checks. Negative prices depend on separate buying and selling settings.",
         "For a nonzero expected amount or quantity, compute:"
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
@@ -196,8 +196,8 @@
       "name": "Concrete status decision tables",
       "specification_reference": "../../docs/domains/transaction-progress-and-row-closure.md#concrete-status-decision-tables",
       "business_rule_summary": [
-        "Evaluate each table from highest to lowest precedence and stop at the first match. Lifecycle state and manually held or closed status are separate inputs; the rules below reproduce even combinations that an ordinary screen may prevent.",
-        "The strict equality for purchase-order billing differs from sales-order billing's at-least comparison. The percentages' ordinary calculation caps rows, but an independently stored exceptional value above 100 cannot be assumed to choose the same status in both tables. The On Hold rules do not themselves check lifecycle, so a stale hold value can precede a cancelled match; cancellation services must update their input status consistently."
+        "Evaluate each table from highest to lowest precedence and stop at the first match. Lifecycle state and manually held or closed status are separate inputs. The rules below reproduce even combinations that an ordinary screen may prevent.",
+        "The strict equality for purchase-order billing differs from sales-order billing's at-least comparison. The percentages' ordinary calculation caps rows, but an independently stored exceptional value above 100 cannot be assumed to choose the same status in both tables. The On Hold rules do not themselves check lifecycle, so a stale hold value can precede a cancelled match. Cancellation services must update their input status consistently."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -208,8 +208,8 @@
       "name": "Failure outcomes and numeric boundary fixtures",
       "specification_reference": "../../docs/domains/transaction-progress-and-row-closure.md#failure-outcomes-and-numeric-boundary-fixtures",
       "business_rule_summary": [
-        "For a purchase order of ten units, receive six and close its remaining commitment. Actual received quantity stays six and warehouse quantity remains the six received. When every row is closed, progress reports sixty percent actual receipt while the parent is Closed. Reopening makes four outstanding units available again and cannot recreate the earlier six-unit receipt. A customer invoice or supplier debt already posted remains collectible or payable after order closure.",
-        "Submission failure must leave progress, stock, financial entries and closure flags at their pre-operation state. Repeated recalculation must converge on the same counters. A concurrency acceptance case starts two submissions each requesting the final available remainder; whichever business transaction commits first determines the remaining allowed quantity for the second. This is a required replacement consistency property, not a claim that a read-only arithmetic helper alone provides locking."
+        "For a purchase order of ten units, receive six and close its remaining commitment. Actual received quantity stays six and warehouse quantity remains the six received. The generic measure reports sixty percent actual receipt while the parent is Closed. Reopening makes four outstanding units available again and cannot recreate the earlier six-unit receipt. A customer invoice or supplier debt already posted remains collectible or payable after order closure.",
+        "Submission failure must leave progress, stock, financial entries and closure flags at their pre-operation state. Repeated recalculation must converge on the same counters. A concurrency acceptance case starts two submissions each requesting the final available remainder. Whichever business transaction commits first determines the remaining allowed quantity for the second. Apply the authority check and the quantity mutation to the same protected predecessor."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -220,8 +220,8 @@
       "name": "Financial and physical closure invariants",
       "specification_reference": "../../docs/domains/transaction-progress-and-row-closure.md#financial-and-physical-closure-invariants",
       "business_rule_summary": [
-        "Row closure must preserve actual received, delivered, billed and returned contributions while changing the remaining commitment selected by the parent policy. For a ten-unit purchase order received six units at 12.00, closing the last four units leaves warehouse quantity six and received stock value 72.00. If the six units are already invoiced, supplier debt remains 72.00 until settled or credited. If they are not invoiced, the 72.00 received-but-unbilled clearing balance remains. A close operation that credits inventory or debits supplier payable merely to make the order look completed is incorrect.",
-        "The local calculation catalog now records the exact threshold, zero-value, all-excluded and all-closed cases as data. Its `closed_order_preserves_posted_effects` example separates ordered quantity ten, actual quantity six, closed parent, sixty percent actual progress, released commitment four and unchanged recognized stock or liability. This cross-check prevents a reader from equating a closed business status with one hundred percent physical performance or financial settlement."
+        "Closing a document or an independently closable row must preserve actual received, delivered, billed and returned contributions while changing the remaining commitment selected by the parent policy. For a ten-unit purchase order received six units at 12.00, closing the last four units leaves warehouse quantity six and received stock value 72.00. If the six units are already invoiced, supplier debt remains 72.00 until settled or credited. If they are not invoiced, the 72.00 received-but-unbilled clearing balance remains. A close operation that credits inventory or debits supplier payable merely to make the order look completed is incorrect.",
+        "The [calculation contracts](../calculations/README.md) include zero-value, all-excluded and all-closed order cases. Closing the remaining four units of a ten-unit order after receiving six preserves sixty percent actual fulfilment and the posted inventory and liability amounts."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",

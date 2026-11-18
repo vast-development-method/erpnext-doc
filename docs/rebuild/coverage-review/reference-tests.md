@@ -1,4 +1,4 @@
-# Additional reference executions on the November release
+# Reference execution receipt for eleven workflow suites
 
 On 18 November 2026, the 11 upstream test modules below ran to completion on the disposable `erp-stock-lab.test` installation with [ERPNext v16.60.0 and Frappe v16.60.1](../model/pins.json). **All 124 tests passed**, with zero failures, errors or skips in the completed runs. The [JUnit results](reference-tests.xml) preserve each method and test class. The timing, machine hostname, file paths and captured process output are omitted.
 

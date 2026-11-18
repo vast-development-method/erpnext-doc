@@ -1,8 +1,8 @@
-# Marketplace apps declaring an ERPNext dependency
+# Evidence of declared core ERP dependencies
 
-Each row links to the dependency declaration at the publisher repository's inspected revision. The v16 column records the marketplace compatibility claim. Counts refer to declarations in the inspected tree.
+Each row links to the dependency declaration at the publisher repository's inspected revision. The compatibility column reproduces the publisher’s major-16 declaration for catalog reconciliation. Counts refer to declarations in the inspected tree.
 
-| Marketplace ID | Lists v16 | Records | Non-layout fields | Services | Dependency evidence |
+| Marketplace ID | Publisher compatibility subgroup | Records | Non-layout fields | Services | Dependency evidence |
 |---|---|---:|---:|---:|---|
 | [advanced_compliance](https://cloud.frappe.io/marketplace/apps/advanced_compliance) | Yes | 29 | 308 | 55 | [hooks.py](https://github.com/norelinorth/norelinorth_ai_advanced_compliance/blob/1e8c416ed607e07ca508ea1d5e29c252caaaaef1/advanced_compliance/hooks.py#L10) |
 | [ai_snaplead_connector](https://cloud.frappe.io/marketplace/apps/ai_snaplead_connector) | Yes | 11 | 62 | 9 | [pyproject.toml](https://github.com/Sigzen-Team/ai_snaplead_connector/blob/5f7033866faadf2d1643183feedbc92ca07a3489/pyproject.toml) |

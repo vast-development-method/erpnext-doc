@@ -1,62 +1,41 @@
 # Coverage and evidence
 
-## Measured baseline
+Use the [business chapters](../README.md) for the applicable rule and the [logical field dictionary](../../schema/README.md) for its records. The measures below describe the underlying collections. Several collections describe the same activity at different levels, so their counts cannot be added to obtain a feature total.
 
-The following measures describe different kinds of evidence. They are not interchangeable completion percentages.
+## Measured coverage
 
-| Measure | Count | Meaning |
+| Collection or test | Count | Meaning |
 |---|---:|---|
-| Source files | 12,282 | Every non-directory entry in the four uploaded archives has a pack, ordinal and content digest |
-| Declared record definitions | 1,044 | Includes ordinary records, child records, settings, virtual records and explicitly classified supporting definitions |
-| Declared fields | 16,813 | Includes stored fields, owned collections and presentation fields |
-| Parsed server source files | 5,583 | Syntax inventory, not complete semantic interpretation |
-| Server callable definitions | 33,360 | Includes inspected and uninspected operations, tests and classified excluded surfaces |
-| Declared exposed operations | 1,771 | Registration inventory; caller permissions and returned data still require operation-specific contracts |
-| Current-candidate exposed operations | 1,768 | Scope classification after excluding identified obsolete or supporting operations |
-| Arithmetic expression candidates | 6,049 | Neutral extracted expression structures; some are nonnumeric or require surrounding context |
-| Report definitions | 226 | Report metadata inventory; dynamic columns and all result branches are not certified |
-| Operational metadata records | 831 | Workspaces, reports, dashboards, print and related declarations |
-| Source artifacts cited by chapters | 208 | Evidence anchors for reviewed statements; a citation does not imply whole-file review |
-| Reviewed mathematical contracts | 142 | Named mathematical specifications, plus separately listed ordered valuation procedures |
-| Independent arithmetic checks passed | 180 | Decimal, rational or calendar examples verified without executing the source application |
+| Classified input components | 12,282 | Includes production capabilities, fixtures, migration-related artifacts and supporting files. The inventory includes 5,583 parsed server files. |
+| Detailed record definitions and declared fields | 1,044 / 16,813 | Includes stored values, owned children, protected values, layout declarations, settings and virtual results. |
+| Relationships, field conditions and record behaviour bindings | 3,820 / 2,818 / 1,042 | Fixed links, dynamic links, child ownership, field expressions and event bindings. |
+| Operation identifiers | 33,360 | Distinct callable declarations across enterprise, shared services, workforce and customer relationship functions. An ordered decision body has to be matched to its declared identifier. |
+| Exposed operations | 1,771 | Of the registrations, 1,768 were classified as candidates for business use. Registration alone establishes neither permission nor reachable outcomes. |
+| Reports, conditional column definitions and filter definitions | 226 / 1,609 / 1,119 | The filter inventory includes 556 parsed defaults. Dynamic runtime columns depend on the report and its arguments. |
+| Operational presentation declarations | 831 | Includes workspaces, reports, dashboards, print definitions and related surfaces. |
+| Arithmetic expression candidates | 6,049 | Each candidate needs its operands, units, precision, preconditions and side effects to serve as a calculation contract. |
+| Named calculation definitions | 184 | The catalog contains 58 financial formulas, 51 workforce calculations, 40 inventory calculations, 30 customer/service calculations and 5 progress procedures. It also contains two ordered layer-valuation procedures. |
+| Recorded arithmetic review | 142 contracts / 180 checks | This review covered a subset of the mathematical catalog. It compared input amounts and dates to expected values. The verification register separately identifies journal-balance checks and isolated decision runs. |
+| Evidence anchors in the structural review | 208 | A cited source artifact identifies evidence for a particular statement. Review of one decision does not imply review of every branch in its containing file. |
 
-The [catalog coverage file](../../schemas/traceability/catalog-coverage.json) provides structural classifications and exceptions. The [mathematics verification file](../../schemas/traceability/mathematics-verification.json) records check results. Review catalogs identify inspected spans and specific remaining work.
+See the [structured coverage catalog](../../schemas/traceability/catalog-coverage.json), [mathematical verification register](../../schemas/traceability/mathematics-verification.json) and [validation results](../../schemas/traceability/validation-result.json). The [logical dictionary](../../schema/README.md) also covers optional business entities and distinguishes data fields from relationship fields. Its counts describe a different population.
 
-## How to locate evidence
+## Decisions and field interpretation
 
-A source citation has an opaque artifact identifier and a line range. Resolve its identifier in the [source distribution catalogs](../../schemas/source-file-distribution/README.md). The record gives the source pack, archive-entry ordinal and content digest. Resolve the pack through [source snapshot](../../schemas/traceability/source-snapshot.json), verify the archive digest, and select the numbered central-directory entry. Ordinals start at zero and include directory entries. Archive and file content digests use the 256-bit Secure Hash Algorithm over original bytes. Name and expression digests use that algorithm over their original text encoded in Unicode Transformation Format with eight-bit code units. Verify the selected file digest before using its one-based line range.
+The [operation directory](../../schemas/operations/README.md) and [decision interpretation](../runtime/decision-contract-interpretation.md) describe parameters, ordered branches, loops, failure, cleanup and completion. Call dependencies, effective configuration and permissions determine which outcomes a business request can reach. Test those outcomes at the transaction boundary.
 
-This keeps the blueprint's terminology independent of source product and implementation names while preserving exact evidence location. The supplied archives are required only to independently audit original evidence; they are not copied into this repository. A future implementation should work from the reviewed contracts and data definitions rather than embed those archives.
+The [conditional field semantics](../../schemas/data/conditional-field-semantics.json) resolve 85 field-condition occurrences represented by 54 distinct expressions. These cover compound and collection predicates, optional children and section expansion. A true expansion condition opens its section. A form condition and server validation are distinct decisions.
 
-## Structural completeness
+Definitions preserve field identity, order, relationship targets, defaults, naming rules and meaningful blank or punctuation values. Collection removal is a collection operation. Type alternatives in annotations describe allowed shapes. Names that would collide globally remain qualified by the owning record. The [review registers](../../schemas/traceability/README.md) identify financial, workforce, inventory, customer and foundation decisions that need independent acceptance cases.
 
-Every supplied file is inventoried. Every recognised declared record definition and its fields are represented. Independent audits check record identity collisions, field identity collisions, source-name digests, field counts, relationships and catalog shape. Every folder has navigation.
+## Transaction and execution evidence
 
-Historical migration and deployment artifacts are retained in source classification but excluded from rebuilding requirements. Supporting fixtures are not counted as production capabilities. A static current-candidate classification identifies material for review; it is not a reachability proof.
+The [receipt-to-cash observation](../rebuild/live/README.md) records balances after each of twelve posted vouchers. The [stock results](../rebuild/stock-live/README.md) cover reservations, valuation, production and closing. The [warehouse fulfilment observations](../rebuild/warehouse-fulfilment/README.md) cover physical allocation, picking, packing and dispatch. Compare these with the [shared-service observations](../rebuild/platform-live/README.md), [restore results](../rebuild/recovery-live/README.md) and [module-level test results](../rebuild/coverage-review/reference-tests.md).
 
-## Field conditions
+The [project-cost example](../transactions/project-costing.md) distinguishes the company-currency controller from the employee-expense controller using identical time rows. Isolated calculations establish the observed outputs for those inputs. They do not establish deployment-wide hook dispatch or successful posting to a live tenant.
 
-The mechanical parser initially left 85 field-condition occurrences unresolved. Their 54 distinct expression digests now have manually reviewed neutral decision structures in [conditional field semantics](../../schemas/data/conditional-field-semantics.json). All 85 occurrences are covered there. These include optional child collections, every-row and any-row predicates, compound conditions and section expansion. A true section condition expands the section; it does not request collapse.
+## Remaining qualification
 
-These interpretations describe form behaviour. They do not turn a visibility or required-field hint into a server validation guarantee. Other mechanically extracted trees also retain explicit warnings where truthiness, coercion or a called helper's business meaning requires context.
+A production comparison needs the selected company, accounting and inventory policies, permissions, custom fields, language and enabled optional services. Dynamic reports, provider callbacks, concurrent operations, retries and failures after remote acceptance require their own observations. A jurisdiction’s current law and the receiver’s accepted format must be established separately from a regional fixture.
 
-## Remaining conformance boundary
-
-This repository does **not** certify that every business branch in the source has been fully specified, that all current-candidate operations are reachable, or that a replacement could already pass a complete behavioural comparison without further work. Exhaustive source inventory and substantial reviewed specifications are established; universal semantic equivalence remains unproven.
-
-The consequential remaining work is explicit:
-
-- Some operation and report entries provide structural contracts without fully enumerated output variants, dynamic filters, all permission paths or error conditions.
-- Extracted arithmetic expressions need dimensional, precondition and side-effect review before each can become a normative mathematical contract. A syntax tree alone is insufficient.
-- Client component behaviour, embedded scripts, external callback formats and provider-specific failure paths are not exhaustively executed or semantically modelled.
-- Private runtime custom fields, permission changes and configuration are not present in source archives. One effective schema requires a fixed configuration profile.
-- Lending and payment-gateway records referenced by supplied modules are absent from the supplied definitions. Their links are documented integration boundaries; their complete internal applications are not invented.
-- Regional source logic is documented as observed behaviour, not a claim of current legal compliance in every jurisdiction.
-- The supplied snapshots are development revisions. Their combined installation and all extension-order effects have not been exercised here.
-- Source findings include payroll calculation discrepancies, specialised valuation and reporting questions, and background identity or permission concerns. Each review catalog records the relevant evidence and needed acceptance case.
-
-## Execution status
-
-No source application instance or replacement application was run as part of this specification. Source test bodies were inspected, and independent numerical examples were checked. Reference execution, end-to-end integration, concurrency, external provider behaviour and replacement conformance remain separate qualification gates.
-
-Do not describe this repository as a certified gap-free reconstruction contract while these gates and semantic gaps remain open. New evidence should close a specific row or finding, not merely add more generated lines.
+Use the [acceptance strategy](../reimplementation/acceptance-strategy.md), [conformance gates](../../schemas/traceability/conformance-gates.json), [integration qualifications](../rebuild/qualification.json) and [external record contracts](../../schemas/data/external-record-contracts.json) to record the tested profile, input, observed result and remaining uncertainty. A completed inventory and individually executed scenarios do not establish equivalence for every configuration or replacement system.

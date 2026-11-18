@@ -89,3 +89,8 @@ Each enquiry must declare company, party, as-of date, selected currency, financi
 The current-date overdue check must not be presented as a historical as-of ageing engine. A replacement can expose both operations, but a date input on a report cannot silently change the business-date checks used when authorizing a new sale. Cancellation, late allocation and backdated posting must be reflected according to each operation's documented effective-date policy.
 
 The cases `customer_partial_payment_credit_and_reversal`, `foreign_customer_receipt_and_realized_gain`, and `customer_advance_later_applied` specify complete debit-and-credit sequences. They complement the separate exposure and overdue formulas; none substitutes an invoice status label for measured debt.
+
+## Linked specifications
+
+- **Record definitions** · [Customer](../../schemas/data/record-types/customer.json) · [Customer credit limit](../../schemas/data/record-types/customer_credit_limit.json) · [Sales invoice](../../schemas/data/record-types/sales_invoice.json) · [Sales invoice line](../../schemas/data/record-types/sales_invoice_item.json) · [Payment](../../schemas/data/record-types/payment_entry.json) · [Payment allocation](../../schemas/data/record-types/payment_entry_reference.json) · [Payment schedule](../../schemas/data/record-types/payment_schedule.json) · [Collection notice](../../schemas/data/record-types/dunning.json)
+- **Calculation and acceptance cases** · [Financial calculations](../../schemas/mathematics/financial-calculations.json) · [Accounting acceptance cases](../../schemas/mathematics/accounting-acceptance-cases.json)

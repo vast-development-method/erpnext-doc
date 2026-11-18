@@ -3,11 +3,10 @@
   "identifier": "record_type_personal_data_deletion_request",
   "name": "personal_data_deletion_request",
   "display_name": "personal data deletion request",
-  "source_name_digest": "bff4276e5b512d2f7929d75af9d0ced8fb115796330f5ffea44dc9d1d35437eb",
-  "source_pack": "foundation",
-  "source_artifact": "source-artifact-ce8296267ba778e6810c",
+  "capability_group": "foundation",
+  "component_identifier": "component_foundation_website_record_definitions_personal_data_deletion_request_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "independent_record",
   "supports_posting_and_cancellation": false,
   "ordered_field_names": [
@@ -49,14 +48,13 @@
     }
   ],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 4,
   "fields": [
     {
       "identifier": "record_type_personal_data_deletion_request.email",
       "name": "email",
-      "source_field_ordinal": 0,
-      "source_name_digest": "d55b99efba68c4d57a901b891ddbaa9d1d8ad6c52dd62390b00204efc3170441",
+      "field_ordinal": 0,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -72,13 +70,18 @@
         },
         "required": 1
       },
-      "display_name": "email"
+      "display_name": "email",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "d55b99efba68c4d57a901b891ddbaa9d1d8ad6c52dd62390b00204efc3170441"
     },
     {
       "identifier": "record_type_personal_data_deletion_request.status",
       "name": "status",
-      "source_field_ordinal": 1,
-      "source_name_digest": "cfc31bcc34ed7f4cc7895026ae8a54f0494f73757e9f914d0f6ed90f9bc34f51",
+      "field_ordinal": 1,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -116,13 +119,32 @@
         ],
         "read_only": 1
       },
-      "display_name": "status"
+      "display_name": "status",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "pending_verification",
+          "pending_approval",
+          "on_hold",
+          "deleted"
+        ],
+        "empty_option_explicitly_listed": false,
+        "default": {
+          "kind": "symbolic_text",
+          "value": "pending_verification"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "cfc31bcc34ed7f4cc7895026ae8a54f0494f73757e9f914d0f6ed90f9bc34f51"
     },
     {
       "identifier": "record_type_personal_data_deletion_request.anonymization_matrix",
       "name": "anonymization_matrix",
-      "source_field_ordinal": 2,
-      "source_name_digest": "e77623bdbb39589254f086634e02f2ed5b3fb883c8b819306173a0d986d1a6c5",
+      "field_ordinal": 2,
       "value_type": "source_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -136,13 +158,19 @@
         },
         "read_only": 1
       },
-      "display_name": "anonymization matrix"
+      "display_name": "anonymization matrix",
+      "value_contract": {
+        "value_kind": "rule_or_extension_text",
+        "evaluation": "Content is configuration for a declared behavior surface; saving text must not silently execute it as an unrestricted system command.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "e77623bdbb39589254f086634e02f2ed5b3fb883c8b819306173a0d986d1a6c5"
     },
     {
       "identifier": "record_type_personal_data_deletion_request.deletion_steps",
       "name": "deletion_steps",
-      "source_field_ordinal": 3,
-      "source_name_digest": "246dbb87b87899de4525d886d86cf42af8bddf0190a1ae5b11c4e1655a3bcbcd",
+      "field_ordinal": 3,
       "value_type": "owned_record_collection",
       "persistence": "owned_child_records",
       "required_when_no_conditional_override": false,
@@ -154,9 +182,37 @@
           "identifier": "record_type_personal_data_deletion_step"
         }
       },
-      "display_name": "deletion steps"
+      "display_name": "deletion steps",
+      "value_contract": {
+        "value_kind": "ordered_owned_records",
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_personal_data_deletion_step"
+        },
+        "ownership": "Each row stores one parent record identity, parent record type, parent field, and row position. Preserve row ordering and prevent attachment of the same owned row to a second parent.",
+        "save_boundary": "Persist the parent and its owned rows in the same transaction.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "246dbb87b87899de4525d886d86cf42af8bddf0190a1ae5b11c4e1655a3bcbcd"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "ordinary record rename disabled",
+    "strategy": "record_type_default_or_controller_assignment",
+    "rule": "The create operation assigns identity through the record-type naming policy; explicitly named records retain their validated identity."
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "independent_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "This record type does not independently implement the post-and-cancel lifecycle."
+  },
+  "source_name_digest": "bff4276e5b512d2f7929d75af9d0ced8fb115796330f5ffea44dc9d1d35437eb",
+  "source_pack": "foundation",
+  "source_artifact": "source-artifact-ce8296267ba778e6810c",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "cd1f9056efedcabfbbb66aa7b0c024dcfa8dfb0a985882e07c3ebb5711252b55",
@@ -178,5 +234,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "web_publishing.personal_data_deletion_request",
+    "status": "declared",
+    "dictionary": "schema/entities/web-publishing.json",
+    "declaration_name": "Personal Data Deletion Request",
+    "declaration_catalog": "docs/rebuild/model/catalog/frappe-website-01.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

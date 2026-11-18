@@ -177,3 +177,7 @@ Although offsets are supplied, append-mode writes do not establish arbitrary out
 ```
 
 The example preserves the document contract's batch field spellings while using neutral identities and error wording. All input items have exactly one result category. Above the configured asynchronous threshold the result instead identifies accepted work; the client must await durable outcome before displaying those items as updated. The [service contract matrix](service-contracts.md#operation-contract-matrix) defines the transaction boundary independently of the response wrapper.
+
+## Client adapter mappings
+
+For each existing client, record the exact route, accepted method, field names and response envelope it uses. Map those literals to the business operation and verify its accepted input, permission result and serialized output through the adapter.

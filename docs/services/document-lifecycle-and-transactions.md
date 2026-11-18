@@ -138,3 +138,7 @@ A draft has children A and B in its item collection and child C in another colle
 ## Financial closure invariant
 
 For a posting operation, define its affected fact set before implementation: document state, general ledger entries, stock entries, settlement entries, source progress, reservations, and dependent references. The operation's successful boundary requires the complete prescribed fact set, and its failed boundary requires no committed partial subset unless the domain explicitly defines independently committed work. Equality of debit and credit is necessary where a journal is produced, but does not prove correct account, company, currency, dimension, quantity, or reference selection. Those decisions belong to cross-domain transactions.
+
+## Linked specifications
+
+- **Related decisions** · [cross-domain transactions](../transactions/cross-domain-transactions.md)

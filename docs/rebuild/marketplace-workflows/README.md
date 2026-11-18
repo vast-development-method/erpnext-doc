@@ -1,10 +1,10 @@
 # Marketplace workflows and language resources
 
-Use the [listing index](directory.md) to find the callback for a particular document event or the language catalogs supplied at a publisher revision. The [workflow specifications](vertical-workflows.md) trace livestock capitalization, piece-rate payroll and incoming material price controls. Two further walkthroughs follow [item names on multilingual invoices](item-language.md) and [a stock transfer across gate control and a webshop](stock-dispatch.md).
+Start with [optional activities that affect posting](../../capabilities/optional-posting.md) and [language and document issuance](../../capabilities/language-and-issuance.md) for the business rules. Use the [listing index](directory.md) to find the callback for a particular document event or the language catalogs supplied at a publisher revision. The [workflow specifications](vertical-workflows.md) trace livestock capitalization, piece-rate payroll and incoming material price controls. Two further walkthroughs follow [item names on multilingual invoices](item-language.md) and [a stock transfer across gate control and a webshop](stock-dispatch.md).
 
 ## What the source covers
 
-All 313 compressed source archives matched the SHA-256 values in the [marketplace source model](../marketplace-model/README.md). These are the publicly pinned listings outside the core and curated profiles in the November 18 snapshot. For the other 69 listings with unresolved original source links, consult their [publisher and historical evidence guides](../marketplace-guides/README.md).
+All 313 compressed source archives matched the SHA-256 values in the [marketplace source model](../marketplace-model/README.md). These are the publicly pinned listings outside the core and curated profiles in the documented listing population. For the other 69 listings with unresolved original source links, consult their [publisher and historical evidence guides](../marketplace-guides/README.md).
 
 | Source observation across the 313 listings | Result |
 |---|---:|

@@ -162,3 +162,7 @@ Queued rename can return the old identity while work remains pending. A client m
 A calendar date, a local date-time, a time of day, and a duration have different semantics. The common current-date-time helper resolves the configured system timezone and returns its local wall-clock date-time without an embedded timezone offset. The implementation must therefore retain the effective timezone context instead of silently interpreting every stored timestamp as universal time. This distinction affects modification timestamps, scheduled eligibility, attendance, service deadlines, and report cut-offs.
 
 Keep fractional seconds where the field and transport support them, particularly for optimistic modification checks. A posting date is a business calendar date and is not obtained by shifting midnight through a user's display timezone. For exchanges requiring unambiguous instants, an adapter may attach the resolved offset or another explicit timezone representation; that mapping must preserve the original local-time business meaning. Time arithmetic must separately state whether it measures wall-clock elapsed time, actual elapsed time, or a working calendar.
+
+## Linked specifications
+
+- **Related decisions** · [common storage families](../governance/physical-data-catalog.md#common-storage-families)

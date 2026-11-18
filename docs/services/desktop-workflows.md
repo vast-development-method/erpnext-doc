@@ -93,3 +93,11 @@ A lost response is an uncertain outcome. On reconnection, read the identified do
 Use an ordinary restricted user to enter a two-row order for one product in two units, receive only the first row partially, invoice the accepted portion, allocate a partial payment, and inspect outstanding values. Confirm unit labels, factor, stock quantity, rate currency, row lineage, and current business state at every step. Attempt a stale edit, an unauthorized company change, a submitted monetary-field change, and a cancellation with a submitted dependant. Each failure must preserve the authoritative business facts and provide a readable path to correction.
 
 The [service matrix](service-contracts.md#operation-contract-matrix), [permission fixtures](identity-permissions-and-tenancy.md#permission-fixtures-with-explicit-expected-results), and [report contracts](reporting-and-exports.md) define the server behavior behind this journey. The desktop or mobile client is an alternate presentation of that contract, not an independent accounting engine.
+
+## Conversion and accessibility checks
+
+A browser conversion case creates a lead, invokes conversion and checks that the resulting opportunity has the lead’s email address. Check the selected organisation, contact and original lead separately. Repeated conversion, concurrent duplicates and cross-role field access require distinct cases. Verify keyboard navigation, focus restoration, accessible error messages and mobile interactions on the rendered form.
+
+## Linked specifications
+
+- **Related decisions** · [customer relationships specification](../people-and-services/customer-relationships-and-sales.md) · [service specification](../people-and-services/service-and-support.md) · [project and time specification](../people-and-services/projects-and-time-billing.md)

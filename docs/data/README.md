@@ -4,7 +4,7 @@ Use the following entries together with the [documentation index](../README.md) 
 
 | Entry | Content |
 |---|---|
-| [Domain model](domain-model.md) | Specification |
-| [Fresh initialisation and data exchange](fresh-initialisation-and-data-exchange.md) | Specification |
-| [Persistence, identity, and values](persistence-identity-and-values.md) | Specification |
-| [Physical data catalog](physical-data-catalog.md) | Specification |
+| [Domain model](../governance/domain-model.md) | Specification |
+| [Fresh initialisation and data exchange](../services/fresh-initialisation-and-data-exchange.md) | Specification |
+| [Persistence, identity, and values](../services/persistence-identity-and-values.md) | Specification |
+| [Physical data catalog](../governance/physical-data-catalog.md) | Specification |

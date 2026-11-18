@@ -3,11 +3,10 @@
   "identifier": "record_type_terms_and_conditions",
   "name": "terms_and_conditions",
   "display_name": "terms and conditions",
-  "source_name_digest": "6a53d7db03ea116c3659b3ea3800783fb58e3dd571ce3e104169dc0c828b78d9",
-  "source_pack": "enterprise",
-  "source_artifact": "source-artifact-f46fc1f3284934ea2755",
+  "capability_group": "enterprise",
+  "component_identifier": "component_enterprise_setup_record_definitions_terms_and_conditions_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "independent_record",
   "supports_posting_and_cancellation": false,
   "ordered_field_names": [
@@ -164,14 +163,13 @@
     }
   ],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 10,
   "fields": [
     {
       "identifier": "record_type_terms_and_conditions.title",
       "name": "title",
-      "source_field_ordinal": 0,
-      "source_name_digest": "87dfbbd263f118137d036701c9df923f7214ce109ccf397139825fcf4b4e7a5c",
+      "field_ordinal": 0,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -183,6 +181,15 @@
         "unique": 1
       },
       "display_name": "title",
+      "value_contract": {
+        "value_kind": "text",
+        "uniqueness_scope": "the record type across saved records",
+        "uniqueness_validation": "Reject another persisted record with the same constrained value; handle empty values according to the field storage contract.",
+        "required_when_no_conditional_override": true,
+        "empty_storage_policy": "An empty or whitespace-only unique value is stored as null rather than a repeated empty string."
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "87dfbbd263f118137d036701c9df923f7214ce109ccf397139825fcf4b4e7a5c",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "87dfbbd263f118137d036701c9df923f7214ce109ccf397139825fcf4b4e7a5c",
@@ -197,8 +204,7 @@
     {
       "identifier": "record_type_terms_and_conditions.disabled",
       "name": "disabled",
-      "source_field_ordinal": 1,
-      "source_name_digest": "f693b9deb860600fb93d749df324c55991afe7eba6300113ab381339b23d12d5",
+      "field_ordinal": 1,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -210,13 +216,28 @@
           "value": "0"
         }
       },
-      "display_name": "disabled"
+      "display_name": "disabled",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "f693b9deb860600fb93d749df324c55991afe7eba6300113ab381339b23d12d5"
     },
     {
       "identifier": "record_type_terms_and_conditions.terms",
       "name": "terms",
-      "source_field_ordinal": 2,
-      "source_name_digest": "a301bcb976ae3f71bb78a24ca3e3e468af41c4040f6b011a5359e786688842a3",
+      "field_ordinal": 2,
       "value_type": "rich_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -227,6 +248,13 @@
         "included_in_global_search": 1
       },
       "display_name": "terms and conditions",
+      "value_contract": {
+        "value_kind": "rich_document_text",
+        "rendering": "Preserve supported formatting while applying the configured content sanitization policy.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "a301bcb976ae3f71bb78a24ca3e3e468af41c4040f6b011a5359e786688842a3",
       "excluded_source_attributes": {
         "historical_field_name": {
           "source_value_digest": "a301bcb976ae3f71bb78a24ca3e3e468af41c4040f6b011a5359e786688842a3",
@@ -241,8 +269,7 @@
     {
       "identifier": "record_type_terms_and_conditions.terms_and_conditions_help",
       "name": "terms_and_conditions_help",
-      "source_field_ordinal": 3,
-      "source_name_digest": "6025e9992adca35ca29b636d58398d6993711582546b2d3b647f4d3d19ad2654",
+      "field_ordinal": 3,
       "value_type": "rendered_markup",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -250,31 +277,46 @@
       "editable_after_posting": false,
       "properties": {
         "type_specific_options": {
-          "kind": "opaque_source_value",
-          "source_value_digest": "acaafd9cf09a7f8ebfa5995bdf573d5caa9159708537cebc96c41bd1ffb6c42e",
-          "reason": "Source prose, address, markup, template, or executable content is excluded from the neutral specification; semantics require review."
+          "kind": "semantic_value",
+          "meaning": "Terms templates may substitute values from the transaction, including order identifier, transaction date, and expected delivery date. The rendered terms are stored or displayed with the target transaction according to that workflow.",
+          "value_role": "field_instruction",
+          "source_value_digest": "acaafd9cf09a7f8ebfa5995bdf573d5caa9159708537cebc96c41bd1ffb6c42e"
         }
       },
-      "display_name": "terms and conditions help"
+      "display_name": "terms and conditions help",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "rendered_markup",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 9
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "6025e9992adca35ca29b636d58398d6993711582546b2d3b647f4d3d19ad2654"
     },
     {
       "identifier": "record_type_terms_and_conditions.applicable_modules_section",
       "name": "applicable_modules_section",
-      "source_field_ordinal": 4,
-      "source_name_digest": "6ec3638cd40cffb8e9acf2a6a3cb95e648d77c38f62a214ff441264d2c143eb9",
+      "field_ordinal": 4,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "applicable modules"
+      "display_name": "applicable modules",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 4
+      },
+      "source_field_ordinal": 4,
+      "source_name_digest": "6ec3638cd40cffb8e9acf2a6a3cb95e648d77c38f62a214ff441264d2c143eb9"
     },
     {
       "identifier": "record_type_terms_and_conditions.selling",
       "name": "selling",
-      "source_field_ordinal": 5,
-      "source_name_digest": "ff73d6614808c7ccaeee7f98a2b99c5c6b3ea5b6c7178328c4ccd72b386ab90a",
+      "field_ordinal": 5,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -287,13 +329,28 @@
         },
         "visible_in_list": 1
       },
-      "display_name": "selling"
+      "display_name": "selling",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "1"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 5,
+      "source_name_digest": "ff73d6614808c7ccaeee7f98a2b99c5c6b3ea5b6c7178328c4ccd72b386ab90a"
     },
     {
       "identifier": "record_type_terms_and_conditions.buying",
       "name": "buying",
-      "source_field_ordinal": 6,
-      "source_name_digest": "fcb3a5f224d9d8917bdee2151bd88fc5420ab476fc60893f37a976546b298e00",
+      "field_ordinal": 6,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -306,37 +363,66 @@
         },
         "visible_in_list": 1
       },
-      "display_name": "buying"
+      "display_name": "buying",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "1"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 6,
+      "source_name_digest": "fcb3a5f224d9d8917bdee2151bd88fc5420ab476fc60893f37a976546b298e00"
     },
     {
       "identifier": "record_type_terms_and_conditions.section_break_7",
       "name": "section_break_7",
-      "source_field_ordinal": 7,
-      "source_name_digest": "65c80131267b5fe05fc9bf16c845f041d34b9d31c205b21db5bd55b805e0bf61",
+      "field_ordinal": 7,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 7
+      },
+      "source_field_ordinal": 7,
+      "source_name_digest": "65c80131267b5fe05fc9bf16c845f041d34b9d31c205b21db5bd55b805e0bf61"
     },
     {
       "identifier": "record_type_terms_and_conditions.column_break_ofhb",
       "name": "column_break_ofhb",
-      "source_field_ordinal": 8,
-      "source_name_digest": "5535702ace5b004072980e5ad9fa612fbcf1061ab6d4ce07284969f62ee5b841",
+      "field_ordinal": 8,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 2
+      },
+      "source_field_ordinal": 8,
+      "source_name_digest": "5535702ace5b004072980e5ad9fa612fbcf1061ab6d4ce07284969f62ee5b841"
     },
     {
       "identifier": "record_type_terms_and_conditions.copy_attachments_to_transaction",
       "name": "copy_attachments_to_transaction",
-      "source_field_ordinal": 9,
-      "source_name_digest": "a202d61c25bcc723bd1658a0d7cd65ef8b8271b7289f533c4aca794a7d2e4933",
+      "field_ordinal": 9,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -348,9 +434,42 @@
           "value": "0"
         }
       },
-      "display_name": "copy attachments to transaction"
+      "display_name": "copy attachments to transaction",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 9,
+      "source_name_digest": "a202d61c25bcc723bd1658a0d7cd65ef8b8271b7289f533c4aca794a7d2e4933"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "explicit rename operation required",
+    "strategy": "identity_from_field",
+    "field_name": "title",
+    "rule": "Use the selected field value as the record identifier after requiredness and uniqueness checks."
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "independent_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "This record type does not independently implement the post-and-cancel lifecycle."
+  },
+  "source_name_digest": "6a53d7db03ea116c3659b3ea3800783fb58e3dd571ce3e104169dc0c828b78d9",
+  "source_pack": "enterprise",
+  "source_artifact": "source-artifact-f46fc1f3284934ea2755",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "e1abac099f28069ddcb98b304969ac85cf05940bb7dad1e2423cba1f23108f8c",
@@ -380,5 +499,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "organization.terms_and_conditions",
+    "status": "declared",
+    "dictionary": "schema/entities/organization.json",
+    "declaration_name": "Terms and Conditions",
+    "declaration_catalog": "docs/rebuild/model/catalog/erpnext-setup-01.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

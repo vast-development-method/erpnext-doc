@@ -17,6 +17,8 @@ from predicates import rule
 BASE = Path(__file__).resolve().parents[1]
 PINS = json.loads((BASE / "pins.json").read_text())
 CORE = ("erpnext", "frappe")
+AREA_LABELS = {"erpnext": "Business application", "frappe": "Shared foundation",
+               "hrms": "Workforce", "crm": "Customer relationships"}
 CHILD_TYPES = {"Table", "Table MultiSelect"}
 DISPLAY = {"Section Break", "Column Break", "Tab Break", "Attachment Gallery", "HTML",
            "Button", "Image", "Fold", "Heading", "Vue Component"}
@@ -289,7 +291,7 @@ def build(roots):
         pin = PINS[app]
         prefix = f"{app}-{slug(module)}"
         module_page = f"modules/{prefix}.md"
-        lines = [f"# {module} declarations in {app}", "",
+        lines = [f"# {module_label(module)} declarations in {AREA_LABELS[app].lower()}", "",
                  "Each dictionary part contains an ordered field list, source location, record settings and grants. "
                  "The source column opens the declaration at the reviewed revision.", "",
                  "| Record | Storage | Fields | Dictionary | Source |",
@@ -303,34 +305,49 @@ def build(roots):
             for row in group:
                 lookup[row["name"]] = {"app": app, "module": module, "part": path}
                 source = link(pin["repository"], pin["revision"], row["source_path"])
-                lines.append(f"| {row['name']} | {row['kind']} | {len(row['fields'])} | "
+                display_name = {"Frappe CRM Allowed User": "CRM integration allowed user"}.get(row["name"], row["name"])
+                lines.append(f"| {display_name} | {row['kind']} | {len(row['fields'])} | "
                              f"[Part {i}](../{path}) | [Source]({source}) |")
         files[module_page] = "\n".join(lines) + "\n"
         manifest["modules"][prefix] = report
     files["record-index.json"] = "{\n" + ",\n".join(
         "  " + encode(name) + ": " + encode(row) for name, row in sorted(lookup.items())) + "\n}\n"
     files["coverage.json"] = pretty(manifest)
-    lines = ["# Modules and release comparison", "", "## Core data dictionary", "",
-             "| App | Module | Records | Fields |", "|---|---|---:|---:|"]
-    for r in manifest["modules"].values():
-        lines.append(f"| {r['app']} | [{r['module']}]({r['index']}) | {r['records']} | {r['fields']} |")
-    lines += ["", "## Differences from the September source profile", "",
-              "Parts are grouped by current module, or by former module for a missing record. "
-              "Each changed record has source paths for both revisions and its changed facts. "
-              "For additions and removals the field names are in imported order. The preserved-field "
-              "ordering comparison ignores insertion or removal alone.", "",
-              "| App | September records / fields | November records / fields | Added | Absent | Changed | Unchanged |",
-              "|---|---:|---:|---:|---:|---:|---:|"]
-    for app, r in manifest["sources"].items():
-        lines.append(f"| {app} | {r['baseline_records']} / {r['baseline_fields']} | "
-                     f"{r['current_records']} / {r['current_fields']} | {r['added_records']} | "
-                     f"{r['removed_records']} | {r['changed_records']} | {r['stable_records']} |")
-    for app, r in manifest["sources"].items():
-        lines += ["", f"### {app}", "", "| Module | Comparison | Records differing |", "|---|---|---:|"]
-        for part in r["delta_parts"]:
-            lines.append(f"| {part['module']} | [Differences]({part['file']}) | {part['records']} |")
-    files["INDEX.md"] = "\n".join(lines) + "\n"
+    index, comparison = directory_pages(manifest)
+    files["INDEX.md"] = index
+    files["source-comparison.md"] = comparison
     return files
+
+
+def module_label(module):
+    return "Business Integrations" if module == "ERPNext Integrations" else module
+
+
+def directory_pages(manifest):
+    lines = ["# Record declarations by business area", "",
+             "Use the [qualified entity dictionary](../../../schema/README.md) for stable identities "
+             "and the [source comparison](source-comparison.md) for the provenance of field differences.", "",
+             "| Area | Module | Records | Fields |", "|---|---|---:|---:|"]
+    for row in manifest["modules"].values():
+        lines.append(f"| {AREA_LABELS[row['app']]} | [{module_label(row['module'])}]({row['index']}) | "
+                     f"{row['records']} | {row['fields']} |")
+    index = "\n".join(lines) + "\n"
+    lines = ["# Declaration comparison evidence", "",
+             "These counts reconcile the source extracts used to build the [record specification](INDEX.md). "
+             "Group a record by its declaring module, or by its last known module if absent. "
+             "Each comparison supplies the source paths and changed facts. Added and removed record "
+             "fields follow import order. The ordering comparison covers only fields present in both inputs.", "",
+             "| Area | Comparison input records / fields | Dictionary input records / fields | Added | Absent | Changed | Unchanged |",
+             "|---|---:|---:|---:|---:|---:|---:|"]
+    for app, row in manifest["sources"].items():
+        lines.append(f"| {AREA_LABELS[app]} | {row['baseline_records']} / {row['baseline_fields']} | "
+                     f"{row['current_records']} / {row['current_fields']} | {row['added_records']} | "
+                     f"{row['removed_records']} | {row['changed_records']} | {row['stable_records']} |")
+    for app, row in manifest["sources"].items():
+        lines += ["", f"## {AREA_LABELS[app]}", "", "| Module | Comparison | Records differing |", "|---|---|---:|"]
+        for part in row["delta_parts"]:
+            lines.append(f"| {module_label(part['module'])} | [Compared declarations]({part['file']}) | {part['records']} |")
+    return index, "\n".join(lines) + "\n"
 
 
 def main():

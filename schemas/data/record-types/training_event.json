@@ -3,11 +3,10 @@
   "identifier": "record_type_training_event",
   "name": "training_event",
   "display_name": "training event",
-  "source_name_digest": "b9b54aab5d5be05c152d99b9f8a17cb7e26fa77ab226e31d671e5213bca01c59",
-  "source_pack": "workforce",
-  "source_artifact": "source-artifact-a99fd182d67b021aa641",
+  "capability_group": "workforce",
+  "component_identifier": "component_workforce_human_resources_record_definitions_training_event_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "independent_record",
   "supports_posting_and_cancellation": true,
   "ordered_field_names": [
@@ -115,14 +114,13 @@
     }
   ],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 26,
   "fields": [
     {
       "identifier": "record_type_training_event.event_name",
       "name": "event_name",
-      "source_field_ordinal": 0,
-      "source_name_digest": "7bc545a44034b2dca045eb20774104e22a60696b6c8c4e3959e777010e8b9578",
+      "field_ordinal": 0,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -134,13 +132,21 @@
         "required": 1,
         "unique": 1
       },
-      "display_name": "event name"
+      "display_name": "event name",
+      "value_contract": {
+        "value_kind": "text",
+        "uniqueness_scope": "the record type across saved records",
+        "uniqueness_validation": "Reject another persisted record with the same constrained value; handle empty values according to the field storage contract.",
+        "required_when_no_conditional_override": true,
+        "empty_storage_policy": "An empty or whitespace-only unique value is stored as null rather than a repeated empty string."
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "7bc545a44034b2dca045eb20774104e22a60696b6c8c4e3959e777010e8b9578"
     },
     {
       "identifier": "record_type_training_event.training_program",
       "name": "training_program",
-      "source_field_ordinal": 1,
-      "source_name_digest": "203f8e08954f33f4fb9e118ff4e19fb57fb7f5c9b79f7876f3c77e6b280c5f6e",
+      "field_ordinal": 1,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -152,13 +158,24 @@
           "identifier": "record_type_training_program"
         }
       },
-      "display_name": "training program"
+      "display_name": "training program",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_training_program"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "203f8e08954f33f4fb9e118ff4e19fb57fb7f5c9b79f7876f3c77e6b280c5f6e"
     },
     {
       "identifier": "record_type_training_event.event_status",
       "name": "event_status",
-      "source_field_ordinal": 2,
-      "source_name_digest": "5042177f133730072230b6c7bad8d367abb57395bf5f9722694e90ffb35f7dda",
+      "field_ordinal": 2,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -187,13 +204,26 @@
         ],
         "required": 1
       },
-      "display_name": "event status"
+      "display_name": "event status",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "scheduled",
+          "completed",
+          "cancelled"
+        ],
+        "empty_option_explicitly_listed": false,
+        "required_when_no_conditional_override": true,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "5042177f133730072230b6c7bad8d367abb57395bf5f9722694e90ffb35f7dda"
     },
     {
       "identifier": "record_type_training_event.has_certificate",
       "name": "has_certificate",
-      "source_field_ordinal": 3,
-      "source_name_digest": "10e5f636656d3d978f8ff741f90cdbb525a5edac7a83a62f668c797c0583a7e5",
+      "field_ordinal": 3,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -296,29 +326,53 @@
               }
             ]
           },
-          "source_value_digest": "31bbdf82fc11f2a276b7cae006490ca8870be13896270f1c93d0959b78c1fef3",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.type equals seminar first truthy record.type equals workshop first truthy record.type equals conference first truthy record.type equals exam)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "31bbdf82fc11f2a276b7cae006490ca8870be13896270f1c93d0959b78c1fef3"
         }
       },
-      "display_name": "has certificate"
+      "display_name": "has certificate",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "10e5f636656d3d978f8ff741f90cdbb525a5edac7a83a62f668c797c0583a7e5"
     },
     {
       "identifier": "record_type_training_event.column_break_2",
       "name": "column_break_2",
-      "source_field_ordinal": 4,
-      "source_name_digest": "5723e464b5b2a5c5362d0e7966be5b644451f98a5228c8fa46574851bd3bc4d5",
+      "field_ordinal": 4,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 4
+      },
+      "source_field_ordinal": 4,
+      "source_name_digest": "5723e464b5b2a5c5362d0e7966be5b644451f98a5228c8fa46574851bd3bc4d5"
     },
     {
       "identifier": "record_type_training_event.type",
       "name": "type",
-      "source_field_ordinal": 5,
-      "source_name_digest": "d0070d5c40cd1aedd1b8d81061cd99af330999196a4200af47d89c42b4f81274",
+      "field_ordinal": 5,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -366,13 +420,30 @@
         ],
         "required": 1
       },
-      "display_name": "type"
+      "display_name": "type",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "seminar",
+          "theory",
+          "workshop",
+          "conference",
+          "exam",
+          "internet",
+          "self_study"
+        ],
+        "empty_option_explicitly_listed": false,
+        "required_when_no_conditional_override": true,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 5,
+      "source_name_digest": "d0070d5c40cd1aedd1b8d81061cd99af330999196a4200af47d89c42b4f81274"
     },
     {
       "identifier": "record_type_training_event.level",
       "name": "level",
-      "source_field_ordinal": 6,
-      "source_name_digest": "06435e3c0631c15559a2acc8fcfa3f6cbf27f3603a4e63ad5deca9a9a9197a2e",
+      "field_ordinal": 6,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -450,8 +521,10 @@
               }
             ]
           },
-          "source_value_digest": "d3b50e5c80231522e80db9edb15e88b64cb0b22c85b3b5a9c12caea4d1cddb3a",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.type equals seminar first truthy record.type equals workshop first truthy record.type equals exam)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "d3b50e5c80231522e80db9edb15e88b64cb0b22c85b3b5a9c12caea4d1cddb3a"
         },
         "allowed_values": [
           {
@@ -476,13 +549,27 @@
           }
         ]
       },
-      "display_name": "level"
+      "display_name": "level",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "",
+          "beginner",
+          "intermediate",
+          "advance"
+        ],
+        "empty_option_explicitly_listed": true,
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 6,
+      "source_name_digest": "06435e3c0631c15559a2acc8fcfa3f6cbf27f3603a4e63ad5deca9a9a9197a2e"
     },
     {
       "identifier": "record_type_training_event.company",
       "name": "company",
-      "source_field_ordinal": 7,
-      "source_name_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d",
+      "field_ordinal": 7,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -494,63 +581,98 @@
           "identifier": "record_type_company"
         }
       },
-      "display_name": "company"
+      "display_name": "company",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_company"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 7,
+      "source_name_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d"
     },
     {
       "identifier": "record_type_training_event.section_break_4",
       "name": "section_break_4",
-      "source_field_ordinal": 8,
-      "source_name_digest": "07c1075f75856326d10c5ba07cc48ae377155057c3f402a79199699a5885105f",
+      "field_ordinal": 8,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 8
+      },
+      "source_field_ordinal": 8,
+      "source_name_digest": "07c1075f75856326d10c5ba07cc48ae377155057c3f402a79199699a5885105f"
     },
     {
       "identifier": "record_type_training_event.trainer_name",
       "name": "trainer_name",
-      "source_field_ordinal": 9,
-      "source_name_digest": "ce4b5e579fab212ee52851db31d6634449d4c98b50aa9dff4a1f628a6bef2f0d",
+      "field_ordinal": 9,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "trainer name"
+      "display_name": "trainer name",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 9,
+      "source_name_digest": "ce4b5e579fab212ee52851db31d6634449d4c98b50aa9dff4a1f628a6bef2f0d"
     },
     {
       "identifier": "record_type_training_event.trainer_email",
       "name": "trainer_email",
-      "source_field_ordinal": 10,
-      "source_name_digest": "4decf694f78f1b5d63ec30ed83f1e289a56527435d83ca7a7e722bd169a56c84",
+      "field_ordinal": 10,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "trainer email"
+      "display_name": "trainer email",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 10,
+      "source_name_digest": "4decf694f78f1b5d63ec30ed83f1e289a56527435d83ca7a7e722bd169a56c84"
     },
     {
       "identifier": "record_type_training_event.column_break_7",
       "name": "column_break_7",
-      "source_field_ordinal": 11,
-      "source_name_digest": "b112ed3ff4d24278a59c92edf34de07bdbab38cf6feaceda1344d5fe0a623ddf",
+      "field_ordinal": 11,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 11
+      },
+      "source_field_ordinal": 11,
+      "source_name_digest": "b112ed3ff4d24278a59c92edf34de07bdbab38cf6feaceda1344d5fe0a623ddf"
     },
     {
       "identifier": "record_type_training_event.supplier",
       "name": "supplier",
-      "source_field_ordinal": 12,
-      "source_name_digest": "6dc47b3f81d4f564627d557daaab0830b4d5ca13bebd2d9536041575910a66c0",
+      "field_ordinal": 12,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -562,38 +684,61 @@
           "identifier": "record_type_supplier"
         }
       },
-      "display_name": "supplier"
+      "display_name": "supplier",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_supplier"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 12,
+      "source_name_digest": "6dc47b3f81d4f564627d557daaab0830b4d5ca13bebd2d9536041575910a66c0"
     },
     {
       "identifier": "record_type_training_event.contact_number",
       "name": "contact_number",
-      "source_field_ordinal": 13,
-      "source_name_digest": "a5ee26e4cca399ad0600a697e165838cab74b9cce273b7226c0f6a691f881c77",
+      "field_ordinal": 13,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "contact number"
+      "display_name": "contact number",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 13,
+      "source_name_digest": "a5ee26e4cca399ad0600a697e165838cab74b9cce273b7226c0f6a691f881c77"
     },
     {
       "identifier": "record_type_training_event.section_break_9",
       "name": "section_break_9",
-      "source_field_ordinal": 14,
-      "source_name_digest": "b67b401c762ff9ad3cf73db4d4a44373b00f31ca1fe8c0867bf38f294ece5aad",
+      "field_ordinal": 14,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 14
+      },
+      "source_field_ordinal": 14,
+      "source_name_digest": "b67b401c762ff9ad3cf73db4d4a44373b00f31ca1fe8c0867bf38f294ece5aad"
     },
     {
       "identifier": "record_type_training_event.course",
       "name": "course",
-      "source_field_ordinal": 15,
-      "source_name_digest": "854015a28921d9907e12ce39a810e1c77cfe829976c4d09c39af137522b3385b",
+      "field_ordinal": 15,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -602,13 +747,18 @@
       "properties": {
         "available_as_standard_filter": 1
       },
-      "display_name": "course"
+      "display_name": "course",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 15,
+      "source_name_digest": "854015a28921d9907e12ce39a810e1c77cfe829976c4d09c39af137522b3385b"
     },
     {
       "identifier": "record_type_training_event.location",
       "name": "location",
-      "source_field_ordinal": 16,
-      "source_name_digest": "1d147ff5488e58fa0e6d0d879d64bf16a26069d7e76dec775f585e3d6d043cc3",
+      "field_ordinal": 16,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -619,25 +769,37 @@
         "available_as_standard_filter": 1,
         "required": 1
       },
-      "display_name": "location"
+      "display_name": "location",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 16,
+      "source_name_digest": "1d147ff5488e58fa0e6d0d879d64bf16a26069d7e76dec775f585e3d6d043cc3"
     },
     {
       "identifier": "record_type_training_event.column_break_12",
       "name": "column_break_12",
-      "source_field_ordinal": 17,
-      "source_name_digest": "739ebc85dd5b2027430e9ab03977145d97de256bc12a800495c3c16e1237f6bc",
+      "field_ordinal": 17,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 17
+      },
+      "source_field_ordinal": 17,
+      "source_name_digest": "739ebc85dd5b2027430e9ab03977145d97de256bc12a800495c3c16e1237f6bc"
     },
     {
       "identifier": "record_type_training_event.start_time",
       "name": "start_time",
-      "source_field_ordinal": 18,
-      "source_name_digest": "80f6b7a9f3821523ec5c21dbc230822aac8136c880bb3ec66ae80c625f889e8a",
+      "field_ordinal": 18,
       "value_type": "date_and_time",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -646,13 +808,20 @@
       "properties": {
         "required": 1
       },
-      "display_name": "start time"
+      "display_name": "start time",
+      "value_contract": {
+        "value_kind": "timestamp",
+        "representation": "calendar date and time with subsecond precision when supplied",
+        "time_zone_policy": "Apply the configured site and user time-zone conversion contracts at transport and display boundaries.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 18,
+      "source_name_digest": "80f6b7a9f3821523ec5c21dbc230822aac8136c880bb3ec66ae80c625f889e8a"
     },
     {
       "identifier": "record_type_training_event.end_time",
       "name": "end_time",
-      "source_field_ordinal": 19,
-      "source_name_digest": "5c0130bde093beada2f6b7a4af96bb3b526fc10bafd06c8d71afbf55579fb2bf",
+      "field_ordinal": 19,
       "value_type": "date_and_time",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -661,25 +830,39 @@
       "properties": {
         "required": 1
       },
-      "display_name": "end time"
+      "display_name": "end time",
+      "value_contract": {
+        "value_kind": "timestamp",
+        "representation": "calendar date and time with subsecond precision when supplied",
+        "time_zone_policy": "Apply the configured site and user time-zone conversion contracts at transport and display boundaries.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 19,
+      "source_name_digest": "5c0130bde093beada2f6b7a4af96bb3b526fc10bafd06c8d71afbf55579fb2bf"
     },
     {
       "identifier": "record_type_training_event.section_break_15",
       "name": "section_break_15",
-      "source_field_ordinal": 20,
-      "source_name_digest": "ec20d76c574072bfc808de705b85a19f7032f3d746f48526da020660bd98f01c",
+      "field_ordinal": 20,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 20
+      },
+      "source_field_ordinal": 20,
+      "source_name_digest": "ec20d76c574072bfc808de705b85a19f7032f3d746f48526da020660bd98f01c"
     },
     {
       "identifier": "record_type_training_event.introduction",
       "name": "introduction",
-      "source_field_ordinal": 21,
-      "source_name_digest": "5300b46b24986e21d82656dc93d0beaf262bc2feabb739473299acac12a57545",
+      "field_ordinal": 21,
       "value_type": "rich_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -688,26 +871,39 @@
       "properties": {
         "required": 1
       },
-      "display_name": "introduction"
+      "display_name": "introduction",
+      "value_contract": {
+        "value_kind": "rich_document_text",
+        "rendering": "Preserve supported formatting while applying the configured content sanitization policy.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 21,
+      "source_name_digest": "5300b46b24986e21d82656dc93d0beaf262bc2feabb739473299acac12a57545"
     },
     {
       "identifier": "record_type_training_event.section_break_18",
       "name": "section_break_18",
-      "source_field_ordinal": 22,
-      "source_name_digest": "5d261c05b299ece2bfb2fcd63420895d413ffd90175012572f70b759a2e64251",
+      "field_ordinal": 22,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "attendees"
+      "display_name": "attendees",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 22
+      },
+      "source_field_ordinal": 22,
+      "source_name_digest": "5d261c05b299ece2bfb2fcd63420895d413ffd90175012572f70b759a2e64251"
     },
     {
       "identifier": "record_type_training_event.employees",
       "name": "employees",
-      "source_field_ordinal": 23,
-      "source_name_digest": "09eccbcd1da373b515745f158c01e84f89365dce1cf34fc7dbcec6f410eddec3",
+      "field_ordinal": 23,
       "value_type": "owned_record_collection",
       "persistence": "owned_child_records",
       "required_when_no_conditional_override": false,
@@ -720,13 +916,24 @@
           "identifier": "record_type_training_event_employee"
         }
       },
-      "display_name": "employees"
+      "display_name": "employees",
+      "value_contract": {
+        "value_kind": "ordered_owned_records",
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_training_event_employee"
+        },
+        "ownership": "Each row stores one parent record identity, parent record type, parent field, and row position. Preserve row ordering and prevent attachment of the same owned row to a second parent.",
+        "save_boundary": "Persist the parent and its owned rows in the same transaction.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 23,
+      "source_name_digest": "09eccbcd1da373b515745f158c01e84f89365dce1cf34fc7dbcec6f410eddec3"
     },
     {
       "identifier": "record_type_training_event.amended_from",
       "name": "amended_from",
-      "source_field_ordinal": 24,
-      "source_name_digest": "b43b52ad6f6c613ab2fb1330e5f616e71c8b496566b87009de27f6c7b11ed774",
+      "field_ordinal": 24,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -741,13 +948,24 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "amended from"
+      "display_name": "amended from",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_training_event"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 24,
+      "source_name_digest": "b43b52ad6f6c613ab2fb1330e5f616e71c8b496566b87009de27f6c7b11ed774"
     },
     {
       "identifier": "record_type_training_event.employee_emails",
       "name": "employee_emails",
-      "source_field_ordinal": 25,
-      "source_name_digest": "8dbc79e99faa62b96221357120758b44958e757f24098363e9a71ca253b7d2b4",
+      "field_ordinal": 25,
       "value_type": "short_multiline_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -761,9 +979,32 @@
           "source_value_digest": "0b57e967ff55ce5d934b1ac35a1e4a404e69444be35dba221b8a345b161d4ec6"
         }
       },
-      "display_name": "employee emails"
+      "display_name": "employee emails",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 25,
+      "source_name_digest": "8dbc79e99faa62b96221357120758b44958e757f24098363e9a71ca253b7d2b4"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "explicit rename operation required",
+    "strategy": "identity_from_field",
+    "field_name": "event_name",
+    "rule": "Use the selected field value as the record identifier after requiredness and uniqueness checks."
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "independent_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "Use draft, posted, and cancelled record states with explicit posting and cancellation operations."
+  },
+  "source_name_digest": "b9b54aab5d5be05c152d99b9f8a17cb7e26fa77ab226e31d671e5213bca01c59",
+  "source_pack": "workforce",
+  "source_artifact": "source-artifact-a99fd182d67b021aa641",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "7dd7a1294401d5ec8e57120e65a0a703cb29304ea329909577839a8eec023229",
@@ -785,5 +1026,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "workforce.training_event",
+    "status": "declared",
+    "dictionary": "schema/entities/workforce-02.json",
+    "declaration_name": "Training Event",
+    "declaration_catalog": "docs/rebuild/extensions/catalog/hrms-records-02.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

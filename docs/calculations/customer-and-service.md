@@ -1,6 +1,6 @@
 # Customers, projects and service
 
-[Complete definitions, units, exceptions and examples](customer-and-service-calculations.json) · [Transaction and boundary cases](customer-and-service-acceptance-cases.json)
+[Complete definitions, units, exceptions and examples](../../schemas/mathematics/customer-and-service-calculations.json) · [Transaction and boundary cases](../../schemas/mathematics/customer-and-service-acceptance-cases.json)
 
 ## Commercial product discount
 

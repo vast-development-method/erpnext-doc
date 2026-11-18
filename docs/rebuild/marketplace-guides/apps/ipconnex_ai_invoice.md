@@ -1,5 +1,7 @@
 # AI Invoice Importer
 
+[Business workflow and acceptance cases](../../../capabilities/guides/accounting.md#invoice-image-and-document-extraction).
+
 ## Publisher and recovered source evidence
 
 IPCONNEX advertises a version 14 tool that extracts invoice data from PDFs using ChatGPT. Its listed repository did not supply a public revision in the baseline. A separately hosted revision identifies the same app and credits IPCONNEX. The following behaviour belongs to that copy. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/ipconnex_ai_invoice) · [Listed repository](https://github.com/IPCONNEX-Services/IPCONNEX-AI-Invoice) · [Copy identification](https://github.com/jwjohns/IPCONNEX-AI-Invoice/blob/c4f4ba36150619fe04a79e63bd9803aa0c8c2602/ipconnex_ai_invoice/hooks.py#L4)
@@ -12,15 +14,7 @@ IPCONNEX advertises a version 14 tool that extracts invoice data from PDFs using
 
 ## Proposed multilingual rebuild contract
 
-An authorized clerk selects direction and company, attaches a file and requests an extraction using its attachment ID. Preserve the file hash, original text, document-language hints, extracted strings and reviewer corrections. Limit candidate parties to the authorized business scope. Match on stable party identity and show competing matches for review. Currency precision comes from the currency metadata. A model suggestion must never determine a posting by itself.
-
-Show translated field captions beside the supplier’s original words. Preserve names, identifiers and line descriptions, including mixed scripts. Parse decimal and date conventions from document evidence separately from the reviewer’s UI locale. Present questionable values with their source text. Require a reviewer to confirm direction, party, date, amounts and currency before producing one linked draft per approved import revision.
-
-| Acceptance example | Expected result |
-|---|---|
-| German PDF has a line “Beratung”, amount “1.234,50 EUR”, and date “18.11.2026”; clerk works in English | Review displays EUR 1234.50 and 2026-11-18 alongside their source strings. Approval produces one linked draft carrying currency EUR. Repeating the same approval returns that draft. |
-| Input states “03/04/26” with no further date context or contains an image without extractable text | Flag the date for review or route the file for explicit OCR/manual entry. The import remains unposted, with its source available to an authorized clerk. |
-| Header total differs from reviewed lines, taxes and rounding | Show the signed discrepancy and prevent final approval until it is explained. Switching UI language preserves the same decimal value and review decision. |
+[Read the consolidated workflow](../../../capabilities/guides/accounting.md#invoice-image-and-document-extraction-2).
 
 ## Remaining evidence
 

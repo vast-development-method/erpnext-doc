@@ -25,7 +25,7 @@ The [machine-readable example](indicator-example.json) fixes the clock at Novemb
 | Fiscal year missing, use calendar year | 325 | 275 | About 18.18% |
 | Zero prior aggregate | 0 | 0 | No percentage value |
 
-The pinned client filter resolver and server aggregation and comparison functions produced these results in isolation. The fixture supplies company, clock, currency and row visibility. SQLite executed the requested filtering and sum. The [machine-readable example](indicator-example.json) also records the resolved date, company and four ageing boundaries for the separate Accounts Payable Ageing chart. A full website run requires actual site permissions, chart rendering and the selected company's data.
+The client filter resolver and server aggregation and comparison functions produced these results in isolation. The fixture supplies company, clock, currency and row visibility. SQLite executed the requested filtering and sum. The [machine-readable example](indicator-example.json) also records the resolved date, company and four ageing boundaries for the separate Accounts Payable Ageing chart. A full website run requires actual site permissions, chart rendering and the selected company's data.
 
 ## Complete accounting onboarding
 

@@ -1,5 +1,7 @@
 # Farm stock, piece-rate payroll and incoming material prices
 
+The [posting contracts](../../capabilities/optional-posting.md) connect these controller decisions to inventory value, payroll basis and purchase price.
+
 A farm activity, a payroll calculation and a price warning can all change a later financial result. The three extensions below place those decisions at different points in the document lifecycle. Each trace describes a particular publisher revision. The acceptance examples specify what a replacement should demonstrate. No extension was installed for these traces.
 
 ## Livestock Management • from daily capture to stock valuation

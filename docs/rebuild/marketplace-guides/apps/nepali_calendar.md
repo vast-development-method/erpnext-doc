@@ -1,14 +1,12 @@
 # Nepali Calendar
 
+[Business workflow and acceptance cases](../../../capabilities/guides/data.md#nepali-civil-day-conversion).
+
 Kanak Infosystems lists version 15. Its datepicker lets a form user select a Nepali date and convert between Nepali and Gregorian dates in either direction. The publisher explicitly covers Date fields across sales, purchasing, HR and accounting. This establishes an input and display capability. Storage format, supported year range, conversion data and treatment of DateTime fields require separate evidence. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/nepali_calendar) · [Publisher's v15 product guide](https://www.kanakinfosystems.com/frappe/apps/15.0/nepali_calendar)
 
 A public modified copy names Kanak in the app manifest and installation instructions. Its server-side test declarations specify Gregorian years 1944–2042 and Nepali years 2000–2099. Its browser code adds a Nepali rendering for Date and DateTime controls using configured patterns. The browser and server have separate conversion paths. The test ranges are properties of that historical server converter, rather than a verified promise about the listed package. [Copy manifest](https://github.com/ajiragroup/nepali_calendar/blob/bcfdde64f305d94a564a8a74623688e21877458d/nepali_calendar/hooks.py) · [Converter cases](https://github.com/ajiragroup/nepali_calendar/blob/bcfdde64f305d94a564a8a74623688e21877458d/nepali_calendar/nepali/tests/test_date_converter.py) · [Browser control](https://github.com/ajiragroup/nepali_calendar/blob/bcfdde64f305d94a564a8a74623688e21877458d/nepali_calendar/public/js/custom_control_date.js)
 
 ## Proposed rebuild contract
-
-For each Date field, maintain one canonical civil date. Accept a calendar identifier, numeric year/month/day and a conversion-table revision. Validate the day against the selected calendar, convert once and save the canonical date with the business record. Rendering performs the inverse conversion for the viewer. Changing the picker view leaves an untouched record clean. Use the same canonical date for filters, comparisons, invoice ageing and payroll boundaries. A civil date has no time-of-day or UTC offset.
-
-Treat language, numeral system and calendar as separate preferences. A Nepali-speaking clerk can choose Gregorian input, and an English-speaking clerk can choose Bikram Sambat input. Identify the calendar beside editable and ambiguous printed dates. If approved local month names are unavailable, use an explicitly labelled numeric format. Preserve the actual conversion-table range and report a localized error outside it. A fixed offset in years cannot perform the conversion across irregular month boundaries.
 
 | Proposed acceptance case | Expected result |
 |---|---|
@@ -18,3 +16,5 @@ Treat language, numeral system and calendar as separate preferences. A Nepali-sp
 | A user in a distant time zone opens an already-saved civil date. | The Gregorian and Nepali views preserve the civil day across the zone change. |
 
 The publisher's repository remains unpinned in the cohort snapshot. Upstream control code provides the ordinary Date integration point. The deployed marketplace build, calendar-switch persistence and exact coverage shared by its server and browser conversions still need direct evidence. [Named app repository](https://github.com/kanakinfo/nepali_calendar) · [Framework Date control](https://github.com/frappe/frappe/blob/199a0385c00e572664a099a57a00be6ce7404eeb/frappe/public/js/frappe/form/controls/date.js)
+
+[Read the consolidated workflow](../../../capabilities/guides/data.md#nepali-civil-day-conversion).

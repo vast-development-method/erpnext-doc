@@ -1,26 +1,28 @@
-# Marketplace source models
+# Optional application declaration catalog
 
-The [marketplace directory](../extensions/marketplace.json) identifies 398 publisher listings observed on November 18, 2026. This catalog inspects every publicly pinned listing outside the [core](../model/README.md) and the [18 curated extension profiles](../extensions/README.md). It covers 313 listings, including 101 that declare ERPNext as a dependency and another 111 with a production import, hook, record operation, customization or field link to an ERPNext record. The inspected sources provide 3,143 DocTypes, 29,401 declared non-layout fields, 4,099 custom-field contributions and 8,207 whitelisted service declarations. The [101-app directory](declared-apps.md) links each explicit dependency to its source. [Three worked integrations](integration-examples.md) trace invoice-to-payment mapping, property-specific cost center allocation and two-warehouse stock validation.
+The [marketplace directory](../extensions/marketplace.json) identifies 398 publisher listings with their evidence and source identifiers. This catalog inspects every publicly pinned listing outside the [core](../model/README.md) and the [18 curated extension profiles](../extensions/README.md). It covers 313 listings, including 101 that declare core ERP as a dependency and another 111 with a production import, hook, record operation, customization or field link to an core ERP record. The inspected sources provide 3,143 DocTypes, 29,401 declared non-layout fields, 4,099 custom-field contributions and 8,207 whitelisted service declarations. The [101-app directory](declared-apps.md) links each explicit dependency to its source. [Three worked integrations](integration-examples.md) trace invoice-to-payment mapping, property-specific cost center allocation and two-warehouse stock validation.
 
 The [multilingual marketplace guides](../marketplace-guides/README.md) follow every one of the 69 rows whose original repository link lacked a verified revision. The guides add publisher manuals, attributed alternate sources, worked rebuild cases and the evidence still needed to verify each commercial release. The 398-listing declaration inventory below retains its original source basis.
 
 ## Reading the coverage
 
-The classification uses the strongest evidence found for each listing. Every positive criterion observed also has a path, line and matched operand in that listing’s evidence map. A zero line identifies a whole declarative file. The owner of a record name is taken from the [pinned ERPNext record index](../model/record-index.json). The version column records the publisher's marketplace claim. A publisher's default branch can target a different version.
+The classification uses the strongest evidence found for each listing. Every positive criterion observed also has a path, line and matched operand in that listing’s evidence map. A zero line identifies a whole declarative file. The owner of a record name is taken from the [pinned core ERP record index](../model/record-index.json). The publisher compatibility subgroup reproduces the listing counts indexed in the source manifest. The [capability directory](../../capabilities/directory.md) organizes business workflows independently of package identity.
 
-| Strongest evidence per listing | All | Lists v16 | Reader interpretation |
+| Strongest evidence per listing | All | Publisher compatibility subgroup¹ | Reader interpretation |
 |---|---:|---:|---|
-| Explicit ERPNext dependency | 101 | 75 | ERPNext occurs in a literal application dependency, project dependency or requirements declaration |
-| ERPNext production import | 40 | 22 | A source module imports ERPNext. An optional or conditionally used integration is possible |
-| ERPNext record hook | 36 | 14 | A literal record key appears in selected lifecycle, class, client or permission hook maps |
-| ERPNext record operation | 25 | 12 | Source supplies the record name to a recognized document or database operation |
-| ERPNext record customization | 2 | 0 | A custom field, property setter or custom permission names the ERPNext record |
-| ERPNext record field link | 8 | 5 | A typed DocType field's options match an ERPNext record |
-| No selected ERPNext evidence | 101 | 53 | Source inspected; dynamically resolved names, optional dependencies, other integration styles and standalone framework apps may fall here |
+| Explicit core ERP dependency | 101 | 75 | The core package occurs in a literal application dependency, project dependency or requirements declaration |
+| core ERP production import | 40 | 22 | A source module imports core ERP. An optional or conditionally used integration is possible |
+| core ERP record hook | 36 | 14 | A literal record key appears in selected lifecycle, class, client or permission hook maps |
+| core ERP record operation | 25 | 12 | Source supplies the record name to a recognized document or database operation |
+| core ERP record customization | 2 | 0 | A custom field, property setter or custom permission names the core ERP record |
+| core ERP record field link | 8 | 5 | A typed DocType field's options match an core ERP record |
+| No selected core ERP evidence | 101 | 53 | Source inspected; dynamically resolved names, optional dependencies, other integration styles and standalone framework apps may fall here |
 | Curated extension profile | 15 | 13 | A dedicated extension profile covers this listing |
-| ERPNext itself | 1 | 1 | Covered by the core blueprint |
+| Core ERP | 1 | 1 | Covered by the core blueprint |
 | Public revision unresolved | 69 | 14 | The marketplace lists a repository, but a public immutable source revision was unavailable |
 | **Total** | **398** | **209** | Each listing occurs once |
+
+¹ The subgroup counts listings that advertise major 16 in the source register.
 
 There were 313 distinct repository names among the 313 inspected cards, corresponding to 311 distinct Git commits. Forks or renamed repositories can share Git history. Counts throughout this directory are per listing. Three selected files were skipped: the holiday and postal data fixtures exceeded the single-source size limit, and a controller in `stock_reconcialiation_per_item_group` contains inconsistent indentation. Their exact paths and reasons are recorded under `unparsed` on each directory row. The scanner traversed 55,113 regular files and selected 27,903. Third-party app installation, test execution, legal compliance, current provider interoperability and compatibility between arbitrary app combinations remain unverified by this catalog.
 
@@ -30,10 +32,10 @@ There were 313 distinct repository names among the 313 inspected cards, correspo
 
 | Kind | Entries | What each entry captures |
 |---|---:|---|
-| Module / record | 368 / 3,143 | Named module in a module manifest; DocType name, module, child/singleton/tree/submittable/virtual flags, number of metadata fields and ERPNext link triples |
+| Module / record | 368 / 3,143 | Named module in a module manifest; DocType name, module, child/singleton/tree/submittable/virtual flags, number of metadata fields and core ERP link triples |
 | Field / permission | 29,401 / 4,971 | Non-layout field key, type, selected constraints, permission level, link or table target, Select options; declared role, level, grant names and owner-only flag |
 | Custom field / property rule / custom permission | 4,099 / 1,136 / 234 | Target record and field definition; changed property name, target and property type; imported role grants. The exact override value and conditional behavior can be read at the pinned source |
-| ERPNext record operation | 8,011 | Line, framework document or database operation and statically named ERPNext record. An operation may occur inside a branch or optional integration |
+| core ERP record operation | 8,011 | Line, framework document or database operation and statically named core ERP record. An operation may occur inside a branch or optional integration |
 | Hook | 2,016 | Hook-file assignment, literal binding path when recognized and whether the assigned value is dynamic. Nested callback entries preserve map keys in order; fixture entries retain record types |
 | Service | 8,207 | Whitelisted function or class method, declaration line, argument names, literal guest or method settings and positional decorator marker. An absent setting means the source left it unspecified. Actual authorization also depends on the handler, runtime and site |
 | Report / view | 605 / 305 | Report name, module, type and reference record; workspace, dashboard, print-format or workflow identifier |
@@ -67,4 +69,4 @@ python3 tools/verify.py
 
 Downloads address the publisher repository and full commit. The reader checks the archive root, streams regular files as data, excludes vendored and build trees, and records parser failures. GitHub may repackage archives over time; compare the commit and recorded archive digest when reproducing an exact byte capture. Limits are 256 MiB per compressed archive, 768 MiB of regular-file contents, 120,000 regular files and 3 MiB per selected file. No app is imported, installed or executed by this inventory. Detection does not expand runtime-generated metadata, database customization, additional permissions installed at a site, decorator wrappers, arbitrary aliases or user reports. Counts of named tests describe declarations present in each repository. For example, 19,615 occur in the Jarvis repository alone.
 
-The next stage for an app-specific implementation is to open its pinned controller and fixtures, resolve actual state transitions and privilege checks, model effects on core documents and ledgers, and establish replayable acceptance cases for each required installation and version. The [worked integrations](integration-examples.md) demonstrate this for three distinct boundaries.
+The [commerce and regional exchange contracts](../../capabilities/trade-exchanges.md) give the decisions for installment payment orders, property cost centers and warehouse group restrictions. The [worked integrations](integration-examples.md) retain the calculation examples, source conditions and traces for those boundaries.

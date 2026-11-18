@@ -181,3 +181,89 @@ def live_cases(load, root):
             "negative control metadata")
     return (f"{len(ids)} recorded live platform decisions, {len(keys)} matching native JUnit observations, "
             "two recovery attachment snapshots and a failed-layout control")
+
+def business_dictionary(repo, load, validator):
+    """Join each business entity and retained field to its exact declaration."""
+    from csv import DictReader
+
+    def rows(path):
+        with path.open(encoding="utf-8", newline="") as stream:
+            return list(DictReader(stream, delimiter="\t"))
+
+    schema = repo / "schema"
+    coverage = repo / "docs/rebuild/coverage-review"
+    definitions = {}
+    fields = set()
+    dictionary = validator(load(schema / "dictionary.schema.json"))
+    for part in sorted((schema / "entities").glob("*.json")):
+        records = load(part)
+        dictionary.validate(records)
+        for record in records:
+            entity = record["entity"]
+            require(entity not in definitions, "duplicate dictionary entity: " + entity)
+            definitions[entity] = (part.relative_to(repo).as_posix(), record)
+            fields.update((entity, f["field"]) for f in record["fields"] if f.get("compatibility_only"))
+
+    declared = {}
+    comparisons = {}
+    for pattern in ["model/catalog/*.json", "extensions/catalog/*-records*.json", "model/delta/*.json"]:
+        for part in (repo / "docs/rebuild").glob(pattern):
+            name = part.relative_to(repo).as_posix()
+            for record in load(part):
+                if part.parent.name == "delta":
+                    comparisons[name, record["name"]] = record
+                else:
+                    key = (name, record["name"], record.get("source_path", record.get("source")))
+                    require(key not in declared, "duplicate source declaration: " + str(key))
+                    declared[key] = record
+
+    used_entities, used_sources = {}, set()
+    source_kinds = {"ordinary": "independent_record", "record": "independent_record",
+                    "singleton": "singleton_settings", "child": "owned_row", "virtual": "computed_record",
+                    "single": "singleton_settings"}
+    layout_types = {"Section Break", "Column Break", "Tab Break", "Button", "HTML", "Heading", "Image",
+                    "Fold", "Vue Component"}
+    retired = 0
+    historical = {(part, name, r["baseline_path"]) for (part, name), r in comparisons.items()
+                  if r["status"] == "removed"}
+    for row in rows(coverage / "entity-cross-reference.tsv"):
+        entity = row["entity"]
+        require(entity in definitions and entity not in used_entities, "invalid entity cross-reference: " + entity)
+        part, record = definitions[entity]
+        compatibility = record.get("compatibility_only", False)
+        source = row["declaration_catalog"], row["declaration_name"], row["source_path"]
+        require(part == row["dictionary"] and row["status"] == ("compatibility_only" if compatibility else "declared")
+                and source in (historical if compatibility else declared) and source not in used_sources,
+                "invalid declaration binding: " + entity)
+        if not compatibility:
+            source_record = declared[source]
+            require(source_kinds.get(source_record["kind"], source_record["kind"]) == record["kind"],
+                    "storage kind mismatch: " + entity)
+            ordered = {}
+            for field in source_record["fields"]:
+                name, field_type = (field["name"], field["type"]) if isinstance(field, dict) else field[:2]
+                if field_type not in layout_types:
+                    ordered[name] = None
+            active_fields = [f["field"] for f in record["fields"] if not f.get("compatibility_only")]
+            require(len(ordered) == len(active_fields), "declared value-field count mismatch: " + entity)
+            stable_names = set(active_fields)
+            require(all(a == b or a not in stable_names for a, b in zip(ordered, active_fields)),
+                    "declaration order mismatch: " + entity)
+        used_entities[entity] = source
+        used_sources.add(source)
+        retired += compatibility
+    require(set(used_entities) == set(definitions) and used_sources == set(declared) | historical,
+            "the entity cross-reference must cover every dictionary entity and declaration exactly once")
+
+    seen = set()
+    for row in rows(coverage / "compatibility-fields.tsv"):
+        key = row["entity"], row["field"]
+        declaration = comparisons[row["declaration_comparison"], row["declaration_name"]]
+        require(key in fields and key not in seen
+                and used_entities[key[0]][1:] == (row["declaration_name"], declaration["current_path"])
+                and "removed" in declaration.get("changes", {}).get("fields", {}).get(row["source_field"], {}),
+                "invalid removed-field binding: " + ".".join(key))
+        seen.add(key)
+    require(fields == seen, "missing compatibility-field binding")
+    return (f"{len(definitions) - retired} declared entities, {retired} retained layouts, "
+            f"{len(fields)} compatibility-only fields")

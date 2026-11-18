@@ -1,6 +1,6 @@
 # Restoring document state, attachment access and a numbering counter
 
-A MariaDB and filesystem backup from a disposable ERPNext site restored a private note, its two attachment records and their byte content into a separately provisioned site. The restored site resumed the sequence from the value at backup time. Its private download handler returned the original bytes to the administrator and HTTP 403 to both Guest and a newly created, unrelated website user. This experiment ran on ERPNext 16.60.0, Frappe 16.60.1 and MariaDB 11.8.6. The [successful receipt](observed.json) and [failed path-layout control](absolute-root-control.json) record two different destination sites. [ERPNext revision](https://github.com/frappe/erpnext/tree/886ab6ae187244e7f1b852393384ab6019d56264) · [Framework revision](https://github.com/frappe/frappe/tree/199a0385c00e572664a099a57a00be6ce7404eeb)
+A MariaDB and filesystem backup from a disposable reference site restored a private note, its two attachment records and their byte content into a separately provisioned site. The restored site resumed the sequence from the value at backup time. Its private download handler returned the original bytes to the administrator and HTTP 403 to both Guest and a newly created, unrelated website user. This experiment ran on the business and foundation packages with MariaDB 11.8.6. The [successful receipt](observed.json) and [failed path-layout control](absolute-root-control.json) record two different destination sites. [Business application revision](https://github.com/frappe/erpnext/tree/886ab6ae187244e7f1b852393384ab6019d56264) · [Framework revision](https://github.com/frappe/frappe/tree/199a0385c00e572664a099a57a00be6ce7404eeb)
 
 | Check | Source at snapshot | Source after snapshot | Restored target |
 |---|---|---|---|
@@ -24,7 +24,7 @@ This is a quiescent, same-version, same-host logical restore to a separate Maria
 
 ## Reproduce on a disposable Bench
 
-Run the following Bash commands from a Bench already configured with the recorded revisions, MariaDB, Redis, the MariaDB and tar tools and the Frappe virtual environment. Supply a separate fresh pair of site names each time. The example derives both names from a random suffix, checks their absence, and provisions both before applying the experiment markers. A new target is required after a failed or successful restore. Use the same database administrator identity for provisioning and for restore. The runner reads its password from a private temporary file. The report written to the chosen directory contains measurements and hashes.
+Run the following Bash commands from a Bench already configured with the recorded revisions, MariaDB, Redis, the MariaDB and tar tools and the reference virtual environment. Supply a separate fresh pair of site names each time. The example derives both names from a random suffix, checks their absence, and provisions both before applying the experiment markers. A new target is required after a failed or successful restore. Use the same database administrator identity for provisioning and for restore. The runner reads its password from a private temporary file. The report written to the chosen directory contains measurements and hashes.
 
 ```bash
 set -euo pipefail

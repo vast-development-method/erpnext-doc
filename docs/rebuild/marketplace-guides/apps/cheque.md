@@ -1,5 +1,7 @@
 # cheque
 
+[Business workflow and acceptance cases](../../../capabilities/guides/banking.md#cheque-approval-and-collection).
+
 Ahmed’s listing covers received and issued cheques in versions 15 and 16, with deposit batches, journals, bank reconciliation, reminders and bilingual Arabic/English receipts. A submitted receipt creates its cheque. Deposit-slip selection filters by company, date and status, and excludes cheques already assigned to a slip. The listing also describes endorsement, agent collection, discounting and bank charges. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/cheque)
 
 ## Business events and journal effects
@@ -25,10 +27,6 @@ Bank reconciliation looks for a submitted deposited cheque matching the trimmed 
 
 ## Proposed rebuild and acceptance
 
-Give each authorised transition an event ID and references to its journal, deposit slip and originating bank transaction. Commit workflow status and its accounting effect together. An approval request should stay visible to the manager after commit, while no journal posts until approval. Require manual review when a reference, account, amount or direction is ambiguous.
-
-- With a threshold of 1,000, submit a cheque for exactly 1,000 and query it in a fresh session. Expect pending approval and no journal. A manager approves it once. Retrying the command returns the posted journal ID.
-- A cheque for 1,000 is received, deposited and collected. The bank increases by 1,000, customer receivables decrease by 1,000, and the two intervening clearing balances net to zero. Reimporting the bank line leaves the balances unchanged.
-- Two companies deposit cheques numbered 0123. A statement lacking the account context must leave both untouched. A bank’s local-language return code takes precedence over translating free text.
-
 Render the same cheque ID, number, amount and date in both language copies. Support right-to-left labels while preserving the reading order and leading zeros of instrument numbers. Move the publisher’s pounds/piastres wording into a currency-specific print template. Capture approval evidence, statement mapping and journal references independently of the operator’s language. Runtime equivalence to the commercial build remains unverified.
+
+[Read the consolidated acceptance cases](../../../capabilities/guides/banking.md#cheque-approval-and-collection-3).

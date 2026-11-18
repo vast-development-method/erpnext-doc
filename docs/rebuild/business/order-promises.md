@@ -1,36 +1,22 @@
 # Customer order promises, delivery splits and pro forma invoices
 
-An order row is the unit of commitment. Two rows for the same product can have different warehouses, schedules, unit conversions, delivered quantities and billed values. Preserve the order row identity on schedule, dispatch, invoice and return lines. This chapter supplements the [row progress contract](../../domains/transaction-progress-and-row-closure.md) and [customer relationships](../../domains/customer-relationships-and-sales.md).
+The [Customer order promises, delivery splits and pro forma invoices](../../transactions/order-promises.md) chapter defines the business rules, calculations and worked outcomes.
+
+- [row progress contract](../../domains/transaction-progress-and-row-closure.md)
+- [customer relationships](../../domains/customer-relationships-and-sales.md)
 
 ## Set and resize delivery promises
 
-A writer on the order selects one of its rows and supplies dated portions in the **order unit**. Resolve product, warehouse, units and stock conversion from that stored row. Compare the sum of portions to ordered quantity at row precision. A smaller total represents a partially scheduled commitment. Multiply each accepted quantity by the conversion factor (fallback one) to store stock quantity. Update an existing schedule identity only if it belongs to this order and row. Otherwise create a schedule. For a nonempty replacement remove earlier schedules omitted from the submission. Set the row's delivery date to the earliest supplied date when one exists.
-
-A request with no schedules does not pass the nonempty replacement gate. Removing all schedules requires the deletion path. On order-row change, consume the new quantity budget in ascending (delivery date, creation) order. Keep each earlier quantity up to the remaining budget, update stock quantities and row metadata, and delete the tail when no quantity remains. A quantity increase does not invent a date for the extra units. Example: promises of 4, 3 and 2 cartons become 4, 2 and no third record when the row drops to 6 cartons. At 12 pieces per carton the revised stock promises are 48 and 24 pieces. No stock movement or sales revenue arises from scheduling. [Delivery schedule lifecycle](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/selling/doctype/sales_order/sales_order.py#L1040-L1168)
+- [Delivery schedule lifecycle](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/selling/doctype/sales_order/sales_order.py#L1040-L1168)
 
 ## Map delivery and invoice independently
 
-For ordinary unreserved items, a dispatch draft maps the quantity still owed after both submitted deliveries and rows already mapped to the target. Respect selected children, delivery-date filters and direct supplier delivery. Unit-price rows with zero quantity have a separate single-mapping branch. Reserved stock and bundled items have separate allocation paths. A successful mapping returns a draft for downstream validation. [Delivery mapping](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/selling/doctype/sales_order/sales_order.py#L1419-L1591)
-
-For invoice mapping, aggregate submitted linked invoice row quantity in stock units and divide by the **order row's** conversion factor. Signed invoice rows therefore affect billed quantity. Compute a second aggregate for credit notes flagged both to update stock and to update order billed amount. In that second aggregate negate each qualifying signed return quantity to express a positive reversal magnitude. For a normal positive-quantity row:
-
-1. Effective returned quantity = recorded returns − qualifying credit-note return magnitude.
-2. Quantity billable after returns = min(ordered, max(ordered − effective returned, delivered)).
-3. Pending = max(0, round to row precision(quantity billable after returns − net submitted billed − already mapped to draft)).
-4. Select if pending is positive and the value gate passes (zero base amount or absolute billed amount strictly below the allowance-adjusted order amount). The amount check uses the overbilling allowance. There is also a value-completion path when quantity is exhausted, no row is already mapped and the order is underbilled in money. Do not discard such a candidate solely because pending quantity is zero.
-5. The initial mapped amount is the order amount less billed amount, converted at the order exchange rate for base amount. Apply target defaults and tax/total calculation before interpreting final invoice values.
-
-For 10 ordered cartons, 3 recorded returns, 2 cartons on qualifying credit notes, 8 delivered, 5 cartons net billed and 1 already mapped, the billable ceiling is 9 and pending is **3 cartons**. For inward subcontracting, the separately appended company-supplied material row uses the positive remainder of max(required, consumed) less already billed. Customer-provided material is excluded. [Invoice mapper](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/selling/doctype/sales_order/sales_order.py#L1594-L1826) · [Return criteria](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/selling/doctype/sales_order/sales_order.py#L2523-L2543)
+- [Delivery mapping](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/selling/doctype/sales_order/sales_order.py#L1419-L1591)
+- [Invoice mapper](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/selling/doctype/sales_order/sales_order.py#L1594-L1826)
+- [Return criteria](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/selling/doctype/sales_order/sales_order.py#L2523-L2543)
 
 ## Issue a pro forma
 
-| Operation | Required facts | Observable result |
-|---|---|---|
-| Inspect order lines | Read access to the specified order | Order row, quantity, rate, amount and previously issued pro forma sums grouped by order row. Drafts and cancellations are excluded. |
-| Issue by quantity | Enabled feature, submitted readable order, chosen rows unique within this document, positive quantity | Re-read each source row and set amount to quantity × order rate. |
-| Issue by amount | Same gates and positive entered amount | Rate = entered amount ÷ quantity. The entered line amount survives display-rate rounding. Quantity may be hidden on the printed amount-basis document. |
-| Submit | Valid rows | Status Issued, recalculated grand total, private PDF on the pro forma. The adjusted order copy exists only during calculation/rendering. |
-| Send | Email permission on issued document, generated attachment attached to that same record | Send attached copy, then record recipient text and sent timestamp. |
-| Cancel or amend | Existing issued document | Cancel records Cancelled and removes it from future issued totals. Amendment is rejected. Issue a fresh record if needed. |
-
-Use a proportional share for fixed order charges. Divide selected line amounts by the original order total; when that denominator is zero use one. Multiply each actual charge and any fixed document discount by the share at field precision. Leave percentage charges to the normal calculation. Rebuild the selected rows' rate and amount inputs and clear inherited margin/discount/rule overrides. Reject a negative recalculated grand total. For an order merchandise total of 1,000, pro forma line amount 250, fixed freight 80, no other adjustments, the share is 0.25 and the issued total is **270**. A 100 amount spread over 3 units remains 100 despite a display rate of 33.33. Previously issued totals are informative. Issuing does not consume the stock, billed quantity or outstanding receivable, and this service has no per-line cap against prior pro formas. [Issue, validation and calculation](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/selling/doctype/proforma_invoice/proforma_invoice.py) · [Upstream cases](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/selling/doctype/proforma_invoice/test_proforma_invoice.py) · [Operator guide](https://docs.frappe.io/erpnext/proforma-invoice)
+- [Issue, validation and calculation](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/selling/doctype/proforma_invoice/proforma_invoice.py)
+- [Upstream cases](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/selling/doctype/proforma_invoice/test_proforma_invoice.py)
+- [Operator guide](https://docs.frappe.io/erpnext/proforma-invoice)

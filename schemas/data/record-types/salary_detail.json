@@ -3,11 +3,10 @@
   "identifier": "record_type_salary_detail",
   "name": "salary_detail",
   "display_name": "salary detail",
-  "source_name_digest": "45903e980cca64ae9fd151601dde7c4e23175be044138085490df4acc6b18808",
-  "source_pack": "workforce",
-  "source_artifact": "source-artifact-443c0fc98fb6d01d98a2",
+  "capability_group": "workforce",
+  "component_identifier": "component_workforce_payroll_record_definitions_salary_detail_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "owned_child_record",
   "supports_posting_and_cancellation": false,
   "ordered_field_names": [
@@ -68,14 +67,13 @@
   },
   "declared_permission_grants": [],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 30,
   "fields": [
     {
       "identifier": "record_type_salary_detail.salary_component",
       "name": "salary_component",
-      "source_field_ordinal": 0,
-      "source_name_digest": "f6c1d0af5ace83058100630269c598f2187f8011cc9c2e94e87e56ee890ee2cb",
+      "field_ordinal": 0,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -91,13 +89,24 @@
         "required": 1,
         "indexed_for_search": 1
       },
-      "display_name": "component"
+      "display_name": "component",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_salary_component"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "f6c1d0af5ace83058100630269c598f2187f8011cc9c2e94e87e56ee890ee2cb"
     },
     {
       "identifier": "record_type_salary_detail.abbreviation",
       "name": "abbreviation",
-      "source_field_ordinal": 1,
-      "source_name_digest": "6a3201f1b5a9cc43087a68024bb17fd8c4aa677d23b5b9fa90d02e8b61a485e6",
+      "field_ordinal": 1,
       "value_type": "short_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -128,8 +137,10 @@
               }
             ]
           },
-          "source_value_digest": "4c9bdb841e521ac033784c4c77f40bc3447d3e74ed5460fd064dbfaef642e777",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.parenttype equals salary_structure",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "4c9bdb841e521ac033784c4c77f40bc3447d3e74ed5460fd064dbfaef642e777"
         },
         "copy_from_reference": {
           "path": [
@@ -142,25 +153,44 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "abbreviation"
+      "display_name": "abbreviation",
+      "value_contract": {
+        "value_kind": "text",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "salary_component",
+            "salary_component_abbreviation"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "6a3201f1b5a9cc43087a68024bb17fd8c4aa677d23b5b9fa90d02e8b61a485e6"
     },
     {
       "identifier": "record_type_salary_detail.column_break_3",
       "name": "column_break_3",
-      "source_field_ordinal": 2,
-      "source_name_digest": "cb518558cee856071d0b298b365831cff26130a1d1431b65d2ac74b08f9248c9",
+      "field_ordinal": 2,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 2
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "cb518558cee856071d0b298b365831cff26130a1d1431b65d2ac74b08f9248c9"
     },
     {
       "identifier": "record_type_salary_detail.statistical_component",
       "name": "statistical_component",
-      "source_field_ordinal": 3,
-      "source_name_digest": "32ecacfe681d8ec22a2ce379ff2e95fe3d2ee8daae2188c7bb03ff0fad77b312",
+      "field_ordinal": 3,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -180,6 +210,29 @@
         }
       },
       "display_name": "statistical component",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "salary_component",
+            "statistical_component"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "32ecacfe681d8ec22a2ce379ff2e95fe3d2ee8daae2188c7bb03ff0fad77b312",
       "excluded_source_attributes": {
         "description": {
           "source_value_digest": "4e060160176d79f0cb72674da47973a5df32b3f4a41e120b6a9302da55053564",
@@ -190,8 +243,7 @@
     {
       "identifier": "record_type_salary_detail.is_tax_applicable",
       "name": "is_tax_applicable",
-      "source_field_ordinal": 4,
-      "source_name_digest": "86689c15586593bb456f9d0bb503d2c31905d1a78a16bc7dade1045e3b05450d",
+      "field_ordinal": 4,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -225,8 +277,10 @@
               }
             ]
           },
-          "source_value_digest": "a5f96b4e2effc491837136ab37f8c14cdd7bb58b504c5b13a1d1287f3a3ab2fc",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.parentfield equals earnings",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "a5f96b4e2effc491837136ab37f8c14cdd7bb58b504c5b13a1d1287f3a3ab2fc"
         },
         "copy_from_reference": {
           "path": [
@@ -240,13 +294,35 @@
         "read_only": 1,
         "indexed_for_search": 1
       },
-      "display_name": "is tax applicable"
+      "display_name": "is tax applicable",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "salary_component",
+            "is_tax_applicable"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 4,
+      "source_name_digest": "86689c15586593bb456f9d0bb503d2c31905d1a78a16bc7dade1045e3b05450d"
     },
     {
       "identifier": "record_type_salary_detail.is_flexible_benefit",
       "name": "is_flexible_benefit",
-      "source_field_ordinal": 5,
-      "source_name_digest": "b20642c272fa59959e8467e2455a10ec159ae2ce668f84a51ea63ecbb9cec0ea",
+      "field_ordinal": 5,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -280,8 +356,10 @@
               }
             ]
           },
-          "source_value_digest": "a5f96b4e2effc491837136ab37f8c14cdd7bb58b504c5b13a1d1287f3a3ab2fc",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.parentfield equals earnings",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "a5f96b4e2effc491837136ab37f8c14cdd7bb58b504c5b13a1d1287f3a3ab2fc"
         },
         "copy_from_reference": {
           "path": [
@@ -293,13 +371,35 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "is flexible benefit"
+      "display_name": "is flexible benefit",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "salary_component",
+            "is_flexible_benefit"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 5,
+      "source_name_digest": "b20642c272fa59959e8467e2455a10ec159ae2ce668f84a51ea63ecbb9cec0ea"
     },
     {
       "identifier": "record_type_salary_detail.variable_based_on_taxable_salary",
       "name": "variable_based_on_taxable_salary",
-      "source_field_ordinal": 6,
-      "source_name_digest": "443d7443f73ff52ad3f7c3d56fdc28c66aa769b199f4f59978228657331d348d",
+      "field_ordinal": 6,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -333,8 +433,10 @@
               }
             ]
           },
-          "source_value_digest": "39d49985a9415fcb9ddc063fc6a1d230581f7dfc04d59a7d9317428254c8bcc4",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.parentfield equals deductions",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "39d49985a9415fcb9ddc063fc6a1d230581f7dfc04d59a7d9317428254c8bcc4"
         },
         "copy_from_reference": {
           "path": [
@@ -347,13 +449,35 @@
         "read_only": 1,
         "indexed_for_search": 1
       },
-      "display_name": "variable based on taxable salary"
+      "display_name": "variable based on taxable salary",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "salary_component",
+            "variable_based_on_taxable_salary"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 6,
+      "source_name_digest": "443d7443f73ff52ad3f7c3d56fdc28c66aa769b199f4f59978228657331d348d"
     },
     {
       "identifier": "record_type_salary_detail.depends_on_payment_days",
       "name": "depends_on_payment_days",
-      "source_field_ordinal": 7,
-      "source_name_digest": "41ec06898b5980d7a04016cd6175da62678c87a8beadd792ce15138e2b4d0ff8",
+      "field_ordinal": 7,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -375,13 +499,35 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "depends on payment days"
+      "display_name": "depends on payment days",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "salary_component",
+            "depends_on_payment_days"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 7,
+      "source_name_digest": "41ec06898b5980d7a04016cd6175da62678c87a8beadd792ce15138e2b4d0ff8"
     },
     {
       "identifier": "record_type_salary_detail.deduct_full_tax_on_selected_payroll_date",
       "name": "deduct_full_tax_on_selected_payroll_date",
-      "source_field_ordinal": 8,
-      "source_name_digest": "45e2ceb2eba71f59ec288157fa27b5ab51ae6eb01709585a4d8c136672d3d496",
+      "field_ordinal": 8,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -395,13 +541,28 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "deduct full tax on selected payroll date"
+      "display_name": "deduct full tax on selected payroll date",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 8,
+      "source_name_digest": "45e2ceb2eba71f59ec288157fa27b5ab51ae6eb01709585a4d8c136672d3d496"
     },
     {
       "identifier": "record_type_salary_detail.section_break_2",
       "name": "section_break_2",
-      "source_field_ordinal": 9,
-      "source_name_digest": "b13270e222b3a9370cd28c2a61441d58fd3ca373fde1972df1c95dd3bff2f401",
+      "field_ordinal": 9,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -431,17 +592,26 @@
               }
             ]
           },
-          "source_value_digest": "83c4ec97a92f6763d0653b7451bbeddc8ed2823d2d677c2eb4dfebfd4a12ae2b",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.is flexible benefit does not equal 1",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "83c4ec97a92f6763d0653b7451bbeddc8ed2823d2d677c2eb4dfebfd4a12ae2b"
         }
       },
-      "display_name": "condition and formula"
+      "display_name": "condition and formula",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 19
+      },
+      "source_field_ordinal": 9,
+      "source_name_digest": "b13270e222b3a9370cd28c2a61441d58fd3ca373fde1972df1c95dd3bff2f401"
     },
     {
       "identifier": "record_type_salary_detail.condition",
       "name": "condition",
-      "source_field_ordinal": 10,
-      "source_name_digest": "7b86eac0516594016b942302fa7017794aac87ef77f75e2fc5bf113cd0710b99",
+      "field_ordinal": 10,
       "value_type": "source_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -472,8 +642,10 @@
               }
             ]
           },
-          "source_value_digest": "4c9bdb841e521ac033784c4c77f40bc3447d3e74ed5460fd064dbfaef642e777",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.parenttype equals salary_structure",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "4c9bdb841e521ac033784c4c77f40bc3447d3e74ed5460fd064dbfaef642e777"
         },
         "type_specific_options": {
           "kind": "symbolic_text",
@@ -481,13 +653,19 @@
           "source_value_digest": "7968a2b8d18d7755298c9e82cb22ff6f72c71d76e032fd98ea8e28053da8fb3e"
         }
       },
-      "display_name": "condition"
+      "display_name": "condition",
+      "value_contract": {
+        "value_kind": "rule_or_extension_text",
+        "evaluation": "Content is configuration for a declared behavior surface; saving text must not silently execute it as an unrestricted system command.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 10,
+      "source_name_digest": "7b86eac0516594016b942302fa7017794aac87ef77f75e2fc5bf113cd0710b99"
     },
     {
       "identifier": "record_type_salary_detail.amount_based_on_formula",
       "name": "amount_based_on_formula",
-      "source_field_ordinal": 11,
-      "source_name_digest": "d18d1e7b727c26667588684a1e7163efbcd83d37e7ea2769b91301befd73eef6",
+      "field_ordinal": 11,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -521,17 +699,34 @@
               }
             ]
           },
-          "source_value_digest": "4c9bdb841e521ac033784c4c77f40bc3447d3e74ed5460fd064dbfaef642e777",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.parenttype equals salary_structure",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "4c9bdb841e521ac033784c4c77f40bc3447d3e74ed5460fd064dbfaef642e777"
         }
       },
-      "display_name": "amount based on formula"
+      "display_name": "amount based on formula",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 11,
+      "source_name_digest": "d18d1e7b727c26667588684a1e7163efbcd83d37e7ea2769b91301befd73eef6"
     },
     {
       "identifier": "record_type_salary_detail.formula",
       "name": "formula",
-      "source_field_ordinal": 12,
-      "source_name_digest": "c7fff44592f4a8a865aa9daedff1d42e8501ac3ca03e64da0a577ed9f866396a",
+      "field_ordinal": 12,
       "value_type": "source_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -588,8 +783,10 @@
               }
             ]
           },
-          "source_value_digest": "0aeb42fcb79c27bddd5a2cafd3e9876318eb841ecdacb006a3e5e9082df1fe4d",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.amount based on formula does not equal 0 all truthy record.parenttype equals salary_structure)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "0aeb42fcb79c27bddd5a2cafd3e9876318eb841ecdacb006a3e5e9082df1fe4d"
         },
         "type_specific_options": {
           "kind": "symbolic_text",
@@ -597,13 +794,19 @@
           "source_value_digest": "7968a2b8d18d7755298c9e82cb22ff6f72c71d76e032fd98ea8e28053da8fb3e"
         }
       },
-      "display_name": "formula"
+      "display_name": "formula",
+      "value_contract": {
+        "value_kind": "rule_or_extension_text",
+        "evaluation": "Content is configuration for a declared behavior surface; saving text must not silently execute it as an unrestricted system command.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 12,
+      "source_name_digest": "c7fff44592f4a8a865aa9daedff1d42e8501ac3ca03e64da0a577ed9f866396a"
     },
     {
       "identifier": "record_type_salary_detail.amount",
       "name": "amount",
-      "source_field_ordinal": 13,
-      "source_name_digest": "bf8be0777c7b38dfae01bc3f63a8b0a6e34481f9ef8fbec6a68f07f5f3a8baec",
+      "field_ordinal": 13,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -659,8 +862,10 @@
               }
             ]
           },
-          "source_value_digest": "dda9687b898045656048d69bb95639082fce8b3b4dbc203b934cdecc9e46e6fa",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.amount based on formula does not equal 1 first truthy record.parenttype equals salary_slip)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "dda9687b898045656048d69bb95639082fce8b3b4dbc203b934cdecc9e46e6fa"
         },
         "visible_in_list": 1,
         "currency_context": {
@@ -669,13 +874,27 @@
           "source_value_digest": "0e4989ec47c3d70bba675521906d037a8a6bbb4ca692be343ec2b511ac64e2af"
         }
       },
-      "display_name": "amount"
+      "display_name": "amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 13,
+      "source_name_digest": "bf8be0777c7b38dfae01bc3f63a8b0a6e34481f9ef8fbec6a68f07f5f3a8baec"
     },
     {
       "identifier": "record_type_salary_detail.do_not_include_in_total",
       "name": "do_not_include_in_total",
-      "source_field_ordinal": 14,
-      "source_name_digest": "43e86fc404df22f6ba92053069b4a2a4dd4e5d45f59718d19786fdb3fb031176",
+      "field_ordinal": 14,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -694,13 +913,35 @@
           "source_value_digest": "b187d66fd83e379fe46d0cf2b1519be4b1b163c4148e63784bf41ed0bb669b46"
         }
       },
-      "display_name": "do not include in total"
+      "display_name": "do not include in total",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "salary_component",
+            "do_not_include_in_total"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 14,
+      "source_name_digest": "43e86fc404df22f6ba92053069b4a2a4dd4e5d45f59718d19786fdb3fb031176"
     },
     {
       "identifier": "record_type_salary_detail.default_amount",
       "name": "default_amount",
-      "source_field_ordinal": 15,
-      "source_name_digest": "b8f6768aae79c7740adcba18ec750075b49d52185cd80ae54f30b29ed86b10a4",
+      "field_ordinal": 15,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -730,8 +971,10 @@
               }
             ]
           },
-          "source_value_digest": "4c9bdb841e521ac033784c4c77f40bc3447d3e74ed5460fd064dbfaef642e777",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.parenttype equals salary_structure",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "4c9bdb841e521ac033784c4c77f40bc3447d3e74ed5460fd064dbfaef642e777"
         },
         "currency_context": {
           "kind": "symbolic_text",
@@ -740,13 +983,27 @@
         },
         "print_hide": 1
       },
-      "display_name": "default amount"
+      "display_name": "default amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 15,
+      "source_name_digest": "b8f6768aae79c7740adcba18ec750075b49d52185cd80ae54f30b29ed86b10a4"
     },
     {
       "identifier": "record_type_salary_detail.additional_amount",
       "name": "additional_amount",
-      "source_field_ordinal": 16,
-      "source_name_digest": "067e05df17b7c3c774b650057d4c1aee1f2877b570f69e82971fd21f58c762ad",
+      "field_ordinal": 16,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -763,13 +1020,27 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "additional amount"
+      "display_name": "additional amount",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 16,
+      "source_name_digest": "067e05df17b7c3c774b650057d4c1aee1f2877b570f69e82971fd21f58c762ad"
     },
     {
       "identifier": "record_type_salary_detail.tax_on_flexible_benefit",
       "name": "tax_on_flexible_benefit",
-      "source_field_ordinal": 17,
-      "source_name_digest": "e9d9e70d4e16e6a7b54d4a49d71d0e9d7b44edfcd44781d8eaac7c03f60e59ec",
+      "field_ordinal": 17,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -846,8 +1117,10 @@
               }
             ]
           },
-          "source_value_digest": "50dfce3d4ebfd17660da4f443536cdf12b074cb92e50db702f036b328691df7d",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.parenttype equals salary_slip all truthy record.parentfield equals deductions all truthy record.variable based on taxable salary equals 1)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "50dfce3d4ebfd17660da4f443536cdf12b074cb92e50db702f036b328691df7d"
         },
         "currency_context": {
           "kind": "symbolic_text",
@@ -856,13 +1129,27 @@
         },
         "read_only": 1
       },
-      "display_name": "tax on flexible benefit"
+      "display_name": "tax on flexible benefit",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 17,
+      "source_name_digest": "e9d9e70d4e16e6a7b54d4a49d71d0e9d7b44edfcd44781d8eaac7c03f60e59ec"
     },
     {
       "identifier": "record_type_salary_detail.tax_on_additional_salary",
       "name": "tax_on_additional_salary",
-      "source_field_ordinal": 18,
-      "source_name_digest": "750434af12c3d9a3aba54049bd8640fa3371799403d87f9ecaefd0e9dc95fa7d",
+      "field_ordinal": 18,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -939,8 +1226,10 @@
               }
             ]
           },
-          "source_value_digest": "50dfce3d4ebfd17660da4f443536cdf12b074cb92e50db702f036b328691df7d",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.parenttype equals salary_slip all truthy record.parentfield equals deductions all truthy record.variable based on taxable salary equals 1)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "50dfce3d4ebfd17660da4f443536cdf12b074cb92e50db702f036b328691df7d"
         },
         "currency_context": {
           "kind": "symbolic_text",
@@ -949,13 +1238,27 @@
         },
         "read_only": 1
       },
-      "display_name": "tax on additional salary"
+      "display_name": "tax on additional salary",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 18,
+      "source_name_digest": "750434af12c3d9a3aba54049bd8640fa3371799403d87f9ecaefd0e9dc95fa7d"
     },
     {
       "identifier": "record_type_salary_detail.additional_salary",
       "name": "additional_salary",
-      "source_field_ordinal": 19,
-      "source_name_digest": "b14559e0c9ef66ace06ce7bdaa9ff64824710c598589d9328755f77763c4471f",
+      "field_ordinal": 19,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -968,13 +1271,24 @@
         },
         "read_only": 1
       },
-      "display_name": "additional salary"
+      "display_name": "additional salary",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_additional_salary"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 19,
+      "source_name_digest": "b14559e0c9ef66ace06ce7bdaa9ff64824710c598589d9328755f77763c4471f"
     },
     {
       "identifier": "record_type_salary_detail.exempted_from_income_tax",
       "name": "exempted_from_income_tax",
-      "source_field_ordinal": 20,
-      "source_name_digest": "2aca6aa3ee57f18d000c6bc1904bd01846b2a2960835fb944f681f15f11cdb1a",
+      "field_ordinal": 20,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1008,8 +1322,10 @@
               }
             ]
           },
-          "source_value_digest": "39d49985a9415fcb9ddc063fc6a1d230581f7dfc04d59a7d9317428254c8bcc4",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.parentfield equals deductions",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "39d49985a9415fcb9ddc063fc6a1d230581f7dfc04d59a7d9317428254c8bcc4"
         },
         "copy_from_reference": {
           "path": [
@@ -1021,13 +1337,35 @@
         "read_only": 1,
         "indexed_for_search": 1
       },
-      "display_name": "exempted from income tax"
+      "display_name": "exempted from income tax",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "salary_component",
+            "exempted_from_income_tax"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 20,
+      "source_name_digest": "2aca6aa3ee57f18d000c6bc1904bd01846b2a2960835fb944f681f15f11cdb1a"
     },
     {
       "identifier": "record_type_salary_detail.section_break_5",
       "name": "section_break_5",
-      "source_field_ordinal": 21,
-      "source_name_digest": "bbd478ca04e0da4d0e2058443bf6295c836bccb5fcde7118a93b06f9d933f346",
+      "field_ordinal": 21,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -1036,61 +1374,96 @@
       "properties": {
         "collapsible": 1
       },
-      "display_name": "component properties and references"
+      "display_name": "component properties and references",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 5
+      },
+      "source_field_ordinal": 21,
+      "source_name_digest": "bbd478ca04e0da4d0e2058443bf6295c836bccb5fcde7118a93b06f9d933f346"
     },
     {
       "identifier": "record_type_salary_detail.column_break_11",
       "name": "column_break_11",
-      "source_field_ordinal": 22,
-      "source_name_digest": "1a7b67d5ed0ad6cf7ffc7be82b61b223bfee99331419def8312fd62323077dfa",
+      "field_ordinal": 22,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 12
+      },
+      "source_field_ordinal": 22,
+      "source_name_digest": "1a7b67d5ed0ad6cf7ffc7be82b61b223bfee99331419def8312fd62323077dfa"
     },
     {
       "identifier": "record_type_salary_detail.section_break_19",
       "name": "section_break_19",
-      "source_field_ordinal": 23,
-      "source_name_digest": "23576909c0fbdd65a7da690191ea99dde78f4c87e61fcf3b78eba4fdd738a735",
+      "field_ordinal": 23,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 24
+      },
+      "source_field_ordinal": 23,
+      "source_name_digest": "23576909c0fbdd65a7da690191ea99dde78f4c87e61fcf3b78eba4fdd738a735"
     },
     {
       "identifier": "record_type_salary_detail.column_break_18",
       "name": "column_break_18",
-      "source_field_ordinal": 24,
-      "source_name_digest": "f74d644e96d90d646ee8ff09eb58804629f4b27ee318790dba6eda99c3ac04c2",
+      "field_ordinal": 24,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 21
+      },
+      "source_field_ordinal": 24,
+      "source_name_digest": "f74d644e96d90d646ee8ff09eb58804629f4b27ee318790dba6eda99c3ac04c2"
     },
     {
       "identifier": "record_type_salary_detail.column_break_24",
       "name": "column_break_24",
-      "source_field_ordinal": 25,
-      "source_name_digest": "ce07d50987df4f923d72a30830dfe4c1b4c89b892966c9851d8a0025283b8269",
+      "field_ordinal": 25,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 27
+      },
+      "source_field_ordinal": 25,
+      "source_name_digest": "ce07d50987df4f923d72a30830dfe4c1b4c89b892966c9851d8a0025283b8269"
     },
     {
       "identifier": "record_type_salary_detail.year_to_date",
       "name": "year_to_date",
-      "source_field_ordinal": 26,
-      "source_name_digest": "a10152c6b3f484b98dc41f00f8f41c557168bf9232cfc8cc931aba78921d2023",
+      "field_ordinal": 26,
       "value_type": "monetary_decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1105,6 +1478,21 @@
         "read_only": 1
       },
       "display_name": "year to date",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Keep currency context with the amount. Currency conversion and rounding follow the transaction currency and company currency rules.",
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "currency_context": {
+          "kind": "symbolic_text",
+          "value": "currency"
+        },
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 26,
+      "source_name_digest": "a10152c6b3f484b98dc41f00f8f41c557168bf9232cfc8cc931aba78921d2023",
       "excluded_source_attributes": {
         "description": {
           "source_value_digest": "b4bbc720f65aba64880e575323374a40b0369707cbead03d532a643a792d7bbe",
@@ -1115,8 +1503,7 @@
     {
       "identifier": "record_type_salary_detail.is_recurring_additional_salary",
       "name": "is_recurring_additional_salary",
-      "source_field_ordinal": 27,
-      "source_name_digest": "0dee8d5bb457658f28924ea8745a03f9681e8300051417b6995f39512dc3959b",
+      "field_ordinal": 27,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1164,18 +1551,35 @@
               }
             ]
           },
-          "source_value_digest": "d6750859dab43301e894060131ae8fd3f8f7559cc3d21059a8f464d356eef1d7",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "(record.parenttype equals salary_slip all truthy record.additional salary)",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "d6750859dab43301e894060131ae8fd3f8f7559cc3d21059a8f464d356eef1d7"
         },
         "read_only": 1
       },
-      "display_name": "is recurring additional salary"
+      "display_name": "is recurring additional salary",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 27,
+      "source_name_digest": "0dee8d5bb457658f28924ea8745a03f9681e8300051417b6995f39512dc3959b"
     },
     {
       "identifier": "record_type_salary_detail.do_not_include_in_accounts",
       "name": "do_not_include_in_accounts",
-      "source_field_ordinal": 28,
-      "source_name_digest": "d0c04237ff3ead83e6d3dda85fc1018f68fae5587b890b696cc4925260f27d53",
+      "field_ordinal": 28,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1196,8 +1600,10 @@
             },
             "name": "do_not_include_in_total"
           },
-          "source_value_digest": "d843ab946e2d2919067da1d03fadaaa7978454f86ff1e1b884990cdcd0feb804",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.do not include in total",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "d843ab946e2d2919067da1d03fadaaa7978454f86ff1e1b884990cdcd0feb804"
         },
         "copy_from_reference": {
           "path": [
@@ -1208,6 +1614,29 @@
         }
       },
       "display_name": "do not include in accounting entries",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "salary_component",
+            "do_not_include_in_accounts"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 28,
+      "source_name_digest": "d0c04237ff3ead83e6d3dda85fc1018f68fae5587b890b696cc4925260f27d53",
       "excluded_source_attributes": {
         "description": {
           "source_value_digest": "6a01d4532428effcbc4dab2e53415784c166d4451ab9dddd11a0c8af813e7709",
@@ -1218,8 +1647,7 @@
     {
       "identifier": "record_type_salary_detail.accrual_component",
       "name": "accrual_component",
-      "source_field_ordinal": 29,
-      "source_name_digest": "a2214d6dc8650260f4644c364570441ebdd5e76f6e131474d660fb3441e80fe5",
+      "field_ordinal": 29,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1240,9 +1668,48 @@
         "visible_in_list": 1,
         "read_only": 1
       },
-      "display_name": "accrual component"
+      "display_name": "accrual component",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "salary_component",
+            "accrual_component"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 29,
+      "source_name_digest": "a2214d6dc8650260f4644c364570441ebdd5e76f6e131474d660fb3441e80fe5"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "ordinary record rename disabled",
+    "strategy": "record_type_default_or_controller_assignment",
+    "rule": "The create operation assigns identity through the record-type naming policy; explicitly named records retain their validated identity."
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "owned_child_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "This record type does not independently implement the post-and-cancel lifecycle."
+  },
+  "source_name_digest": "45903e980cca64ae9fd151601dde7c4e23175be044138085490df4acc6b18808",
+  "source_pack": "workforce",
+  "source_artifact": "source-artifact-443c0fc98fb6d01d98a2",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "cc33098080bd5f1c236be44d7a46c37d072f65c6197a5bdd81d59d5420b69a60",
@@ -1264,5 +1731,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "workforce.salary_detail",
+    "status": "declared",
+    "dictionary": "schema/entities/workforce-02.json",
+    "declaration_name": "Salary Detail",
+    "declaration_catalog": "docs/rebuild/extensions/catalog/hrms-records-02.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }

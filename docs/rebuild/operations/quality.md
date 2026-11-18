@@ -1,29 +1,21 @@
 # Inspection evidence, release gates and corrective action
 
+The [Inspection evidence, release gates and corrective action](../../operations/quality.md) chapter defines the business rules, calculations and worked outcomes.
+
+For a monthly goal scheduled on the 31st, 28 February 2025 is the effective due date. A single daily pass tests for an existing review by goal and date. Concurrent scheduler invocations require an atomic uniqueness guarantee on that pair.
+
 ## Bind evidence to the inspected row
 
-An inspection records type, referenced transaction and child row, item, optional batch, inspector, sample size, readings and decision. Copy the company's identity from its referenced transaction. When no row was specified, the inspected path finds eligible rows of the same item under the reference in row order, restricts by batch when supported and prefers a row without another active inspection. Stock movement lines and job cards have distinct link shapes. For a job card the update also matches its production item. If eligible rows are already inspected, do not replace the existing inspection merely because an item repeats.
-
-For receipt R with two rows of product P in batches A and B, an inspection for B belongs to the B row. Creating a second inspection cannot displace the first from that row. Allow the next inspection for the other eligible row when no batch restriction precludes it. On delete/cancel clear only links that still point to this inspection, and notify the referenced document. On cancellation a linked submitted transaction normally must be cancelled first; the post-purchase/post-delivery inspection setting lifts that dependency. [Row binding and lifecycle](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/quality_inspection/quality_inspection.py) · [Upstream inspection cases](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/quality_inspection/test_quality_inspection.py)
+- [Row binding and lifecycle](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/quality_inspection/quality_inspection.py)
+- [Upstream inspection cases](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/quality_inspection/test_quality_inspection.py)
 
 ## Decide the reading and release the operation
 
-| Step | Decision |
-|---|---|
-| Populate criteria | If readings are empty, populate from the selected template or item default. In-process job-card readings refresh matching parameter criteria from the inspection's own template first. |
-| Normalise evidence | Validate newly entered nonblank, automatic, numeric readings against the user's number format. Unchanged stored input passes that edit-time check even when a different locale is active. Manual reading rows keep their specified verdict. |
-| Automatic range | Between one and ten nonblank values may participate. Every provided value must be within inclusive limits. An empty set fails. Automatic nonnumeric equality compares the observed and configured strings, with empty representing missing. |
-| Automatic formula | Bind named readings and the mean of nonblank numeric readings, or the observed string for a nonnumeric test. An absent numeric position binds to zero. A missing expression, unknown variable or invalid expression fails validation. |
-| Set header | For an automatic header and available readings, any rejected reading rejects the inspection. A manual header is separately selectable. On submission every reading must have a decision and sample size must exceed zero. Only the cancellation action may assign the Cancelled status. |
-| Publish link | A blank or Warn policy for unsubmitted inspections updates the linkage on draft save. A Stop policy links on submission. |
-| Gate a transaction | Apply purchase/delivery flags for stocked invoices, receipts and deliveries, or use stock-entry purpose/row rules when inspection is enabled. Validate linked reference identity. On eligible required rows, missing inspection warns in draft and stops submission. At submission, unsubmitted and non-accepted inspections have independent Warn/Stop controls. Exempt secondary-output rows and the policy allowing inspection after receipt/delivery follow separate branches. |
-
-For numeric readings 9, 10, 11 and one blank, mean is 10 and the range 9–11 passes. Under a rule testing mean ≥ 10 and requiring the fourth position to exceed zero, it fails. A manually rejected row remains rejected even when its numbers lie inside the numeric range. A successful inspection records evidence; the accepted/rejected warehouse movements and commercial consequences are owned by the originating receipt or stock transaction. [Release gates](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/controllers/stock_controller.py#L1823-L1926) · [Operator guide](https://docs.frappe.io/erpnext/quality-inspection)
+- [Release gates](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/controllers/stock_controller.py#L1823-L1926)
+- [Operator guide](https://docs.frappe.io/erpnext/quality-inspection)
 
 ## Review goals and resolve actions
 
-A quality goal owns objective, target and UOM rows. An empty review is populated from that goal. New or changed review objectives must belong to its current goal; changing the goal rechecks all rows. Keep existing historical objectives where the original review reference has not changed. A review stays Open when empty or when any objective lacks a final Passed/Failed result, including when another row has failed. Once all have final results, one failed objective makes the header Failed; otherwise Passed.
-
-The daily scheduler creates a review only when the goal's cadence is due and a review for this goal and date does not already exist. Weekly follows named weekday. Monthly caps a requested day at the last day of the month. Quarterly uses January, April, July and October with the same day cap. A monthly target on day 31 therefore falls on 28 February 2025, even though the shortest month lacks day 31. This source checks for an existing goal/date; a replacement requiring concurrent retriggers to be exactly-once should enforce the same uniqueness atomically.
-
-A corrective action is Completed only if it has at least one resolution and all resolutions are Completed. Nonconformance separately records subject, procedure, responsible party, details and corrective/preventive responses. No automatic stock rejection, disposal, supplier payment block or action closure follows solely from entering that record. [Goal review](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/quality_management/doctype/quality_review/quality_review.py) · [Action](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/quality_management/doctype/quality_action/quality_action.py) · [Nonconformance record](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/quality_management/doctype/non_conformance/non_conformance.json)
+- [Goal review](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/quality_management/doctype/quality_review/quality_review.py)
+- [Action](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/quality_management/doctype/quality_action/quality_action.py)
+- [Nonconformance record](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/quality_management/doctype/non_conformance/non_conformance.json)

@@ -2,7 +2,7 @@
 
 [English](../en/README.md) · [Afrikaans](../af/README.md) · Deutsch · [简体中文](../zh-Hans/README.md)
 
-Wählen Sie eine Erweiterung nach dem betrieblichen Vorgang aus. Jeder Eintrag beschreibt den dokumentierten Ablauf und enthält einen vorgeschlagenen Abnahmetest für ein mehrsprachiges ERP. Das ausführliche englische Profil nennt Datensätze, Sonderfälle, Quellen und offene Fragen.
+Den Ablauf nach der betrieblichen Aufgabe auswählen. Jeder Eintrag verweist auf die Spezifikation und den Prüffall. Das Quellenprofil benennt die untersuchten Datensätze und offenen Fragen.
 
 | Geschäftsbereich | Erweiterungen |
 |---|---:|

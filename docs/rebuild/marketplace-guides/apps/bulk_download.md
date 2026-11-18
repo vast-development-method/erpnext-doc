@@ -1,5 +1,7 @@
 # Dynamic Bulk PDF Downloader
 
+[Business workflow and acceptance cases](../../../capabilities/guides/documents.md#bulk-document-rendition).
+
 Meet Sherasiya lists versions 14–16. A user selects a record type and print format, filters the records, and optionally groups output PDFs into folders within one downloadable ZIP. The publisher gives invoices, purchase orders and delivery notes as examples. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/bulk_download) · [Developer’s walkthrough](https://meetsherasiya.github.io/project/bulk-download/)
 
 ## What the recovered source implements
@@ -12,10 +14,4 @@ The Sanprasoftware copy at `91a0d6c9808b9d9ba826285d107cc9d5d71c1c0b` identifies
 
 ## Proposed rebuild contract and acceptance
 
-Create an export job with requester, site, document filter, authorised selection, ordering, print template, language policy and job ID. Enumerate all authorised pages against a consistent snapshot. Recheck access before printing and at download. Return a private artifact, manifest of completed document IDs, per-document errors and a final status of completed, partial, empty or failed. An all-failure result carries no download link. A repeated request for the same job returns its existing result.
-
-Localise queue notifications and status text. Support a single requested print locale and an explicit per-recipient printing policy. Preserve the locale actually used for each PDF. Build portable, distinct archive paths with stable record IDs and Unicode-safe names. Decide group membership on the stored key. Distinct customers with the same translated name must stay separate.
-
-- For a synthetic selection of 55 authorised invoices spanning several query pages, render 55 PDFs. One failure yields 54 files and one named manifest error. No successful renders yields a failed job with the 55 errors.
-- Generate an invoice in German and another in simplified Chinese. The PDFs must render their intended scripts and the ZIP preserve both document IDs. Two customers whose labels sanitise to the same text get distinct folders.
-- Revoke access before a queued PDF is rendered. Record a denial without its contents. A different user cannot download the requesting user’s completed archive.
+[Read the consolidated acceptance cases](../../../capabilities/guides/documents.md#bulk-document-rendition-2).

@@ -4,88 +4,38 @@
 
 [全部主题](README.md)
 
-验收示例描述的是新系统应达到的结果。英文详细说明会区分发布者的描述、源代码中的实现与运行环境中的实测结果。
-
 ## PCAT Exam
-
-按稳定的选项标识计算测评得分，并在各语言版本中显示相同的兴趣类别排名。
-
-**有资料可查的工作流程**
 
 发布者定义了六个兴趣类别，结果显示前三类。历史代码根据提交的答案文字查找分值；找不到相同文字时，该题按零分计算。
 
-**建议的验收示例**
-
-在英文版和中文版选择对应答案，S、A、I 的得分分别为 6、4、2，其他类别为零。两版均应显示 S、A、I 的排序和总分 12，翻译不会改变选项权重。
-
-[英文详细说明](../../apps/frappe_pcat_exam.md) · [发布者的市场页面](https://cloud.frappe.io/marketplace/apps/frappe_pcat_exam)
+[工作流程与验收案例](../../../../capabilities/guides/zh-Hans/people.md#workflow-career-interest-assessment) · [来源说明](../../apps/frappe_pcat_exam.md)
 
 ## Gym Pro
 
-为会员分配训练和饮食计划，并记录带日期和单位的测量值。
-
-**有资料可查的工作流程**
-
 根据发布者手册，可从已确认的报价创建会籍。教练可以制定饮食与训练计划，会员可以查看自己的计划及历史测量值，公司可设置默认计量单位。
 
-**建议的验收示例**
-
-身高为 180 厘米、体重为 80 千克时，德语界面显示 BMI 为 24,690，英语界面显示 24.690。两者的测量值、单位和计算结果完全相同。
-
-[英文详细说明](../../apps/gympro.md) · [发布者的市场页面](https://cloud.frappe.io/marketplace/apps/gympro)
+[工作流程与验收案例](../../../../capabilities/guides/zh-Hans/people.md#workflow-member-workouts-and-measurements) · [来源说明](../../apps/gympro.md)
 
 ## HR Forms
 
-从可复用模板的获批语言版本生成人事表单，并保留实际签发的内容。
-
-**有资料可查的工作流程**
-
 发布者展示的任务申请模板包含员工、职务、部门和日期变量。提交草稿的正文已填入员工编号、职务和部门，但日期仍显示为模板表达式。
 
-**建议的验收示例**
-
-英语界面的人事专员按模板第 4 版签发了一份德语员工表单。第 5 版更改字段标题后，再次打开已签发表单，仍应显示第 4 版的德语内容及原始员工信息。
-
-[英文详细说明](../../apps/hr_forms.md) · [发布者的市场页面](https://cloud.frappe.io/marketplace/apps/hr_forms)
+[工作流程与验收案例](../../../../capabilities/guides/zh-Hans/people.md#workflow-employee-form-issuance) · [来源说明](../../apps/hr_forms.md)
 
 ## Labor Management System
 
-将临时工分配到项目，根据已核准的出勤记录和调整项生成工资单。
-
-**有资料可查的工作流程**
-
 Micro Solution 的流程图显示，人员分配和打卡日志形成出勤记录，再据此产生加班记录；出勤、加班和调整项汇入工资单后才付款。报表示例按付款类型、项目和利润中心列示金额：P101 项目的工时单金额为 120、加班金额为 80，图中未注明币种或计薪公式。
 
-**建议的验收示例**
-
-以同一币种计算：正常工时 8 小时、每小时 30，加班 2 小时、每小时 45，扣款 20。重复导入同一次打卡记录，并用工人所选语言打印后，仍只有一张工资单，正常工资 240、加班费 90、应付 310；人员编号、成本中心、币种和工时不变。
-
-[英文详细说明](../../apps/laborers_management.md) · [发布者的市场页面](https://cloud.frappe.io/marketplace/apps/laborers_management)
+[工作流程与验收案例](../../../../capabilities/guides/zh-Hans/people.md#workflow-temporary-labour-placement-and-pay) · [来源说明](../../apps/laborers_management.md)
 
 ## NextArrear
 
-根据工资单计算应补发的工资，并按员工偏好的语言列出收入和扣款明细。
-
-**有资料可查的工作流程**
-
 据发布者介绍，薪资人员创建一条 Salary Arrear（补发工资）记录并填写必填字段。应用调取工资单及收入、扣款明细，在保存时计算净补发额，工作人员可在审批前复核并调整。
 
-**建议的验收示例**
-
-工资单收入由 2,000 调整为 2,150，扣款由 250 调整为 280。无论切换到哪种语言，收入差额均为 +150，扣款差额为 +30，净补发额为 +120，工资项目编号保持一致。
-
-[英文详细说明](../../apps/nextarrear.md) · [发布者的市场页面](https://cloud.frappe.io/marketplace/apps/nextarrear)
+[工作流程与验收案例](../../../../capabilities/guides/zh-Hans/people.md#workflow-retroactive-payroll-adjustments) · [来源说明](../../apps/nextarrear.md)
 
 ## Organization Chart Advance
 
-在公司组织架构中查找员工，并按查看者选择的语言导出组织架构图。
-
-**有资料可查的工作流程**
-
 Kanak 介绍，人事人员可按公司筛选组织架构图，查找员工并导出层级关系。一份公开的历史代码根据直属主管关系构建树，返回员工编号、姓名、照片和职务，生成整张图时从第一个根节点开始。
 
-**建议的验收示例**
-
-公司有两位最高层主管，另有两位员工的显示姓名相同。人事人员按员工编号搜索并导出阿拉伯语 PDF 后，正确的员工被突出显示，两位主管、汇报关系和阿拉伯字母的连写均正确呈现。
-
-[英文详细说明](../../apps/organizational_chart_knk.md) · [发布者的市场页面](https://cloud.frappe.io/marketplace/apps/organizational_chart_knk)
+[工作流程与验收案例](../../../../capabilities/guides/zh-Hans/people.md#workflow-reporting-hierarchy) · [来源说明](../../apps/organizational_chart_knk.md)

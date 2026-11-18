@@ -2,7 +2,7 @@
 
 English · [Afrikaans](../af/README.md) · [Deutsch](../de/README.md) · [简体中文](../zh-Hans/README.md)
 
-Find an extension by the business task it supports. Each entry describes the published workflow, followed by a proposed acceptance example for a multilingual ERP. The detailed English profile identifies the records, exceptions, references and remaining questions.
+Find the workflow by business task. Each entry leads to its implementation contract and worked example. The publisher evidence identifies the inspected records and the remaining questions.
 
 | Business area | Listings |
 |---|---:|

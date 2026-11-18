@@ -1,6 +1,6 @@
 # Six native reports after settlement
 
-A new session reopened the committed twelve-voucher site and ran six ERPNext report controllers with the Administrator identity. All six read the same company on the posting day, in NAD. Trial Balance used the calendar fiscal year and showed net opening and closing columns. Balance Sheet and Profit and Loss used the posting day as their date range with one yearly bucket. Accounts Receivable and Accounts Payable filtered the fixture's customer and supplier respectively, aged by due date as at report date. Stock Balance used both warehouses on the posting day. [Source-run observations](observed.json) · [Schema](observation.schema.json) · [Source-run adapter](observe.py)
+A new session reopened the committed twelve-voucher site and ran six financial and inventory report controllers with the Administrator identity. All six read the same company on the posting day, in NAD. Trial Balance used the calendar fiscal year and showed net opening and closing columns. Balance Sheet and Profit and Loss used the posting day as their date range with one yearly bucket. Accounts Receivable and Accounts Payable filtered the fixture's customer and supplier respectively, aged by due date as at report date. Stock Balance used both warehouses on the posting day. [Source-run observations](observed.json) · [Schema](observation.schema.json) · [Source-run adapter](observe.py)
 
 | Native report | Reconciliation |
 |---|---|

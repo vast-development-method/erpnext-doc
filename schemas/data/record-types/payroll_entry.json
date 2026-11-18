@@ -3,11 +3,10 @@
   "identifier": "record_type_payroll_entry",
   "name": "payroll_entry",
   "display_name": "payroll entry",
-  "source_name_digest": "6037060657db3042dcac80ba413515d7b864c29e0a40de381aec90a8ee3264f7",
-  "source_pack": "workforce",
-  "source_artifact": "source-artifact-9185fe842ce76ab5a74e",
+  "capability_group": "workforce",
+  "component_identifier": "component_workforce_payroll_record_definitions_payroll_entry_record_definition",
   "coverage_scope": "current_candidate",
-  "review_status": "metadata_inventory_complete_behavioral_review_separate",
+  "review_status": "metadata_constraints_explicit_lifecycle_rules_linked",
   "persistence_kind": "independent_record",
   "supports_posting_and_cancellation": true,
   "ordered_field_names": [
@@ -149,14 +148,13 @@
     }
   ],
   "permission_interpretation": "Declared grants are inputs to effective access; role membership, owner restrictions, sharing, user record restrictions, field levels, and custom permission logic must also be applied.",
-  "inherited_fields_contract": "common-record-attributes.json",
+  "inherited_fields_contract": "../common-record-attributes.json",
   "field_count": 45,
   "fields": [
     {
       "identifier": "record_type_payroll_entry.posting_date",
       "name": "posting_date",
-      "source_field_ordinal": 0,
-      "source_name_digest": "602769780e0d8121d17105dbdf8b7ced77ed42da219e4bf1c104951b0b542d55",
+      "field_ordinal": 0,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -170,13 +168,25 @@
         },
         "required": 1
       },
-      "display_name": "posting date"
+      "display_name": "posting date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "default": {
+          "kind": "symbolic_text",
+          "value": "today"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 0,
+      "source_name_digest": "602769780e0d8121d17105dbdf8b7ced77ed42da219e4bf1c104951b0b542d55"
     },
     {
       "identifier": "record_type_payroll_entry.payroll_frequency",
       "name": "payroll_frequency",
-      "source_field_ordinal": 1,
-      "source_name_digest": "d59ea576437b032d4f98cfe27393aacd644831abf3dc0007bd5b5d092ba011db",
+      "field_ordinal": 1,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -205,8 +215,10 @@
               }
             ]
           },
-          "source_value_digest": "e29303dd6b0b89df7a1455e2fb63c8c84e9949ed60830c95795dbd50054e3aa0",
-          "interpretation": "Operators preserve the source evaluation order. Source truthiness, coercion, member access, and function contracts still require semantic interpretation."
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.salary slip based on timesheet equals 0",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
+          "source_value_digest": "e29303dd6b0b89df7a1455e2fb63c8c84e9949ed60830c95795dbd50054e3aa0"
         },
         "allowed_values": [
           {
@@ -241,13 +253,55 @@
           }
         ]
       },
-      "display_name": "payroll frequency"
+      "display_name": "payroll frequency",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "",
+          "monthly",
+          "fortnightly",
+          "bimonthly",
+          "weekly",
+          "daily"
+        ],
+        "empty_option_explicitly_listed": true,
+        "required_when_no_conditional_override": false,
+        "requiredness_condition": {
+          "kind": "expression_tree",
+          "tree": {
+            "kind": "comparison_chain",
+            "first": {
+              "kind": "member",
+              "owner": {
+                "kind": "variable",
+                "name": "record"
+              },
+              "name": "salary_slip_based_on_timesheet"
+            },
+            "comparisons": [
+              {
+                "operator": "equal",
+                "value": {
+                  "kind": "literal",
+                  "value": 0
+                }
+              }
+            ]
+          },
+          "interpretation": "Evaluate the ordered decision tree using the conditional-field evaluation contract, including short-circuit order, missing-value handling, coercion, collection truthiness, and error propagation.",
+          "meaning": "record.salary slip based on timesheet equals 0",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract"
+        },
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 1,
+      "source_name_digest": "d59ea576437b032d4f98cfe27393aacd644831abf3dc0007bd5b5d092ba011db"
     },
     {
       "identifier": "record_type_payroll_entry.company",
       "name": "company",
-      "source_field_ordinal": 2,
-      "source_name_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d",
+      "field_ordinal": 2,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -262,13 +316,24 @@
         "remember_last_selected_value": 1,
         "required": 1
       },
-      "display_name": "company"
+      "display_name": "company",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_company"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 2,
+      "source_name_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d"
     },
     {
       "identifier": "record_type_payroll_entry.branch",
       "name": "branch",
-      "source_field_ordinal": 3,
-      "source_name_digest": "fcce49047e714afffc4f1581b5ce472263ed7631521c9c8d5bcded98d3988d6d",
+      "field_ordinal": 3,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -281,13 +346,24 @@
           "identifier": "record_type_branch"
         }
       },
-      "display_name": "branch"
+      "display_name": "branch",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_branch"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 3,
+      "source_name_digest": "fcce49047e714afffc4f1581b5ce472263ed7631521c9c8d5bcded98d3988d6d"
     },
     {
       "identifier": "record_type_payroll_entry.department",
       "name": "department",
-      "source_field_ordinal": 4,
-      "source_name_digest": "8abdb5a568f18bc0fef5a9e0a638fda4dbd8f233bdac1c9c96fb4f4ffcae0455",
+      "field_ordinal": 4,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -299,13 +375,24 @@
           "identifier": "record_type_department"
         }
       },
-      "display_name": "department"
+      "display_name": "department",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_department"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 4,
+      "source_name_digest": "8abdb5a568f18bc0fef5a9e0a638fda4dbd8f233bdac1c9c96fb4f4ffcae0455"
     },
     {
       "identifier": "record_type_payroll_entry.designation",
       "name": "designation",
-      "source_field_ordinal": 5,
-      "source_name_digest": "e3565025c4e62cafd5a684708026c77e84e68c5647d9733a5c6f21b599c4487d",
+      "field_ordinal": 5,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -317,13 +404,24 @@
           "identifier": "record_type_designation"
         }
       },
-      "display_name": "designation"
+      "display_name": "designation",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_designation"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 5,
+      "source_name_digest": "e3565025c4e62cafd5a684708026c77e84e68c5647d9733a5c6f21b599c4487d"
     },
     {
       "identifier": "record_type_payroll_entry.number_of_employees",
       "name": "number_of_employees",
-      "source_field_ordinal": 6,
-      "source_name_digest": "ac5d794d293ec9a2f40eeeeb837b5688d2e598a898922ed65106ece6e25958b3",
+      "field_ordinal": 6,
       "value_type": "integer",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -332,13 +430,24 @@
       "properties": {
         "read_only": 1
       },
-      "display_name": "number of employees"
+      "display_name": "number of employees",
+      "value_contract": {
+        "value_kind": "integer",
+        "fractional_values_allowed": false,
+        "precision": {
+          "kind": "inherited_or_unspecified",
+          "resolution": "Resolve field precision from explicit metadata, currency settings where applicable, and system numeric defaults before rounding."
+        },
+        "required_when_no_conditional_override": false,
+        "input_normalization": "The ordinary record adapter converts numeric input to an integer, including truncating a fractional numeric value toward zero. Invalid or absent numeric input follows the shared numeric-default policy; a domain operation may reject it earlier."
+      },
+      "source_field_ordinal": 6,
+      "source_name_digest": "ac5d794d293ec9a2f40eeeeb837b5688d2e598a898922ed65106ece6e25958b3"
     },
     {
       "identifier": "record_type_payroll_entry.employees",
       "name": "employees",
-      "source_field_ordinal": 7,
-      "source_name_digest": "09eccbcd1da373b515745f158c01e84f89365dce1cf34fc7dbcec6f410eddec3",
+      "field_ordinal": 7,
       "value_type": "owned_record_collection",
       "persistence": "owned_child_records",
       "required_when_no_conditional_override": false,
@@ -349,13 +458,24 @@
           "kind": "record_type",
           "identifier": "record_type_payroll_employee_detail"
         }
-      }
+      },
+      "value_contract": {
+        "value_kind": "ordered_owned_records",
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_payroll_employee_detail"
+        },
+        "ownership": "Each row stores one parent record identity, parent record type, parent field, and row position. Preserve row ordering and prevent attachment of the same owned row to a second parent.",
+        "save_boundary": "Persist the parent and its owned rows in the same transaction.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 7,
+      "source_name_digest": "09eccbcd1da373b515745f158c01e84f89365dce1cf34fc7dbcec6f410eddec3"
     },
     {
       "identifier": "record_type_payroll_entry.validate_attendance",
       "name": "validate_attendance",
-      "source_field_ordinal": 8,
-      "source_name_digest": "f04728744a98c67690eb30e6afcf2e9f6ce265156f6f067cbeb1988a5758ff9c",
+      "field_ordinal": 8,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -367,25 +487,47 @@
           "value": "0"
         }
       },
-      "display_name": "validate attendance"
+      "display_name": "validate attendance",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 8,
+      "source_name_digest": "f04728744a98c67690eb30e6afcf2e9f6ce265156f6f067cbeb1988a5758ff9c"
     },
     {
       "identifier": "record_type_payroll_entry.attendance_detail_document_markup",
       "name": "attendance_detail_document_markup",
-      "source_field_ordinal": 9,
-      "source_name_digest": "b255a27c56624e431972db22bcc7bda810c5f5691ccd5ecd4059ae268e8029df",
+      "field_ordinal": 9,
       "value_type": "rendered_markup",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "rendered_markup",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 27
+      },
+      "source_field_ordinal": 9,
+      "source_name_digest": "b255a27c56624e431972db22bcc7bda810c5f5691ccd5ecd4059ae268e8029df"
     },
     {
       "identifier": "record_type_payroll_entry.salary_slip_based_on_timesheet",
       "name": "salary_slip_based_on_timesheet",
-      "source_field_ordinal": 10,
-      "source_name_digest": "d294189319c720185bb38ea9131516c479668490ac435b48749848b03e542b08",
+      "field_ordinal": 10,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -397,26 +539,48 @@
           "value": "0"
         }
       },
-      "display_name": "salary slip based on timesheet"
+      "display_name": "salary slip based on timesheet",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 10,
+      "source_name_digest": "d294189319c720185bb38ea9131516c479668490ac435b48749848b03e542b08"
     },
     {
       "identifier": "record_type_payroll_entry.select_payroll_period",
       "name": "select_payroll_period",
-      "source_field_ordinal": 11,
-      "source_name_digest": "4e581fac0683d7ca258ccdcc7444c511fb1d3beb4595a3c849bcb806688c105f",
+      "field_ordinal": 11,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "overview"
+      "display_name": "overview",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 0
+      },
+      "source_field_ordinal": 11,
+      "source_name_digest": "4e581fac0683d7ca258ccdcc7444c511fb1d3beb4595a3c849bcb806688c105f"
     },
     {
       "identifier": "record_type_payroll_entry.start_date",
       "name": "start_date",
-      "source_field_ordinal": 12,
-      "source_name_digest": "c8044235216a437ff3e53bff4af5fd28ce3045c4a3067271e2200e574eb7ac89",
+      "field_ordinal": 12,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -425,13 +589,20 @@
       "properties": {
         "required": 1
       },
-      "display_name": "start date"
+      "display_name": "start date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 12,
+      "source_name_digest": "c8044235216a437ff3e53bff4af5fd28ce3045c4a3067271e2200e574eb7ac89"
     },
     {
       "identifier": "record_type_payroll_entry.end_date",
       "name": "end_date",
-      "source_field_ordinal": 13,
-      "source_name_digest": "db4f1ff28df4d8e33cc7277883fc0f520f6b558ad2a07a5f8d0c1f57dc4b8c42",
+      "field_ordinal": 13,
       "value_type": "date",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -440,13 +611,20 @@
       "properties": {
         "required": 1
       },
-      "display_name": "end date"
+      "display_name": "end date",
+      "value_contract": {
+        "value_kind": "calendar_date",
+        "representation": "four-digit year, two-digit month, and two-digit day separated by hyphens",
+        "time_of_day_present": false,
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 13,
+      "source_name_digest": "db4f1ff28df4d8e33cc7277883fc0f520f6b558ad2a07a5f8d0c1f57dc4b8c42"
     },
     {
       "identifier": "record_type_payroll_entry.deduct_tax_for_unsubmitted_tax_exemption_proof",
       "name": "deduct_tax_for_unsubmitted_tax_exemption_proof",
-      "source_field_ordinal": 14,
-      "source_name_digest": "db28a3e5f2fcce159252a906953c7c5dc7aa2f7c113dc0324cb3e2dfdecec64a",
+      "field_ordinal": 14,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -458,13 +636,28 @@
           "value": "0"
         }
       },
-      "display_name": "deduct tax for unsubmitted tax exemption proof"
+      "display_name": "deduct tax for unsubmitted tax exemption proof",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 14,
+      "source_name_digest": "db28a3e5f2fcce159252a906953c7c5dc7aa2f7c113dc0324cb3e2dfdecec64a"
     },
     {
       "identifier": "record_type_payroll_entry.cost_center",
       "name": "cost_center",
-      "source_field_ordinal": 15,
-      "source_name_digest": "efbbf0a4b73ea019ed0c0f4c3aacdbf8c2af4f11f0364d9bff705d68158d5c2a",
+      "field_ordinal": 15,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -482,13 +675,29 @@
         },
         "required": 1
       },
-      "display_name": "cost center"
+      "display_name": "cost center",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_cost_center"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "default": {
+          "kind": "symbolic_text",
+          "value": "company"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 15,
+      "source_name_digest": "efbbf0a4b73ea019ed0c0f4c3aacdbf8c2af4f11f0364d9bff705d68158d5c2a"
     },
     {
       "identifier": "record_type_payroll_entry.project",
       "name": "project",
-      "source_field_ordinal": 16,
-      "source_name_digest": "471cacee86a419f75111098ba664eeb1e7db51b9436a9821c23851df5ed52c15",
+      "field_ordinal": 16,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -500,26 +709,44 @@
           "identifier": "record_type_project"
         }
       },
-      "display_name": "project"
+      "display_name": "project",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_project"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 16,
+      "source_name_digest": "471cacee86a419f75111098ba664eeb1e7db51b9436a9821c23851df5ed52c15"
     },
     {
       "identifier": "record_type_payroll_entry.account",
       "name": "account",
-      "source_field_ordinal": 17,
-      "source_name_digest": "a2b520d68009c64e1dcdf8cbc40f0f870d1427d455bfe18d4963b7f154b76cda",
+      "field_ordinal": 17,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "payment entry"
+      "display_name": "payment entry",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 33
+      },
+      "source_field_ordinal": 17,
+      "source_name_digest": "a2b520d68009c64e1dcdf8cbc40f0f870d1427d455bfe18d4963b7f154b76cda"
     },
     {
       "identifier": "record_type_payroll_entry.payment_account",
       "name": "payment_account",
-      "source_field_ordinal": 18,
-      "source_name_digest": "441337a677b286acb31543199c56cf3a1e8a016e1c0f8e764b3df7e263180be0",
+      "field_ordinal": 18,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -540,6 +767,25 @@
         }
       },
       "display_name": "payment account",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false,
+        "reference_value_copy": {
+          "path": [
+            "bank_account",
+            "account"
+          ]
+        },
+        "copy_only_when_destination_empty": false
+      },
+      "source_field_ordinal": 18,
+      "source_name_digest": "441337a677b286acb31543199c56cf3a1e8a016e1c0f8e764b3df7e263180be0",
       "excluded_source_attributes": {
         "description": {
           "source_value_digest": "1c056f2581944d759430b5f5cef6baacfc1f7594b3610985c6644b052afd6353",
@@ -550,8 +796,7 @@
     {
       "identifier": "record_type_payroll_entry.amended_from",
       "name": "amended_from",
-      "source_field_ordinal": 19,
-      "source_name_digest": "b43b52ad6f6c613ab2fb1330e5f616e71c8b496566b87009de27f6c7b11ed774",
+      "field_ordinal": 19,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -566,13 +811,24 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "amended from"
+      "display_name": "amended from",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_payroll_entry"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 19,
+      "source_name_digest": "b43b52ad6f6c613ab2fb1330e5f616e71c8b496566b87009de27f6c7b11ed774"
     },
     {
       "identifier": "record_type_payroll_entry.salary_slips_created",
       "name": "salary_slips_created",
-      "source_field_ordinal": 20,
-      "source_name_digest": "9bc8929db95ac55126675db90dc282495a6071bcfdf440b43b367ff1d9a1ea5b",
+      "field_ordinal": 20,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -587,13 +843,28 @@
         "excluded_from_record_copy": 1,
         "read_only": 1
       },
-      "display_name": "salary slips created"
+      "display_name": "salary slips created",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 20,
+      "source_name_digest": "9bc8929db95ac55126675db90dc282495a6071bcfdf440b43b367ff1d9a1ea5b"
     },
     {
       "identifier": "record_type_payroll_entry.salary_slips_submitted",
       "name": "salary_slips_submitted",
-      "source_field_ordinal": 21,
-      "source_name_digest": "aa543e076161ad79f6f53fa81bd1fc4033134a9d612dc8cf3f781d5e32cf2f38",
+      "field_ordinal": 21,
       "value_type": "boolean",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -608,38 +879,67 @@
         "excluded_from_record_copy": 1,
         "read_only": 1
       },
-      "display_name": "salary slips submitted"
+      "display_name": "salary slips submitted",
+      "value_contract": {
+        "value_kind": "boolean",
+        "accepted_logical_values": [
+          false,
+          true
+        ],
+        "normalization": "Stored flag values zero and one correspond to false and true. Treat an absent flag as its configured default; preserve any explicit requiredness rule.",
+        "default": {
+          "kind": "integer_text",
+          "value": "0"
+        },
+        "default_application": "Apply when constructing a new record with no supplied value, subject to request, user, parent, and transaction defaults. Do not overwrite an explicit value on an existing record.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 21,
+      "source_name_digest": "aa543e076161ad79f6f53fa81bd1fc4033134a9d612dc8cf3f781d5e32cf2f38"
     },
     {
       "identifier": "record_type_payroll_entry.accounting_dimensions_section",
       "name": "accounting_dimensions_section",
-      "source_field_ordinal": 22,
-      "source_name_digest": "fed6c78ee355407d0216b558d400a7f85281f8a0361a2b86e947f300e3cf5f3e",
+      "field_ordinal": 22,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "accounting dimensions"
+      "display_name": "accounting dimensions",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 29
+      },
+      "source_field_ordinal": 22,
+      "source_name_digest": "fed6c78ee355407d0216b558d400a7f85281f8a0361a2b86e947f300e3cf5f3e"
     },
     {
       "identifier": "record_type_payroll_entry.dimension_column_break",
       "name": "dimension_column_break",
-      "source_field_ordinal": 23,
-      "source_name_digest": "635b3bf44ffaca22b905f6de6061612bbd01db3b66a20b429db2d7cf276eacc4",
+      "field_ordinal": 23,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 31
+      },
+      "source_field_ordinal": 23,
+      "source_name_digest": "635b3bf44ffaca22b905f6de6061612bbd01db3b66a20b429db2d7cf276eacc4"
     },
     {
       "identifier": "record_type_payroll_entry.bank_account",
       "name": "bank_account",
-      "source_field_ordinal": 24,
-      "source_name_digest": "f9d84a722045d3166c5a306a6f993f50668a36e24ddd3d3e6236ad2feb208e60",
+      "field_ordinal": 24,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -651,13 +951,24 @@
           "identifier": "record_type_bank_account"
         }
       },
-      "display_name": "bank account"
+      "display_name": "bank account",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_bank_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 24,
+      "source_name_digest": "f9d84a722045d3166c5a306a6f993f50668a36e24ddd3d3e6236ad2feb208e60"
     },
     {
       "identifier": "record_type_payroll_entry.currency",
       "name": "currency",
-      "source_field_ordinal": 25,
-      "source_name_digest": "0e4989ec47c3d70bba675521906d037a8a6bbb4ca692be343ec2b511ac64e2af",
+      "field_ordinal": 25,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -667,6 +978,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "company",
+          "meaning": "the value of company is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d"
         },
         "visible_in_list": 1,
@@ -676,13 +989,24 @@
         },
         "required": 1
       },
-      "display_name": "currency"
+      "display_name": "currency",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_currency"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 25,
+      "source_name_digest": "0e4989ec47c3d70bba675521906d037a8a6bbb4ca692be343ec2b511ac64e2af"
     },
     {
       "identifier": "record_type_payroll_entry.exchange_rate",
       "name": "exchange_rate",
-      "source_field_ordinal": 26,
-      "source_name_digest": "22c6cf63732224f8f136def9b7787cdecc8a0755641fa476aadafc4158395102",
+      "field_ordinal": 26,
       "value_type": "decimal",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -692,6 +1016,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "company",
+          "meaning": "the value of company is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d"
         },
         "decimal_precision": {
@@ -700,13 +1026,23 @@
         },
         "required": 1
       },
-      "display_name": "exchange rate"
+      "display_name": "exchange rate",
+      "value_contract": {
+        "value_kind": "decimal_number",
+        "arithmetic_policy": "Use the resolved field precision and operation rounding policy; do not infer a quantity unit from the decimal representation.",
+        "precision": {
+          "kind": "integer_text",
+          "value": "9"
+        },
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 26,
+      "source_name_digest": "22c6cf63732224f8f136def9b7787cdecc8a0755641fa476aadafc4158395102"
     },
     {
       "identifier": "record_type_payroll_entry.payroll_payable_account",
       "name": "payroll_payable_account",
-      "source_field_ordinal": 27,
-      "source_name_digest": "215ed930bd5a8fe1554a0415a2a1c5113bd1676525a1fc9613891616c09aeb98",
+      "field_ordinal": 27,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": true,
@@ -716,6 +1052,8 @@
         "visibility_condition": {
           "kind": "record_field_truth_test",
           "field_name": "company",
+          "meaning": "the value of company is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "7e749627a9559a85ed56031c40d97299859a3b1a909bb2afea74c57ec864945d"
         },
         "target_record_type": {
@@ -724,13 +1062,24 @@
         },
         "required": 1
       },
-      "display_name": "payroll payable account"
+      "display_name": "payroll payable account",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": false,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_account"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": true
+      },
+      "source_field_ordinal": 27,
+      "source_name_digest": "215ed930bd5a8fe1554a0415a2a1c5113bd1676525a1fc9613891616c09aeb98"
     },
     {
       "identifier": "record_type_payroll_entry.failure_details_section",
       "name": "failure_details_section",
-      "source_field_ordinal": 28,
-      "source_name_digest": "dcc719384a67e4dfd088625b938efaed075398590db932e2627d6066da1a57f1",
+      "field_ordinal": 28,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -741,24 +1090,35 @@
         "section_expansion_condition": {
           "kind": "record_field_truth_test",
           "field_name": "error_message",
+          "meaning": "the value of error message is truthy",
+          "evaluation_contract": "../conditional-field-semantics.json#/evaluation_contract",
           "source_value_digest": "10b3b1d66621d65b25c62f8a33176610c61c9768cad17e738ddf45cbba658f1b"
         },
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "e880858ef7ff3abef1c1711e6f4f344dfbb0a4998afdeda613969427ce806fca",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_e880858ef7ff3abef1c1",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_payroll_entry_failure_details_section_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_payroll_entry_failure_details_section_visibility_condition",
+          "meaning": "The payroll operation status is failed.",
+          "source_value_digest": "e880858ef7ff3abef1c1711e6f4f344dfbb0a4998afdeda613969427ce806fca"
         }
       },
-      "display_name": "failure details"
+      "display_name": "failure details",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 40
+      },
+      "source_field_ordinal": 28,
+      "source_name_digest": "dcc719384a67e4dfd088625b938efaed075398590db932e2627d6066da1a57f1"
     },
     {
       "identifier": "record_type_payroll_entry.error_message",
       "name": "error_message",
-      "source_field_ordinal": 29,
-      "source_name_digest": "10b3b1d66621d65b25c62f8a33176610c61c9768cad17e738ddf45cbba658f1b",
+      "field_ordinal": 29,
       "value_type": "rich_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -767,34 +1127,49 @@
       "properties": {
         "visibility_condition": {
           "kind": "supplemental_semantic_reference",
-          "source_value_digest": "e880858ef7ff3abef1c1711e6f4f344dfbb0a4998afdeda613969427ce806fca",
-          "interpretation": "The structural parser did not decode this expression. Its decision structure, field bindings, evaluation semantics, and acceptance examples are resolved in the supplemental semantic catalog by the source value digest.",
-          "semantic_resolution_identifier": "conditional_semantics_e880858ef7ff3abef1c1",
+          "interpretation": "The linked conditional decision defines the complete rule, field bindings, evaluation policy, and acceptance examples.",
+          "semantic_resolution_identifier": "condition_payroll_entry_failure_details_section_visibility_condition",
           "semantic_catalog": "schemas/data/conditional-field-semantics.json",
-          "semantic_catalog_path_base": "repository_root"
+          "semantic_catalog_path_base": "repository_root",
+          "resolution_identifier": "condition_payroll_entry_failure_details_section_visibility_condition",
+          "meaning": "The payroll operation status is failed.",
+          "source_value_digest": "e880858ef7ff3abef1c1711e6f4f344dfbb0a4998afdeda613969427ce806fca"
         },
         "excluded_from_record_copy": 1,
         "read_only": 1
       },
-      "display_name": "error message"
+      "display_name": "error message",
+      "value_contract": {
+        "value_kind": "rich_document_text",
+        "rendering": "Preserve supported formatting while applying the configured content sanitization policy.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 29,
+      "source_name_digest": "10b3b1d66621d65b25c62f8a33176610c61c9768cad17e738ddf45cbba658f1b"
     },
     {
       "identifier": "record_type_payroll_entry.section_break_41",
       "name": "section_break_41",
-      "source_field_ordinal": 30,
-      "source_name_digest": "0d17b02edbee85534a66e678df120f800944e39bd95c028f452fa86fe1029383",
+      "field_ordinal": 30,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 42
+      },
+      "source_field_ordinal": 30,
+      "source_name_digest": "0d17b02edbee85534a66e678df120f800944e39bd95c028f452fa86fe1029383"
     },
     {
       "identifier": "record_type_payroll_entry.status",
       "name": "status",
-      "source_field_ordinal": 31,
-      "source_name_digest": "cfc31bcc34ed7f4cc7895026ae8a54f0494f73757e9f914d0f6ed90f9bc34f51",
+      "field_ordinal": 31,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -831,137 +1206,222 @@
         "print_hide": 1,
         "read_only": 1
       },
-      "display_name": "status"
+      "display_name": "status",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "draft",
+          "submitted",
+          "cancelled",
+          "queued",
+          "failed"
+        ],
+        "empty_option_explicitly_listed": false,
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 31,
+      "source_name_digest": "cfc31bcc34ed7f4cc7895026ae8a54f0494f73757e9f914d0f6ed90f9bc34f51"
     },
     {
       "identifier": "record_type_payroll_entry.column_break_5",
       "name": "column_break_5",
-      "source_field_ordinal": 32,
-      "source_name_digest": "f41c913c2744104d385fb8e7dd5dd9e52f8fc8ec5407571f6feb57c49fb0ec13",
+      "field_ordinal": 32,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 3
+      },
+      "source_field_ordinal": 32,
+      "source_name_digest": "f41c913c2744104d385fb8e7dd5dd9e52f8fc8ec5407571f6feb57c49fb0ec13"
     },
     {
       "identifier": "record_type_payroll_entry.column_break_21",
       "name": "column_break_21",
-      "source_field_ordinal": 33,
-      "source_name_digest": "fb1c596dc0abd5f5818b4e2824b1f11a236fd77c1dc6fef776594cb88fa8bcdc",
+      "field_ordinal": 33,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 19
+      },
+      "source_field_ordinal": 33,
+      "source_name_digest": "fb1c596dc0abd5f5818b4e2824b1f11a236fd77c1dc6fef776594cb88fa8bcdc"
     },
     {
       "identifier": "record_type_payroll_entry.section_break_24",
       "name": "section_break_24",
-      "source_field_ordinal": 34,
-      "source_name_digest": "13ad046556cb9a673767d6326878c6223165c8929b89521ede1427eb5ada7f45",
+      "field_ordinal": 34,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "employee details"
+      "display_name": "employee details",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 23
+      },
+      "source_field_ordinal": 34,
+      "source_name_digest": "13ad046556cb9a673767d6326878c6223165c8929b89521ede1427eb5ada7f45"
     },
     {
       "identifier": "record_type_payroll_entry.section_break_26",
       "name": "section_break_26",
-      "source_field_ordinal": 35,
-      "source_name_digest": "81bfe42c270dfcaf86e2c848ab2d22323b96c06aca6a593cd63b379e4cf4f6b0",
+      "field_ordinal": 35,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 25
+      },
+      "source_field_ordinal": 35,
+      "source_name_digest": "81bfe42c270dfcaf86e2c848ab2d22323b96c06aca6a593cd63b379e4cf4f6b0"
     },
     {
       "identifier": "record_type_payroll_entry.column_break_35",
       "name": "column_break_35",
-      "source_field_ordinal": 36,
-      "source_name_digest": "43885e77e7898091c3db261456d20055fc0bc6fb2b341e684084be71776e5c2f",
+      "field_ordinal": 36,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 35
+      },
+      "source_field_ordinal": 36,
+      "source_name_digest": "43885e77e7898091c3db261456d20055fc0bc6fb2b341e684084be71776e5c2f"
     },
     {
       "identifier": "record_type_payroll_entry.column_break_13",
       "name": "column_break_13",
-      "source_field_ordinal": 37,
-      "source_name_digest": "6feccc75bf6fcb01b114f55cdef59b39d51fd743e99b227adb6364c1baf8318c",
+      "field_ordinal": 37,
       "value_type": "column_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "column_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 13
+      },
+      "source_field_ordinal": 37,
+      "source_name_digest": "6feccc75bf6fcb01b114f55cdef59b39d51fd743e99b227adb6364c1baf8318c"
     },
     {
       "identifier": "record_type_payroll_entry.accounting_dimensions_tab",
       "name": "accounting_dimensions_tab",
-      "source_field_ordinal": 38,
-      "source_name_digest": "7cfbdb9b65c6c4371d14daa1f42e13dee8d79d01c9b36aa3106cae6e759abc6d",
+      "field_ordinal": 38,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "accounting payment"
+      "display_name": "accounting payment",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 28
+      },
+      "source_field_ordinal": 38,
+      "source_name_digest": "7cfbdb9b65c6c4371d14daa1f42e13dee8d79d01c9b36aa3106cae6e759abc6d"
     },
     {
       "identifier": "record_type_payroll_entry.section_break_17",
       "name": "section_break_17",
-      "source_field_ordinal": 39,
-      "source_name_digest": "ac2138366ddd01807d592b9a6c07ee81c755cb50c707a9a0f3a8723046e07d00",
+      "field_ordinal": 39,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "filter employees"
+      "display_name": "filter employees",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 16
+      },
+      "source_field_ordinal": 39,
+      "source_name_digest": "ac2138366ddd01807d592b9a6c07ee81c755cb50c707a9a0f3a8723046e07d00"
     },
     {
       "identifier": "record_type_payroll_entry.employees_tab",
       "name": "employees_tab",
-      "source_field_ordinal": 40,
-      "source_name_digest": "81409200d2ed3a1974e17d548c3cb3cebe7691ba8868c715f681f9da11002fdb",
+      "field_ordinal": 40,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
       "properties": {},
-      "display_name": "employees"
+      "display_name": "employees",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 15
+      },
+      "source_field_ordinal": 40,
+      "source_name_digest": "81409200d2ed3a1974e17d548c3cb3cebe7691ba8868c715f681f9da11002fdb"
     },
     {
       "identifier": "record_type_payroll_entry.section_break_cypo",
       "name": "section_break_cypo",
-      "source_field_ordinal": 41,
-      "source_name_digest": "5df5ccb16a7e68b3c91ac61f8f702797ab563a631e29e23573f8648198cab473",
+      "field_ordinal": 41,
       "value_type": "section_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
       "read_only_in_generated_form": false,
       "editable_after_posting": false,
-      "properties": {}
+      "properties": {},
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "section_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 8
+      },
+      "source_field_ordinal": 41,
+      "source_name_digest": "5df5ccb16a7e68b3c91ac61f8f702797ab563a631e29e23573f8648198cab473"
     },
     {
       "identifier": "record_type_payroll_entry.connections_tab",
       "name": "connections_tab",
-      "source_field_ordinal": 42,
-      "source_name_digest": "b802d177bfa23e3300e938a070e1c40e1c637f184bca612e6ca6c80d98fa3d39",
+      "field_ordinal": 42,
       "value_type": "tab_layout",
       "persistence": "presentation_only",
       "required_when_no_conditional_override": false,
@@ -970,13 +1430,20 @@
       "properties": {
         "show_dashboard": 1
       },
-      "display_name": "connections"
+      "display_name": "connections",
+      "value_contract": {
+        "value_kind": "presentation_control",
+        "control_role": "tab_layout",
+        "persistence": "No independent business value is stored for this control.",
+        "layout_position": 44
+      },
+      "source_field_ordinal": 42,
+      "source_name_digest": "b802d177bfa23e3300e938a070e1c40e1c637f184bca612e6ca6c80d98fa3d39"
     },
     {
       "identifier": "record_type_payroll_entry.grade",
       "name": "grade",
-      "source_field_ordinal": 43,
-      "source_name_digest": "dc0042fefbf54e556ca0b558e9c5a13fb8bd95717d0c57869d4d63f3ec01e99c",
+      "field_ordinal": 43,
       "value_type": "record_reference",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -988,13 +1455,24 @@
           "identifier": "record_type_employee_grade"
         }
       },
-      "display_name": "grade"
+      "display_name": "grade",
+      "value_contract": {
+        "value_kind": "record_identity",
+        "empty_reference_allowed": true,
+        "target": {
+          "kind": "record_type",
+          "identifier": "record_type_employee_grade"
+        },
+        "validation": "A nonempty identity must resolve to the declared target record type; the operation also applies effective target access and transaction-specific filters.",
+        "required_when_no_conditional_override": false
+      },
+      "source_field_ordinal": 43,
+      "source_name_digest": "dc0042fefbf54e556ca0b558e9c5a13fb8bd95717d0c57869d4d63f3ec01e99c"
     },
     {
       "identifier": "record_type_payroll_entry.overtime_step",
       "name": "overtime_step",
-      "source_field_ordinal": 44,
-      "source_name_digest": "3bef25b2cecc4dde49fddcc1cd497fc0551fa8c445944cb4e074366fe13f8ac1",
+      "field_ordinal": 44,
       "value_type": "enumerated_text",
       "persistence": "persistent_scalar",
       "required_when_no_conditional_override": false,
@@ -1019,9 +1497,45 @@
           }
         ]
       },
-      "display_name": "overtime slip step"
+      "display_name": "overtime slip step",
+      "value_contract": {
+        "value_kind": "enumerated_text",
+        "comparison": "Compare the declared semantic option value, not its ordinal or translated display label.",
+        "allowed_values": [
+          "",
+          "create",
+          "submit"
+        ],
+        "empty_option_explicitly_listed": true,
+        "required_when_no_conditional_override": false,
+        "validation_contract": "../record-value-semantics.json#/enumerated_text"
+      },
+      "source_field_ordinal": 44,
+      "source_name_digest": "3bef25b2cecc4dde49fddcc1cd497fc0551fa8c445944cb4e074366fe13f8ac1"
     }
   ],
+  "naming_contract": {
+    "identity_scope": "unique within this record type",
+    "rename_policy": "ordinary record rename disabled",
+    "strategy": "configured_number_series",
+    "rule": "Expand configured prefix and calendar segments and increment the resulting sequence counter.",
+    "serial_width": 5,
+    "calendar_components": [
+      "four_digit_year",
+      "two_digit_year"
+    ],
+    "field_substitutions": []
+  },
+  "definition_contract": "../record-value-semantics.json",
+  "persistence_contract": {
+    "storage_kind": "independent_record",
+    "shared_fields": "../common-record-attributes.json",
+    "owned_row_atomicity": "A parent save and its child-row insertions, updates, and deletions are one transaction.",
+    "posting_policy": "Use draft, posted, and cancelled record states with explicit posting and cancellation operations."
+  },
+  "source_name_digest": "6037060657db3042dcac80ba413515d7b864c29e0a40de381aec90a8ee3264f7",
+  "source_pack": "workforce",
+  "source_artifact": "source-artifact-9185fe842ce76ab5a74e",
   "excluded_source_attributes": {
     "creation": {
       "source_value_digest": "5476af71cdc7728294c05141efcd277c9aa36650300c3a374c13e1903ffea597",
@@ -1043,5 +1557,13 @@
       "source_value_digest": "cbc554f70533b2817c57562d8157472a794c91ce707833f99b00ccb8f5bde13f",
       "exclusion_reason": "Source authoring metadata, implementation choice, or prose is outside the neutral data contract."
     }
+  },
+  "applicability": {
+    "entity": "workforce.payroll_entry",
+    "status": "declared",
+    "dictionary": "schema/entities/workforce-02.json",
+    "declaration_name": "Payroll Entry",
+    "declaration_catalog": "docs/rebuild/extensions/catalog/hrms-records-02.json",
+    "lookup": "docs/rebuild/coverage-review/entity-cross-reference.tsv"
   }
 }
