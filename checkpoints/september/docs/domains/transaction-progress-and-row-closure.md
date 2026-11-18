@@ -1,5 +1,7 @@
 # Transaction progress and row closure
 
+For the recovered September delivery-note billing decision and its quantity fallback, see the [stock-controller contracts](../../../../docs/rebuild/checkpoint-corrections/README.md).
+
 ## Responsibility
 
 This policy connects source commitments to submitted downstream execution. Quantities and amounts are updated at source-row level, then summarised to parent percentages and business statuses. It is shared across buying, selling, delivery, receipt, billing and related operations. A replacement needs source-row identity and document lifecycle state to reproduce the result.
