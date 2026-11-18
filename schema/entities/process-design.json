@@ -1,0 +1,387 @@
+[
+  {
+    "entity": "process_design.flow_agent",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "print", "read", "report", "share", "write"]},
+      {"role": "flow_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true, "unique": true},
+      {"field": "description", "type": "text", "read_only_when": ["current_field", "is_system_generated"]},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "is_system_generated", "type": "boolean", "form_read_only": true, "omit_on_copy": true},
+      {"field": "application", "type": "short_text", "form_read_only": true, "omit_on_copy": true},
+      {"field": "model_identifier", "type": "entity_reference", "target": "process_design.flow_model", "required": true},
+      {"field": "maximum_iterations", "type": "integer", "nonnegative": true, "default": "100", "read_only_when": ["current_field", "is_system_generated"]},
+      {"field": "token_budget", "type": "integer", "nonnegative": true},
+      {"field": "instructions", "type": "long_text", "required": true, "read_only_when": ["current_field", "is_system_generated"]},
+      {"field": "tools_rows", "type": "owned_selection", "target": "process_design.flow_agent_tool", "read_only_when": ["current_field", "is_system_generated"]},
+      {"field": "sub_agents_rows", "type": "owned_selection", "target": "process_design.flow_agent_sub_agent", "read_only_when": ["current_field", "is_system_generated"]},
+      {"field": "skills_rows", "type": "owned_selection", "target": "process_design.flow_agent_skill", "read_only_when": ["and", ["current_field", "is_system_generated"], ["coercive_unequal", ["current_field", "record_identifier"], ["literal", "Flow"]]]},
+      {"field": "knowledge_bases_rows", "type": "owned_selection", "target": "process_design.flow_agent_knowledge_base", "read_only_when": ["and", ["current_field", "is_system_generated"], ["coercive_unequal", ["current_field", "record_identifier"], ["literal", "Flow"]]]},
+      {"field": "roles_rows", "type": "owned_selection", "target": "information_management.has_role"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Instructions"},
+      {"control": "section", "purpose": "Tools"},
+      {"control": "section", "purpose": "Sub-agents"},
+      {"control": "section", "purpose": "Skills"},
+      {"control": "section", "purpose": "Knowledge"},
+      {"control": "section", "purpose": "Access"}
+    ]
+  },
+  {
+    "entity": "process_design.flow_agent_knowledge_base",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "knowledge_base_identifier", "type": "entity_reference", "target": "process_design.flow_knowledge_base", "required": true}
+    ]
+  },
+  {
+    "entity": "process_design.flow_agent_memory",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "agent_identifier", "type": "entity_reference", "target": "process_design.flow_agent", "required": true},
+      {"field": "scope", "type": "enumeration", "required": true, "write_once": true, "values": ["Agent", "User"], "default": "Agent"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "write_once": true, "visible_when": ["strict_equal", ["current_field", "scope"], ["literal", "User"]], "required_when": ["strict_equal", ["current_field", "scope"], ["literal", "User"]]},
+      {"field": "status", "type": "enumeration", "values": ["Active", "Archived"], "default": "Active"},
+      {"field": "source", "type": "enumeration", "form_read_only": true, "values": ["Agent", "Feedback", "Manual"], "default": "Manual"},
+      {"field": "source_run_identifier", "type": "entity_reference", "target": "process_design.flow_run", "form_read_only": true},
+      {"field": "content", "type": "text", "required": true}
+    ]
+  },
+  {
+    "entity": "process_design.flow_agent_skill",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "skill_identifier", "type": "entity_reference", "target": "process_design.flow_skill", "required": true}
+    ]
+  },
+  {
+    "entity": "process_design.flow_agent_sub_agent",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "agent_identifier", "type": "entity_reference", "target": "process_design.flow_agent", "required": true}
+    ]
+  },
+  {
+    "entity": "process_design.flow_agent_tool",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "tool_identifier", "type": "entity_reference", "target": "process_design.flow_tool", "required": true}
+    ]
+  },
+  {
+    "entity": "process_design.flow_knowledge_base",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true, "unique": true},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "is_system_generated", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "process_design.flow_knowledge_chunk",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "report"]}
+    ],
+    "fields": [
+      {"field": "knowledge_base_identifier", "type": "entity_reference", "target": "process_design.flow_knowledge_base", "required": true, "form_read_only": true, "searchable": true},
+      {"field": "source_identifier", "type": "entity_reference", "target": "process_design.flow_knowledge_source", "required": true, "form_read_only": true, "searchable": true},
+      {"field": "chunk_index", "type": "integer", "form_read_only": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "form_read_only": true, "searchable": true},
+      {"field": "content", "type": "long_text", "required": true, "form_read_only": true},
+      {"field": "content_hash", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "process_design.flow_knowledge_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "embedding_model_identifier", "type": "entity_reference", "target": "process_design.flow_model"},
+      {"field": "embedding_dimension", "type": "integer", "form_read_only": true},
+      {"field": "search_type", "type": "enumeration", "values": ["Hybrid", "Vector"], "default": "Hybrid"},
+      {"field": "chunk_size", "type": "integer", "nonnegative": true, "default": "1000"},
+      {"field": "chunk_overlap", "type": "integer", "nonnegative": true, "default": "200"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Chunking"}
+    ]
+  },
+  {
+    "entity": "process_design.flow_knowledge_source",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true},
+      {"field": "knowledge_base_identifier", "type": "entity_reference", "target": "process_design.flow_knowledge_base", "required": true, "searchable": true},
+      {"field": "source_type", "type": "enumeration", "required": true, "values": ["Text", "File", "URL", "Entity type"], "default": "Text"},
+      {"field": "is_system_generated", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "content", "type": "long_text", "visible_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "Text"]], "required_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "Text"]]},
+      {"field": "file", "type": "file_reference", "visible_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "File"]], "required_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "File"]]},
+      {"field": "resource_address", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "URL"]], "required_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "URL"]]},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "visible_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "Entity type"]], "required_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "Entity type"]]},
+      {"field": "filters", "type": "structured_value", "visible_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "Entity type"]]},
+      {"field": "content_fields", "type": "text", "visible_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "Entity type"]], "required_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "Entity type"]]},
+      {"field": "auto_sync", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "Entity type"]]},
+      {"field": "chunk_size", "type": "integer", "nonnegative": true, "default": "0"},
+      {"field": "chunk_overlap", "type": "integer", "nonnegative": true, "default": "0"},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Pending", "Processing", "Completed", "Failed"], "default": "Pending"},
+      {"field": "chunk_count", "type": "integer", "form_read_only": true},
+      {"field": "last_synced_at", "type": "date_and_time", "form_read_only": true},
+      {"field": "error_log", "type": "long_text", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Source"},
+      {"control": "section", "purpose": "Chunking"},
+      {"control": "section", "purpose": "Indexing"},
+      {"control": "section", "purpose": "Error", "visible_when": ["current_field", "error_log"]}
+    ]
+  },
+  {
+    "entity": "process_design.flow_model",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "print", "read", "report", "share", "write"]},
+      {"role": "flow_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true, "unique": true},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "embedding", "type": "boolean", "default": "0"},
+      {"field": "provider_identifier", "type": "entity_reference", "target": "process_design.flow_provider"},
+      {"field": "model_identifier", "type": "suggested_text", "required": true},
+      {"field": "context_window", "type": "integer", "form_read_only": true, "nonnegative": true},
+      {"field": "service_interface_key", "type": "protected_value", "visible_when": ["not", ["current_field", "provider_identifier"]]},
+      {"field": "service_base_address", "type": "short_text", "visible_when": ["not", ["current_field", "provider_identifier"]]},
+      {"field": "extra_params", "type": "structured_value"},
+      {"field": "roles_rows", "type": "owned_selection", "target": "information_management.has_role"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Access"}
+    ]
+  },
+  {
+    "entity": "process_design.flow_provider",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "provider", "type": "suggested_text", "required": true, "unique": true},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "service_interface_key", "type": "protected_value"},
+      {"field": "service_base_address", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "process_design.flow_run",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "print", "read", "report", "share"]},
+      {"role": "flow_user", "level": 0, "owner_only": true, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "session_identifier", "type": "entity_reference", "target": "process_design.flow_session", "required": true},
+      {"field": "source", "type": "enumeration", "required": true, "values": ["Manual", "Trigger"], "default": "Manual"},
+      {"field": "trigger_identifier", "type": "entity_reference", "target": "process_design.flow_trigger", "visible_when": ["strict_equal", ["current_field", "source"], ["literal", "Trigger"]]},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "visible_when": ["strict_equal", ["current_field", "source"], ["literal", "Trigger"]]},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "visible_when": ["strict_equal", ["current_field", "source"], ["literal", "Trigger"]]},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Running", "Paused", "Completed", "Denied", "Failed"], "default": "Running"},
+      {"field": "iterations", "type": "integer", "nonnegative": true, "default": "0"},
+      {"field": "daemon_run_identifier", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "on_complete", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "input", "type": "long_text", "form_read_only": true, "form_hidden": true},
+      {"field": "output", "type": "long_text", "form_read_only": true, "form_hidden": true},
+      {"field": "tool_calls", "type": "structured_value", "form_read_only": true, "form_hidden": true},
+      {"field": "questions", "type": "structured_value", "form_read_only": true, "form_hidden": true},
+      {"field": "approval_sequence", "type": "integer", "form_read_only": true, "form_hidden": true, "default": "0"},
+      {"field": "usage", "type": "structured_value", "form_read_only": true, "form_hidden": true},
+      {"field": "error", "type": "long_text", "form_read_only": true, "form_hidden": true},
+      {"field": "feedback_rating", "type": "enumeration", "form_read_only": true, "values": ["", "Up", "Down"]},
+      {"field": "feedback_comment", "type": "text", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Input → Output"},
+      {"control": "section", "purpose": "Detail"},
+      {"control": "formatted_information", "purpose": "Detail"},
+      {"control": "section", "purpose": "Error", "visible_when": ["strict_equal", ["current_field", "status"], ["literal", "Failed"]]},
+      {"control": "section", "purpose": "Feedback", "visible_when": ["current_field", "feedback_rating"]}
+    ]
+  },
+  {
+    "entity": "process_design.flow_session",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "print", "read", "report", "share"]},
+      {"role": "system_manager", "level": 0, "owner_only": true, "allows": ["create", "write"]},
+      {"role": "flow_user", "level": 0, "owner_only": true, "allows": ["create", "delete", "read", "share", "write"]},
+      {"role": "flow_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "maximum_length": 200},
+      {"field": "agent_identifier", "type": "entity_reference", "target": "process_design.flow_agent", "required": true},
+      {"field": "model_identifier", "type": "entity_reference", "target": "process_design.flow_model"},
+      {"field": "source", "type": "enumeration", "form_read_only": true, "values": ["Manual", "Trigger"], "default": "Manual"},
+      {"field": "approval_mode", "type": "enumeration", "form_read_only": true, "values": ["Ask", "Auto", "Auto-approve"], "default": "Auto"},
+      {"field": "general_access", "type": "enumeration", "form_read_only": true, "values": ["Restricted", "Everyone"], "default": "Restricted"},
+      {"field": "last_synced_sequence", "type": "integer", "form_read_only": true, "form_hidden": true, "default": "0"},
+      {"field": "messages_rows", "type": "owned_collection", "target": "process_design.flow_session_message", "form_read_only": true, "form_hidden": true},
+      {"field": "attachments_rows", "type": "owned_collection", "target": "process_design.flow_session_attachment", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Transcript"},
+      {"control": "formatted_information", "purpose": "Transcript"}
+    ]
+  },
+  {
+    "entity": "process_design.flow_session_attachment",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "file_identifier", "type": "entity_reference", "target": "information_management.file", "required": true, "form_read_only": true},
+      {"field": "file_name", "type": "short_text", "form_read_only": true},
+      {"field": "file_size", "type": "integer", "form_read_only": true},
+      {"field": "run_identifier", "type": "entity_reference", "target": "process_design.flow_run", "form_read_only": true},
+      {"field": "mode", "type": "enumeration", "form_read_only": true, "values": ["Inline", "Retrieval", "Image"], "default": "Inline"},
+      {"field": "extracted_text", "type": "long_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "process_design.flow_session_message",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "role", "type": "short_text", "required": true, "maximum_length": 16},
+      {"field": "content", "type": "long_text"},
+      {"field": "tool_call_identifier", "type": "short_text"},
+      {"field": "tool_calls", "type": "structured_value"},
+      {"field": "run_identifier", "type": "entity_reference", "target": "process_design.flow_run", "form_read_only": true},
+      {"field": "sequence", "type": "integer", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "process_design.flow_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "small_model_identifier", "type": "entity_reference", "target": "process_design.flow_model"},
+      {"field": "search_provider", "type": "enumeration", "values": ["DuckDuckGo", "Brave", "Tavily", "Exa"], "default": "DuckDuckGo"},
+      {"field": "search_service_interface_key", "type": "protected_value", "visible_when": ["and", ["current_field", "search_provider"], ["strict_unequal", ["current_field", "search_provider"], ["literal", "DuckDuckGo"]]], "required_when": ["and", ["current_field", "search_provider"], ["strict_unequal", ["current_field", "search_provider"], ["literal", "DuckDuckGo"]]]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Web Search"}
+    ]
+  },
+  {
+    "entity": "process_design.flow_skill",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "print", "read", "report", "share", "write"]},
+      {"role": "flow_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true, "unique": true},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "is_global", "type": "boolean", "default": "0"},
+      {"field": "user_invocable", "type": "boolean", "default": "0"},
+      {"field": "is_system_generated", "type": "boolean", "form_read_only": true, "omit_on_copy": true, "default": "0"},
+      {"field": "application", "type": "short_text", "form_read_only": true, "omit_on_copy": true},
+      {"field": "description", "type": "text", "required": true, "read_only_when": ["current_field", "is_system_generated"]},
+      {"field": "instructions", "type": "long_text", "required": true, "read_only_when": ["current_field", "is_system_generated"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Instructions"}
+    ]
+  },
+  {
+    "entity": "process_design.flow_tool",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true},
+      {"field": "slug", "type": "short_text", "required": true, "unique": true},
+      {"field": "type", "type": "enumeration", "required": true, "values": ["Script", "Imported", "Server"], "default": "Imported", "read_only_when": ["current_field", "is_system_generated"]},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "requires_confirmation", "type": "boolean", "read_only_when": ["current_field", "is_system_generated"]},
+      {"field": "background", "type": "boolean", "visible_when": ["strict_unequal", ["current_field", "type"], ["literal", "Server"]], "read_only_when": ["current_field", "is_system_generated"]},
+      {"field": "is_system_generated", "type": "boolean", "form_read_only": true},
+      {"field": "description", "type": "long_text", "required": true, "read_only_when": ["current_field", "is_system_generated"]},
+      {"field": "summary", "type": "text", "visible_when": ["strict_equal", ["current_field", "type"], ["literal", "Script"]]},
+      {"field": "import_path", "type": "short_text", "visible_when": ["strict_equal", ["current_field", "type"], ["literal", "Imported"]], "read_only_when": ["current_field", "is_system_generated"], "required_when": ["strict_equal", ["current_field", "type"], ["literal", "Imported"]]},
+      {"field": "code", "type": "expression_or_structured_text", "visible_when": ["strict_equal", ["current_field", "type"], ["literal", "Script"]], "required_when": ["strict_equal", ["current_field", "type"], ["literal", "Script"]]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Description"},
+      {"control": "section", "purpose": "Definition"}
+    ]
+  },
+  {
+    "entity": "process_design.flow_trigger",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "print", "read", "report", "share", "write"]},
+      {"role": "flow_user", "level": 0, "owner_only": true, "allows": ["create", "delete", "read", "write"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true, "unique": true},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "is_system_generated", "type": "boolean", "form_read_only": true, "omit_on_copy": true, "default": "0"},
+      {"field": "application", "type": "short_text", "form_read_only": true, "omit_on_copy": true},
+      {"field": "agent_identifier", "type": "entity_reference", "target": "process_design.flow_agent", "required": true},
+      {"field": "event", "type": "enumeration", "required": true, "values": ["Entity type Event", "Scheduled"], "default": "Entity type Event"},
+      {"field": "run_as_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "target_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "visible_when": ["strict_equal", ["current_field", "event"], ["literal", "Entity type Event"]], "required_when": ["strict_equal", ["current_field", "event"], ["literal", "Entity type Event"]]},
+      {"field": "record_event", "type": "enumeration", "values": ["", "after_insert", "on_update", "on_submit", "on_cancel", "on_trash"], "visible_when": ["strict_equal", ["current_field", "event"], ["literal", "Entity type Event"]], "required_when": ["strict_equal", ["current_field", "event"], ["literal", "Entity type Event"]]},
+      {"field": "cron_expression", "type": "short_text", "visible_when": ["strict_equal", ["current_field", "event"], ["literal", "Scheduled"]], "required_when": ["strict_equal", ["current_field", "event"], ["literal", "Scheduled"]]},
+      {"field": "last_fired_at", "type": "date_and_time", "form_read_only": true, "visible_when": ["strict_equal", ["current_field", "event"], ["literal", "Scheduled"]]},
+      {"field": "condition", "type": "expression_or_structured_text"},
+      {"field": "prompt_template", "type": "expression_or_structured_text", "required": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "When"},
+      {"control": "section", "purpose": "Condition"},
+      {"control": "section", "purpose": "Prompt"}
+    ]
+  }
+]

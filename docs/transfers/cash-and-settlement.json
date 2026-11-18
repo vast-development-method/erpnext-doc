@@ -1,0 +1,151 @@
+[
+  {
+    "name": "Add a payment entry to a bank payment order",
+    "source": "accounting.payment_entry",
+    "destination": "accounting.payment_order",
+    "decision": "Append one bank instruction reference for this posted payment. Use its paid amount, supplier, receiving account, party bank account and payment mode. When adding to an existing order keep that order's company. The instruction does not create another payment entry.",
+    "record_mappings": [
+      {
+        "source_entity": "accounting.payment_entry",
+        "target_entity": "accounting.payment_order",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.payment_entry",
+        "target_entity": "accounting.payment_order_reference",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "reference_name_identifier"
+          ],
+          [
+            "party_bank_account_identifier",
+            "bank_account_identifier"
+          ],
+          [
+            "paid_amount",
+            "amount"
+          ],
+          [
+            "paid_to_identifier",
+            "account_identifier"
+          ],
+          [
+            "party_identifier",
+            "supplier_identifier"
+          ],
+          [
+            "mode_of_payment_identifier",
+            "mode_of_payment_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Add a payment request to a bank payment order",
+    "source": "accounting.payment_request",
+    "destination": "accounting.payment_order",
+    "decision": "Append the request's underlying business reference, remaining outstanding amount, supplier, payment account, bank account and payment mode. Set the instruction type to payment request. On an existing order retain its company. A full historical request amount can exceed the outstanding balance.",
+    "record_mappings": [
+      {
+        "source_entity": "accounting.payment_request",
+        "target_entity": "accounting.payment_order"
+      },
+      {
+        "source_entity": "accounting.payment_request",
+        "target_entity": "accounting.payment_order_reference",
+        "explicit_field_transfers": [
+          [
+            "reference_entity_type_identifier",
+            "reference_entity_type_identifier"
+          ],
+          [
+            "reference_name_identifier",
+            "reference_name_identifier"
+          ],
+          [
+            "outstanding_amount",
+            "amount"
+          ],
+          [
+            "party_identifier",
+            "supplier_identifier"
+          ],
+          [
+            "record_identifier",
+            "payment_request_identifier"
+          ],
+          [
+            "mode_of_payment_identifier",
+            "mode_of_payment_identifier"
+          ],
+          [
+            "bank_account_identifier",
+            "bank_account_identifier"
+          ],
+          [
+            "account",
+            "account_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Create an overdue collection notice",
+    "source": "accounting.sales_invoice",
+    "destination": "accounting.dunning",
+    "decision": "Select payment-schedule rows with outstanding above zero and a due date strictly before the current date. A selected row filter can narrow that set. Attach the payment-schedule row and invoice identifiers. A due-today instalment remains outside this notice.",
+    "record_mappings": [
+      {
+        "source_entity": "accounting.sales_invoice",
+        "target_entity": "accounting.dunning",
+        "explicit_field_transfers": [
+          [
+            "customer_address_identifier",
+            "customer_address_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.payment_schedule",
+        "target_entity": "accounting.overdue_payment",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "payment_schedule"
+          ],
+          [
+            "owning_record_identifier",
+            "sales_invoice_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Prepare a receipt or payment for a customer",
+    "source": "sales.customer",
+    "destination": "accounting.payment_entry",
+    "decision": "Set the party kind to customer and retain its identifier. An amount, accounts, exchange rates and allocations must be established on the payment before it can settle an invoice.",
+    "record_mappings": [
+      {
+        "source_entity": "sales.customer",
+        "target_entity": "accounting.payment_entry",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "party_identifier"
+          ]
+        ]
+      }
+    ]
+  }
+]

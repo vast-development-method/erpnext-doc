@@ -1,0 +1,1161 @@
+[
+  {
+    "capability": "Incoming material price controls",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "cost_anomaly_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "voucher_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "voucher_number", "value_kind": "variable_record_reference", "rules": ["read_only"], "record_class_field": "voucher_type"},
+          {"purpose": "product_identifier", "value_kind": "reference", "rules": ["read_only"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "warehouse", "value_kind": "reference", "rules": ["read_only"], "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "incoming_rate", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "expected_rate", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "variance_percentage", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "severity", "value_kind": "choice", "rules": ["read_only"], "choices": ["warning", "severe"]},
+          {"purpose": "bypassed_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "bypassed_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "override_reason", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["open", "reviewed", "ignored"]},
+          {"purpose": "notes", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["stock_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["cost_manager", 0, ["read", "write", "delete", "report", "export", "share", "print", "email"], false],
+          ["cost_guard", 0, ["read", "write", "report", "export", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "cost_valuation_rule",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "rule_for", "value_kind": "choice", "rules": ["required"], "choices": ["item", "item_group"]},
+          {"purpose": "product_identifier", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_group", "value_kind": "reference", "target": "organization.item_group", "binding": "shared_model"},
+          {"purpose": "warehouse", "value_kind": "reference", "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "from_date", "value_kind": "civil_day"},
+          {"purpose": "to_date", "value_kind": "civil_day"},
+          {"purpose": "expected_rate", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "allowed_variance_percentage", "value_kind": "percentage"},
+          {"purpose": "minimum_rate", "value_kind": "money"},
+          {"purpose": "maximum_rate", "value_kind": "money"},
+          {"purpose": "enabled", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["stock_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["cost_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["cost_guard", 0, ["read", "write", "create", "report", "export", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "cost_valuation_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean", "rules": ["required"]},
+          {"purpose": "include_internal_suppliers", "value_kind": "boolean"},
+          {"purpose": "default_variance_percentage", "value_kind": "percentage", "rules": ["required"]},
+          {"purpose": "severe_multiplier", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "block_severe", "value_kind": "boolean"},
+          {"purpose": "block_if_number_rule", "value_kind": "boolean"},
+          {"purpose": "bypass_roles", "value_kind": "owned_selection_rows", "target": "material_price_control_bypass_role"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["cost_manager", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false],
+          ["cost_guard", 0, ["read", "report", "export", "print"], false]
+        ]
+      },
+      {
+        "concept": "material_price_control_bypass_role",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "role", "value_kind": "reference", "rules": ["required"], "target": "information_management.role", "binding": "shared_model"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Incoming material price controls",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "purchase_order", "purpose": "field_group_for_material_price_control_override_reason", "value_kind": "field_group", "placement": "schedule_date"},
+      {"on": "purchase_order", "purpose": "material_price_control_override_reason", "value_kind": "text", "placement": "field_group_for_material_price_control_override_reason", "rules": ["read_only"]},
+      {"on": "purchase_order", "purpose": "field_column_for_material_price_control_overridden_by", "value_kind": "field_column", "placement": "material_price_control_override_reason"},
+      {"on": "purchase_order", "purpose": "material_price_control_overridden_by", "value_kind": "text", "placement": "field_column_for_material_price_control_overridden_by", "rules": ["read_only"]},
+      {"on": "purchase_order", "purpose": "material_price_control_overridden_at", "value_kind": "date_and_time", "placement": "material_price_control_overridden_by", "rules": ["read_only"]},
+      {"on": "purchase_receipt", "purpose": "field_group_for_material_price_control_override_reason", "value_kind": "field_group", "placement": "posting_date"},
+      {"on": "purchase_receipt", "purpose": "material_price_control_override_reason", "value_kind": "text", "placement": "field_group_for_material_price_control_override_reason", "rules": ["read_only"]},
+      {"on": "purchase_receipt", "purpose": "field_column_for_material_price_control_overridden_by", "value_kind": "field_column", "placement": "material_price_control_override_reason"},
+      {"on": "purchase_receipt", "purpose": "material_price_control_overridden_by", "value_kind": "text", "placement": "field_column_for_material_price_control_overridden_by", "rules": ["read_only"]},
+      {"on": "purchase_receipt", "purpose": "material_price_control_overridden_at", "value_kind": "date_and_time", "placement": "material_price_control_overridden_by", "rules": ["read_only"]},
+      {"on": "supplier_invoice", "purpose": "field_group_for_material_price_control_override_reason", "value_kind": "field_group", "placement": "posting_date"},
+      {"on": "supplier_invoice", "purpose": "material_price_control_override_reason", "value_kind": "text", "placement": "field_group_for_material_price_control_override_reason", "rules": ["read_only"]},
+      {"on": "supplier_invoice", "purpose": "field_column_for_material_price_control_overridden_by", "value_kind": "field_column", "placement": "material_price_control_override_reason"},
+      {"on": "supplier_invoice", "purpose": "material_price_control_overridden_by", "value_kind": "text", "placement": "field_column_for_material_price_control_overridden_by", "rules": ["read_only"]},
+      {"on": "supplier_invoice", "purpose": "material_price_control_overridden_at", "value_kind": "date_and_time", "placement": "material_price_control_overridden_by", "rules": ["read_only"]},
+      {"on": "stock_entry", "purpose": "field_group_for_material_price_control_override_reason", "value_kind": "field_group", "placement": "purpose"},
+      {"on": "stock_entry", "purpose": "material_price_control_override_reason", "value_kind": "text", "placement": "field_group_for_material_price_control_override_reason", "rules": ["read_only"]},
+      {"on": "stock_entry", "purpose": "field_column_for_material_price_control_overridden_by", "value_kind": "field_column", "placement": "material_price_control_override_reason"},
+      {"on": "stock_entry", "purpose": "material_price_control_overridden_by", "value_kind": "text", "placement": "field_column_for_material_price_control_overridden_by", "rules": ["read_only"]},
+      {"on": "stock_entry", "purpose": "material_price_control_overridden_at", "value_kind": "date_and_time", "placement": "material_price_control_overridden_by", "rules": ["read_only"]},
+      {"on": "stock_reconciliation", "purpose": "field_group_for_material_price_control_override_reason", "value_kind": "field_group", "placement": "posting_date"},
+      {"on": "stock_reconciliation", "purpose": "material_price_control_override_reason", "value_kind": "text", "placement": "field_group_for_material_price_control_override_reason", "rules": ["read_only"]},
+      {"on": "stock_reconciliation", "purpose": "field_column_for_material_price_control_overridden_by", "value_kind": "field_column", "placement": "material_price_control_override_reason"},
+      {"on": "stock_reconciliation", "purpose": "material_price_control_overridden_by", "value_kind": "text", "placement": "field_column_for_material_price_control_overridden_by", "rules": ["read_only"]},
+      {"on": "stock_reconciliation", "purpose": "material_price_control_overridden_at", "value_kind": "date_and_time", "placement": "material_price_control_overridden_by", "rules": ["read_only"]}
+    ]
+  },
+  {
+    "capability": "Indian identity and signature verification",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "identity_verification_service_request_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "identity_verification_service_identifier", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "request_type", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "e_sign", "e_kyc"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "pending", "kyc_requested", "kyc_completed", "kyc_review_ready", "kyc_approved", "kyc_rejected", "kyc_expired", "kyc_terminated", "signed", "sign_rejected", "sign_failed", "e_sign_failed", "e_sign_pending"]},
+          {"purpose": "linked_record_class", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "linked_record_identifier", "value_kind": "variable_record_reference", "rules": ["read_only"], "record_class_field": "linked_record_class"},
+          {"purpose": "kfs_version", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "response_structured_data", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "inbound_event_notification_received_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "inbound_event_notification_payload", "value_kind": "expression_or_structured_text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "identity_verification_service_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "production_resource_address", "value_kind": "text"},
+          {"purpose": "enable_production", "value_kind": "boolean"},
+          {"purpose": "service_interface_client_identifier", "value_kind": "protected_text"},
+          {"purpose": "service_interface_secret", "value_kind": "protected_text"},
+          {"purpose": "sandbox_resource_address", "value_kind": "text"},
+          {"purpose": "enable_sandbox", "value_kind": "boolean"},
+          {"purpose": "sandbox_service_interface_client_identifier", "value_kind": "protected_text"},
+          {"purpose": "sandbox_service_interface_secret", "value_kind": "protected_text"},
+          {"purpose": "generate_access_token", "value_kind": "boolean"},
+          {"purpose": "send_sign_link", "value_kind": "boolean"},
+          {"purpose": "inbound_event_notification_secret", "value_kind": "protected_text"},
+          {"purpose": "documents", "value_kind": "owned_rows", "target": "e_signature_document"},
+          {"purpose": "request_expiry_in_days", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "notify_customers", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "e_signature_document",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document_type", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "send_request_via", "value_kind": "choice", "choices": ["email", "mobile"]},
+          {"purpose": "request_recipient_by_document_field", "value_kind": "choice"},
+          {"purpose": "expiry_in_days", "value_kind": "whole_number"}
+        ]
+      },
+      {
+        "concept": "loan_application_kfs_schedule",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "instalment_number", "value_kind": "whole_number"},
+          {"purpose": "payment_date", "value_kind": "civil_day"},
+          {"purpose": "outstanding_principal", "value_kind": "money"},
+          {"purpose": "principal_amount", "value_kind": "money"},
+          {"purpose": "interest_amount", "value_kind": "money"},
+          {"purpose": "instalment_amount", "value_kind": "money"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Indian payroll",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "form_16",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "permanent_account_number", "value_kind": "text"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "tan", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "financial_year", "value_kind": "reference", "rules": ["required"], "target": "accounting.fiscal_year", "binding": "shared_model"},
+          {"purpose": "tax_deducted_at_source_return", "value_kind": "reference", "target": "tax_deducted_at_source_return"},
+          {"purpose": "gross_salary", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_taxable_income", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_tax_deducted", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "part_a_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["pending", "requested", "available", "failed"]},
+          {"purpose": "traces_request_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "part_a_job_identifier", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "part_a_file", "value_kind": "file_reference", "rules": ["read_only"]},
+          {"purpose": "part_b_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["pending", "requested", "available", "failed"]},
+          {"purpose": "part_b_job_identifier", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "part_b_file", "value_kind": "file_reference", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["payroll_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "india_payroll_company_setting",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "esic_registration_number", "value_kind": "text"},
+          {"purpose": "epf_establishment_code", "value_kind": "text"},
+          {"purpose": "professional_tax_registration_number", "value_kind": "text"},
+          {"purpose": "lwf_registration_number", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "india_payroll_telemetry_milestone",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "event", "value_kind": "text", "rules": ["required", "unique"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "tax_deducted_at_source_challan",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "tan", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "numbering_rule", "value_kind": "choice", "choices": ["assigned_sequence_with_year"]},
+          {"purpose": "financial_year", "value_kind": "reference", "rules": ["required"], "target": "accounting.fiscal_year", "binding": "shared_model"},
+          {"purpose": "quarter", "value_kind": "choice", "rules": ["required"], "choices": ["q1", "q2", "q3", "q4"]},
+          {"purpose": "section", "value_kind": "text"},
+          {"purpose": "challan_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "bsr_code", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "challan_serial_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "payment_mode", "value_kind": "choice", "choices": ["unselected", "net_banking", "debit_card", "over_the_counter", "neft_rtgs"]},
+          {"purpose": "bank_name", "value_kind": "text"},
+          {"purpose": "deposit_amount", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "minor_head", "value_kind": "choice", "choices": ["tax_deducted_at_source_payable_by_taxpayer_200", "tax_deducted_at_source_regular_assessment_400"]},
+          {"purpose": "tax_deducted_at_source_amount", "value_kind": "money"},
+          {"purpose": "surcharge_amount", "value_kind": "money"},
+          {"purpose": "education_cess", "value_kind": "money"},
+          {"purpose": "interest", "value_kind": "money"},
+          {"purpose": "fee", "value_kind": "money"},
+          {"purpose": "others", "value_kind": "money"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "tax_deducted_at_source_challan"},
+          {"purpose": "deduction_month", "value_kind": "choice", "choices": ["unselected", "april", "may", "june", "july", "august", "september", "october", "november", "december", "january", "february", "march"]},
+          {"purpose": "traces_status", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "traces_cin", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "traces_checked_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "traces_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "traces_claimed_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "traces_available_amount", "value_kind": "money", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["payroll_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "tax_deducted_at_source_return",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "write_once"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "tan", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "permanent_account_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "financial_year", "value_kind": "reference", "rules": ["required", "write_once"], "target": "accounting.fiscal_year", "binding": "shared_model"},
+          {"purpose": "quarter", "value_kind": "choice", "rules": ["required", "write_once"], "choices": ["q1", "q2", "q3", "q4"]},
+          {"purpose": "form_type", "value_kind": "choice", "rules": ["read_only"], "choices": ["24_q"]},
+          {"purpose": "return_type", "value_kind": "choice", "choices": ["original", "revised"]},
+          {"purpose": "previous_receipt_number", "value_kind": "text"},
+          {"purpose": "filing_status", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "deductor_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "responsible_person_name", "value_kind": "text"},
+          {"purpose": "responsible_person_permanent_account_number", "value_kind": "text"},
+          {"purpose": "responsible_person_designation", "value_kind": "text"},
+          {"purpose": "deductees", "value_kind": "owned_rows", "target": "tax_deducted_at_source_return_deductee"},
+          {"purpose": "total_amount_paid", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_tax_deducted", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_tax_deposited", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "validation_issues", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "txt_file", "value_kind": "file_reference", "rules": ["read_only"]},
+          {"purpose": "csi_file", "value_kind": "file_reference", "rules": ["read_only"]},
+          {"purpose": "conso_file", "value_kind": "file_reference"},
+          {"purpose": "sheet_structured_data_file", "value_kind": "file_reference", "rules": ["read_only"]},
+          {"purpose": "fvu_file", "value_kind": "file_reference", "rules": ["read_only"]},
+          {"purpose": "form_27a", "value_kind": "file_reference", "rules": ["read_only"]},
+          {"purpose": "token_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "acknowledgement_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "receipt_file", "value_kind": "file_reference", "rules": ["read_only"]},
+          {"purpose": "filing_date", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "filing_actions", "value_kind": "owned_rows", "rules": ["read_only"], "target": "tax_deducted_at_source_return_action"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "tax_deducted_at_source_return"},
+          {"purpose": "deductor_branch", "value_kind": "text"},
+          {"purpose": "deductor_type_code", "value_kind": "choice", "choices": ["a_central_government", "s_state_government", "d_statutory_body_central_govt", "e_statutory_body_state_govt", "g_autonomous_body_central_govt", "h_autonomous_body_state_govt", "l_local_authority_central_govt", "n_local_authority_state_govt", "k_company", "m_branch_division_of_company", "p_association_of_persons_aop", "t_association_of_persons_trust", "j_artificial_juridical_person", "b_body_of_individuals", "q_individual_huf", "f_firm"]},
+          {"purpose": "deductor_goods_and_services_tax_registration_number", "value_kind": "text"},
+          {"purpose": "deductor_email", "value_kind": "text"},
+          {"purpose": "deductor_contact_country_code", "value_kind": "text"},
+          {"purpose": "deductor_contact_number", "value_kind": "text"},
+          {"purpose": "deductor_flat_door_block_number", "value_kind": "text"},
+          {"purpose": "deductor_post_office", "value_kind": "text"},
+          {"purpose": "deductor_road_street", "value_kind": "text"},
+          {"purpose": "deductor_area_locality", "value_kind": "text"},
+          {"purpose": "deductor_district", "value_kind": "text"},
+          {"purpose": "deductor_state", "value_kind": "text"},
+          {"purpose": "deductor_postal_code", "value_kind": "text"},
+          {"purpose": "deductor_country", "value_kind": "text"},
+          {"purpose": "government_state_code", "value_kind": "text"},
+          {"purpose": "ministry_code", "value_kind": "text"},
+          {"purpose": "ministry_name_other", "value_kind": "text"},
+          {"purpose": "account_office_identification_number", "value_kind": "text"},
+          {"purpose": "rp_email", "value_kind": "text"},
+          {"purpose": "rp_contact_country_code", "value_kind": "text"},
+          {"purpose": "rp_contact_number", "value_kind": "text"},
+          {"purpose": "rp_flat_door_block_number", "value_kind": "text"},
+          {"purpose": "rp_post_office", "value_kind": "text"},
+          {"purpose": "rp_road_street", "value_kind": "text"},
+          {"purpose": "rp_area_locality", "value_kind": "text"},
+          {"purpose": "rp_district", "value_kind": "text"},
+          {"purpose": "rp_state", "value_kind": "text"},
+          {"purpose": "rp_postal_code", "value_kind": "text"},
+          {"purpose": "rp_country", "value_kind": "text"},
+          {"purpose": "csi_reference_identifier", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "csi_mobile_number", "value_kind": "text"},
+          {"purpose": "deductor_address", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "deductor_contact", "value_kind": "reference", "target": "contacts.contact", "binding": "shared_model"},
+          {"purpose": "responsible_person_contact", "value_kind": "reference", "target": "contacts.contact", "binding": "shared_model"},
+          {"purpose": "rp_address", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["payroll_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "tax_deducted_at_source_return_action",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "request_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "creation_time", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "job_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "request_identifier", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "integration_request", "value_kind": "reference", "rules": ["read_only"], "target": "service_integrations.integration_request", "binding": "shared_model"},
+          {"purpose": "message", "value_kind": "text", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "tax_deducted_at_source_return_deductee",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "permanent_account_number", "value_kind": "text"},
+          {"purpose": "deductee_status", "value_kind": "choice", "choices": ["resident", "non_resident"]},
+          {"purpose": "month", "value_kind": "choice", "choices": ["unselected", "april", "may", "june", "july", "august", "september", "october", "november", "december", "january", "february", "march"]},
+          {"purpose": "date_of_payment", "value_kind": "civil_day"},
+          {"purpose": "amount_paid", "value_kind": "money"},
+          {"purpose": "tax_deducted", "value_kind": "money"},
+          {"purpose": "date_of_deduction", "value_kind": "civil_day"},
+          {"purpose": "challan", "value_kind": "reference", "target": "tax_deducted_at_source_challan"},
+          {"purpose": "remarks", "value_kind": "text"},
+          {"purpose": "surcharge", "value_kind": "money"},
+          {"purpose": "health_and_education_cess", "value_kind": "money"},
+          {"purpose": "tax_deposited", "value_kind": "money"},
+          {"purpose": "opting_new_regime", "value_kind": "boolean"},
+          {"purpose": "employee_category", "value_kind": "choice", "choices": ["general", "senior_citizen", "super_senior_citizen"]},
+          {"purpose": "is_permanent_account_number_operative", "value_kind": "boolean"},
+          {"purpose": "reason_for_lower_deduction", "value_kind": "text"},
+          {"purpose": "certificate_number", "value_kind": "text"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Indian postal addresses",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "indian_postal_code",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "pincode", "value_kind": "text", "rules": ["required", "indexed_for_search"]},
+          {"purpose": "post_office_name", "value_kind": "text", "rules": ["required", "indexed_for_search"]},
+          {"purpose": "disabled", "value_kind": "boolean"},
+          {"purpose": "branch_type", "value_kind": "text"},
+          {"purpose": "delivery_status", "value_kind": "text"},
+          {"purpose": "circle", "value_kind": "text"},
+          {"purpose": "district", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "division", "value_kind": "text"},
+          {"purpose": "region", "value_kind": "text"},
+          {"purpose": "block", "value_kind": "text"},
+          {"purpose": "state", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "country", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Indian postal addresses",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "address", "purpose": "post_office", "value_kind": "reference", "placement": "pincode"},
+      {"on": "address", "purpose": "field_group_for_branch_type", "value_kind": "field_group", "placement": "post_office"},
+      {"on": "address", "purpose": "branch_type", "value_kind": "text", "placement": "field_group_for_branch_type", "rules": ["read_only"]},
+      {"on": "address", "purpose": "delivery_status", "value_kind": "text", "placement": "branch_type", "rules": ["read_only"]},
+      {"on": "address", "purpose": "field_column_for_postal_circle", "value_kind": "field_column", "placement": "delivery_status"},
+      {"on": "address", "purpose": "postal_circle", "value_kind": "text", "placement": "field_column_for_postal_circle", "rules": ["read_only"]},
+      {"on": "address", "purpose": "postal_district", "value_kind": "text", "placement": "postal_circle", "rules": ["read_only"]},
+      {"on": "address", "purpose": "postal_division", "value_kind": "text", "placement": "postal_district", "rules": ["read_only"]},
+      {"on": "address", "purpose": "postal_region", "value_kind": "text", "placement": "postal_division", "rules": ["read_only"]},
+      {"on": "address", "purpose": "postal_block", "value_kind": "text", "placement": "postal_region", "rules": ["read_only"]}
+    ]
+  },
+  {
+    "capability": "Indonesian tax invoice import and export",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "indonesian_tax_system_additional_info_reference",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "code", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "group", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["accounts_user", 0, ["select", "read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["sales_user", 0, ["select", "read"], false]
+        ]
+      },
+      {
+        "concept": "indonesian_tax_system_goods_or_services_reference",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "code", "value_kind": "text"},
+          {"purpose": "group", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["accounts_user", 0, ["select", "read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["sales_user", 0, ["select", "read"], false]
+        ]
+      },
+      {
+        "concept": "indonesian_tax_system_facility_stamp_reference",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "code", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "group", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["accounts_user", 0, ["select", "read", "write", "create", "delete"], false],
+          ["sales_user", 0, ["select", "read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "indonesian_tax_system_importer",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "import_file", "value_kind": "file_reference", "rules": ["required"]},
+          {"purpose": "importer_status", "value_kind": "choice", "rules": ["read_only", "hidden_from_form"], "choices": ["unselected", "draft", "failed", "in_process", "succeed"]},
+          {"purpose": "formatted_markup", "value_kind": "expression_or_structured_text", "rules": ["hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["select", "read", "write", "create", "report", "export", "print"], false],
+          ["sales_user", 0, ["select", "read", "write", "create", "report", "export"], false]
+        ]
+      },
+      {
+        "concept": "indonesian_tax_system_transaction_code_reference",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "code", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "tax_submission_service", "value_kind": "text"},
+          {"purpose": "group", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "long_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["accounts_user", 0, ["select", "read", "write", "create", "delete", "report", "export", "import"], false],
+          ["sales_user", 0, ["select", "read"], false]
+        ]
+      },
+      {
+        "concept": "indonesian_tax_system_unit_reference",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "code", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["accounts_user", 0, ["select", "read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["sales_user", 0, ["select", "read"], false]
+        ]
+      },
+      {
+        "concept": "indonesian_tax_system_structured_exchange_exporter",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "choices": ["assigned_sequence_of_5_digits_with_year"]},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "branch", "value_kind": "reference", "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "start_invoice_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "end_invoice_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only", "editable_after_submission"], "choices": ["unselected", "in_process", "succeed", "failed"]},
+          {"purpose": "formatted_markup", "value_kind": "expression_or_structured_text", "rules": ["read_only", "hidden_from_form", "editable_after_submission"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "indonesian_tax_system_structured_exchange_exporter"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["select", "read", "write", "create", "submit", "cancel", "amend", "report", "export", "print"], false],
+          ["sales_user", 0, ["select", "read", "write", "create", "report", "export"], false]
+        ]
+      },
+      {
+        "concept": "indonesia_localization_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "tax_prefix_codes", "value_kind": "owned_rows", "target": "tax_prefix_code"},
+          {"purpose": "minimum_tin_threshold", "value_kind": "whole_number"},
+          {"purpose": "tin_length", "value_kind": "whole_number"},
+          {"purpose": "tax_submission_service_service_access_key", "value_kind": "protected_text"},
+          {"purpose": "resource_address_create_value_added_tax", "value_kind": "text"},
+          {"purpose": "resource_address_get_value_added_tax", "value_kind": "text"},
+          {"purpose": "resource_address_get_portable_document_value_added_tax", "value_kind": "text"},
+          {"purpose": "automatic_tax_submission", "value_kind": "boolean"},
+          {"purpose": "tax_invoice_number_source", "value_kind": "choice", "choices": ["tax_io", "tax_invoice_number_record_class"]},
+          {"purpose": "auto_call_tax_submission_service_service_interface", "value_kind": "boolean"},
+          {"purpose": "auto_create_value_added_tax_output_metadata", "value_kind": "boolean"},
+          {"purpose": "create_value_added_tax_output", "value_kind": "boolean"},
+          {"purpose": "get_details_value_added_tax_output", "value_kind": "boolean"},
+          {"purpose": "get_portable_document_value_added_tax_output", "value_kind": "boolean"},
+          {"purpose": "use_amended_from_as_tin_revision_flag", "value_kind": "boolean"},
+          {"purpose": "invoice_name_in_tax_invoice_template", "value_kind": "text"},
+          {"purpose": "resource_address_upload_value_added_tax", "value_kind": "text"},
+          {"purpose": "tin_revision_if_only_sales_invoice_had_tin_before", "value_kind": "boolean"},
+          {"purpose": "number_invoice_format", "value_kind": "boolean"},
+          {"purpose": "exclude_opening_entry", "value_kind": "boolean"},
+          {"purpose": "worker_for_link_tax_invoice_number_background_job", "value_kind": "text"},
+          {"purpose": "use_minimum_grand_total_for_wapu", "value_kind": "boolean"},
+          {"purpose": "minimum_grand_total_for_wapu", "value_kind": "money"},
+          {"purpose": "worker_for_renaming_tax_invoice_number", "value_kind": "text"},
+          {"purpose": "exclude_customer_invoice_type_return", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["tax_administrator", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "list_of_customer_invoice",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "customer_invoice_identifier", "value_kind": "reference", "target": "accounting.sales_invoice", "binding": "shared_model"},
+          {"purpose": "is_invoice_cancelled", "value_kind": "boolean", "rules": ["editable_after_submission"]}
+        ]
+      },
+      {
+        "concept": "tax_invoice_exporter",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "sales_invoices", "value_kind": "owned_rows", "rules": ["required"], "target": "tax_invoice_exporter_item"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "tax_invoice_exporter"},
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required"], "choices": ["assigned_sequence_with_year"]},
+          {"purpose": "customer_type", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "all", "pkp", "non_pkp"]},
+          {"purpose": "start_customer_invoice_posting_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "end_customer_invoice_posting_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "assign_tax_invoice_number_to_multiple_invoices", "value_kind": "boolean"},
+          {"purpose": "branch", "value_kind": "reference", "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "is_loading_filling_sales_invoice", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "linking_tin_to_sales_invoice_status", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["tax_administrator", 0, ["select", "read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["tax_user", 0, ["select", "read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "tax_invoice_exporter_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "customer_invoice", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "tax_invoice_number", "value_kind": "reference", "rules": ["read_only"], "target": "tax_invoice_number"},
+          {"purpose": "total_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "customer_invoice_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "customer", "value_kind": "reference", "rules": ["read_only"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "customer_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "is_invoice_cancelled", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "is_tin_unlinked_from_invoice", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "branch", "value_kind": "reference", "rules": ["read_only"], "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "delivery_note", "value_kind": "text", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "tax_invoice_number",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["read_only"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "tax_invoice_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "available", "used"]},
+          {"purpose": "creation_datetime", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "linked_datetime", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "tax_invoice_number_formatted", "value_kind": "text", "rules": ["unique", "read_only"]},
+          {"purpose": "linked_sales_invoice", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.sales_invoice", "binding": "shared_model"},
+          {"purpose": "is_invoice_cancelled", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "list_of_customer_invoice", "value_kind": "owned_rows", "rules": ["read_only"], "target": "list_of_customer_invoice"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["tax_administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["tax_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "tax_invoice_number_importer",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "from_tax_invoice_number", "value_kind": "text"},
+          {"purpose": "from_tax_invoice_number_formatted", "value_kind": "text"},
+          {"purpose": "to_tax_invoice_number", "value_kind": "text"},
+          {"purpose": "to_tax_invoice_number_formatted", "value_kind": "text"},
+          {"purpose": "tax_invoice_number_total", "value_kind": "whole_number", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["tax_administrator", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["tax_user", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "tax_prefix_code",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "tax_prefix_code", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "sales_taxes_and_charges_template", "value_kind": "reference", "rules": ["required"], "target": "accounting.sales_taxes_and_charges_template", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "value_added_tax_output_metadata",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "automatic_tax_submission", "value_kind": "boolean"},
+          {"purpose": "replacement", "value_kind": "boolean"},
+          {"purpose": "tax_invoice_number", "value_kind": "text"},
+          {"purpose": "invoice_number", "value_kind": "text"},
+          {"purpose": "transaction_class_code", "value_kind": "text"},
+          {"purpose": "additional_information_identifier", "value_kind": "text"},
+          {"purpose": "tax_invoice_date", "value_kind": "text"},
+          {"purpose": "tax_period", "value_kind": "text"},
+          {"purpose": "tax_year", "value_kind": "text"},
+          {"purpose": "value_added_tax_rate", "value_kind": "text"},
+          {"purpose": "payment_terms", "value_kind": "text"},
+          {"purpose": "goods_or_services", "value_kind": "owned_rows", "target": "vom_goods_or_services_item"},
+          {"purpose": "taxpayer_identification_number", "value_kind": "text"},
+          {"purpose": "identity_or_passport_number", "value_kind": "text"},
+          {"purpose": "value_added_tax_output_metadata_display_name", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "street_address", "value_kind": "text"},
+          {"purpose": "city", "value_kind": "text"},
+          {"purpose": "telephone", "value_kind": "text"},
+          {"purpose": "name_signatory", "value_kind": "text"},
+          {"purpose": "city_signatory", "value_kind": "text"},
+          {"purpose": "create_value_added_tax_response", "value_kind": "text"},
+          {"purpose": "transaction_identifier", "value_kind": "text"},
+          {"purpose": "get_value_added_tax_portable_document_response", "value_kind": "text"},
+          {"purpose": "value_added_tax_output_portable_document_response", "value_kind": "text"},
+          {"purpose": "last_called_create_value_added_tax", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "last_called_get_value_added_tax_portable_document", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "last_called_value_added_tax_output_portable_document", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["to_be_reviewed", "draft", "approved", "received_portable_document"]},
+          {"purpose": "parent_record_class", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "base64", "value_kind": "long_text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "installment_taxable_basis", "value_kind": "text"},
+          {"purpose": "installment_value_added_tax", "value_kind": "text"},
+          {"purpose": "installment_luxury_goods_tax", "value_kind": "text"},
+          {"purpose": "value_added_tax_upload_success", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "customer_name", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["all", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "vom_goods_or_services_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "vom_goods_or_services_item_display_name", "value_kind": "formatted_text"},
+          {"purpose": "quantity", "value_kind": "text"},
+          {"purpose": "price", "value_kind": "text"},
+          {"purpose": "discount", "value_kind": "text"},
+          {"purpose": "taxable_basis", "value_kind": "text"},
+          {"purpose": "value_added_tax", "value_kind": "text"},
+          {"purpose": "luxury_goods_tax_rate", "value_kind": "text"},
+          {"purpose": "code", "value_kind": "text"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Indonesian tax invoice import and export",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "customer_group", "purpose": "tax_code", "value_kind": "choice", "placement": "account_code", "rules": ["required"]},
+      {"on": "customer_group", "purpose": "customer_tax_code", "value_kind": "text", "placement": "tax_code", "rules": ["read_only", "hidden_from_form"]},
+      {"on": "branch", "purpose": "branchs_business_location_tax_identifier", "value_kind": "text", "placement": "branch", "rules": ["required"]},
+      {"on": "unit_of_measure", "purpose": "indonesian_tax_system_field_group", "value_kind": "field_group", "placement": "must_be_whole_number"},
+      {"on": "unit_of_measure", "purpose": "unit_reference", "value_kind": "reference", "placement": "indonesian_tax_system_field_group"},
+      {"on": "country", "purpose": "indonesian_tax_system_field_group", "value_kind": "field_group", "placement": "code"},
+      {"on": "country", "purpose": "indonesian_tax_system_countryref", "value_kind": "text", "placement": "code", "rules": ["translatable"]},
+      {"on": "supplier_invoice", "purpose": "invoice_received_date", "value_kind": "civil_day", "placement": "company"},
+      {"on": "supplier_invoice", "purpose": "tax_invoice_date", "value_kind": "civil_day", "placement": "taxes_and_charges", "rules": ["editable_after_submission"]},
+      {"on": "supplier_invoice", "purpose": "tax_invoice_number", "value_kind": "text", "placement": "shipping_rule", "rules": ["editable_after_submission", "translatable"]},
+      {"on": "supplier_invoice", "purpose": "withholding_certificate_number", "value_kind": "text", "placement": "tax_invoice_number", "rules": ["editable_after_submission", "translatable"]},
+      {"on": "supplier_invoice", "purpose": "code_taxable_object", "value_kind": "text", "placement": "named_place", "rules": ["editable_after_submission", "translatable"]},
+      {"on": "sales_taxes_and_charges_template", "purpose": "indonesian_tax_system_field_group", "value_kind": "field_group", "placement": "tax_category"},
+      {"on": "sales_taxes_and_charges_template", "purpose": "transaction_code", "value_kind": "reference", "placement": "indonesian_tax_system_field_group"},
+      {"on": "sales_taxes_and_charges_template", "purpose": "tax_additional_info", "value_kind": "reference", "placement": "transaction_code"},
+      {"on": "sales_taxes_and_charges_template", "purpose": "tax_facility_stamp", "value_kind": "reference", "placement": "tax_additional_info"},
+      {"on": "customer_invoice", "purpose": "tax_invoice_number", "value_kind": "text", "placement": "tax_identifier", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "tax_additional_description", "value_kind": "text", "placement": "shipping_rule", "rules": ["editable_after_submission", "translatable"]},
+      {"on": "customer_invoice", "purpose": "tax_additional_reference", "value_kind": "text", "placement": "incoterm", "rules": ["editable_after_submission", "translatable"]},
+      {"on": "customer_invoice", "purpose": "page_group_after_loyalty_redemption_cost_center", "value_kind": "page_group", "placement": "loyalty_redemption_cost_center"},
+      {"on": "customer_invoice", "purpose": "indonesian_tax_system_field_group", "value_kind": "field_group", "placement": "page_group_after_loyalty_redemption_cost_center"},
+      {"on": "customer_invoice", "purpose": "customer_taxable_business_status", "value_kind": "boolean", "placement": "indonesian_tax_system_field_group"},
+      {"on": "customer_invoice", "purpose": "is_structured_exchange_generated", "value_kind": "boolean", "placement": "customer_taxable_business_status", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "indonesian_tax_system_structured_exchange_exporter", "value_kind": "text", "placement": "is_structured_exchange_generated", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "tax_invoice_number_alternative_2", "value_kind": "text", "placement": "indonesian_tax_system_structured_exchange_exporter", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "tax_invoice_date", "value_kind": "civil_day", "placement": "tax_invoice_number_alternative_2", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "indonesian_tax_system_status", "value_kind": "choice", "placement": "tax_invoice_date", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "transaction_code", "value_kind": "reference", "placement": "indonesian_tax_system_status"},
+      {"on": "customer_invoice", "purpose": "tax_invoice_type", "value_kind": "choice", "placement": "transaction_code"},
+      {"on": "customer_invoice", "purpose": "tax_additional_info", "value_kind": "reference", "placement": "tax_invoice_type"},
+      {"on": "customer_invoice", "purpose": "field_column_for_tax_facility_stamp", "value_kind": "field_column", "placement": "tax_additional_info"},
+      {"on": "customer_invoice", "purpose": "tax_facility_stamp", "value_kind": "reference", "placement": "field_column_for_tax_facility_stamp"},
+      {"on": "customer_invoice", "purpose": "tax_custom_document", "value_kind": "text", "placement": "tax_facility_stamp"},
+      {"on": "customer_invoice", "purpose": "tax_custom_document_period", "value_kind": "civil_day", "placement": "tax_custom_document"},
+      {"on": "customer_invoice", "purpose": "total_other_tax_base", "value_kind": "money", "placement": "tax_custom_document_period", "rules": ["read_only"]},
+      {"on": "customer_invoice", "purpose": "total_luxury_goods_tax", "value_kind": "money", "placement": "total_other_tax_base", "rules": ["read_only"]},
+      {"on": "customer_invoice", "purpose": "linking_customer_invoice_to_tax_invoice_number", "value_kind": "boolean", "placement": "connections_tab", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "sales_invoice_had_tin_before", "value_kind": "boolean", "placement": "linking_customer_invoice_to_tax_invoice_number", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "company", "purpose": "use_company_business_location_tax_identifier", "value_kind": "boolean", "placement": "default_holiday_list"},
+      {"on": "company", "purpose": "companys_business_location_tax_identifier", "value_kind": "text", "placement": "tax_identifier"},
+      {"on": "sales_taxes_and_charges", "purpose": "field_column_for_use_temporary_rate", "value_kind": "field_column", "placement": "rate"},
+      {"on": "sales_taxes_and_charges", "purpose": "use_temporary_rate", "value_kind": "boolean", "placement": "field_column_for_use_temporary_rate"},
+      {"on": "sales_taxes_and_charges", "purpose": "old_temporary_rate", "value_kind": "whole_number", "placement": "use_temporary_rate", "rules": ["hidden_from_form"]},
+      {"on": "sales_taxes_and_charges", "purpose": "temporary_rate", "value_kind": "decimal", "placement": "old_temporary_rate"},
+      {"on": "item", "purpose": "unit_reference", "value_kind": "reference", "placement": "units_of_measure"},
+      {"on": "item", "purpose": "indonesian_tax_system_field_group", "value_kind": "field_group", "placement": "taxes"},
+      {"on": "item", "purpose": "goods_or_services_opt", "value_kind": "choice", "placement": "indonesian_tax_system_field_group"},
+      {"on": "item", "purpose": "goods_or_services_reference", "value_kind": "reference", "placement": "goods_or_services_opt"},
+      {"on": "customer", "purpose": "personal_identity_number", "value_kind": "text", "placement": "taxation_section"},
+      {"on": "customer", "purpose": "company_name_tax_identifier", "value_kind": "text", "placement": "tax_identifier"},
+      {"on": "customer", "purpose": "company_address_tax_identifier", "value_kind": "long_text", "placement": "company_name_tax_identifier"},
+      {"on": "customer", "purpose": "customer_taxable_business_status", "value_kind": "boolean", "placement": "tax_withholding_category"},
+      {"on": "customer", "purpose": "section_break_indonesian_tax_system_field_group", "value_kind": "field_group", "placement": "customer_taxable_business_status"},
+      {"on": "customer", "purpose": "customer_identifier_type", "value_kind": "choice", "placement": "section_break_indonesian_tax_system_field_group"},
+      {"on": "customer", "purpose": "customer_identifier_number", "value_kind": "text", "placement": "customer_identifier_type"},
+      {"on": "customer", "purpose": "customer_email_as_per_tax_identifier", "value_kind": "text", "placement": "customer_identifier_number", "rules": ["translatable"]},
+      {"on": "customer", "purpose": "field_column_for_customers_business_location_tax_identifier", "value_kind": "field_column", "placement": "customer_email_as_per_tax_identifier"},
+      {"on": "customer", "purpose": "customers_business_location_tax_identifier", "value_kind": "text", "placement": "field_column_for_customers_business_location_tax_identifier"},
+      {"on": "customer", "purpose": "indonesian_tax_system_country", "value_kind": "reference", "placement": "customers_business_location_tax_identifier"},
+      {"on": "customer", "purpose": "tax_country_code", "value_kind": "text", "placement": "indonesian_tax_system_country"},
+      {"on": "customer_invoice_item", "purpose": "indonesian_tax_system_field_group", "value_kind": "field_group", "placement": "delivered_by_supplier"},
+      {"on": "customer_invoice_item", "purpose": "value_added_tax_amount", "value_kind": "money", "placement": "indonesian_tax_system_field_group"},
+      {"on": "customer_invoice_item", "purpose": "other_tax_base_amount", "value_kind": "money", "placement": "value_added_tax_amount"},
+      {"on": "customer_invoice_item", "purpose": "luxury_goods_tax_rate", "value_kind": "money", "placement": "other_tax_base_amount"},
+      {"on": "customer_invoice_item", "purpose": "luxury_goods_tax_amount", "value_kind": "money", "placement": "luxury_goods_tax_rate"},
+      {"on": "customer_invoice_item", "purpose": "field_column_for_code_goods_or_services_reference", "value_kind": "field_column", "placement": "luxury_goods_tax_amount"},
+      {"on": "customer_invoice_item", "purpose": "code_goods_or_services_reference", "value_kind": "text", "placement": "field_column_for_code_goods_or_services_reference", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "code_goods_or_services_opt", "value_kind": "text", "placement": "code_goods_or_services_reference", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "unit_reference", "value_kind": "text", "placement": "code_goods_or_services_opt", "rules": ["read_only"]}
+    ]
+  },
+  {
+    "capability": "Indonesian tax invoice import and export",
+    "configuration": 1,
+    "rule_addresses": [
+      ["customer_invoice", "tax_identifier", "fetch_from", "text"],
+      ["country", null, "field_order", "text"],
+      ["customer", "tax_identifier", "default", "text"],
+      ["branch", "branch", "unique", "boolean"],
+      ["sales_taxes_and_charges_template", null, "field_order", "text"],
+      ["customer", null, "field_order", "text"],
+      ["item", null, "field_order", "text"],
+      ["company", null, "field_order", "text"],
+      ["unit_of_measure", null, "field_order", "text"],
+      ["customer_invoice", null, "field_order", "text"],
+      ["branch", null, "field_order", "text"],
+      ["customer_invoice_item", null, "field_order", "text"]
+    ]
+  },
+  {
+    "capability": "Installable mobile workspace",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "notification_gateway_user_token",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "notification_gateway_token", "value_kind": "text", "rules": ["required", "read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_worker",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "vapid_public_key", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "vapid_private_key", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "enable_notification_gateway", "value_kind": "boolean"},
+          {"purpose": "notification_gateway_vapid_public_key", "value_kind": "text"},
+          {"purpose": "notification_gateway_web_configuration", "value_kind": "expression_or_structured_text"},
+          {"purpose": "notification_gateway_service_account_structured_data", "value_kind": "protected_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "web_application_manifest",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "application_name", "value_kind": "text"},
+          {"purpose": "short_name", "value_kind": "text"},
+          {"purpose": "theme_color", "value_kind": "colour"},
+          {"purpose": "background_color", "value_kind": "colour"},
+          {"purpose": "scope", "value_kind": "text"},
+          {"purpose": "start_resource_address", "value_kind": "text"},
+          {"purpose": "iarc_rating_identifier", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "long_text"},
+          {"purpose": "display", "value_kind": "choice", "rules": ["translatable"], "choices": ["fullscreen", "standalone", "minimal_ui", "browser"]},
+          {"purpose": "orientation", "value_kind": "choice", "rules": ["translatable"], "choices": ["any", "natural", "landscape", "landscape_primary", "landscape_secondary", "portrait", "portrait_primary", "portrait_secondary"]},
+          {"purpose": "dir", "value_kind": "choice", "rules": ["translatable"], "choices": ["auto", "ltr", "rtl"]},
+          {"purpose": "lang", "value_kind": "reference", "target": "information_management.language", "binding": "shared_model"},
+          {"purpose": "icons", "value_kind": "owned_rows", "target": "web_application_manifest_icon"},
+          {"purpose": "categories", "value_kind": "owned_rows", "target": "web_application_manifest_category"},
+          {"purpose": "screenshots", "value_kind": "owned_rows", "target": "web_application_manifest_screenshot"},
+          {"purpose": "prefer_related_applications", "value_kind": "boolean"},
+          {"purpose": "related_applications", "value_kind": "owned_rows", "target": "web_application_manifest_related_application"},
+          {"purpose": "configure_desk", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "share", "print", "email"], false],
+          ["all", 0, ["read", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "web_application_manifest_category",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "category", "value_kind": "text", "rules": ["required", "unique"]}
+        ]
+      },
+      {
+        "concept": "web_application_manifest_icon",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "icon", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "sizes", "value_kind": "text"},
+          {"purpose": "web_application_manifest_icon_classification", "value_kind": "text"},
+          {"purpose": "source", "value_kind": "image_reference", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "web_application_manifest_related_application",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "resource_address", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "platform", "value_kind": "choice", "rules": ["required"], "choices": ["browser_layout_engine_web_store", "play", "itunes", "desktop_operating_environment"]},
+          {"purpose": "identifier", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "web_application_manifest_screenshot",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "screenshot", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "sizes", "value_kind": "text"},
+          {"purpose": "web_application_manifest_screenshot_classification", "value_kind": "text"},
+          {"purpose": "source", "value_kind": "image_reference", "rules": ["required"]},
+          {"purpose": "form_factor", "value_kind": "choice", "choices": ["wide", "narrow"]}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Invoice image and document extraction",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "text_generation_provider_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "text_generation_provider_service_access_key", "value_kind": "protected_text", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create"], false]
+        ]
+      },
+      {
+        "concept": "invoice_ocr",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required"], "choices": ["assigned_sequence_of_4_digits_with_year"]},
+          {"purpose": "invoice_file", "value_kind": "file_reference"},
+          {"purpose": "supplier", "value_kind": "reference", "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "supplier_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invoice_number", "value_kind": "text"},
+          {"purpose": "invoice_date", "value_kind": "civil_day"},
+          {"purpose": "currency", "value_kind": "reference", "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "confidence", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["draft", "ready", "posted", "processing"]},
+          {"purpose": "items", "value_kind": "owned_rows", "target": "invoice_ocr_item"},
+          {"purpose": "taxes", "value_kind": "owned_rows", "target": "accounting.purchase_taxes_and_charges", "binding": "shared_model"},
+          {"purpose": "net_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "tax_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "grand_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "financial_risk", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "calculated_grand_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "financial_mismatch", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "is_financial_valid", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "raw_ocr_text", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "semantic_invoice_structured_data", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "supplier_invoice", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.purchase_invoice", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "invoice_ocr_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "ocr_item_name", "value_kind": "text"},
+          {"purpose": "quantity", "value_kind": "decimal"},
+          {"purpose": "rate", "value_kind": "money"},
+          {"purpose": "amount", "value_kind": "money"},
+          {"purpose": "matched_item", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "match_confidence", "value_kind": "percentage"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["pending", "matched", "manual_review", "approved"]}
+        ]
+      },
+      {
+        "concept": "supplier_ai_profile",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "supplier", "value_kind": "reference", "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "default_expense_account", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "default_tax_account", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "last_currency", "value_kind": "text"},
+          {"purpose": "average_invoice_amount", "value_kind": "money"},
+          {"purpose": "invoice_count", "value_kind": "whole_number"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Invoice payment links",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "payment_link_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "client_identifier", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "client_secret", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "extension_code", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Invoice signing",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "document_sign_setting",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "private_key", "value_kind": "file_reference"},
+          {"purpose": "certificate", "value_kind": "file_reference"},
+          {"purpose": "digital_signing_certificate_password", "value_kind": "protected_text", "rules": ["required"]},
+          {"purpose": "pfx_file_use", "value_kind": "boolean"},
+          {"purpose": "pfx_file", "value_kind": "file_reference"},
+          {"purpose": "resource_address", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "sign_address", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "location", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Job applicant résumé assessment",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "ai_analysis_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "job_applicant", "value_kind": "reference", "rules": ["required"], "target": "workforce.job_applicant", "binding": "shared_model"},
+          {"purpose": "service_provider", "value_kind": "text"},
+          {"purpose": "model_name", "value_kind": "text"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["success", "failed", "retried", "queued"]},
+          {"purpose": "execution_time", "value_kind": "decimal"},
+          {"purpose": "prompt_tokens", "value_kind": "whole_number"},
+          {"purpose": "completion_tokens", "value_kind": "whole_number"},
+          {"purpose": "total_tokens", "value_kind": "whole_number"},
+          {"purpose": "error_message", "value_kind": "text"},
+          {"purpose": "raw_response", "value_kind": "long_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "ai_configuration",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "default", "value_kind": "reference", "target": "ai_model_configuration_list"},
+          {"purpose": "prompt_template", "value_kind": "text"},
+          {"purpose": "model_configuration_list", "value_kind": "owned_rows", "target": "ai_model_configuration_list"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "ai_model_configuration_list",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "service_provider", "value_kind": "reference", "target": "ai_provider"},
+          {"purpose": "model_name", "value_kind": "text"},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "service_access_key", "value_kind": "protected_text"},
+          {"purpose": "input_cost_per_1m", "value_kind": "decimal"},
+          {"purpose": "output_cost_per_1m", "value_kind": "decimal"},
+          {"purpose": "enabled", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "ai_prompt_version",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "version_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "prompt_template", "value_kind": "long_text", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "ai_provider",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "provider_name", "value_kind": "text", "rules": ["unique"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "job_applicant_ai_history",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "analysis_date", "value_kind": "date_and_time"},
+          {"purpose": "service_provider", "value_kind": "text"},
+          {"purpose": "model_name", "value_kind": "text"},
+          {"purpose": "prompt_version", "value_kind": "text"},
+          {"purpose": "overall_score", "value_kind": "whole_number"},
+          {"purpose": "match_percentage", "value_kind": "percentage"},
+          {"purpose": "confidence_score", "value_kind": "percentage"},
+          {"purpose": "recommendation", "value_kind": "choice", "choices": ["highly_recommended", "recommended", "consider", "potential", "reject"]},
+          {"purpose": "rating", "value_kind": "whole_number"},
+          {"purpose": "cost", "value_kind": "money"},
+          {"purpose": "execution_time", "value_kind": "decimal"},
+          {"purpose": "summary", "value_kind": "text"},
+          {"purpose": "raw_structured_data", "value_kind": "long_text"}
+        ]
+      },
+      {
+        "concept": "job_applicant_list",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "job_applicant", "value_kind": "reference", "rules": ["required"], "target": "workforce.job_applicant", "binding": "shared_model"},
+          {"purpose": "designation", "value_kind": "text"},
+          {"purpose": "email_address", "value_kind": "text"},
+          {"purpose": "phone_number", "value_kind": "text"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Job applicant résumé assessment",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "job_applicant", "purpose": "additional_requirements_score", "value_kind": "whole_number", "placement": "overall_score", "rules": ["read_only"]},
+      {"on": "job_applicant", "purpose": "ai_analysis_page_group", "value_kind": "page_group", "placement": "upper_range"},
+      {"on": "job_applicant", "purpose": "ai_provider", "value_kind": "text", "placement": "summary", "rules": ["read_only"]},
+      {"on": "job_applicant", "purpose": "field_column_for_experience_score", "value_kind": "field_column", "placement": "missing_skills"},
+      {"on": "job_applicant", "purpose": "education_score", "value_kind": "whole_number", "placement": "skills_score", "rules": ["read_only"]},
+      {"on": "job_applicant", "purpose": "experience_score", "value_kind": "whole_number", "placement": "field_column_for_experience_score", "rules": ["read_only"]},
+      {"on": "job_applicant", "purpose": "is_success", "value_kind": "boolean", "placement": "ai_provider", "rules": ["read_only"]},
+      {"on": "job_applicant", "purpose": "missing_skills", "value_kind": "text", "placement": "strengths", "rules": ["read_only"]},
+      {"on": "job_applicant", "purpose": "overall_score", "value_kind": "whole_number", "placement": "ai_analysis_page_group", "rules": ["read_only"]},
+      {"on": "job_applicant", "purpose": "recommendation", "value_kind": "choice", "placement": "additional_requirements_score", "rules": ["read_only"]},
+      {"on": "job_applicant", "purpose": "skills_score", "value_kind": "whole_number", "placement": "experience_score", "rules": ["read_only"]},
+      {"on": "job_applicant", "purpose": "strengths", "value_kind": "text", "placement": "recommendation", "rules": ["read_only"]},
+      {"on": "job_applicant", "purpose": "summary", "value_kind": "text", "placement": "education_score", "rules": ["read_only"]},
+      {"on": "job_applicant", "purpose": "ai_history", "value_kind": "owned_rows", "placement": "human_resources_feedback_notes", "rules": ["read_only"]}
+    ]
+  },
+  {
+    "capability": "Job applicant résumé assessment",
+    "configuration": 1,
+    "rule_addresses": [
+      ["job_applicant", "applicant_rating", "default", "text"],
+      ["job_applicant", null, "field_order", "text"]
+    ]
+  }
+]

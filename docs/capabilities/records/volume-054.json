@@ -1,0 +1,1353 @@
+[
+  {
+    "capability": "Workforce administration",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "daily_hours_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "day", "value_kind": "choice", "rules": ["required"], "choices": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]},
+          {"purpose": "hours", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "hour_time", "value_kind": "text"},
+          {"purpose": "break_minutes", "value_kind": "whole_number"}
+        ]
+      },
+      {
+        "concept": "employee_checkins",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "employee_checkin", "value_kind": "reference", "target": "workforce.employee_checkin", "binding": "shared_model"},
+          {"purpose": "log_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "log_time", "value_kind": "text"},
+          {"purpose": "skip_auto_attendance", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "employee_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "half_day_holidays",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "holiday_date", "value_kind": "civil_day"},
+          {"purpose": "description", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "human_resources_addon_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "name_of_calendar_export_ics_file", "value_kind": "text"},
+          {"purpose": "ics_folder_path", "value_kind": "text"},
+          {"purpose": "day", "value_kind": "choice", "choices": ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]},
+          {"purpose": "time", "value_kind": "choice", "choices": ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"]},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "anniversary_notification_email_list", "value_kind": "owned_selection_rows", "target": "employee_item"},
+          {"purpose": "anniversary_notification_email_recipient_role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "enable_work_anniversaries_notification_for_leave_approvers", "value_kind": "boolean"},
+          {"purpose": "enable_work_anniversaries_notification", "value_kind": "boolean"},
+          {"purpose": "notification_x_days_before", "value_kind": "whole_number"},
+          {"purpose": "workday_break_calculation_mechanism", "value_kind": "choice", "choices": ["break_hours_from_employee_checkins", "break_hours_from_weekly_working_hours", "break_hours_from_weekly_working_hours_if_shorter_breaks", "break_hours_from_minimum_break_rule"]},
+          {"purpose": "swap_hours_worked_and_actual_working_hours", "value_kind": "boolean"},
+          {"purpose": "background_job_frequency", "value_kind": "choice", "choices": ["weekly", "daily"]},
+          {"purpose": "skip_workday_if_number_weekly_hours", "value_kind": "boolean"},
+          {"purpose": "allow_workdays_on_holidays", "value_kind": "boolean"},
+          {"purpose": "minimum_break_rule", "value_kind": "owned_rows", "target": "minimum_break_rule"},
+          {"purpose": "half_day_holidays", "value_kind": "owned_rows", "target": "half_day_holidays"},
+          {"purpose": "overtime_frozen", "value_kind": "civil_day"},
+          {"purpose": "select_employees", "value_kind": "owned_selection_rows", "target": "repost_employees_ole"},
+          {"purpose": "enable_overtime_ledger_feature", "value_kind": "boolean"},
+          {"purpose": "kurzarbeit_leave_type", "value_kind": "reference", "target": "workforce.leave_type", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "minimum_break_rule",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "from_hours", "value_kind": "decimal"},
+          {"purpose": "to_hours", "value_kind": "decimal"},
+          {"purpose": "minimum_break_minutes", "value_kind": "whole_number"}
+        ]
+      },
+      {
+        "concept": "overtime_ledger_entry",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text"},
+          {"purpose": "department", "value_kind": "reference", "target": "organization.department", "binding": "shared_model"},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "posting_date", "value_kind": "civil_day"},
+          {"purpose": "posting_time", "value_kind": "time_of_day"},
+          {"purpose": "posting_datetime", "value_kind": "date_and_time"},
+          {"purpose": "target_hours", "value_kind": "decimal"},
+          {"purpose": "actual_hours", "value_kind": "decimal"},
+          {"purpose": "hour_variance", "value_kind": "decimal"},
+          {"purpose": "balance_before", "value_kind": "decimal"},
+          {"purpose": "balance_after", "value_kind": "decimal"},
+          {"purpose": "voucher_type", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "voucher_number", "value_kind": "variable_record_reference", "record_class_field": "voucher_type"},
+          {"purpose": "is_cancelled", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "remarks", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "target": "overtime_ledger_entry"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "overtime_payout",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "posting_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "purpose", "value_kind": "choice", "rules": ["required"], "choices": ["pay_out", "positive_adjustment", "negative_adjustment"]},
+          {"purpose": "hours", "value_kind": "elapsed_time", "rules": ["required"]},
+          {"purpose": "comment", "value_kind": "text"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "remember_previous_selection"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "overtime_payout"},
+          {"purpose": "numbering_rule", "value_kind": "choice"},
+          {"purpose": "current_overtime_balance", "value_kind": "elapsed_time", "rules": ["read_only"]},
+          {"purpose": "overtime_balance_after_submit", "value_kind": "elapsed_time", "rules": ["read_only", "editable_after_submission"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "repost_employees_ole",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "weekly_working_hours",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "title_hour", "value_kind": "text", "rules": ["unique", "read_only", "write_once"]},
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "valid_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "valid_to", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "holiday_list", "value_kind": "reference", "rules": ["hidden_from_form"], "target": "organization.holiday_list", "binding": "shared_model"},
+          {"purpose": "shift", "value_kind": "reference", "target": "workforce.shift_type", "binding": "shared_model"},
+          {"purpose": "note", "value_kind": "text"},
+          {"purpose": "total_work_hours", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "weekly_working_hours"},
+          {"purpose": "hours", "value_kind": "owned_rows", "rules": ["required"], "target": "daily_hours_detail"},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "number_break_hours", "value_kind": "boolean"},
+          {"purpose": "set_target_hours_to_zero_when_date_is_holiday", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "workday",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "log_date", "value_kind": "civil_day"},
+          {"purpose": "attendance", "value_kind": "reference", "target": "workforce.attendance", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "text"},
+          {"purpose": "target_hours", "value_kind": "decimal"},
+          {"purpose": "hours_worked", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "break_hours", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "employee_checkins", "value_kind": "owned_rows", "rules": ["read_only"], "target": "employee_checkins"},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "first_checkin", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "last_checkout", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "actual_working_hours", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "kurzarbeit_hours", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "expected_break_hours", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "workday_creation_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "log_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "creation_time", "value_kind": "date_and_time"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["success", "failed", "skipped"]},
+          {"purpose": "checkins_found", "value_kind": "whole_number"},
+          {"purpose": "checkins_processed", "value_kind": "whole_number"},
+          {"purpose": "first_checkin", "value_kind": "date_and_time"},
+          {"purpose": "last_checkout", "value_kind": "date_and_time"},
+          {"purpose": "checkin_details", "value_kind": "owned_rows", "target": "workday_creation_log_checkin"},
+          {"purpose": "hours_worked", "value_kind": "decimal"},
+          {"purpose": "break_hours", "value_kind": "decimal"},
+          {"purpose": "expected_break_hours", "value_kind": "decimal"},
+          {"purpose": "actual_working_hours", "value_kind": "decimal"},
+          {"purpose": "target_hours", "value_kind": "decimal"},
+          {"purpose": "manual_workday", "value_kind": "boolean"},
+          {"purpose": "workday_status", "value_kind": "text"},
+          {"purpose": "attendance", "value_kind": "reference", "target": "workforce.attendance", "binding": "shared_model"},
+          {"purpose": "is_holiday", "value_kind": "boolean"},
+          {"purpose": "is_on_leave", "value_kind": "boolean"},
+          {"purpose": "error_message", "value_kind": "text"},
+          {"purpose": "traceback", "value_kind": "expression_or_structured_text"},
+          {"purpose": "workday", "value_kind": "reference", "target": "workday"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "workday_creation_log_checkin",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "employee_checkin", "value_kind": "reference", "target": "workforce.employee_checkin", "binding": "shared_model"},
+          {"purpose": "log_type", "value_kind": "choice", "choices": ["in", "out"]},
+          {"purpose": "log_time", "value_kind": "date_and_time"},
+          {"purpose": "skip_auto_attendance", "value_kind": "boolean"},
+          {"purpose": "attendance", "value_kind": "reference", "target": "workforce.attendance", "binding": "shared_model"},
+          {"purpose": "processed", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "workday_generation_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "execution_time", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "execution_type", "value_kind": "choice", "rules": ["required"], "choices": ["scheduled_job", "manual_button", "service_interface_call"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["running", "completed", "partially_failed", "failed"]},
+          {"purpose": "duration", "value_kind": "decimal"},
+          {"purpose": "total_employees", "value_kind": "whole_number"},
+          {"purpose": "total_dates_processed", "value_kind": "whole_number"},
+          {"purpose": "workdays_created", "value_kind": "whole_number"},
+          {"purpose": "workdays_failed", "value_kind": "whole_number"},
+          {"purpose": "employee_logs", "value_kind": "owned_rows", "target": "workday_generation_log_detail"},
+          {"purpose": "error_log", "value_kind": "long_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "workday_generation_log_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["success", "partially_failed", "failed", "skipped"]},
+          {"purpose": "unmarked_days", "value_kind": "whole_number"},
+          {"purpose": "workdays_created", "value_kind": "whole_number"},
+          {"purpose": "workdays_failed", "value_kind": "whole_number"},
+          {"purpose": "checkins_found", "value_kind": "whole_number"},
+          {"purpose": "checkins_processed", "value_kind": "whole_number"},
+          {"purpose": "dates_with_number_checkins", "value_kind": "whole_number"},
+          {"purpose": "dates_with_incomplete_checkins", "value_kind": "whole_number"},
+          {"purpose": "dates_on_leave", "value_kind": "whole_number"},
+          {"purpose": "dates_on_holiday", "value_kind": "whole_number"},
+          {"purpose": "error_message", "value_kind": "long_text"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Workforce administration",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "employee", "purpose": "permanent", "value_kind": "boolean", "placement": "employment_type", "equivalent_declarations": 2},
+      {"on": "employee", "purpose": "working_hours_field_group", "value_kind": "field_group", "placement": "current_status", "equivalent_declarations": 2},
+      {"on": "employee", "purpose": "weekly_working_hours", "value_kind": "text", "placement": "working_hours_field_group", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "employee", "purpose": "working_hours_cb_field_column", "value_kind": "field_column", "placement": "weekly_working_hours", "equivalent_declarations": 2},
+      {"on": "employee", "purpose": "total_work_hours", "value_kind": "decimal", "placement": "working_hours_cb_field_column", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "employee", "purpose": "overtime_ledger_details_field_group", "value_kind": "field_group", "placement": "default_shift"},
+      {"on": "employee", "purpose": "current_overtime_hours", "value_kind": "decimal", "placement": "overtime_ledger_details_field_group", "rules": ["read_only"]},
+      {"on": "employee", "purpose": "field_column_for_overtime_ledger_entry", "value_kind": "field_column", "placement": "current_overtime_hours"},
+      {"on": "employee", "purpose": "overtime_ledger_entry", "value_kind": "reference", "placement": "field_column_for_overtime_ledger_entry", "rules": ["read_only"]},
+      {"on": "leave_type", "purpose": "is_deducted_from_overtime_ledger", "value_kind": "boolean", "placement": "is_compensatory"},
+      {"on": "attendance", "purpose": "working_hours_details_field_group", "value_kind": "field_group", "placement": "modify_half_day_status"},
+      {"on": "attendance", "purpose": "target_hours", "value_kind": "decimal", "placement": "working_hours_details_field_group", "rules": ["read_only"]},
+      {"on": "attendance", "purpose": "workday", "value_kind": "text", "placement": "working_hours_details_field_group", "rules": ["read_only"]},
+      {"on": "attendance", "purpose": "actual_working_hours", "value_kind": "decimal", "placement": "target_hours", "rules": ["read_only"]},
+      {"on": "attendance", "purpose": "hour_variance", "value_kind": "decimal", "placement": "actual_working_hours", "rules": ["read_only"]},
+      {"on": "attendance", "purpose": "field_column_for_create_overtime_ledger_entry", "value_kind": "field_column", "placement": "hour_variance"},
+      {"on": "attendance", "purpose": "create_overtime_ledger_entry", "value_kind": "boolean", "placement": "field_column_for_create_overtime_ledger_entry", "rules": ["read_only"]},
+      {"on": "attendance", "purpose": "overtime_ledger_entry", "value_kind": "text", "placement": "create_overtime_ledger_entry", "rules": ["editable_after_submission"]}
+    ]
+  },
+  {
+    "capability": "Working time and break policies",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "freelancer_rate",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "rate", "value_kind": "money"},
+          {"purpose": "from_date", "value_kind": "civil_day"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "freelancer_time",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "time_logs", "value_kind": "owned_rows", "target": "freelancer_time_log"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "freelancer_time"},
+          {"purpose": "from_date", "value_kind": "civil_day"},
+          {"purpose": "to_date", "value_kind": "civil_day"},
+          {"purpose": "total_duration", "value_kind": "elapsed_time", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["freelancer", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print"], true]
+        ]
+      },
+      {
+        "concept": "freelancer_time_log",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "project", "value_kind": "reference", "rules": ["required"], "target": "projects.project", "binding": "shared_model"},
+          {"purpose": "issue_key", "value_kind": "text"},
+          {"purpose": "duration", "value_kind": "elapsed_time", "rules": ["required"]},
+          {"purpose": "note", "value_kind": "text"},
+          {"purpose": "task", "value_kind": "reference", "target": "projects.task", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "issue_tracking_service_site",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "site_resource_address", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "username", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "service_interface_token", "value_kind": "protected_text", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "working_time",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "working_time"},
+          {"purpose": "working_time", "value_kind": "elapsed_time", "rules": ["read_only"]},
+          {"purpose": "time_logs", "value_kind": "owned_rows", "target": "working_time_log"},
+          {"purpose": "break_time", "value_kind": "elapsed_time", "rules": ["read_only"]},
+          {"purpose": "project_time", "value_kind": "elapsed_time", "rules": ["read_only"]},
+          {"purpose": "billable_time", "value_kind": "elapsed_time", "rules": ["read_only"]},
+          {"purpose": "project_percentage", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "billable_percentage", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "paid_break_time", "value_kind": "elapsed_time", "rules": ["read_only"]},
+          {"purpose": "productive_time", "value_kind": "elapsed_time", "rules": ["read_only"]},
+          {"purpose": "whole_day_project", "value_kind": "reference", "target": "projects.project", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["employee", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "working_time_blocked_day",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "blocked_day", "value_kind": "choice", "rules": ["required"], "choices": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]}
+        ]
+      },
+      {
+        "concept": "working_time_break_policy",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "work_threshold", "value_kind": "elapsed_time", "rules": ["required"]},
+          {"purpose": "required_break_minutes", "value_kind": "elapsed_time", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "working_time_log",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "duration", "value_kind": "elapsed_time", "rules": ["read_only"]},
+          {"purpose": "project", "value_kind": "reference", "target": "projects.project", "binding": "shared_model"},
+          {"purpose": "key", "value_kind": "text"},
+          {"purpose": "from_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "to_time", "value_kind": "time_of_day"},
+          {"purpose": "is_break", "value_kind": "boolean"},
+          {"purpose": "billable", "value_kind": "choice", "choices": ["0%", "25%", "50%", "75%", "100%", "125%", "150%"]},
+          {"purpose": "note", "value_kind": "text"},
+          {"purpose": "task", "value_kind": "reference", "target": "projects.task", "binding": "shared_model"},
+          {"purpose": "is_paid_break", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "working_time_policy",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "minimum_resource_exchange_between_days", "value_kind": "elapsed_time"},
+          {"purpose": "mandatory_breaks", "value_kind": "owned_rows", "target": "working_time_break_policy"},
+          {"purpose": "blocked_days", "value_kind": "owned_rows", "target": "working_time_blocked_day"},
+          {"purpose": "consider_holiday_list", "value_kind": "boolean"},
+          {"purpose": "maximum_productive_time_per_day", "value_kind": "elapsed_time"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Workplace facial attendance",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "office",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "office", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "machine_readable_code", "value_kind": "image_reference", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "company_abbreviation", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Workplace facial attendance",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "employee_checkin", "purpose": "latitude", "value_kind": "text", "placement": "shift", "rules": ["read_only", "translatable"]},
+      {"on": "employee_checkin", "purpose": "longitude", "value_kind": "text", "placement": "latitude", "rules": ["read_only", "translatable"]},
+      {"on": "employee_checkin", "purpose": "employee_attendance_image", "value_kind": "image_reference", "placement": "longitude", "rules": ["read_only", "hidden_from_form"]},
+      {"on": "employee_checkin", "purpose": "office_identifier", "value_kind": "text", "placement": "preceding_field_column_in_employee_checkin", "rules": ["read_only", "translatable"]},
+      {"on": "employee_checkin", "purpose": "location", "value_kind": "text", "placement": "office_identifier", "rules": ["read_only", "translatable"]}
+    ]
+  },
+  {
+    "capability": "Workspace presentation",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "desk_theme",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "navbar_color", "value_kind": "colour"},
+          {"purpose": "navbar_text_color", "value_kind": "colour"},
+          {"purpose": "button_background_color", "value_kind": "colour"},
+          {"purpose": "button_text_color", "value_kind": "colour"},
+          {"purpose": "login_button_background_color", "value_kind": "colour"},
+          {"purpose": "login_button_text_color", "value_kind": "colour"},
+          {"purpose": "button_hover_text_color", "value_kind": "colour"},
+          {"purpose": "button_hover_background_color", "value_kind": "colour"},
+          {"purpose": "page_background_type", "value_kind": "choice", "choices": ["unselected", "color", "image", "carousel"]},
+          {"purpose": "login_page_background_color", "value_kind": "colour"},
+          {"purpose": "login_page_background_image", "value_kind": "image_reference"},
+          {"purpose": "login_box_position", "value_kind": "choice", "choices": ["default", "left", "right"]},
+          {"purpose": "login_page_button_hover_background_color", "value_kind": "colour"},
+          {"purpose": "login_page_button_hover_text_color", "value_kind": "colour"},
+          {"purpose": "page_heading_text_color", "value_kind": "colour"},
+          {"purpose": "login_box_background_color", "value_kind": "colour"},
+          {"purpose": "body_background_color", "value_kind": "colour"},
+          {"purpose": "secondary_button_background_color", "value_kind": "colour"},
+          {"purpose": "secondary_button_text_color", "value_kind": "colour"},
+          {"purpose": "secondary_button_hover_background_color", "value_kind": "colour"},
+          {"purpose": "secondary_button_hover_text_color", "value_kind": "colour"},
+          {"purpose": "main_body_content_box_background_color", "value_kind": "colour"},
+          {"purpose": "table_head_background_color", "value_kind": "colour"},
+          {"purpose": "table_body_background_color", "value_kind": "colour"},
+          {"purpose": "table_head_text_color", "value_kind": "colour"},
+          {"purpose": "table_body_text_color", "value_kind": "colour"},
+          {"purpose": "number_card_background_color", "value_kind": "colour"},
+          {"purpose": "number_card_border_color", "value_kind": "colour"},
+          {"purpose": "number_card_text_color", "value_kind": "colour"},
+          {"purpose": "hide_help_button", "value_kind": "boolean"},
+          {"purpose": "table_hide_like_comment_section", "value_kind": "boolean"},
+          {"purpose": "disable_card_view_on_mobile_view", "value_kind": "boolean"},
+          {"purpose": "input_background_color", "value_kind": "colour"},
+          {"purpose": "input_border_color", "value_kind": "colour"},
+          {"purpose": "input_text_color", "value_kind": "colour"},
+          {"purpose": "input_label_color", "value_kind": "colour"},
+          {"purpose": "is_application_details_inside_the_box", "value_kind": "boolean"},
+          {"purpose": "login_page_title", "value_kind": "text"},
+          {"purpose": "hide_side_bar", "value_kind": "boolean"},
+          {"purpose": "hide_search", "value_kind": "owned_selection_rows", "target": "information_management.has_role", "binding": "shared_model"},
+          {"purpose": "disable_flex_card_content_on_mobile_view", "value_kind": "boolean"},
+          {"purpose": "main_body_content_box_text_color", "value_kind": "colour"},
+          {"purpose": "sidebar_background_color", "value_kind": "colour"},
+          {"purpose": "sidebar_text_color", "value_kind": "colour"},
+          {"purpose": "hide_application_switcher", "value_kind": "boolean"},
+          {"purpose": "default_application", "value_kind": "choice"},
+          {"purpose": "copyright_text", "value_kind": "text"},
+          {"purpose": "sticky_footer", "value_kind": "boolean"},
+          {"purpose": "footer_powered_by", "value_kind": "text"},
+          {"purpose": "carousel_images", "value_kind": "owned_rows", "target": "desk_theme_carousel_images"},
+          {"purpose": "allow_manual_navigation", "value_kind": "boolean"},
+          {"purpose": "footer_background_color", "value_kind": "colour"},
+          {"purpose": "footer_text_color", "value_kind": "colour"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "desk_theme_carousel_images",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "image", "value_kind": "image_reference", "rules": ["required"]}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Workspace presentation",
+    "configuration": 2,
+    "entity_contracts": [
+      {
+        "concept": "allowed_theme",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "theme", "value_kind": "reference", "rules": ["required"], "target": "theme_definition"}
+        ]
+      },
+      {
+        "concept": "theme_definition",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "theme_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "theme_key", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "is_default", "value_kind": "boolean"},
+          {"purpose": "is_dark", "value_kind": "boolean"},
+          {"purpose": "owner_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "is_public", "value_kind": "boolean"},
+          {"purpose": "restrict_to_roles", "value_kind": "owned_selection_rows", "target": "theme_role"},
+          {"purpose": "bg_primary", "value_kind": "colour"},
+          {"purpose": "bg_surface", "value_kind": "colour"},
+          {"purpose": "bg_input", "value_kind": "colour"},
+          {"purpose": "text_primary", "value_kind": "colour"},
+          {"purpose": "text_muted", "value_kind": "colour"},
+          {"purpose": "border", "value_kind": "colour"},
+          {"purpose": "accent", "value_kind": "colour"},
+          {"purpose": "accent_hover", "value_kind": "colour"},
+          {"purpose": "button_bg", "value_kind": "colour"},
+          {"purpose": "button_text", "value_kind": "colour"},
+          {"purpose": "button_hover_bg", "value_kind": "colour"},
+          {"purpose": "font_family", "value_kind": "text"},
+          {"purpose": "font_size_base", "value_kind": "text"},
+          {"purpose": "font_weight_base", "value_kind": "whole_number"},
+          {"purpose": "transition_duration", "value_kind": "text"},
+          {"purpose": "border_radius", "value_kind": "text"},
+          {"purpose": "enable_hover_lift", "value_kind": "boolean"},
+          {"purpose": "sidebar_style", "value_kind": "choice", "choices": ["plain", "tinted", "solid", "gradient"]},
+          {"purpose": "sidebar_pattern", "value_kind": "boolean"},
+          {"purpose": "icon_tints", "value_kind": "boolean"},
+          {"purpose": "sidebar_bg", "value_kind": "colour"},
+          {"purpose": "sidebar_text", "value_kind": "colour"},
+          {"purpose": "sidebar_active_bg", "value_kind": "colour"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["theme_user", 0, ["read"], false],
+          ["theme_user", 0, ["read", "write", "create", "delete"], true]
+        ]
+      },
+      {
+        "concept": "theme_role",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "role", "value_kind": "reference", "rules": ["required"], "target": "information_management.role", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "theme_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "site_default_theme", "value_kind": "reference", "target": "theme_definition"},
+          {"purpose": "apply_to_website", "value_kind": "boolean"},
+          {"purpose": "allow_custom_themes", "value_kind": "boolean"},
+          {"purpose": "allow_public_sharing", "value_kind": "boolean"},
+          {"purpose": "restrict_theme_choice", "value_kind": "boolean"},
+          {"purpose": "allowed_themes", "value_kind": "owned_selection_rows", "target": "allowed_theme"},
+          {"purpose": "allow_user_sounds", "value_kind": "boolean"},
+          {"purpose": "navbar_logo", "value_kind": "image_reference"},
+          {"purpose": "favicon", "value_kind": "image_reference"},
+          {"purpose": "login_background", "value_kind": "image_reference"},
+          {"purpose": "use_attendance_integration_login", "value_kind": "boolean"},
+          {"purpose": "login_subtitle", "value_kind": "text"},
+          {"purpose": "login_footnote", "value_kind": "text"},
+          {"purpose": "login_headline", "value_kind": "text"},
+          {"purpose": "login_subheadline", "value_kind": "text"},
+          {"purpose": "login_points", "value_kind": "text"},
+          {"purpose": "login_stat", "value_kind": "text"},
+          {"purpose": "login_stat_note", "value_kind": "text"},
+          {"purpose": "login_brand_name", "value_kind": "text"},
+          {"purpose": "login_brand_logo", "value_kind": "image_reference"},
+          {"purpose": "default_density", "value_kind": "choice", "choices": ["compact", "comfortable", "spacious"]},
+          {"purpose": "use_attendance_integration_home", "value_kind": "boolean"},
+          {"purpose": "home_layout", "value_kind": "choice", "choices": ["grid", "compact_list"]},
+          {"purpose": "home_show_greeting", "value_kind": "boolean"},
+          {"purpose": "home_show_shortcuts", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["theme_user", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "user_sound_mapping",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "event_key", "value_kind": "choice", "rules": ["required"], "choices": ["save", "submit", "cancel", "delete", "error", "email", "alert", "click", "notification", "login", "logout", "missing_fields"]},
+          {"purpose": "file", "value_kind": "file_reference"},
+          {"purpose": "volume", "value_kind": "decimal"}
+        ]
+      },
+      {
+        "concept": "user_sound_preference",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "sounds", "value_kind": "owned_rows", "target": "user_sound_mapping"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["theme_user", 0, ["read", "write", "create", "delete"], true]
+        ]
+      },
+      {
+        "concept": "user_theme_preference",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "use_business_application_theme", "value_kind": "boolean"},
+          {"purpose": "active_theme", "value_kind": "reference", "target": "theme_definition"},
+          {"purpose": "theme_mode", "value_kind": "choice", "choices": ["single", "automatic"]},
+          {"purpose": "dark_theme", "value_kind": "reference", "target": "theme_definition"},
+          {"purpose": "overrides_structured_data", "value_kind": "long_text"},
+          {"purpose": "density", "value_kind": "choice", "choices": ["unselected", "compact", "comfortable", "spacious"]},
+          {"purpose": "sidebar_collapsed", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["theme_user", 0, ["read", "write", "create", "delete"], true]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Workspace presentation preferences",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "login_feature_card",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "icon", "value_kind": "choice", "choices": ["es_line_tiles", "es_line_dashboard", "es_line_chart", "es_line_reports", "es_line_plans", "es_line_notes", "es_line_support", "es_line_chat", "es_line_ticket", "es_line_people", "es_line_teams", "es_line_customer", "es_line_security", "es_line_lock", "es_line_cloud", "es_line_globe", "es_line_zap", "es_line_activity", "es_line_calender", "es_line_time", "es_line_payments", "es_line_folder", "es_line_settings", "es_line_star"]},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "subtitle", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "login_page_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "layout", "value_kind": "choice", "choices": ["split_screen", "centered_card"]},
+          {"purpose": "auto_fetch_branding", "value_kind": "boolean"},
+          {"purpose": "company_name", "value_kind": "text"},
+          {"purpose": "logo", "value_kind": "image_reference"},
+          {"purpose": "hero_logo", "value_kind": "image_reference"},
+          {"purpose": "favicon", "value_kind": "image_reference"},
+          {"purpose": "brand_color", "value_kind": "colour"},
+          {"purpose": "accent_color", "value_kind": "colour"},
+          {"purpose": "badge_text", "value_kind": "text"},
+          {"purpose": "headline", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "hero_bg_image", "value_kind": "image_reference"},
+          {"purpose": "hero_gradient_from", "value_kind": "colour"},
+          {"purpose": "hero_gradient_to", "value_kind": "colour"},
+          {"purpose": "show_hero_pattern", "value_kind": "boolean"},
+          {"purpose": "show_feature_panel", "value_kind": "boolean"},
+          {"purpose": "feature_panel_title", "value_kind": "text"},
+          {"purpose": "feature_status_text", "value_kind": "text"},
+          {"purpose": "feature_cards", "value_kind": "owned_rows", "target": "login_feature_card"},
+          {"purpose": "card_eyebrow", "value_kind": "text"},
+          {"purpose": "card_heading", "value_kind": "text"},
+          {"purpose": "card_subtitle", "value_kind": "text"},
+          {"purpose": "button_label", "value_kind": "text"},
+          {"purpose": "security_note", "value_kind": "text"},
+          {"purpose": "back_link_label", "value_kind": "text"},
+          {"purpose": "back_link_resource_address", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "share"], false]
+        ]
+      },
+      {
+        "concept": "theme_preference",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "theme_profile", "value_kind": "text", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete"], false],
+          ["all", 0, ["read", "write", "create"], true]
+        ]
+      },
+      {
+        "concept": "theme_preset",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "preset_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "brand_color", "value_kind": "colour", "rules": ["required"]},
+          {"purpose": "accent_color", "value_kind": "colour", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "theme_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "company_name", "value_kind": "text"},
+          {"purpose": "logo", "value_kind": "image_reference"},
+          {"purpose": "favicon", "value_kind": "image_reference"},
+          {"purpose": "tagline", "value_kind": "text"},
+          {"purpose": "brand_color", "value_kind": "colour"},
+          {"purpose": "accent_color", "value_kind": "colour"},
+          {"purpose": "presets", "value_kind": "owned_rows", "target": "theme_preset"},
+          {"purpose": "default_theme_mode", "value_kind": "choice", "choices": ["light", "dark", "auto"]},
+          {"purpose": "base_font_size", "value_kind": "choice", "choices": ["small", "default", "large"]},
+          {"purpose": "default_density", "value_kind": "choice", "choices": ["comfortable", "compact"]},
+          {"purpose": "sidebar_background", "value_kind": "colour"},
+          {"purpose": "navbar_background", "value_kind": "colour"},
+          {"purpose": "page_background", "value_kind": "colour"},
+          {"purpose": "card_background", "value_kind": "colour"},
+          {"purpose": "text_color", "value_kind": "colour"},
+          {"purpose": "corner_radius", "value_kind": "whole_number"},
+          {"purpose": "shadow_style", "value_kind": "choice", "choices": ["none", "soft", "elevated"]},
+          {"purpose": "sidebar_width", "value_kind": "whole_number"},
+          {"purpose": "sidebar_layout", "value_kind": "choice", "choices": ["tree", "icon_rail"]},
+          {"purpose": "icon_rail_width", "value_kind": "whole_number"},
+          {"purpose": "icon_rail_background", "value_kind": "colour"},
+          {"purpose": "icon_rail_active_color", "value_kind": "colour"},
+          {"purpose": "studio_layout", "value_kind": "expression_or_structured_text", "rules": ["hidden_from_form"]},
+          {"purpose": "theme_enabled", "value_kind": "boolean"},
+          {"purpose": "allow_user_theme", "value_kind": "boolean"},
+          {"purpose": "theme_lock", "value_kind": "boolean"},
+          {"purpose": "preview_administrator_only", "value_kind": "boolean"},
+          {"purpose": "active_profile", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "theme_studio_configuration", "value_kind": "expression_or_structured_text", "rules": ["hidden_from_form"]},
+          {"purpose": "theme_studio_draft", "value_kind": "expression_or_structured_text", "rules": ["hidden_from_form"]},
+          {"purpose": "theme_profiles", "value_kind": "expression_or_structured_text", "rules": ["hidden_from_form"]},
+          {"purpose": "theme_versions", "value_kind": "expression_or_structured_text", "rules": ["hidden_from_form"]},
+          {"purpose": "theme_assignments", "value_kind": "expression_or_structured_text", "rules": ["hidden_from_form"]},
+          {"purpose": "theme_schedule", "value_kind": "expression_or_structured_text", "rules": ["hidden_from_form"]},
+          {"purpose": "enable_command_palette", "value_kind": "boolean"},
+          {"purpose": "dark_mode_default", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "enable_smart_home", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "share"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Workspace presentation preferences",
+    "configuration": 2,
+    "entity_contracts": [
+      {
+        "concept": "swift_calendar_field",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document_type", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "fields", "value_kind": "text", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "swift_home_card",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "number_card", "value_kind": "reference", "rules": ["required"], "target": "operator_workspace.number_card", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "workspace_presentation_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "color_mode", "value_kind": "choice", "rules": ["required"], "choices": ["theme_preset", "custom_colors"]},
+          {"purpose": "active_preset", "value_kind": "choice", "choices": ["iron_man", "captain_america", "doctor_strange", "star_lord", "vision", "scarlet_witch", "black_panther", "loki", "hulk", "thanos", "venom", "winter_soldier"]},
+          {"purpose": "primary_color", "value_kind": "colour"},
+          {"purpose": "secondary_color", "value_kind": "colour"},
+          {"purpose": "mode", "value_kind": "choice", "choices": ["dark", "light"]},
+          {"purpose": "strength", "value_kind": "choice", "choices": ["subtle", "bold"]},
+          {"purpose": "sidebar_gradient", "value_kind": "boolean"},
+          {"purpose": "backdrop", "value_kind": "choice", "choices": ["unselected", "aurora", "mesh", "grain", "facets", "silk", "none"]},
+          {"purpose": "default_density", "value_kind": "choice", "choices": ["unselected", "compact", "comfortable", "cozy"]},
+          {"purpose": "default_radius", "value_kind": "choice", "choices": ["unselected", "sharp", "rounded", "pill"]},
+          {"purpose": "default_font_scale", "value_kind": "choice", "choices": ["unselected", "s", "m", "l", "xl"]},
+          {"purpose": "default_font_family", "value_kind": "choice", "choices": ["unselected", "inter", "poppins", "manrope", "typeface", "system"]},
+          {"purpose": "navbar_variant", "value_kind": "choice", "choices": ["solid", "glass", "transparent"]},
+          {"purpose": "sidebar_variant", "value_kind": "choice", "choices": ["attached", "floating", "icon_only"]},
+          {"purpose": "sidebar_brand_fill", "value_kind": "boolean"},
+          {"purpose": "sidebar_texture", "value_kind": "boolean"},
+          {"purpose": "enable_home_page", "value_kind": "boolean"},
+          {"purpose": "home_preset", "value_kind": "choice", "choices": ["aurora", "dune", "nebula", "abyss", "pulse", "horizon", "eclipse", "honeycomb"]},
+          {"purpose": "home_greeting", "value_kind": "boolean"},
+          {"purpose": "home_shortcuts", "value_kind": "boolean"},
+          {"purpose": "home_cards", "value_kind": "owned_selection_rows", "target": "swift_home_card"},
+          {"purpose": "calendar_fields", "value_kind": "owned_rows", "target": "swift_calendar_field"},
+          {"purpose": "orgchart_fields", "value_kind": "text"},
+          {"purpose": "enable_switcher", "value_kind": "boolean"},
+          {"purpose": "enable_command_palette", "value_kind": "boolean"},
+          {"purpose": "enable_focus_mode", "value_kind": "boolean"},
+          {"purpose": "enable_backdrops", "value_kind": "boolean"},
+          {"purpose": "show_backdrop_through", "value_kind": "boolean"},
+          {"purpose": "enable_perf_mode", "value_kind": "boolean"},
+          {"purpose": "enable_styled_scrollbar", "value_kind": "boolean"},
+          {"purpose": "enable_toast_theming", "value_kind": "boolean"},
+          {"purpose": "enable_print_theming", "value_kind": "boolean"},
+          {"purpose": "print_font_family", "value_kind": "choice", "choices": ["unselected", "inter", "poppins", "manrope", "typeface", "system"]},
+          {"purpose": "brand_name", "value_kind": "text"},
+          {"purpose": "brand_favicon", "value_kind": "image_reference"},
+          {"purpose": "brand_logo", "value_kind": "image_reference"},
+          {"purpose": "brand_logo_dark", "value_kind": "image_reference"},
+          {"purpose": "login_layout", "value_kind": "choice", "choices": ["split", "centered", "minimal"]},
+          {"purpose": "login_tagline", "value_kind": "text"},
+          {"purpose": "login_bg_image", "value_kind": "image_reference"},
+          {"purpose": "login_show_brand_panel", "value_kind": "boolean"},
+          {"purpose": "login_heading", "value_kind": "text"},
+          {"purpose": "login_description", "value_kind": "text"},
+          {"purpose": "login_points", "value_kind": "text"},
+          {"purpose": "login_stat_value", "value_kind": "text"},
+          {"purpose": "login_stat_label", "value_kind": "text"},
+          {"purpose": "enable_auto_dark", "value_kind": "boolean"},
+          {"purpose": "auto_dark_start", "value_kind": "time_of_day"},
+          {"purpose": "auto_dark_end", "value_kind": "time_of_day"},
+          {"purpose": "enable_sounds", "value_kind": "boolean"},
+          {"purpose": "volume_level", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "sound_events", "value_kind": "owned_rows", "target": "workspace_presentation_sound_event"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "workspace_presentation_sound_event",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "event_key", "value_kind": "choice", "rules": ["required"], "choices": ["save", "submit", "cancel", "delete", "error", "success", "notification", "click", "login"]},
+          {"purpose": "label", "value_kind": "text"},
+          {"purpose": "sound_file", "value_kind": "file_reference"},
+          {"purpose": "category", "value_kind": "choice", "choices": ["system", "action", "notification", "error", "success"]},
+          {"purpose": "description", "value_kind": "text"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Workspace sound and theme preferences",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "theme_definition",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "theme_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "theme_key", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "is_default", "value_kind": "boolean"},
+          {"purpose": "is_dark", "value_kind": "boolean"},
+          {"purpose": "owner_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "is_public", "value_kind": "boolean"},
+          {"purpose": "bg_primary", "value_kind": "colour"},
+          {"purpose": "bg_surface", "value_kind": "colour"},
+          {"purpose": "bg_input", "value_kind": "colour"},
+          {"purpose": "text_primary", "value_kind": "colour"},
+          {"purpose": "text_muted", "value_kind": "colour"},
+          {"purpose": "border", "value_kind": "colour"},
+          {"purpose": "accent", "value_kind": "colour"},
+          {"purpose": "accent_hover", "value_kind": "colour"},
+          {"purpose": "button_bg", "value_kind": "colour"},
+          {"purpose": "button_text", "value_kind": "colour"},
+          {"purpose": "button_hover_bg", "value_kind": "colour"},
+          {"purpose": "font_family", "value_kind": "text"},
+          {"purpose": "font_size_base", "value_kind": "text"},
+          {"purpose": "font_weight_base", "value_kind": "whole_number"},
+          {"purpose": "transition_duration", "value_kind": "text"},
+          {"purpose": "border_radius", "value_kind": "text"},
+          {"purpose": "enable_hover_lift", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["theme_user", 0, ["read"], false],
+          ["theme_user", 0, ["read", "write", "create", "delete"], true]
+        ]
+      },
+      {
+        "concept": "user_sound_mapping",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "event_key", "value_kind": "choice", "rules": ["required"], "choices": ["save", "submit", "cancel", "delete", "error", "email", "alert", "click", "notification", "login", "logout", "missing_fields"]},
+          {"purpose": "file", "value_kind": "file_reference", "rules": ["required"]},
+          {"purpose": "volume", "value_kind": "decimal"}
+        ]
+      },
+      {
+        "concept": "user_sound_preference",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "sounds", "value_kind": "owned_rows", "target": "user_sound_mapping"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["theme_user", 0, ["read", "write", "create", "delete"], true]
+        ]
+      },
+      {
+        "concept": "user_theme_preference",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "active_theme", "value_kind": "reference", "rules": ["required"], "target": "theme_definition"},
+          {"purpose": "overrides_structured_data", "value_kind": "long_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["theme_user", 0, ["read", "write", "create", "delete"], true]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Workspace sound and theme preferences",
+    "configuration": 2,
+    "entity_contracts": [
+      {
+        "concept": "theme_definition",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "theme_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "theme_key", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "is_default", "value_kind": "boolean"},
+          {"purpose": "is_dark", "value_kind": "boolean"},
+          {"purpose": "owner_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "is_public", "value_kind": "boolean"},
+          {"purpose": "bg_primary", "value_kind": "colour"},
+          {"purpose": "bg_surface", "value_kind": "colour"},
+          {"purpose": "bg_input", "value_kind": "colour"},
+          {"purpose": "text_primary", "value_kind": "colour"},
+          {"purpose": "text_muted", "value_kind": "colour"},
+          {"purpose": "border", "value_kind": "colour"},
+          {"purpose": "accent", "value_kind": "colour"},
+          {"purpose": "accent_hover", "value_kind": "colour"},
+          {"purpose": "button_bg", "value_kind": "colour"},
+          {"purpose": "button_text", "value_kind": "colour"},
+          {"purpose": "button_hover_bg", "value_kind": "colour"},
+          {"purpose": "font_family", "value_kind": "text"},
+          {"purpose": "font_size_base", "value_kind": "text"},
+          {"purpose": "font_weight_base", "value_kind": "whole_number"},
+          {"purpose": "transition_duration", "value_kind": "text"},
+          {"purpose": "border_radius", "value_kind": "text"},
+          {"purpose": "enable_hover_lift", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["theme_user", 0, ["read"], false],
+          ["theme_user", 0, ["read", "write", "create", "delete"], true]
+        ]
+      },
+      {
+        "concept": "user_sound_mapping",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "event_key", "value_kind": "choice", "rules": ["required"], "choices": ["save", "submit", "cancel", "delete", "error", "email", "alert", "click", "notification", "login", "logout", "missing_fields"]},
+          {"purpose": "file", "value_kind": "file_reference", "rules": ["required"]},
+          {"purpose": "volume", "value_kind": "decimal"}
+        ]
+      },
+      {
+        "concept": "user_sound_preference",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "sounds", "value_kind": "owned_rows", "target": "user_sound_mapping"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["theme_user", 0, ["read", "write", "create", "delete"], true]
+        ]
+      },
+      {
+        "concept": "user_theme_preference",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "active_theme", "value_kind": "reference", "rules": ["required"], "target": "theme_definition"},
+          {"purpose": "overrides_structured_data", "value_kind": "long_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["theme_user", 0, ["read", "write", "create", "delete"], true]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Zambian fiscal inventory reporting",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "zambian_revenue_authority_sis_country_codes",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "code", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "code_name", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "zambian_revenue_authority_sis_item_classification_codes",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "item_cls_cd", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "item_classification_name", "value_kind": "text"},
+          {"purpose": "item_cls_lvl", "value_kind": "text"},
+          {"purpose": "tax_ty_cd", "value_kind": "text"},
+          {"purpose": "is_used", "value_kind": "boolean"},
+          {"purpose": "is_major_target", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "zambian_revenue_authority_sis_item_type_codes",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "code", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "code_name", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "zambian_revenue_authority_sis_packaging_unit_codes",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "code", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "code_name", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "zambian_revenue_authority_sis_purchase_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item_identifier", "value_kind": "text"},
+          {"purpose": "item_name", "value_kind": "text"},
+          {"purpose": "product_identifier", "value_kind": "text"},
+          {"purpose": "purchase_item_identifier", "value_kind": "text"},
+          {"purpose": "quantity", "value_kind": "text"},
+          {"purpose": "total_amount", "value_kind": "money"},
+          {"purpose": "value_added_tax_taxable_amount", "value_kind": "money"},
+          {"purpose": "value_added_tax_tax_amount", "value_kind": "money"},
+          {"purpose": "tl_tax_amount", "value_kind": "money"},
+          {"purpose": "tl_taxable_amount", "value_kind": "money"},
+          {"purpose": "excise_tax_amount", "value_kind": "money"},
+          {"purpose": "excise_taxable_amount", "value_kind": "money"},
+          {"purpose": "ipl_tax_amount", "value_kind": "money"},
+          {"purpose": "ipl_taxable_amount", "value_kind": "money"},
+          {"purpose": "unit_price", "value_kind": "money"},
+          {"purpose": "supply_price", "value_kind": "money"},
+          {"purpose": "discount_rate", "value_kind": "percentage"},
+          {"purpose": "packaging_unit_code", "value_kind": "text"},
+          {"purpose": "item_class_code", "value_kind": "text"},
+          {"purpose": "approved_quantity", "value_kind": "whole_number"}
+        ]
+      },
+      {
+        "concept": "zambian_revenue_authority_sis_purchases",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "purchase_identifier", "value_kind": "text"},
+          {"purpose": "pchstycd", "value_kind": "text"},
+          {"purpose": "pchssttscd", "value_kind": "text"},
+          {"purpose": "purchase_type", "value_kind": "text"},
+          {"purpose": "branch", "value_kind": "reference", "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "supplier_invoice_number", "value_kind": "whole_number"},
+          {"purpose": "sales_date", "value_kind": "civil_day"},
+          {"purpose": "purchase_status", "value_kind": "choice", "choices": ["approved", "refunded", "transferred", "rejected"]},
+          {"purpose": "regtycd", "value_kind": "text"},
+          {"purpose": "registration_type", "value_kind": "choice", "choices": ["automatic", "manual"]},
+          {"purpose": "supplier_name", "value_kind": "reference", "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "supplier_tpin", "value_kind": "text"},
+          {"purpose": "supplier_branch_identifier", "value_kind": "text"},
+          {"purpose": "receipt_type", "value_kind": "choice", "choices": ["purchase", "refund_after_purchase"]},
+          {"purpose": "receipt_type_code", "value_kind": "text"},
+          {"purpose": "payment_type_code", "value_kind": "text"},
+          {"purpose": "payment_type", "value_kind": "choice", "choices": ["cash", "credit", "cash_credit", "bank_check", "debit_credit_card", "mobile_money", "other", "bank_transfer"]},
+          {"purpose": "confirmed_date", "value_kind": "civil_day"},
+          {"purpose": "stock_release_date", "value_kind": "civil_day"},
+          {"purpose": "remarks", "value_kind": "text"},
+          {"purpose": "total_amount", "value_kind": "money"},
+          {"purpose": "total_item_count", "value_kind": "whole_number"},
+          {"purpose": "total_taxable_amount", "value_kind": "money"},
+          {"purpose": "total_tax_amount", "value_kind": "money"},
+          {"purpose": "items", "value_kind": "owned_rows", "target": "zambian_revenue_authority_sis_purchase_item"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "zambian_revenue_authority_sis_quantity_unit_codes",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "code", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "code_name", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "zambian_revenue_authority_sis_route_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "resource_address_path_function", "value_kind": "text"},
+          {"purpose": "resource_address_path", "value_kind": "text"},
+          {"purpose": "last_request_date", "value_kind": "date_and_time"},
+          {"purpose": "description", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "zambian_revenue_authority_sis_routes",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "vendor", "value_kind": "choice", "choices": ["fiscal_exchange"]},
+          {"purpose": "routes_table", "value_kind": "owned_rows", "target": "zambian_revenue_authority_sis_route_item"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "zambian_revenue_authority_sis_settings",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "company_name", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "tpin", "value_kind": "text"},
+          {"purpose": "service_interface_server_resource_address", "value_kind": "text"},
+          {"purpose": "environment", "value_kind": "choice", "choices": ["production", "sandbox"]},
+          {"purpose": "sandbox_environment", "value_kind": "boolean"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "auto_create_branch_accounting_dimension", "value_kind": "boolean"},
+          {"purpose": "service_access_key", "value_kind": "text"},
+          {"purpose": "sales_auto_submission_enabled", "value_kind": "boolean"},
+          {"purpose": "sales_submission_frequency", "value_kind": "choice", "choices": ["unselected", "all", "hourly", "daily", "weekly", "monthly", "yearly", "annual", "cron"]},
+          {"purpose": "stock_auto_submission_enabled", "value_kind": "boolean"},
+          {"purpose": "sales_information_submission_timeframe", "value_kind": "elapsed_time"},
+          {"purpose": "maximum_sales_submission_attempts", "value_kind": "whole_number"},
+          {"purpose": "stock_information_submission_timeframe", "value_kind": "elapsed_time"},
+          {"purpose": "maximum_stock_submission_attempts", "value_kind": "whole_number"},
+          {"purpose": "mode_of_payment", "value_kind": "reference", "target": "accounting.mode_of_payment", "binding": "shared_model"},
+          {"purpose": "default_taxation_type_code", "value_kind": "reference", "target": "zambian_revenue_authority_sis_taxation_type_codes"},
+          {"purpose": "default_tax_rate", "value_kind": "decimal"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "zambian_revenue_authority_sis_taxation_type_codes",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "tax_type_code", "value_kind": "text"},
+          {"purpose": "tax_category_code", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "tax_category_name", "value_kind": "text"},
+          {"purpose": "tax_rate", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Zambian fiscal inventory reporting",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "customer", "purpose": "is_lpo", "value_kind": "boolean", "placement": "customer_group"},
+      {"on": "customer", "purpose": "registered_successfuly", "value_kind": "boolean", "placement": "sis_details_field_group", "rules": ["read_only"]},
+      {"on": "customer", "purpose": "sis_customer_identifier", "value_kind": "text", "placement": "registered_successfuly", "rules": ["read_only", "translatable"]},
+      {"on": "customer", "purpose": "sis_details_field_group", "value_kind": "field_group", "placement": "page_group_after_loyalty_program_tier"},
+      {"on": "customer", "purpose": "page_group_after_loyalty_program_tier", "value_kind": "page_group", "placement": "loyalty_program_tier"},
+      {"on": "item", "purpose": "imported_item_submitted", "value_kind": "boolean", "placement": "prevent_smart_registration", "rules": ["read_only"]},
+      {"on": "item", "purpose": "sent_to_fiscal_exchange", "value_kind": "boolean", "placement": "item_registered", "rules": ["read_only"]},
+      {"on": "item", "purpose": "active", "value_kind": "boolean", "placement": "smart_status", "rules": ["read_only"]},
+      {"on": "item", "purpose": "field_column_for_smart_item_classification_code_name", "value_kind": "field_column", "placement": "smart_product_identifier"},
+      {"on": "item", "purpose": "field_column_for_prevent_smart_registration", "value_kind": "field_column", "placement": "smart_remote_identifier"},
+      {"on": "item", "purpose": "item_registered", "value_kind": "boolean", "placement": "item_registration_status_field_group", "rules": ["read_only"]},
+      {"on": "item", "purpose": "item_registration_status_field_group", "value_kind": "field_group", "placement": "smart_details_page_group"},
+      {"on": "item", "purpose": "prevent_smart_registration", "value_kind": "boolean", "placement": "field_column_for_prevent_smart_registration"},
+      {"on": "item", "purpose": "field_group_for_smart_item_classification_code", "value_kind": "field_group", "placement": "active"},
+      {"on": "item", "purpose": "field_group_for_smart_insurance_premium_levy", "value_kind": "field_group", "placement": "smart_tax_rate"},
+      {"on": "item", "purpose": "smart_details_page_group", "value_kind": "page_group", "placement": "dashboard_tab"},
+      {"on": "item", "purpose": "smart_excise_duty_category_code", "value_kind": "text", "placement": "smart_tourism_levy", "rules": ["translatable"]},
+      {"on": "item", "purpose": "smart_insurance_applicable", "value_kind": "boolean", "placement": "smart_turn_over_tax_category_code"},
+      {"on": "item", "purpose": "smart_insurance_premium_levy", "value_kind": "text", "placement": "field_group_for_smart_insurance_premium_levy", "rules": ["translatable"]},
+      {"on": "item", "purpose": "smart_item_classification_code", "value_kind": "reference", "placement": "field_group_for_smart_item_classification_code"},
+      {"on": "item", "purpose": "smart_item_classification_code_name", "value_kind": "text", "placement": "field_column_for_smart_item_classification_code_name", "rules": ["translatable"]},
+      {"on": "item", "purpose": "smart_product_identifier", "value_kind": "text", "placement": "smart_tax_type_code", "rules": ["read_only", "translatable"]},
+      {"on": "item", "purpose": "smart_item_type_code", "value_kind": "reference", "placement": "smart_item_classification_code"},
+      {"on": "item", "purpose": "smart_item_type_code_name", "value_kind": "text", "placement": "smart_item_classification_code_name", "rules": ["translatable"]},
+      {"on": "item", "purpose": "smart_origin_country_code", "value_kind": "reference", "placement": "smart_item_type_code"},
+      {"on": "item", "purpose": "smart_origin_country_name", "value_kind": "text", "placement": "smart_item_type_code_name", "rules": ["translatable"]},
+      {"on": "item", "purpose": "smart_packaging_unit_code", "value_kind": "reference", "placement": "smart_origin_country_code"},
+      {"on": "item", "purpose": "smart_packaging_unit_code_name", "value_kind": "text", "placement": "smart_origin_country_name", "rules": ["translatable"]},
+      {"on": "item", "purpose": "smart_quantity_unit_code", "value_kind": "reference", "placement": "smart_packaging_unit_code"},
+      {"on": "item", "purpose": "smart_quantity_unit_code_name", "value_kind": "text", "placement": "smart_packaging_unit_code_name", "rules": ["translatable"]},
+      {"on": "item", "purpose": "smart_remote_identifier", "value_kind": "text", "placement": "submission_tries", "rules": ["read_only", "translatable"]},
+      {"on": "item", "purpose": "smart_status", "value_kind": "text", "placement": "imported_item_submitted", "rules": ["read_only", "editable_after_submission", "translatable"]},
+      {"on": "item", "purpose": "smart_tax_rate", "value_kind": "text", "placement": "smart_quantity_unit_code_name", "rules": ["translatable"]},
+      {"on": "item", "purpose": "smart_tax_type_code", "value_kind": "reference", "placement": "smart_quantity_unit_code"},
+      {"on": "item", "purpose": "smart_tourism_levy", "value_kind": "text", "placement": "smart_insurance_premium_levy", "rules": ["translatable"]},
+      {"on": "item", "purpose": "smart_turn_over_tax_category_code", "value_kind": "text", "placement": "smart_excise_duty_category_code", "rules": ["translatable"]},
+      {"on": "item", "purpose": "submission_tries", "value_kind": "whole_number", "placement": "sent_to_fiscal_exchange", "rules": ["read_only"]},
+      {"on": "item_tax_template", "purpose": "taxation_type", "value_kind": "reference", "placement": "taxes"},
+      {"on": "customer_invoice", "purpose": "field_column_for_sis_status", "value_kind": "field_column", "placement": "machine_readable_code_code"},
+      {"on": "customer_invoice", "purpose": "field_column_for_taxable_amount_tl", "value_kind": "field_column", "placement": "taxable_amount_tot"},
+      {"on": "customer_invoice", "purpose": "field_column_for_prevent_sis_submission", "value_kind": "field_column", "placement": "submission_status"},
+      {"on": "customer_invoice", "purpose": "created_at", "value_kind": "date_and_time", "placement": "sale_date"},
+      {"on": "customer_invoice", "purpose": "destination_country", "value_kind": "reference", "placement": "kind_of_sale"},
+      {"on": "customer_invoice", "purpose": "internal_data", "value_kind": "text", "placement": "receipt_signature", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "kind_of_sale", "value_kind": "choice", "placement": "tax_identifier", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "prevent_sis_submission", "value_kind": "boolean", "placement": "field_column_for_prevent_sis_submission"},
+      {"on": "customer_invoice", "purpose": "machine_readable_code_code", "value_kind": "text", "placement": "receipt_number", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "machine_readable_code_image", "value_kind": "presented_image", "placement": "created_at"},
+      {"on": "customer_invoice", "purpose": "receipt_number", "value_kind": "text", "placement": "receipt_type", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "receipt_signature", "value_kind": "text", "placement": "field_group_for_receipt_signature", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "receipt_type", "value_kind": "text", "placement": "receipt_resource_address", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "receipt_resource_address", "value_kind": "text", "placement": "internal_data", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "sale_date", "value_kind": "civil_day", "placement": "sis_status"},
+      {"on": "customer_invoice", "purpose": "sale_number", "value_kind": "text", "placement": "sales_identifier", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "sales_identifier", "value_kind": "text", "placement": "sent_to_fiscal_exchange", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "field_group_for_taxable_amount_value_added_tax", "value_kind": "field_group", "placement": "submission_tries"},
+      {"on": "customer_invoice", "purpose": "field_group_for_receipt_signature", "value_kind": "field_group", "placement": "tax_amount_tot"},
+      {"on": "customer_invoice", "purpose": "sent_to_fiscal_exchange", "value_kind": "boolean", "placement": "successfully_submitted"},
+      {"on": "customer_invoice", "purpose": "sis_details_page_group", "value_kind": "page_group", "placement": "total_billing_amount"},
+      {"on": "customer_invoice", "purpose": "sis_status", "value_kind": "text", "placement": "field_column_for_sis_status", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "submission_status", "value_kind": "text", "placement": "sale_number", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "submission_tries", "value_kind": "whole_number", "placement": "prevent_sis_submission", "rules": ["read_only"]},
+      {"on": "customer_invoice", "purpose": "successfully_submitted", "value_kind": "boolean", "placement": "sis_details_page_group"},
+      {"on": "customer_invoice", "purpose": "tax_amount_excise", "value_kind": "money", "placement": "taxable_amount_excise"},
+      {"on": "customer_invoice", "purpose": "tax_amount_ipl", "value_kind": "money", "placement": "taxable_amount_ipl"},
+      {"on": "customer_invoice", "purpose": "tax_amount_tl", "value_kind": "money", "placement": "taxable_amount_tl"},
+      {"on": "customer_invoice", "purpose": "tax_amount_tot", "value_kind": "money", "placement": "tax_amount_excise"},
+      {"on": "customer_invoice", "purpose": "tax_amount_value_added_tax", "value_kind": "money", "placement": "taxable_amount_value_added_tax"},
+      {"on": "customer_invoice", "purpose": "taxable_amount_excise", "value_kind": "money", "placement": "tax_amount_tl"},
+      {"on": "customer_invoice", "purpose": "taxable_amount_ipl", "value_kind": "money", "placement": "tax_amount_value_added_tax"},
+      {"on": "customer_invoice", "purpose": "taxable_amount_tl", "value_kind": "money", "placement": "field_column_for_taxable_amount_tl"},
+      {"on": "customer_invoice", "purpose": "taxable_amount_tot", "value_kind": "money", "placement": "tax_amount_ipl"},
+      {"on": "customer_invoice", "purpose": "taxable_amount_value_added_tax", "value_kind": "money", "placement": "field_group_for_taxable_amount_value_added_tax"},
+      {"on": "customer_invoice_item", "purpose": "field_column_for_excise_taxable_amount", "value_kind": "field_column", "placement": "tl_tax_amount"},
+      {"on": "customer_invoice_item", "purpose": "field_column_for_sis_item_identifier", "value_kind": "field_column", "placement": "tax_rate"},
+      {"on": "customer_invoice_item", "purpose": "field_column_for_tot_taxable_amount", "value_kind": "field_column", "placement": "excise_tax_amount"},
+      {"on": "customer_invoice_item", "purpose": "excise_tax_amount", "value_kind": "money", "placement": "excise_taxable_amount"},
+      {"on": "customer_invoice_item", "purpose": "excise_taxable_amount", "value_kind": "money", "placement": "field_column_for_excise_taxable_amount"},
+      {"on": "customer_invoice_item", "purpose": "ipl_tax_amount", "value_kind": "money", "placement": "ipl_taxable_amount"},
+      {"on": "customer_invoice_item", "purpose": "ipl_taxable_amount", "value_kind": "money", "placement": "sis_item_identifier"},
+      {"on": "customer_invoice_item", "purpose": "field_group_for_tl_taxable_amount", "value_kind": "field_group", "placement": "ipl_tax_amount"},
+      {"on": "customer_invoice_item", "purpose": "sis_details_field_group", "value_kind": "field_group", "placement": "allow_zero_valuation_rate"},
+      {"on": "customer_invoice_item", "purpose": "sis_item_identifier", "value_kind": "text", "placement": "field_column_for_sis_item_identifier", "rules": ["translatable"]},
+      {"on": "customer_invoice_item", "purpose": "sis_value_added_tax_category_code", "value_kind": "reference", "placement": "sis_details_field_group"},
+      {"on": "customer_invoice_item", "purpose": "tax_rate", "value_kind": "percentage", "placement": "value_added_tax_tax_amount"},
+      {"on": "customer_invoice_item", "purpose": "tl_tax_amount", "value_kind": "money", "placement": "tl_taxable_amount"},
+      {"on": "customer_invoice_item", "purpose": "tl_taxable_amount", "value_kind": "money", "placement": "field_group_for_tl_taxable_amount"},
+      {"on": "customer_invoice_item", "purpose": "tot_tax_amount", "value_kind": "money", "placement": "tot_taxable_amount"},
+      {"on": "customer_invoice_item", "purpose": "tot_taxable_amount", "value_kind": "money", "placement": "field_column_for_tot_taxable_amount"},
+      {"on": "customer_invoice_item", "purpose": "value_added_tax_tax_amount", "value_kind": "money", "placement": "value_added_tax_taxable_amount"},
+      {"on": "customer_invoice_item", "purpose": "value_added_tax_taxable_amount", "value_kind": "money", "placement": "sis_value_added_tax_category_code"},
+      {"on": "sales_taxes_and_charges_template", "purpose": "sis_taxation_type", "value_kind": "reference", "placement": "tax_category"},
+      {"on": "stock_ledger_entry", "purpose": "inventory_submitted_successfuly", "value_kind": "boolean", "placement": "field_group_for_inventory_submitted_successfuly"},
+      {"on": "stock_ledger_entry", "purpose": "field_group_for_inventory_submitted_successfuly", "value_kind": "field_group", "placement": "dependant_stock_ledger_entry_voucher_detail_number"},
+      {"on": "stock_ledger_entry", "purpose": "submission_tries", "value_kind": "whole_number", "placement": "inventory_submitted_successfuly"}
+    ]
+  },
+  {
+    "capability": "Zambian fiscal inventory reporting",
+    "configuration": 1,
+    "rule_addresses": [
+      ["customer", null, "field_order", "text"],
+      ["customer", "numbering_rule", "hidden", "boolean"],
+      ["customer", "numbering_rule", "required", "boolean"],
+      ["item", "barcodes", "hidden", "boolean"],
+      ["item", "product_identifier", "hidden", "boolean"],
+      ["item", "product_identifier", "required", "boolean"],
+      ["item", null, "field_order", "text"],
+      ["item", null, "links_order", "text"],
+      ["item", "numbering_rule", "hidden", "boolean"],
+      ["item", "numbering_rule", "options", "text"],
+      ["item", "numbering_rule", "required", "boolean"],
+      ["item_barcode", "barcode", "hidden", "boolean"],
+      ["item_tax_template", null, "field_order", "text"],
+      ["packed_item", "rate", "read_only", "boolean"],
+      ["customer_invoice", "additional_discount_account", "hidden", "boolean"],
+      ["customer_invoice", "additional_discount_account", "mandatory_depends_on", "expression_or_structured_text"],
+      ["customer_invoice", "base_rounded_total", "hidden", "boolean"],
+      ["customer_invoice", "base_rounded_total", "print_hide", "boolean"],
+      ["customer_invoice", "disable_rounded_total", "default", "text"],
+      ["customer_invoice", "in_words", "hidden", "boolean"],
+      ["customer_invoice", "in_words", "print_hide", "boolean"],
+      ["customer_invoice", null, "field_order", "text"],
+      ["customer_invoice", null, "links_order", "text"],
+      ["customer_invoice", "numbering_rule", "options", "text"],
+      ["customer_invoice", "rounded_total", "hidden", "boolean"],
+      ["customer_invoice", "rounded_total", "print_hide", "boolean"],
+      ["customer_invoice", "scan_barcode", "hidden", "boolean"],
+      ["customer_invoice", "tax_identifier", "hidden", "boolean"],
+      ["customer_invoice", "tax_identifier", "print_hide", "boolean"],
+      ["customer_invoice_item", "barcode", "hidden", "boolean"],
+      ["customer_invoice_item", "discount_account", "hidden", "boolean"],
+      ["customer_invoice_item", "discount_account", "mandatory_depends_on", "expression_or_structured_text"],
+      ["customer_invoice_item", null, "field_order", "text"],
+      ["customer_invoice_item", "target_warehouse", "hidden", "boolean"],
+      ["sales_taxes_and_charges_template", null, "field_order", "text"],
+      ["stock_ledger_entry", null, "field_order", "text"]
+    ]
+  }
+]

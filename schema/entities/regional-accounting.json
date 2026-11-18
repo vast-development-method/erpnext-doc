@@ -1,0 +1,82 @@
+[
+  {
+    "entity": "regional_accounting.import_supplier_invoice",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "supplier_group_identifier", "type": "entity_reference", "target": "organization.supplier_group", "required": true},
+      {"field": "tax_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "zip_file", "type": "file_reference"},
+      {"field": "status", "type": "short_text", "form_read_only": true},
+      {"field": "invoice_series", "type": "enumeration", "required": true, "values": ["purchase invoice numbering prefix + four-digit year + configured sequence"]},
+      {"field": "default_buying_price_list_identifier", "type": "entity_reference", "target": "inventory.price_list", "required": true}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "Import Invoices"},
+      {"control": "section", "purpose": "Upload XML Invoices", "visible_when": ["not", ["current_field", "is_new_record"]]}
+    ]
+  },
+  {
+    "entity": "regional_accounting.lower_deduction_certificate",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "certificate_number", "type": "short_text", "required": true, "unique": true},
+      {"field": "supplier_identifier", "type": "entity_reference", "target": "procurement.supplier", "required": true},
+      {"field": "permanent_account_number_number", "type": "short_text", "required": true, "copy_from": ["supplier_identifier", "permanent_account_number"], "copy_only_when_empty": true},
+      {"field": "valid_upto", "type": "calendar_date", "required": true},
+      {"field": "rate", "type": "percentage", "required": true},
+      {"field": "certificate_limit", "type": "monetary_amount", "required": true},
+      {"field": "valid_from", "type": "calendar_date", "required": true},
+      {"field": "fiscal_year_identifier", "type": "entity_reference", "target": "accounting.fiscal_year", "required": true},
+      {"field": "tax_withholding_category_identifier", "type": "entity_reference", "target": "accounting.tax_withholding_category", "required": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Deductee Details"},
+      {"control": "section", "purpose": "Validity Details"},
+      {"control": "section", "purpose": "Certificate Details"}
+    ]
+  },
+  {
+    "entity": "regional_accounting.south_africa_value_added_tax_settings",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "auditor", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true, "unique": true},
+      {"field": "value_added_tax_accounts_rows", "type": "owned_collection", "target": "accounting.south_africa_value_added_tax_account", "required": true}
+    ]
+  },
+  {
+    "entity": "regional_accounting.united_arab_emirates_value_added_tax_account",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "account_identifier", "type": "entity_reference", "target": "accounting.account"}
+    ]
+  },
+  {
+    "entity": "regional_accounting.united_arab_emirates_value_added_tax_settings",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true, "unique": true},
+      {"field": "united_arab_emirates_value_added_tax_accounts_rows", "type": "owned_collection", "target": "regional_accounting.united_arab_emirates_value_added_tax_account", "required": true}
+    ]
+  }
+]

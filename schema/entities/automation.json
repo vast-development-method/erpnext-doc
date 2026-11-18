@@ -1,0 +1,330 @@
+[
+  {
+    "entity": "automation.assignment_rule",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "priority", "type": "integer"},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "description", "type": "text", "required": true, "default": "Automatic Assignment"},
+      {"field": "assign_condition", "type": "expression_or_structured_text", "required": true},
+      {"field": "unassign_condition", "type": "expression_or_structured_text"},
+      {"field": "rule", "type": "enumeration", "required": true, "values": ["Round Robin", "Load Balancing", "Based on Field", "Weighted Distribution"]},
+      {"field": "users_rows", "type": "owned_selection", "target": "automation.assignment_rule_user", "visible_when": ["call", ["context", "contains_value"], ["list", ["literal", "Round Robin"], ["literal", "Load Balancing"]], ["current_field", "rule"]], "required_when": ["call", ["context", "contains_value"], ["list", ["literal", "Round Robin"], ["literal", "Load Balancing"]], ["current_field", "rule"]]},
+      {"field": "last_user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "close_condition", "type": "expression_or_structured_text"},
+      {"field": "assignment_days_rows", "type": "owned_collection", "target": "automation.assignment_rule_day", "required": true},
+      {"field": "due_date_based_on", "type": "enumeration", "visible_when": ["field_has_value", "document_type_identifier"]},
+      {"field": "assignee_selection_field", "type": "enumeration", "visible_when": ["coercive_equal", ["current_field", "rule"], ["literal", "Based on Field"]], "required_when": ["coercive_equal", ["current_field", "rule"], ["literal", "Based on Field"]]},
+      {"field": "current_index", "type": "integer", "form_read_only": true, "visible_when": ["coercive_equal", ["current_field", "rule"], ["literal", "Weighted Distribution"]]},
+      {"field": "weighted_users_rows", "type": "owned_collection", "target": "automation.assignment_rule_user", "visible_when": ["coercive_equal", ["current_field", "rule"], ["literal", "Weighted Distribution"]], "required_when": ["coercive_equal", ["current_field", "rule"], ["literal", "Weighted Distribution"]]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Assignment Rules"},
+      {"control": "section", "purpose": "Assign To Users"},
+      {"control": "section", "purpose": "Assignment Days"}
+    ]
+  },
+  {
+    "entity": "automation.assignment_rule_day",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "day", "type": "enumeration", "values": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]}
+    ]
+  },
+  {
+    "entity": "automation.assignment_rule_user",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true},
+      {"field": "weight", "type": "integer", "default": "1"}
+    ]
+  },
+  {
+    "entity": "automation.auto_repeat",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "reference_document_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "required": true, "omit_on_copy": true},
+      {"field": "start_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "end_date", "type": "calendar_date"},
+      {"field": "disabled", "type": "boolean", "omit_on_copy": true, "default": "0"},
+      {"field": "frequency", "type": "enumeration", "required": true, "values": ["", "Daily", "Weekly", "Fortnightly", "Monthly", "Quarterly", "Half-yearly", "Yearly"]},
+      {"field": "repeat_on_day", "type": "integer", "visible_when": ["and", ["call", ["context", "contains_value"], ["list", ["literal", "Monthly"], ["literal", "Quarterly"], ["literal", "Half-yearly"], ["literal", "Yearly"]], ["current_field", "frequency"]], ["not", ["current_field", "repeat_on_last_day"]]]},
+      {"field": "next_schedule_date", "type": "calendar_date", "form_read_only": true, "omit_on_copy": true, "searchable": true},
+      {"field": "notify_by_email", "type": "boolean", "default": "0"},
+      {"field": "recipients", "type": "text", "visible_when": ["field_has_value", "notify_by_email"]},
+      {"field": "template_identifier", "type": "entity_reference", "target": "mail.email_template", "visible_when": ["current_field", "notify_by_email"]},
+      {"field": "subject", "type": "short_text", "visible_when": ["current_field", "notify_by_email"]},
+      {"field": "message", "type": "text", "default": "Attachment notice including entity type and record identifier", "visible_when": ["current_field", "notify_by_email"]},
+      {"field": "print_format_identifier", "type": "entity_reference", "target": "document_output.print_format", "visible_when": ["field_has_value", "notify_by_email"]},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "form_hidden": true, "values": ["", "Active", "Disabled", "Completed"]},
+      {"field": "repeat_on_last_day", "type": "boolean", "default": "0", "visible_when": ["strict_equal", ["current_field", "frequency"], ["literal", "Monthly"]]},
+      {"field": "repeat_on_days_rows", "type": "owned_collection", "target": "automation.auto_repeat_day", "visible_when": ["strict_equal", ["current_field", "frequency"], ["literal", "Weekly"]]},
+      {"field": "submit_on_creation", "type": "boolean", "default": "0"},
+      {"field": "generate_separate_documents_for_each_assignee", "type": "boolean", "default": "0"},
+      {"field": "assignee_rows", "type": "owned_selection", "target": "automation.auto_repeat_user"}
+    ],
+    "presentation": [
+      {"control": "tab", "purpose": "Schedule"},
+      {"control": "tab", "purpose": "Notification"},
+      {"control": "action", "purpose": "Get Contacts", "visible_when": ["and", ["and", ["current_field", "notify_by_email"], ["current_field", "reference_entity_type_identifier"]], ["current_field", "reference_document_identifier"]]},
+      {"control": "action", "purpose": "Preview Message", "visible_when": ["and", ["and", ["current_field", "notify_by_email"], ["current_field", "reference_entity_type_identifier"]], ["current_field", "reference_document_identifier"]]},
+      {"control": "section", "visible_when": ["strict_equal", ["current_field", "frequency"], ["literal", "Weekly"]]}
+    ]
+  },
+  {
+    "entity": "automation.auto_repeat_day",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "day", "type": "enumeration", "required": true, "values": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]}
+    ]
+  },
+  {
+    "entity": "automation.auto_repeat_user",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true}
+    ]
+  },
+  {
+    "entity": "automation.automation_action",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "step_key", "type": "short_text"},
+      {"field": "step_type", "type": "short_text", "default": "Action"},
+      {"field": "action_type", "type": "enumeration"},
+      {"field": "target", "type": "short_text", "default": "trigger"},
+      {"field": "output_alias", "type": "short_text"},
+      {"field": "params", "type": "structured_value"},
+      {"field": "step_condition", "type": "expression_or_structured_text"},
+      {"field": "related_condition", "type": "structured_value"},
+      {"field": "parent_step", "type": "integer"},
+      {"field": "branch", "type": "enumeration", "values": ["", "If", "Else"], "visible_when": ["field_has_value", "parent_step"]}
+    ]
+  },
+  {
+    "entity": "automation.automation_event_subscription",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "read"]}
+    ],
+    "fields": [
+      {"field": "event_name", "type": "short_text", "required": true, "searchable": true},
+      {"field": "correlation_key", "type": "short_text", "required": true, "searchable": true},
+      {"field": "status", "type": "enumeration", "required": true, "searchable": true, "values": ["Waiting", "Matched", "Timed Out", "Cancelled"], "default": "Waiting"},
+      {"field": "expires_at", "type": "date_and_time", "required": true, "searchable": true},
+      {"field": "run_identifier", "type": "entity_reference", "target": "automation.automation_run", "required": true},
+      {"field": "step_key", "type": "short_text", "required": true},
+      {"field": "resume_queue_identifier", "type": "entity_reference", "target": "automation.automation_trigger_queue", "required": true},
+      {"field": "event_payload", "type": "structured_value"}
+    ]
+  },
+  {
+    "entity": "automation.automation_flow",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true},
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "enabled", "type": "boolean", "default": "0"},
+      {"field": "disabled_reason", "type": "text", "form_read_only": true, "visible_when": ["field_has_value", "disabled_reason"]},
+      {"field": "trigger_type", "type": "enumeration", "required": true, "values": ["Doc Created", "Doc Updated", "Field Value Changed", "Doc Deleted", "Doc Submitted", "Doc Cancelled", "Date Based", "Scheduled", "Custom Event", "Manual"]},
+      {"field": "trigger_field", "type": "enumeration", "visible_when": ["coercive_equal", ["current_field", "trigger_type"], ["literal", "Field Value Changed"]]},
+      {"field": "from_value", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "trigger_type"], ["literal", "Field Value Changed"]]},
+      {"field": "to_value", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "trigger_type"], ["literal", "Field Value Changed"]]},
+      {"field": "custom_event", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "trigger_type"], ["literal", "Custom Event"]]},
+      {"field": "date_field", "type": "enumeration", "visible_when": ["coercive_equal", ["current_field", "trigger_type"], ["literal", "Date Based"]]},
+      {"field": "date_offset", "type": "integer", "visible_when": ["coercive_equal", ["current_field", "trigger_type"], ["literal", "Date Based"]]},
+      {"field": "date_direction", "type": "enumeration", "values": ["Before", "After"], "visible_when": ["coercive_equal", ["current_field", "trigger_type"], ["literal", "Date Based"]]},
+      {"field": "cron_expression", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "trigger_type"], ["literal", "Scheduled"]]},
+      {"field": "next_run", "type": "date_and_time", "form_read_only": true, "omit_on_copy": true, "searchable": true, "visible_when": ["coercive_equal", ["current_field", "trigger_type"], ["literal", "Scheduled"]]},
+      {"field": "filters", "type": "expression_or_structured_text", "form_read_only": true, "form_hidden": true},
+      {"field": "condition", "type": "expression_or_structured_text"},
+      {"field": "relationships", "type": "structured_value"},
+      {"field": "revalidate_on_run", "type": "boolean", "default": "0"},
+      {"field": "actions_rows", "type": "owned_collection", "target": "automation.automation_action"},
+      {"field": "run_as", "type": "enumeration", "values": ["Triggering User", "Document Owner", "Automation User"], "default": "Automation User"},
+      {"field": "automation_user_identifier", "type": "entity_reference", "target": "information_management.user", "default": "Administrator", "visible_when": ["coercive_equal", ["current_field", "run_as"], ["literal", "Automation User"]]},
+      {"field": "stop_on_error", "type": "boolean", "default": "1"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Trigger"},
+      {"control": "section", "purpose": "Conditions"},
+      {"control": "formatted_information", "purpose": "Match Fields"},
+      {"control": "section", "purpose": "Advanced Condition", "expanded_when": ["field_has_value", "condition"]},
+      {"control": "section", "purpose": "Actions"},
+      {"control": "section", "purpose": "Settings"}
+    ]
+  },
+  {
+    "entity": "automation.automation_run",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "automation_identifier", "type": "entity_reference", "target": "automation.automation_flow"},
+      {"field": "automation_title", "type": "short_text", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "values": ["Running", "Waiting", "Success", "Partially Failed", "Failed", "Skipped"]},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "depth", "type": "integer", "form_read_only": true},
+      {"field": "queue_row", "type": "short_text", "form_read_only": true},
+      {"field": "started_at", "type": "date_and_time", "form_read_only": true},
+      {"field": "ended_at", "type": "date_and_time", "form_read_only": true},
+      {"field": "error_summary", "type": "text", "form_read_only": true},
+      {"field": "steps_rows", "type": "owned_collection", "target": "automation.automation_run_step", "form_read_only": true},
+      {"field": "actions_snapshot", "type": "structured_value", "form_read_only": true},
+      {"field": "relationships", "type": "structured_value", "form_read_only": true},
+      {"field": "run_state", "type": "structured_value", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Timing"},
+      {"control": "section", "purpose": "Steps"},
+      {"control": "section", "purpose": "Snapshot"}
+    ]
+  },
+  {
+    "entity": "automation.automation_run_step",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "step_row_position", "type": "integer"},
+      {"field": "step_key", "type": "short_text"},
+      {"field": "action_type", "type": "short_text"},
+      {"field": "status", "type": "enumeration", "values": ["Success", "Failed", "Skipped", "Waiting"]},
+      {"field": "duration_ms", "type": "integer"},
+      {"field": "detail", "type": "long_text"},
+      {"field": "message", "type": "text"},
+      {"field": "exception", "type": "short_text"},
+      {"field": "traceback", "type": "expression_or_structured_text"},
+      {"field": "condition", "type": "expression_or_structured_text"},
+      {"field": "condition_values", "type": "structured_value"},
+      {"field": "output", "type": "structured_value"}
+    ]
+  },
+  {
+    "entity": "automation.automation_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "disable_automations", "type": "boolean", "default": "0"},
+      {"field": "maximum_depth", "type": "integer", "nonnegative": true, "default": "3"},
+      {"field": "failure_threshold", "type": "integer", "nonnegative": true, "default": "10"},
+      {"field": "stale_running_minutes", "type": "integer", "nonnegative": true, "default": "30"},
+      {"field": "maximum_attempts", "type": "integer", "nonnegative": true, "default": "3"},
+      {"field": "drain_seconds", "type": "decimal", "nonnegative": true, "default": "0"},
+      {"field": "commit_every", "type": "integer", "nonnegative": true, "default": "50"},
+      {"field": "queue_retention_days", "type": "integer", "nonnegative": true, "default": "7"},
+      {"field": "step_output_limit", "type": "integer", "nonnegative": true, "default": "65536"},
+      {"field": "event_payload_limit", "type": "integer", "nonnegative": true, "default": "65536"},
+      {"field": "allow_unregistered_events", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "General"},
+      {"control": "section", "purpose": "Reliability"},
+      {"control": "section", "purpose": "Retention"},
+      {"control": "section", "purpose": "Limits"}
+    ]
+  },
+  {
+    "entity": "automation.automation_trigger_queue",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "automation_identifier", "type": "entity_reference", "target": "automation.automation_flow", "required": true, "searchable": true},
+      {"field": "reference_entity_type", "type": "short_text", "searchable": true},
+      {"field": "reference_name", "type": "short_text"},
+      {"field": "status", "type": "enumeration", "searchable": true, "values": ["Pending", "Scheduled", "Running", "Done", "Failed", "Skipped"], "default": "Pending"},
+      {"field": "triggered_at", "type": "date_and_time"},
+      {"field": "run_after", "type": "date_and_time", "searchable": true},
+      {"field": "attempt", "type": "integer", "default": "0"},
+      {"field": "depth", "type": "integer", "default": "0"},
+      {"field": "triggered_by_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "event_payload", "type": "structured_value"},
+      {"field": "resume_run", "type": "short_text"},
+      {"field": "resume_from_row_position", "type": "integer"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Wait Resume"}
+    ]
+  },
+  {
+    "entity": "automation.milestone",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "reference_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "form_read_only": true, "searchable": true},
+      {"field": "reference_name", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "track_field", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "value", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "milestone_tracker_identifier", "type": "entity_reference", "target": "automation.milestone_tracker"}
+    ]
+  },
+  {
+    "entity": "automation.milestone_tracker",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "unique": true},
+      {"field": "track_field", "type": "enumeration", "required": true},
+      {"field": "disabled", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "automation.reminder",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "desk_user", "level": 0, "owner_only": true, "allows": ["create", "delete", "read", "write"]}
+    ],
+    "fields": [
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true, "form_hidden": true, "searchable": true, "default": {"context_default": "current_user"}},
+      {"field": "reminder_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reminder_record_identifier", "type": "selected_entity_reference", "target_selected_by": "reminder_entity_type_identifier", "form_read_only": true},
+      {"field": "remind_at", "type": "date_and_time", "required": true, "searchable": true, "default": "now"},
+      {"field": "description", "type": "text", "required": true},
+      {"field": "notified", "type": "boolean", "form_hidden": true, "default": "0"}
+    ]
+  }
+]

@@ -1,0 +1,1314 @@
+[
+  {
+    "entity": "operator_workspace.assigned_action",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "all", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "system_manager", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "status", "type": "enumeration", "values": ["Open", "Closed", "Cancelled"], "default": "Open"},
+      {"field": "priority", "type": "enumeration", "values": ["High", "Medium", "Low"], "default": "Medium"},
+      {"field": "color", "type": "color"},
+      {"field": "date", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "description", "type": "formatted_text", "required": true},
+      {"field": "reference_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_type_identifier"},
+      {"field": "role_identifier", "type": "entity_reference", "target": "information_management.role"},
+      {"field": "assigned_by_identifier", "type": "entity_reference", "target": "information_management.user", "omit_target_user_filter": true},
+      {"field": "assigned_by_full_name", "type": "display_value", "copy_from": ["assigned_by_identifier", "full_name"]},
+      {"field": "sender", "type": "short_text", "form_hidden": true},
+      {"field": "assignment_rule_identifier", "type": "entity_reference", "target": "automation.assignment_rule", "form_read_only": true},
+      {"field": "allocated_to_identifier", "type": "entity_reference", "target": "information_management.user", "omit_target_user_filter": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Reference"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.bulk_update",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "target_field_name", "type": "enumeration", "required": true},
+      {"field": "update_value", "type": "text", "required": true},
+      {"field": "condition", "type": "text"},
+      {"field": "limit", "type": "integer", "default": "500"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.calendar_view",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "subject_field", "type": "enumeration", "required": true},
+      {"field": "start_date_field", "type": "enumeration", "required": true},
+      {"field": "end_date_field", "type": "enumeration", "required": true},
+      {"field": "all_day", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.console_log",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "script", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "type", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "committed", "type": "boolean", "form_read_only": true, "default": "0"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.custom_sidebar",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "workspace_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["create", "delete", "print", "read", "write"]}
+    ],
+    "fields": [
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "required": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "label", "type": "short_text"},
+      {"field": "header_icon", "type": "icon"},
+      {"field": "sidebar_items_rows", "type": "owned_collection", "target": "operator_workspace.sidebar_item"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Sidebar Items"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.custom_structured_markup_block",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "desk_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]},
+      {"role": "desk_user", "level": 0, "owner_only": true, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "workspace_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "structured_markup", "type": "expression_or_structured_text"},
+      {"field": "script", "type": "expression_or_structured_text"},
+      {"field": "style", "type": "expression_or_structured_text"},
+      {"field": "roles_rows", "type": "owned_collection", "target": "information_management.has_role"},
+      {"field": "private", "type": "boolean", "form_read_only": true, "default": "0", "visible_when": ["or", ["current_field", "private"], ["current_field", "unsaved"]]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "HTML", "expanded_when": ["literal", true]},
+      {"control": "section", "purpose": "Preview"},
+      {"control": "formatted_information", "purpose": "preview"},
+      {"control": "section", "purpose": "Client-side rule", "expanded_when": ["literal", true]},
+      {"control": "section", "purpose": "CSS", "expanded_when": ["literal", true]},
+      {"control": "formatted_information", "purpose": "JS Message"},
+      {"control": "section", "purpose": "Roles"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.custom_workspace",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "workspace_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "workspace_identifier", "type": "entity_reference", "target": "operator_workspace.workspace", "required": true, "unique": true},
+      {"field": "visibility", "type": "enumeration", "values": ["Inherit", "Visible", "Hidden"], "default": "Inherit"},
+      {"field": "added_roles_rows", "type": "owned_collection", "target": "information_management.has_role"},
+      {"field": "removed_roles_rows", "type": "owned_collection", "target": "information_management.has_role"},
+      {"field": "icon", "type": "short_text"},
+      {"field": "indicator_color", "type": "enumeration", "values": ["", "green", "cyan", "blue", "orange", "yellow", "gray", "grey", "red", "pink", "darkgrey", "purple", "light-blue"]},
+      {"field": "override_sequence", "type": "boolean", "default": "0"},
+      {"field": "sequence_identifier", "type": "decimal", "visible_when": ["field_has_value", "override_sequence"]},
+      {"field": "content", "type": "long_text"},
+      {"field": "widgets", "type": "long_text"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Visibility"},
+      {"control": "section", "purpose": "Appearance"},
+      {"control": "section", "purpose": "Content"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.dashboard",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "dashboard_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "dashboard_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "is_default", "type": "boolean", "default": "0"},
+      {"field": "charts_rows", "type": "owned_collection", "target": "operator_workspace.dashboard_chart_link"},
+      {"field": "chart_options", "type": "expression_or_structured_text"},
+      {"field": "cards_rows", "type": "owned_collection", "target": "operator_workspace.number_card_link"},
+      {"field": "is_standard", "type": "boolean", "default": "0", "read_only_when": ["not", ["context", "design_mode_enabled"]]},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "visible_when": ["current_field", "is_standard"], "required_when": ["current_field", "is_standard"]}
+    ]
+  },
+  {
+    "entity": "operator_workspace.dashboard_chart",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "dashboard_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "chart_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "chart_type", "type": "enumeration", "write_once": true, "values": ["Count", "Sum", "Average", "Group By", "Custom", "Report"]},
+      {"field": "source_identifier", "type": "entity_reference", "target": "operator_workspace.dashboard_chart_source", "visible_when": ["strict_equal", ["current_field", "chart_type"], ["literal", "Custom"]]},
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "write_once": true, "visible_when": ["and", ["strict_unequal", ["current_field", "chart_type"], ["literal", "Custom"]], ["strict_unequal", ["current_field", "chart_type"], ["literal", "Report"]]], "required_when": ["and", ["strict_unequal", ["current_field", "chart_type"], ["literal", "Custom"]], ["strict_unequal", ["current_field", "chart_type"], ["literal", "Report"]]]},
+      {"field": "based_on", "type": "enumeration", "visible_when": ["call", ["member", ["list", ["literal", "Count"], ["literal", "Sum"], ["literal", "Average"]], "includes"], ["current_field", "chart_type"]], "required_when": ["call", ["member", ["list", ["literal", "Count"], ["literal", "Sum"], ["literal", "Average"]], "includes"], ["current_field", "chart_type"]]},
+      {"field": "value_based_on", "type": "enumeration", "visible_when": ["call", ["member", ["list", ["literal", "Sum"], ["literal", "Average"]], "includes"], ["current_field", "chart_type"]], "required_when": ["call", ["member", ["list", ["literal", "Sum"], ["literal", "Average"]], "includes"], ["current_field", "chart_type"]]},
+      {"field": "timespan", "type": "enumeration", "values": ["Last Year", "Last Quarter", "Last Month", "Last Week", "Select Date Range"], "visible_when": ["and", ["current_field", "timeseries"], ["strict_unequal", ["current_field", "type"], ["literal", "Heatmap"]]]},
+      {"field": "time_interval", "type": "enumeration", "values": ["Yearly", "Quarterly", "Monthly", "Weekly", "Daily"], "visible_when": ["and", ["current_field", "timeseries"], ["strict_unequal", ["current_field", "type"], ["literal", "Heatmap"]]]},
+      {"field": "timeseries", "type": "boolean", "default": "0", "visible_when": ["not", ["call", ["member", ["list", ["literal", "Group By"], ["literal", "Report"]], "includes"], ["current_field", "chart_type"]]]},
+      {"field": "filters_structured_data", "type": "expression_or_structured_text", "required": true},
+      {"field": "type", "type": "enumeration", "values": ["Line", "Bar", "Percentage", "Pie", "Donut", "Heatmap"], "default": "Line"},
+      {"field": "color", "type": "color", "visible_when": ["and", ["strict_unequal", ["current_field", "chart_type"], ["literal", "Report"]], ["strict_unequal", ["current_field", "type"], ["literal", "Heatmap"]]]},
+      {"field": "last_synced_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "group_by_based_on", "type": "enumeration", "visible_when": ["strict_equal", ["current_field", "chart_type"], ["literal", "Group By"]], "required_when": ["strict_equal", ["current_field", "chart_type"], ["literal", "Group By"]]},
+      {"field": "group_by_type", "type": "enumeration", "values": ["Count", "Sum", "Average"], "default": "Count", "visible_when": ["strict_equal", ["current_field", "chart_type"], ["literal", "Group By"]]},
+      {"field": "aggregate_function_based_on", "type": "enumeration", "visible_when": ["call", ["member", ["list", ["literal", "Sum"], ["literal", "Average"]], "includes"], ["current_field", "group_by_type"]], "required_when": ["and", ["strict_equal", ["current_field", "chart_type"], ["literal", "Group By"]], ["call", ["member", ["list", ["literal", "Sum"], ["literal", "Average"]], "includes"], ["current_field", "group_by_type"]]]},
+      {"field": "number_of_groups", "type": "integer", "visible_when": ["strict_equal", ["current_field", "chart_type"], ["literal", "Group By"]]},
+      {"field": "from_date", "type": "calendar_date", "visible_when": ["strict_equal", ["current_field", "timespan"], ["literal", "Select Date Range"]]},
+      {"field": "to_date", "type": "calendar_date", "visible_when": ["strict_equal", ["current_field", "timespan"], ["literal", "Select Date Range"]]},
+      {"field": "x_field", "type": "enumeration", "visible_when": ["and", ["and", ["coercive_equal", ["current_field", "chart_type"], ["literal", "Report"]], ["current_field", "report_name_identifier"]], ["not", ["current_field", "use_report_chart"]]], "required_when": ["and", ["current_field", "report_name_identifier"], ["not", ["current_field", "use_report_chart"]]]},
+      {"field": "report_name_identifier", "type": "entity_reference", "target": "information_management.report", "write_once": true, "visible_when": ["strict_equal", ["current_field", "chart_type"], ["literal", "Report"]], "required_when": ["strict_equal", ["current_field", "chart_type"], ["literal", "Report"]]},
+      {"field": "y_axis_rows", "type": "owned_collection", "target": "operator_workspace.dashboard_chart_field", "visible_when": ["and", ["and", ["coercive_equal", ["current_field", "chart_type"], ["literal", "Report"]], ["current_field", "report_name_identifier"]], ["not", ["current_field", "use_report_chart"]]], "required_when": ["and", ["current_field", "report_name_identifier"], ["not", ["current_field", "use_report_chart"]]]},
+      {"field": "custom_options", "type": "expression_or_structured_text"},
+      {"field": "is_public", "type": "boolean", "default": "0"},
+      {"field": "heatmap_year", "type": "enumeration", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Heatmap"]]},
+      {"field": "is_standard", "type": "boolean", "omit_on_copy": true, "default": "0", "read_only_when": ["not", ["context", "design_mode_enabled"]]},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "visible_when": ["current_field", "is_standard"], "required_when": ["current_field", "is_standard"]},
+      {"field": "dynamic_filters_structured_data", "type": "expression_or_structured_text"},
+      {"field": "use_report_chart", "type": "boolean", "default": "0", "visible_when": ["current_field", "report_name_identifier"]},
+      {"field": "parent_document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "visible_when": ["and", ["strict_unequal", ["current_field", "chart_type"], ["literal", "Custom"]], ["strict_unequal", ["current_field", "chart_type"], ["literal", "Report"]]]},
+      {"field": "roles_rows", "type": "owned_collection", "target": "information_management.has_role"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency"},
+      {"field": "show_values_over_chart", "type": "boolean", "default": "0", "visible_when": ["or", ["coercive_equal", ["current_field", "type"], ["literal", "Bar"]], ["coercive_equal", ["current_field", "type"], ["literal", "Line"]]]},
+      {"field": "empty_state_message", "type": "text"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Filters"},
+      {"control": "section", "purpose": "Chart Options"},
+      {"control": "section", "purpose": "Dynamic Filters"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.dashboard_chart_field",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "y_field", "type": "enumeration"},
+      {"field": "color", "type": "color"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.dashboard_chart_link",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "chart_identifier", "type": "entity_reference", "target": "operator_workspace.dashboard_chart"},
+      {"field": "width", "type": "enumeration", "values": ["Half", "Full"], "default": "Half"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.dashboard_chart_source",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]},
+      {"role": "administrator", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "dashboard_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "source_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "required": true},
+      {"field": "timeseries", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.dashboard_settings",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "form_read_only": true,
+    "grants": [
+      {"role": "desk_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "chart_config", "type": "expression_or_structured_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "operator_workspace.desktop_icon",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "form_read_only": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "label", "type": "short_text", "unique": true, "translatable": true},
+      {"field": "standard", "type": "boolean", "default": "0"},
+      {"field": "link", "type": "text", "visible_when": ["coercive_equal", ["current_field", "link_type"], ["literal", "External"]]},
+      {"field": "icon", "type": "icon", "form_hidden": true},
+      {"field": "row_position", "type": "integer"},
+      {"field": "logo_resource_address", "type": "short_text"},
+      {"field": "icon_type", "type": "enumeration", "values": ["Link", "Folder", "App"]},
+      {"field": "application", "type": "suggested_text", "visible_when": ["coercive_equal", ["current_field", "standard"], ["literal", 1]]},
+      {"field": "link_to_identifier", "type": "selected_entity_reference", "target_selected_by": "link_type", "visible_when": ["coercive_unequal", ["current_field", "link_type"], ["literal", "External"]]},
+      {"field": "parent_icon_identifier", "type": "entity_reference", "target": "operator_workspace.desktop_icon"},
+      {"field": "hidden", "type": "boolean", "default": "0"},
+      {"field": "link_type", "type": "enumeration", "values": ["Workspace Sidebar", "External"]},
+      {"field": "roles_rows", "type": "owned_collection", "target": "information_management.has_role"},
+      {"field": "sidebar_identifier", "type": "entity_reference", "target": "operator_workspace.workspace_sidebar"},
+      {"field": "icon_image", "type": "file_reference"},
+      {"field": "restrict_removal", "type": "boolean", "default": "0"},
+      {"field": "bg_color", "type": "enumeration", "values": ["gray", "blue"]}
+    ],
+    "presentation": [
+      {"control": "tab", "purpose": "Roles"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.desktop_layout",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "unique": true},
+      {"field": "layout", "type": "expression_or_structured_text"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.desktop_settings",
+    "kind": "singleton_settings",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "icon_style", "type": "enumeration", "values": ["Subtle", "Solid"], "default": "Solid"},
+      {"field": "desktop_page", "type": "enumeration", "values": ["Apps", "Desktop Icons"], "default": "Apps"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.dock",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "workspace_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "application", "type": "suggested_text", "required": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "nonnullable": true},
+      {"field": "standard", "type": "boolean", "default": "0", "read_only_when": ["not", ["context", "design_mode_enabled"]]},
+      {"field": "mount_on", "type": "suggested_text", "visible_when": ["coercive_equal", ["current_field", "standard"], ["literal", 1]]},
+      {"field": "items_rows", "type": "owned_collection", "target": "operator_workspace.dock_item"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Dock Items"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.dock_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "link_type", "type": "enumeration", "values": ["", "Sidebar", "Workspace", "URL"]},
+      {"field": "link_to_identifier", "type": "selected_entity_reference", "target_selected_by": "link_type", "visible_when": ["and", ["current_field", "link_type"], ["coercive_unequal", ["current_field", "link_type"], ["literal", "URL"]]]},
+      {"field": "resource_address", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "link_type"], ["literal", "URL"]]},
+      {"field": "icon", "type": "icon"},
+      {"field": "title", "type": "short_text"},
+      {"field": "added", "type": "boolean", "default": "0"},
+      {"field": "hidden", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.event",
+    "kind": "independent_record",
+    "import_supported": true,
+    "audit_changes": true,
+    "form_read_only": true,
+    "grants": [
+      {"role": "desk_user", "level": 0, "allows": ["create", "email", "print", "read", "report", "share", "write"]},
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "all", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "subject", "type": "text", "required": true},
+      {"field": "event_category", "type": "enumeration", "values": ["Event", "Meeting", "Call", "Sent/Received Email", "Other"]},
+      {"field": "event_type", "type": "enumeration", "required": true, "searchable": true, "values": ["Private", "Public"]},
+      {"field": "send_reminder", "type": "boolean", "default": "1"},
+      {"field": "repeat_this_event", "type": "boolean", "default": "0"},
+      {"field": "starts_on", "type": "date_and_time", "required": true},
+      {"field": "ends_on", "type": "date_and_time"},
+      {"field": "all_day", "type": "boolean", "default": "0"},
+      {"field": "repeat_on", "type": "enumeration", "values": ["", "Daily", "Weekly", "Monthly", "Quarterly", "Half Yearly", "Yearly"], "visible_when": ["field_has_value", "repeat_this_event"]},
+      {"field": "repeat_till", "type": "calendar_date", "visible_when": ["field_has_value", "repeat_this_event"]},
+      {"field": "monday", "type": "boolean", "default": "0", "visible_when": ["and", ["current_field", "repeat_this_event"], ["strict_equal", ["current_field", "repeat_on"], ["literal", "Weekly"]]]},
+      {"field": "tuesday", "type": "boolean", "default": "0", "visible_when": ["and", ["current_field", "repeat_this_event"], ["strict_equal", ["current_field", "repeat_on"], ["literal", "Weekly"]]]},
+      {"field": "wednesday", "type": "boolean", "default": "0", "visible_when": ["and", ["current_field", "repeat_this_event"], ["strict_equal", ["current_field", "repeat_on"], ["literal", "Weekly"]]]},
+      {"field": "thursday", "type": "boolean", "default": "0", "visible_when": ["and", ["current_field", "repeat_this_event"], ["strict_equal", ["current_field", "repeat_on"], ["literal", "Weekly"]]]},
+      {"field": "friday", "type": "boolean", "default": "0", "visible_when": ["and", ["current_field", "repeat_this_event"], ["strict_equal", ["current_field", "repeat_on"], ["literal", "Weekly"]]]},
+      {"field": "saturday", "type": "boolean", "default": "0", "visible_when": ["and", ["current_field", "repeat_this_event"], ["strict_equal", ["current_field", "repeat_on"], ["literal", "Weekly"]]]},
+      {"field": "sunday", "type": "boolean", "default": "0", "visible_when": ["and", ["current_field", "repeat_this_event"], ["strict_equal", ["current_field", "repeat_on"], ["literal", "Weekly"]]]},
+      {"field": "color", "type": "color"},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "event_participants_rows", "type": "owned_collection", "target": "operator_workspace.event_participants"},
+      {"field": "status", "type": "enumeration", "values": ["Open", "Completed", "Closed", "Cancelled"], "default": "Open"},
+      {"field": "hosted_personal_productivity_calendar_identifier", "type": "short_text", "form_read_only": true, "copy_from": ["hosted_personal_productivity_calendar_identifier_reference", "hosted_personal_productivity_calendar_identifier"]},
+      {"field": "hosted_personal_productivity_calendar_event_identifier", "type": "short_text", "form_read_only": true, "omit_on_copy": true, "maximum_length": 320},
+      {"field": "sync_with_hosted_personal_productivity_calendar", "type": "boolean", "default": "0"},
+      {"field": "hosted_personal_productivity_calendar_identifier_reference", "type": "entity_reference", "target": "service_integrations.hosted_personal_productivity_calendar"},
+      {"field": "pulled_from_hosted_personal_productivity_calendar", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "sender", "type": "short_text", "form_read_only": true},
+      {"field": "add_video_conferencing", "type": "boolean", "default": "0", "visible_when": ["current_field", "sync_with_hosted_personal_productivity_calendar"]},
+      {"field": "hosted_personal_productivity_meet_link", "type": "text", "form_read_only": true, "omit_on_copy": true},
+      {"field": "links_rows", "type": "owned_collection", "target": "information_management.dynamic_link"},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "reference_record_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier"},
+      {"field": "notifications_rows", "type": "owned_collection", "target": "operator_workspace.event_notifications"},
+      {"field": "location", "type": "short_text"},
+      {"field": "attending", "type": "enumeration", "values": ["", "Yes", "No", "Maybe"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Details"},
+      {"control": "section", "visible_when": ["field_has_value", "repeat_this_event"]},
+      {"control": "section", "purpose": "hosted productivity service Calendar", "visible_when": ["or", ["current_field", "sync_with_hosted_personal_productivity_calendar"], ["current_field", "pulled_from_hosted_personal_productivity_calendar"]]},
+      {"control": "tab", "purpose": "Notifications"},
+      {"control": "tab", "purpose": "Participants"},
+      {"control": "tab", "purpose": "Links"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.event_notifications",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "type", "type": "enumeration", "values": ["Notification", "Email"], "default": "Notification"},
+      {"field": "before", "type": "integer"},
+      {"field": "interval", "type": "enumeration"},
+      {"field": "time", "type": "time_of_day"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.event_participants",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "reference_record_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "required": true},
+      {"field": "email", "type": "short_text"},
+      {"field": "attending", "type": "enumeration", "values": ["", "Yes", "No", "Maybe"]}
+    ]
+  },
+  {
+    "entity": "operator_workspace.form_tour",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "visible_when": ["or", ["not", ["current_field", "ui_tour"]], ["and", ["current_field", "ui_tour"], ["coercive_equal", ["call", ["member", ["list", ["literal", "Workspaces"], ["literal", "Page"], ["literal", "Tree"]], "index_of"], ["current_field", "view_name"]], ["negate", ["literal", 1]]]]], "required_when": ["not", ["current_field", "ui_tour"]]},
+      {"field": "steps_rows", "type": "owned_collection", "target": "operator_workspace.form_tour_step", "required": true, "visible_when": ["or", ["current_field", "ui_tour"], ["current_field", "reference_entity_type_identifier"]]},
+      {"field": "title", "type": "short_text", "required": true, "unique": true},
+      {"field": "save_on_complete", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "ui_tour"]]},
+      {"field": "is_standard", "type": "boolean", "default": "0"},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "copy_from": ["reference_entity_type_identifier", "module_identifier"], "copy_only_when_empty": true, "visible_when": ["and", ["current_field", "ui_tour"], ["current_field", "is_standard"]]},
+      {"field": "first_document", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "ui_tour"]]},
+      {"field": "include_name_field", "type": "boolean", "default": "0", "visible_when": ["and", ["not", ["current_field", "ui_tour"]], ["not", ["current_field", "first_document"]]]},
+      {"field": "ui_tour", "type": "boolean", "write_once": true, "default": "0"},
+      {"field": "page_route", "type": "text", "form_hidden": true},
+      {"field": "dashboard_name_identifier", "type": "entity_reference", "target": "operator_workspace.dashboard", "visible_when": ["and", ["and", ["current_field", "ui_tour"], ["coercive_equal", ["current_field", "view_name"], ["literal", "List"]]], ["coercive_equal", ["current_field", "list_name"], ["literal", "Dashboard"]]]},
+      {"field": "view_name", "type": "enumeration", "values": ["Workspaces", "List", "Form", "Tree", "Page"], "visible_when": ["field_has_value", "ui_tour"], "required_when": ["field_has_value", "ui_tour"]},
+      {"field": "workspace_name_identifier", "type": "entity_reference", "target": "operator_workspace.workspace", "visible_when": ["and", ["current_field", "ui_tour"], ["coercive_equal", ["current_field", "view_name"], ["literal", "Workspaces"]]]},
+      {"field": "page_name_identifier", "type": "entity_reference", "target": "information_management.page", "visible_when": ["and", ["current_field", "ui_tour"], ["coercive_equal", ["current_field", "view_name"], ["literal", "Page"]]], "required_when": ["and", ["current_field", "ui_tour"], ["coercive_equal", ["current_field", "view_name"], ["literal", "Page"]]]},
+      {"field": "list_name", "type": "enumeration", "values": ["List", "Report", "Dashboard", "Kanban", "Gantt", "Calendar", "File", "Image", "Inbox", "Map"], "default": "List", "visible_when": ["and", ["current_field", "ui_tour"], ["coercive_equal", ["current_field", "view_name"], ["literal", "List"]]], "required_when": ["and", ["current_field", "ui_tour"], ["coercive_equal", ["current_field", "view_name"], ["literal", "List"]]]},
+      {"field": "report_name_identifier", "type": "entity_reference", "target": "information_management.report", "visible_when": ["and", ["and", ["current_field", "ui_tour"], ["coercive_equal", ["current_field", "view_name"], ["literal", "List"]]], ["coercive_equal", ["current_field", "list_name"], ["literal", "Report"]]]},
+      {"field": "track_steps", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "ui_tour"]},
+      {"field": "new_document_form", "type": "boolean", "default": "0", "visible_when": ["and", ["current_field", "ui_tour"], ["coercive_equal", ["current_field", "view_name"], ["literal", "Form"]]]}
+    ]
+  },
+  {
+    "entity": "operator_workspace.form_tour_step",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true},
+      {"field": "description", "type": "formatted_markup", "required": true},
+      {"field": "field_name", "type": "enumeration", "visible_when": ["and", ["not", ["current_field", "ui_tour"]], ["or", ["not", ["current_field", "is_table_field"]], ["and", ["current_field", "is_table_field"], ["current_field", "parent_field_name"]]]], "required_when": ["not", ["current_field", "ui_tour"]]},
+      {"field": "label", "type": "short_text", "form_read_only": true, "visible_when": ["not", ["current_field", "ui_tour"]]},
+      {"field": "position", "type": "enumeration", "values": ["Left", "Left Center", "Left Bottom", "Top", "Top Center", "Top Right", "Right", "Right Center", "Right Bottom", "Bottom", "Bottom Center", "Bottom Right", "Mid Center"], "default": "Bottom"},
+      {"field": "next_step_condition", "type": "expression_or_structured_text", "visible_when": ["field_has_value", "has_next_condition"]},
+      {"field": "has_next_condition", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "ui_tour"]]},
+      {"field": "field_type", "type": "short_text", "form_read_only": true, "default": "0", "visible_when": ["not", ["current_field", "ui_tour"]]},
+      {"field": "is_table_field", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "ui_tour"]]},
+      {"field": "child_entity_type", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "parent_field_name", "type": "enumeration", "visible_when": ["or", ["not", ["current_field", "ui_tour"]], ["current_field", "is_table_field"]], "required_when": ["field_has_value", "is_table_field"]},
+      {"field": "ui_tour", "type": "boolean", "default": "0", "copy_from": ["next_form_tour_identifier", "ui_tour"]},
+      {"field": "element_selector", "type": "short_text", "visible_when": ["current_field", "ui_tour"], "required_when": ["current_field", "ui_tour"]},
+      {"field": "parent_element_selector", "type": "short_text", "visible_when": ["current_field", "ui_tour"]},
+      {"field": "next_form_tour_identifier", "type": "entity_reference", "target": "operator_workspace.form_tour", "visible_when": ["current_field", "ui_tour"]},
+      {"field": "hide_buttons", "type": "boolean", "default": "0", "visible_when": ["current_field", "ui_tour"]},
+      {"field": "next_on_click", "type": "boolean", "default": "0", "visible_when": ["current_field", "ui_tour"]},
+      {"field": "popover_element", "type": "boolean", "default": "0", "visible_when": ["current_field", "ui_tour"]},
+      {"field": "offset_x", "type": "integer", "default": "0", "visible_when": ["current_field", "ui_tour"]},
+      {"field": "offset_y", "type": "integer", "default": "0", "visible_when": ["current_field", "ui_tour"]},
+      {"field": "modal_trigger", "type": "boolean", "default": "0", "visible_when": ["current_field", "ui_tour"]},
+      {"field": "ondemand_description", "type": "formatted_markup", "visible_when": ["or", ["current_field", "popover_element"], ["current_field", "modal_trigger"]]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Hidden Fields"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.global_search_entity_type",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "Configure"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.global_search_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "allowed_in_global_search_rows", "type": "owned_collection", "target": "operator_workspace.global_search_entity_type"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.kanban_board",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "form_read_only": true,
+    "grants": [
+      {"role": "desk_user", "level": 0, "allows": ["read"]},
+      {"role": "desk_user", "level": 0, "owner_only": true, "allows": ["create", "delete", "read", "write"]},
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "kanban_board_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "field_name", "type": "enumeration", "required": true},
+      {"field": "columns_rows", "type": "owned_collection", "target": "operator_workspace.kanban_board_column"},
+      {"field": "card_fields_rows", "type": "owned_collection", "target": "operator_workspace.kanban_board_field"},
+      {"field": "preview_fields_rows", "type": "owned_collection", "target": "operator_workspace.kanban_board_field"},
+      {"field": "group_by_fields_rows", "type": "owned_collection", "target": "operator_workspace.kanban_board_group_field"},
+      {"field": "filters", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "is_standard", "type": "enumeration", "omit_on_copy": true, "values": ["No", "Yes"], "default": "No", "read_only_when": ["not", ["context", "design_mode_enabled"]]},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "visible_when": ["coercive_equal", ["current_field", "is_standard"], ["literal", "Yes"]], "required_when": ["coercive_equal", ["current_field", "is_standard"], ["literal", "Yes"]]},
+      {"field": "private", "type": "boolean", "default": "0"},
+      {"field": "fields", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "show_labels", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "use_revised_board_layout", "type": "boolean", "default": "0"},
+      {"field": "title_field", "type": "suggested_text"},
+      {"field": "show_assigned_to", "type": "boolean", "default": "1"},
+      {"field": "show_tags_on_card", "type": "boolean", "default": "0"},
+      {"field": "image_field", "type": "suggested_text"},
+      {"field": "footer_date_field", "type": "enumeration", "values": ["Modified", "Creation"], "default": "Modified"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "New Kanban", "visible_when": ["current_field", "use_revised_board_layout"]},
+      {"control": "section", "purpose": "Card and Preview Fields", "visible_when": ["current_field", "use_revised_board_layout"]}
+    ]
+  },
+  {
+    "entity": "operator_workspace.kanban_board_column",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "column_name", "type": "short_text"},
+      {"field": "status", "type": "enumeration", "values": ["Active", "Archived"], "default": "Active"},
+      {"field": "indicator", "type": "enumeration", "values": ["Blue", "Cyan", "Gray", "Green", "Light Blue", "Orange", "Pink", "Purple", "Red", "Yellow"], "default": "Gray"},
+      {"field": "order", "type": "expression_or_structured_text"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.kanban_board_field",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "field_name", "type": "suggested_text", "required": true},
+      {"field": "icon", "type": "icon"},
+      {"field": "label", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.kanban_board_group_field",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "field_name", "type": "suggested_text", "required": true},
+      {"field": "label", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.list_filter",
+    "kind": "independent_record",
+    "form_read_only": true,
+    "grants": [
+      {"role": "desk_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "filter_name", "type": "short_text"},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "for_user_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "route_signature", "type": "text", "form_read_only": true},
+      {"field": "filters", "type": "long_text"},
+      {"field": "columns", "type": "long_text"},
+      {"field": "sort_field", "type": "short_text"},
+      {"field": "sort_order", "type": "short_text"},
+      {"field": "is_standard", "type": "boolean", "omit_on_copy": true, "default": "0", "read_only_when": ["not", ["context", "design_mode_enabled"]]},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "visible_when": ["current_field", "is_standard"], "required_when": ["current_field", "is_standard"]},
+      {"field": "layout_order", "type": "integer", "omit_on_copy": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Filters"},
+      {"control": "section", "purpose": "Columns"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.list_view_settings",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "form_read_only": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "disable_count", "type": "boolean", "default": "0"},
+      {"field": "disable_sidebar_stats", "type": "boolean", "default": "0"},
+      {"field": "disable_auto_refresh", "type": "boolean", "default": "0"},
+      {"field": "fields", "type": "expression_or_structured_text", "form_read_only": true, "form_hidden": true},
+      {"field": "disable_comment_count", "type": "boolean", "default": "0"},
+      {"field": "allow_edit", "type": "boolean", "default": "0"},
+      {"field": "disable_automatic_recency_filters", "type": "boolean", "default": "0"},
+      {"field": "disable_scrolling", "type": "boolean", "default": "0"},
+      {"field": "show_tags", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "Fields"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.module_onboarding",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "form_read_only": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "required": true},
+      {"field": "is_complete", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "steps_rows", "type": "owned_collection", "target": "operator_workspace.onboarding_step_map", "required": true},
+      {"field": "allow_roles_rows", "type": "owned_selection", "target": "operator_workspace.onboarding_permission", "required": true}
+    ]
+  },
+  {
+    "entity": "operator_workspace.note",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "system_manager", "level": 1, "allows": ["read", "write"]},
+      {"role": "system_manager", "level": 2, "allows": ["read", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["export", "print", "read", "report"]},
+      {"role": "desk_user", "level": 0, "owner_only": true, "allows": ["create", "delete", "email", "share", "write"]},
+      {"role": "desk_user", "level": 1, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true},
+      {"field": "public", "type": "boolean", "access_level": 1, "default": "0"},
+      {"field": "notify_on_login", "type": "boolean", "access_level": 1, "default": "0", "visible_when": ["field_has_value", "public"]},
+      {"field": "notify_on_every_login", "type": "boolean", "access_level": 1, "default": "0", "visible_when": ["field_has_value", "notify_on_login"]},
+      {"field": "expire_notification_on", "type": "date_and_time", "searchable": true, "access_level": 1, "visible_when": ["and", ["current_field", "notify_on_login"], ["current_field", "public"]]},
+      {"field": "content", "type": "formatted_text"},
+      {"field": "seen_by_rows", "type": "owned_collection", "target": "operator_workspace.note_seen_by", "access_level": 2}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Seen By", "visible_when": ["field_has_value", "notify_on_login"]}
+    ]
+  },
+  {
+    "entity": "operator_workspace.note_seen_by",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "access_level": 2}
+    ]
+  },
+  {
+    "entity": "operator_workspace.notification_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "all", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "type_identifier", "type": "entity_reference", "target": "operator_workspace.notification_type"},
+      {"field": "title", "type": "text"},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "document_name", "type": "short_text", "searchable": true},
+      {"field": "source_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "source_name_identifier", "type": "selected_entity_reference", "target_selected_by": "source_entity_type_identifier", "form_read_only": true},
+      {"field": "application", "type": "enumeration", "searchable": true},
+      {"field": "link", "type": "text"},
+      {"field": "for_user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true, "searchable": true},
+      {"field": "from_user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "read", "type": "boolean", "omit_target_user_filter": true, "default": "0"},
+      {"field": "attached_file", "type": "expression_or_structured_text", "form_hidden": true},
+      {"field": "subject", "type": "text"},
+      {"field": "email_content", "type": "formatted_text"},
+      {"field": "email_header", "type": "short_text"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Notification"},
+      {"control": "section", "purpose": "Reference Document"},
+      {"control": "action", "purpose": "Open Reference Document", "visible_when": ["or", ["current_field", "link"], ["and", ["current_field", "document_type_identifier"], ["current_field", "document_name"]]]},
+      {"control": "section", "purpose": "Recipient & Status"},
+      {"control": "section", "purpose": "Attachment", "visible_when": ["field_has_value", "attached_file"], "expanded_when": ["field_has_value", "attached_file"]},
+      {"control": "formatted_information", "purpose": "Attachment Link"},
+      {"control": "section", "purpose": "Email"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.notification_settings",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "form_read_only": true,
+    "grants": [
+      {"role": "all", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "subscribed_documents_rows", "type": "owned_selection", "target": "operator_workspace.notification_subscribed_document"},
+      {"field": "enable_email_notifications", "type": "boolean", "default": "1"},
+      {"field": "email_notification_types_rows", "type": "owned_selection", "target": "operator_workspace.notification_type_preference", "form_hidden": true, "visible_when": ["field_has_value", "enable_email_notifications"]},
+      {"field": "enable_email_mention", "type": "boolean", "form_hidden": true, "default": "1", "visible_when": ["field_has_value", "enable_email_notifications"]},
+      {"field": "enable_email_assignment", "type": "boolean", "form_hidden": true, "default": "1", "visible_when": ["field_has_value", "enable_email_notifications"]},
+      {"field": "enable_email_share", "type": "boolean", "form_hidden": true, "default": "1", "visible_when": ["field_has_value", "enable_email_notifications"]},
+      {"field": "seen", "type": "boolean", "form_hidden": true, "default": "0"},
+      {"field": "enable_email_event_reminders", "type": "boolean", "default": "1", "visible_when": ["field_has_value", "enable_email_notifications"]},
+      {"field": "enable_email_threads_on_assigned_document", "type": "boolean", "default": "1", "visible_when": ["field_has_value", "enable_email_notifications"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Email Settings"},
+      {"control": "formatted_information", "purpose": "Email me for these notification types", "visible_when": ["field_has_value", "enable_email_notifications"]}
+    ]
+  },
+  {
+    "entity": "operator_workspace.notification_subscribed_document",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "document_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true}
+    ]
+  },
+  {
+    "entity": "operator_workspace.notification_type",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "type_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "enabled", "type": "boolean", "default": "1"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.notification_type_preference",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "notification_type_identifier", "type": "entity_reference", "target": "operator_workspace.notification_type", "required": true}
+    ]
+  },
+  {
+    "entity": "operator_workspace.number_card",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "dashboard_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "visible_when": ["call", ["member", ["list", ["literal", "Document Type"], ["literal", "Custom"]], "includes"], ["current_field", "type"]], "required_when": ["coercive_equal", ["current_field", "type"], ["literal", "Document Type"]]},
+      {"field": "function", "type": "enumeration", "values": ["Count", "Sum", "Average", "Minimum", "Maximum"], "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Document Type"]], "required_when": ["coercive_equal", ["current_field", "type"], ["literal", "Document Type"]]},
+      {"field": "aggregate_function_based_on", "type": "enumeration", "visible_when": ["and", ["strict_equal", ["current_field", "type"], ["literal", "Document Type"]], ["strict_unequal", ["current_field", "function"], ["literal", "Count"]]], "required_when": ["and", ["strict_equal", ["current_field", "type"], ["literal", "Document Type"]], ["strict_unequal", ["current_field", "function"], ["literal", "Count"]]]},
+      {"field": "filters_structured_data", "type": "expression_or_structured_text"},
+      {"field": "label", "type": "short_text", "required": true},
+      {"field": "color", "type": "color"},
+      {"field": "is_public", "type": "boolean", "default": "0"},
+      {"field": "show_percentage_stats", "type": "boolean", "default": "1"},
+      {"field": "stats_time_interval", "type": "enumeration", "values": ["Daily", "Weekly", "Monthly", "Yearly"], "default": "Daily", "visible_when": ["current_field", "show_percentage_stats"]},
+      {"field": "is_standard", "type": "boolean", "omit_on_copy": true, "default": "0", "read_only_when": ["not", ["context", "design_mode_enabled"]]},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "visible_when": ["current_field", "is_standard"], "required_when": ["current_field", "is_standard"]},
+      {"field": "dynamic_filters_structured_data", "type": "expression_or_structured_text"},
+      {"field": "type", "type": "enumeration", "values": ["Document Type", "Report", "Custom"]},
+      {"field": "report_name_identifier", "type": "entity_reference", "target": "information_management.report", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Report"]], "required_when": ["coercive_equal", ["current_field", "type"], ["literal", "Report"]]},
+      {"field": "report_field", "type": "enumeration", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Report"]], "required_when": ["coercive_equal", ["current_field", "type"], ["literal", "Report"]]},
+      {"field": "method", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Custom"]], "required_when": ["coercive_equal", ["current_field", "type"], ["literal", "Custom"]]},
+      {"field": "filters_config", "type": "expression_or_structured_text"},
+      {"field": "report_function", "type": "enumeration", "values": ["Sum", "Average", "Minimum", "Maximum"], "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Report"]], "required_when": ["coercive_equal", ["current_field", "type"], ["literal", "Report"]]},
+      {"field": "parent_document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "visible_when": ["strict_equal", ["current_field", "type"], ["literal", "Document Type"]]},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency"},
+      {"field": "background_color", "type": "color"},
+      {"field": "show_full_number", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Filters Section"},
+      {"control": "section", "purpose": "Stats", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Document Type"]]},
+      {"control": "section", "purpose": "Dynamic Filters Section"},
+      {"control": "section", "purpose": "Custom Configuration", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Custom"]]}
+    ]
+  },
+  {
+    "entity": "operator_workspace.number_card_link",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "card_identifier", "type": "entity_reference", "target": "operator_workspace.number_card"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.onboarding_permission",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "role_identifier", "type": "entity_reference", "target": "information_management.role", "required": true}
+    ]
+  },
+  {
+    "entity": "operator_workspace.onboarding_step",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "form_read_only": true,
+    "grants": [
+      {"role": "administrator", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "is_complete", "type": "boolean", "default": "0"},
+      {"field": "title", "type": "short_text", "required": true},
+      {"field": "action", "type": "enumeration", "required": true, "values": ["Create Entry", "Update Settings", "Show Form Tour", "View Report", "Go to Page", "View Docs", "Complete Onboarding"]},
+      {"field": "reference_document_identifier", "type": "entity_reference", "target": "information_management.entity_type", "visible_when": ["or", ["or", ["or", ["coercive_equal", ["current_field", "action"], ["literal", "Create Entry"]], ["coercive_equal", ["current_field", "action"], ["literal", "Update Settings"]]], ["coercive_equal", ["current_field", "action"], ["literal", "Create Entry"]]], ["coercive_equal", ["current_field", "action"], ["literal", "Show Form Tour"]]], "required_when": ["or", ["or", ["or", ["coercive_equal", ["current_field", "action"], ["literal", "Create Entry"]], ["coercive_equal", ["current_field", "action"], ["literal", "Update Settings"]]], ["coercive_equal", ["current_field", "action"], ["literal", "Create Entry"]]], ["coercive_equal", ["current_field", "action"], ["literal", "Show Form Tour"]]]},
+      {"field": "reference_report_identifier", "type": "entity_reference", "target": "information_management.report", "visible_when": ["coercive_equal", ["current_field", "action"], ["literal", "View Report"]], "required_when": ["coercive_equal", ["current_field", "action"], ["literal", "View Report"]]},
+      {"field": "video_resource_address", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "action"], ["literal", "Watch Video"]], "required_when": ["coercive_equal", ["current_field", "action"], ["literal", "Watch Video"]]},
+      {"field": "report_type", "type": "short_text", "form_read_only": true, "copy_from": ["reference_report_identifier", "report_type"], "visible_when": ["coercive_equal", ["current_field", "action"], ["literal", "View Report"]]},
+      {"field": "is_skipped", "type": "boolean", "default": "0"},
+      {"field": "completion_check_field", "type": "enumeration", "visible_when": ["and", ["coercive_equal", ["current_field", "action"], ["literal", "Update Settings"]], ["current_field", "validate_action"]], "required_when": ["and", ["coercive_equal", ["current_field", "action"], ["literal", "Update Settings"]], ["current_field", "validate_action"]]},
+      {"field": "value_to_validate", "type": "short_text", "visible_when": ["and", ["coercive_equal", ["current_field", "action"], ["literal", "Update Settings"]], ["current_field", "validate_action"]], "required_when": ["and", ["coercive_equal", ["current_field", "action"], ["literal", "Update Settings"]], ["current_field", "validate_action"]]},
+      {"field": "report_description", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "action"], ["literal", "View Report"]], "required_when": ["coercive_equal", ["current_field", "action"], ["literal", "View Report"]]},
+      {"field": "report_reference_entity_type", "type": "short_text", "form_read_only": true, "copy_from": ["reference_report_identifier", "reference_entity_type_identifier"]},
+      {"field": "has_single_configuration", "type": "boolean", "default": "0", "copy_from": ["reference_document_identifier", "issingle"], "visible_when": ["or", ["or", ["or", ["coercive_equal", ["current_field", "action"], ["literal", "Create Entry"]], ["coercive_equal", ["current_field", "action"], ["literal", "Update Settings"]]], ["coercive_equal", ["current_field", "action"], ["literal", "Create Entry"]]], ["coercive_equal", ["current_field", "action"], ["literal", "Show Form Tour"]]]},
+      {"field": "path", "type": "short_text", "visible_when": ["or", ["coercive_equal", ["current_field", "action"], ["literal", "Go to Page"]], ["strict_equal", ["current_field", "action"], ["literal", "View Docs"]]], "required_when": ["coercive_equal", ["current_field", "action"], ["literal", "Go to Page"]]},
+      {"field": "callback_title", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "action"], ["literal", "Go to Page"]]},
+      {"field": "callback_message", "type": "text", "visible_when": ["coercive_equal", ["current_field", "action"], ["literal", "Go to Page"]]},
+      {"field": "validate_action", "type": "boolean", "default": "1", "visible_when": ["coercive_equal", ["current_field", "action"], ["literal", "Update Settings"]]},
+      {"field": "show_full_form", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "action"], ["literal", "Create Entry"]]},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "intro_video_resource_address", "type": "short_text"},
+      {"field": "action_label", "type": "short_text"},
+      {"field": "show_form_tour", "type": "boolean", "default": "0", "visible_when": ["and", ["coercive_equal", ["current_field", "action"], ["literal", "Create Entry"]], ["current_field", "show_full_form"]]},
+      {"field": "form_tour_identifier", "type": "entity_reference", "target": "operator_workspace.form_tour", "visible_when": ["field_has_value", "show_form_tour"]},
+      {"field": "route_options", "type": "expression_or_structured_text"},
+      {"field": "module_onboarding_identifier", "type": "entity_reference", "target": "operator_workspace.module_onboarding", "visible_when": ["coercive_equal", ["current_field", "action"], ["literal", "Complete Onboarding"]], "required_when": ["coercive_equal", ["current_field", "action"], ["literal", "Complete Onboarding"]]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Description"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.onboarding_step_map",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "step_identifier", "type": "entity_reference", "target": "operator_workspace.onboarding_step", "required": true},
+      {"field": "is_optional", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.route_history",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "route", "type": "short_text", "form_read_only": true, "omit_on_copy": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true, "omit_on_copy": true}
+    ]
+  },
+  {
+    "entity": "operator_workspace.sidebar",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def"},
+      {"field": "title", "type": "short_text", "required": true, "unique": true},
+      {"field": "header_icon", "type": "icon"},
+      {"field": "application", "type": "suggested_text"},
+      {"field": "items_rows", "type": "owned_collection", "target": "operator_workspace.sidebar_item"},
+      {"field": "standard", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "merged_from", "type": "long_text", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Items"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.sidebar_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "type", "type": "enumeration", "values": ["Link", "Section Break", "Spacer"], "default": "Link"},
+      {"field": "label", "type": "short_text"},
+      {"field": "link_type", "type": "enumeration", "values": ["Entity type", "Page", "Report", "Workspace", "Dashboard", "URL"], "default": "Entity type", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Link"]]},
+      {"field": "link_to_identifier", "type": "selected_entity_reference", "target_selected_by": "link_type", "visible_when": ["and", ["coercive_unequal", ["current_field", "link_type"], ["literal", "URL"]], ["coercive_equal", ["current_field", "type"], ["literal", "Link"]]]},
+      {"field": "route", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "link_type"], ["literal", "Page"]]},
+      {"field": "icon", "type": "icon", "visible_when": ["or", ["coercive_equal", ["current_field", "type"], ["literal", "Link"]], ["coercive_equal", ["current_field", "type"], ["literal", "Section Break"]]]},
+      {"field": "child", "type": "boolean", "default": "0"},
+      {"field": "indent", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Section Break"]]},
+      {"field": "collapsible", "type": "boolean", "default": "1", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Section Break"]]},
+      {"field": "keep_closed", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Section Break"]]},
+      {"field": "resource_address", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "link_type"], ["literal", "URL"]]},
+      {"field": "show_arrow", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "indent"], ["literal", 1]]},
+      {"field": "filters", "type": "expression_or_structured_text"},
+      {"field": "route_options", "type": "expression_or_structured_text"},
+      {"field": "navigate_to_tab", "type": "suggested_text", "visible_when": ["and", ["coercive_equal", ["current_field", "link_type"], ["literal", "Entity type"]], ["current_field", "link_to_identifier"]]},
+      {"field": "open_in_new_tab", "type": "boolean", "default": "1", "visible_when": ["strict_equal", ["current_field", "link_type"], ["literal", "URL"]]},
+      {"field": "is_default_module", "type": "boolean", "default": "0"},
+      {"field": "hidden", "type": "boolean", "default": "0"},
+      {"field": "added", "type": "boolean", "default": "0"},
+      {"field": "navigation_key", "type": "short_text", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Details"},
+      {"control": "section", "purpose": "Display", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Section Break"]]},
+      {"control": "formatted_information", "purpose": "Filter Area"},
+      {"control": "section", "purpose": "Customization"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.sidebar_item_group",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "sidebar_identifier", "type": "entity_reference", "target": "operator_workspace.workspace_sidebar", "unique": true},
+      {"field": "links_rows", "type": "owned_collection", "target": "operator_workspace.sidebar_item_group_link"},
+      {"field": "application", "type": "suggested_text"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.sidebar_item_group_link",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "report_identifier", "type": "entity_reference", "target": "information_management.report"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.system_console",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "administrator", "level": 0, "allows": ["email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "console", "type": "expression_or_structured_text"},
+      {"field": "output", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "commit", "type": "boolean", "default": "0"},
+      {"field": "show_processlist", "type": "boolean", "default": "0"},
+      {"field": "type", "type": "enumeration", "values": ["Rule expression", "Relational query"], "default": "Rule expression"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Execute"},
+      {"control": "section", "purpose": "Database Processes"},
+      {"control": "formatted_information", "purpose": "processlist"},
+      {"control": "formatted_information", "purpose": "Relational query result", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Relational query"]]}
+    ]
+  },
+  {
+    "entity": "operator_workspace.system_health_report",
+    "kind": "computed_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["print", "read"]}
+    ],
+    "fields": [
+      {"field": "background_workers_rows", "type": "owned_collection", "target": "operator_workspace.system_health_report_workers"},
+      {"field": "total_background_workers", "type": "integer"},
+      {"field": "scheduler_status", "type": "short_text"},
+      {"field": "queue_status_rows", "type": "owned_collection", "target": "operator_workspace.system_health_report_queue"},
+      {"field": "socketio_ping_check", "type": "enumeration", "values": ["Fail", "Pass"], "default": "Fail"},
+      {"field": "socketio_transport_mode", "type": "enumeration", "values": ["Polling", "Websocket"]},
+      {"field": "failed_emails", "type": "integer"},
+      {"field": "total_outgoing_emails", "type": "integer"},
+      {"field": "pending_emails", "type": "integer"},
+      {"field": "unhandled_emails", "type": "integer"},
+      {"field": "handled_emails", "type": "integer"},
+      {"field": "total_errors", "type": "integer"},
+      {"field": "top_errors_rows", "type": "owned_collection", "target": "operator_workspace.system_health_report_errors"},
+      {"field": "database", "type": "short_text"},
+      {"field": "database_storage_usage", "type": "decimal"},
+      {"field": "top_database_tables_rows", "type": "owned_collection", "target": "operator_workspace.system_health_report_tables"},
+      {"field": "database_version", "type": "short_text"},
+      {"field": "bufferpool_size", "type": "short_text"},
+      {"field": "binary_logging", "type": "short_text"},
+      {"field": "cache_keys", "type": "integer"},
+      {"field": "cache_memory_usage", "type": "short_text"},
+      {"field": "backups_size", "type": "decimal"},
+      {"field": "private_files_size", "type": "decimal"},
+      {"field": "public_files_size", "type": "decimal"},
+      {"field": "onsite_backups", "type": "integer"},
+      {"field": "total_users", "type": "integer"},
+      {"field": "new_users", "type": "integer"},
+      {"field": "failed_logins", "type": "integer"},
+      {"field": "active_sessions", "type": "integer"},
+      {"field": "last_10_active_users", "type": "expression_or_structured_text"},
+      {"field": "background_jobs_check", "type": "short_text"},
+      {"field": "test_job_identifier", "type": "short_text", "form_hidden": true},
+      {"field": "failing_scheduled_jobs_rows", "type": "owned_collection", "target": "operator_workspace.system_health_report_failing_jobs"},
+      {"field": "oldest_unscheduled_job_identifier", "type": "entity_reference", "target": "information_management.scheduled_job_type"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Background Jobs"},
+      {"control": "tab", "purpose": "Report"},
+      {"control": "section", "purpose": "Errors"},
+      {"control": "section", "purpose": "Transactional database Variables"},
+      {"control": "section", "purpose": "Emails"},
+      {"control": "section", "purpose": "Database"},
+      {"control": "section", "purpose": "Cache"},
+      {"control": "section", "purpose": "File Storage"},
+      {"control": "section", "purpose": "Backups"},
+      {"control": "section", "purpose": "Users"},
+      {"control": "section", "purpose": "Realtime (SocketIO)"},
+      {"control": "section", "purpose": "Scheduler"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.system_health_report_errors",
+    "kind": "computed_record",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "title", "type": "short_text"},
+      {"field": "occurrences", "type": "integer"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.system_health_report_failing_jobs",
+    "kind": "computed_record",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "scheduled_job_type_identifier", "type": "entity_reference", "target": "information_management.scheduled_job_type"},
+      {"field": "failure_rate", "type": "percentage"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.system_health_report_queue",
+    "kind": "computed_record",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "queue", "type": "short_text"},
+      {"field": "pending_jobs", "type": "integer"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.system_health_report_tables",
+    "kind": "computed_record",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "table", "type": "short_text"},
+      {"field": "size", "type": "decimal"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.system_health_report_workers",
+    "kind": "computed_record",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "queues", "type": "short_text"},
+      {"field": "count", "type": "integer"},
+      {"field": "utilization", "type": "percentage"},
+      {"field": "failed_jobs", "type": "integer"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.tag",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "all", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.tag_link",
+    "kind": "independent_record",
+    "form_read_only": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "all", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "form_read_only": true},
+      {"field": "tag_identifier", "type": "entity_reference", "target": "operator_workspace.tag", "form_read_only": true},
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "document_name_identifier", "type": "selected_entity_reference", "target_selected_by": "document_type_identifier", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "operator_workspace.workspace",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "workspace_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "label", "type": "short_text", "required": true, "unique": true},
+      {"field": "charts_rows", "type": "owned_collection", "target": "operator_workspace.workspace_chart"},
+      {"field": "shortcuts_rows", "type": "owned_collection", "target": "operator_workspace.workspace_shortcut"},
+      {"field": "restrict_to_domain_identifier", "type": "entity_reference", "target": "information_management.domain", "searchable": true},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "required": true},
+      {"field": "for_user", "type": "short_text"},
+      {"field": "hide_custom", "type": "boolean", "default": "0"},
+      {"field": "icon", "type": "icon"},
+      {"field": "links_rows", "type": "owned_collection", "target": "operator_workspace.workspace_link"},
+      {"field": "public", "type": "boolean", "form_read_only": true, "searchable": true, "default": "0"},
+      {"field": "title", "type": "short_text", "required": true},
+      {"field": "parent_page_identifier", "type": "entity_reference", "target": "operator_workspace.workspace"},
+      {"field": "content", "type": "long_text", "form_hidden": true, "default": "[]"},
+      {"field": "sequence_identifier", "type": "decimal"},
+      {"field": "roles_rows", "type": "owned_collection", "target": "information_management.has_role"},
+      {"field": "quick_lists_rows", "type": "owned_collection", "target": "operator_workspace.workspace_quick_list"},
+      {"field": "is_hidden", "type": "boolean", "default": "0"},
+      {"field": "number_cards_rows", "type": "owned_collection", "target": "operator_workspace.workspace_number_card"},
+      {"field": "custom_blocks_rows", "type": "owned_collection", "target": "operator_workspace.workspace_custom_block"},
+      {"field": "indicator_color", "type": "enumeration", "values": ["green", "cyan", "blue", "orange", "yellow", "gray", "grey", "red", "pink", "darkgrey", "purple", "light-blue"], "visible_when": ["literal_field_key_has_value", "current_record.icon"]},
+      {"field": "type", "type": "enumeration", "required": true, "values": ["Workspace", "Link", "URL"], "default": "Workspace"},
+      {"field": "link_type", "type": "enumeration", "values": ["Entity type", "Page", "Report"], "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Link"]], "required_when": ["coercive_equal", ["current_field", "type"], ["literal", "Link"]]},
+      {"field": "link_to_identifier", "type": "selected_entity_reference", "target_selected_by": "link_type", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Link"]], "required_when": ["coercive_equal", ["current_field", "type"], ["literal", "Link"]]},
+      {"field": "external_link", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "URL"]], "required_when": ["coercive_equal", ["current_field", "type"], ["literal", "URL"]]},
+      {"field": "standard", "type": "boolean", "default": "0"},
+      {"field": "module_onboarding_identifier", "type": "entity_reference", "target": "operator_workspace.module_onboarding"}
+    ],
+    "presentation": [
+      {"control": "tab", "purpose": "Dashboards", "visible_when": ["strict_equal", ["current_field", "type"], ["literal", "Workspace"]], "expanded_when": ["field_has_value", "charts_rows"]},
+      {"control": "tab", "purpose": "Shortcuts", "visible_when": ["strict_equal", ["current_field", "type"], ["literal", "Workspace"]], "expanded_when": ["field_has_value", "shortcuts_rows"]},
+      {"control": "tab", "purpose": "Link Cards", "visible_when": ["strict_equal", ["current_field", "type"], ["literal", "Workspace"]], "expanded_when": ["field_has_value", "links_rows"]},
+      {"control": "tab", "purpose": "Roles"},
+      {"control": "tab", "purpose": "Quick Lists", "visible_when": ["strict_equal", ["current_field", "type"], ["literal", "Workspace"]]},
+      {"control": "tab", "purpose": "Number Cards", "visible_when": ["strict_equal", ["current_field", "type"], ["literal", "Workspace"]]},
+      {"control": "tab", "purpose": "Custom Blocks", "visible_when": ["strict_equal", ["current_field", "type"], ["literal", "Workspace"]]}
+    ]
+  },
+  {
+    "entity": "operator_workspace.workspace_chart",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "chart_name_identifier", "type": "entity_reference", "target": "operator_workspace.dashboard_chart", "required": true},
+      {"field": "label", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.workspace_custom_block",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "custom_block_name_identifier", "type": "entity_reference", "target": "operator_workspace.custom_structured_markup_block"},
+      {"field": "label", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.workspace_link",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "type", "type": "enumeration", "required": true, "values": ["Link", "Card Break"], "default": "Link"},
+      {"field": "label", "type": "short_text", "required": true},
+      {"field": "icon", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Card Break"]]},
+      {"field": "hidden", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Card Break"]]},
+      {"field": "link_type", "type": "enumeration", "values": ["Entity type", "Page", "Report"], "read_only_when": ["coercive_unequal", ["current_field", "type"], ["literal", "Link"]], "required_when": ["coercive_equal", ["current_field", "type"], ["literal", "Link"]]},
+      {"field": "link_to_identifier", "type": "selected_entity_reference", "target_selected_by": "link_type", "read_only_when": ["coercive_unequal", ["current_field", "type"], ["literal", "Link"]], "required_when": ["coercive_equal", ["current_field", "type"], ["literal", "Link"]]},
+      {"field": "dependencies", "type": "short_text"},
+      {"field": "only_for_identifier", "type": "entity_reference", "target": "geography.country"},
+      {"field": "onboard", "type": "boolean", "default": "0"},
+      {"field": "is_query_report", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "link_type"], ["literal", "Report"]]},
+      {"field": "link_count", "type": "integer", "form_hidden": true, "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Card Break"]]},
+      {"field": "description", "type": "formatted_markup", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Card Break"]]},
+      {"field": "report_reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "record_type_layout_identifier", "type": "entity_reference", "configuration_variant": true, "target": "configuration.entity_type_layout"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Link Details", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Link"]]}
+    ]
+  },
+  {
+    "entity": "operator_workspace.workspace_number_card",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "number_card_name_identifier", "type": "entity_reference", "target": "operator_workspace.number_card", "required": true},
+      {"field": "label", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.workspace_quick_list",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "label", "type": "short_text", "required": true},
+      {"field": "quick_list_filter", "type": "expression_or_structured_text"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.workspace_shortcut",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "type", "type": "enumeration", "required": true, "values": ["Entity type", "Report", "Page", "Dashboard", "URL"]},
+      {"field": "link_to_identifier", "type": "selected_entity_reference", "target_selected_by": "type", "visible_when": ["coercive_unequal", ["current_field", "type"], ["literal", "URL"]]},
+      {"field": "record_view", "type": "enumeration", "values": ["", "List", "Report Builder", "Dashboard", "Tree", "New", "Calendar", "Kanban", "Image"], "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Entity type"]]},
+      {"field": "label", "type": "short_text", "required": true},
+      {"field": "icon", "type": "short_text", "visible_when": ["context", "design_mode_enabled"]},
+      {"field": "restrict_to_domain_identifier", "type": "entity_reference", "target": "information_management.domain", "visible_when": ["context", "design_mode_enabled"]},
+      {"field": "stats_filter", "type": "expression_or_structured_text"},
+      {"field": "color", "type": "color"},
+      {"field": "format", "type": "short_text"},
+      {"field": "resource_address", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "URL"]]},
+      {"field": "kanban_board_identifier", "type": "entity_reference", "target": "operator_workspace.kanban_board", "visible_when": ["coercive_equal", ["current_field", "record_view"], ["literal", "Kanban"]]},
+      {"field": "report_reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Count Filter", "visible_when": ["and", ["coercive_equal", ["current_field", "type"], ["literal", "Entity type"]], ["context", "design_mode_enabled"]]}
+    ]
+  },
+  {
+    "entity": "operator_workspace.workspace_sidebar",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "email", "export", "print", "read", "report", "share"]},
+      {"role": "desk_user", "level": 0, "allows": ["delete", "email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "unique": true},
+      {"field": "items_rows", "type": "owned_collection", "target": "operator_workspace.workspace_sidebar_item", "omit_on_copy": true},
+      {"field": "header_icon", "type": "icon"},
+      {"field": "application", "type": "suggested_text", "visible_when": ["coercive_equal", ["current_field", "standard"], ["literal", 1]]},
+      {"field": "for_user_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "module", "type": "text", "form_hidden": true},
+      {"field": "standard", "type": "boolean", "default": "0"},
+      {"field": "module_onboarding_identifier", "type": "entity_reference", "target": "operator_workspace.module_onboarding"}
+    ]
+  },
+  {
+    "entity": "operator_workspace.workspace_sidebar_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "type", "type": "enumeration", "values": ["Link", "Section Break", "Spacer", "Sidebar Item Group"], "default": "Link"},
+      {"field": "label", "type": "short_text"},
+      {"field": "link_type", "type": "enumeration", "values": ["Entity type", "Page", "Report", "Workspace", "Dashboard", "URL"], "default": "Entity type", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Link"]]},
+      {"field": "link_to_identifier", "type": "selected_entity_reference", "target_selected_by": "link_type", "visible_when": ["and", ["coercive_unequal", ["current_field", "link_type"], ["literal", "URL"]], ["coercive_equal", ["current_field", "type"], ["literal", "Link"]]]},
+      {"field": "icon", "type": "icon", "visible_when": ["or", ["coercive_equal", ["current_field", "type"], ["literal", "Link"]], ["coercive_equal", ["current_field", "type"], ["literal", "Section Break"]]]},
+      {"field": "child", "type": "boolean", "default": "0"},
+      {"field": "indent", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Section Break"]]},
+      {"field": "collapsible", "type": "boolean", "default": "1", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Section Break"]]},
+      {"field": "keep_closed", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Section Break"]]},
+      {"field": "resource_address", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "link_type"], ["literal", "URL"]]},
+      {"field": "show_arrow", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "indent"], ["literal", 1]]},
+      {"field": "filters", "type": "expression_or_structured_text"},
+      {"field": "route_options", "type": "expression_or_structured_text"},
+      {"field": "navigate_to_tab", "type": "suggested_text", "visible_when": ["and", ["coercive_equal", ["current_field", "link_type"], ["literal", "Entity type"]], ["current_field", "link_to_identifier"]]},
+      {"field": "open_in_new_tab", "type": "boolean", "default": "1", "visible_when": ["strict_equal", ["current_field", "link_type"], ["literal", "URL"]]},
+      {"field": "default_workspace", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Details"},
+      {"control": "section", "purpose": "Display", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Section Break"]]},
+      {"control": "formatted_information", "purpose": "Filter Area"}
+    ]
+  }
+]

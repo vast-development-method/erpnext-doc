@@ -1,0 +1,126 @@
+[
+  {
+    "entity": "maintenance.maintenance_schedule",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "maintenance_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "write_once": true, "omit_on_copy": true, "values": ["maintenance schedule numbering prefix + four-digit year + configured sequence"]},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "searchable": true},
+      {"field": "status", "type": "enumeration", "required": true, "form_read_only": true, "omit_on_copy": true, "values": ["", "Draft", "Submitted", "Cancelled"], "default": "Draft"},
+      {"field": "transaction_date", "type": "calendar_date", "required": true},
+      {"field": "items_rows", "type": "owned_collection", "target": "maintenance.maintenance_schedule_item", "required": true},
+      {"field": "schedules_rows", "type": "owned_collection", "target": "maintenance.maintenance_schedule_detail"},
+      {"field": "customer_name", "type": "short_text", "form_read_only": true, "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "contact_person_identifier", "type": "entity_reference", "target": "contacts.contact", "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "contact_mobile", "type": "short_text", "form_read_only": true, "form_hidden": true, "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "contact_email", "type": "short_text", "form_read_only": true, "form_hidden": true, "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "contact_display", "type": "text", "form_read_only": true, "form_hidden": true},
+      {"field": "customer_address_identifier", "type": "entity_reference", "target": "contacts.address", "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "address_display", "type": "formatted_text", "form_read_only": true, "form_hidden": true},
+      {"field": "territory_identifier", "type": "entity_reference", "target": "organization.territory", "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "customer_group_identifier", "type": "entity_reference", "target": "organization.customer_group", "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "maintenance.maintenance_schedule", "form_read_only": true, "omit_on_copy": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Schedule"},
+      {"control": "action", "purpose": "Generate Schedule"},
+      {"control": "section", "purpose": "Contact Info"}
+    ]
+  },
+  {
+    "entity": "maintenance.maintenance_schedule_detail",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true, "searchable": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true},
+      {"field": "scheduled_date", "type": "calendar_date", "required": true, "searchable": true},
+      {"field": "actual_date", "type": "calendar_date", "form_read_only": true, "omit_on_copy": true},
+      {"field": "sales_person_identifier", "type": "entity_reference", "target": "organization.sales_person", "editable_after_posting": true, "read_only_when": ["coercive_unequal", ["current_field", "completion_status"], ["literal", "Pending"]]},
+      {"field": "serial_number", "type": "text", "form_read_only": true},
+      {"field": "completion_status", "type": "enumeration", "editable_after_posting": true, "values": ["Pending", "Partially Completed", "Fully Completed"], "default": "Pending"},
+      {"field": "item_reference_identifier", "type": "entity_reference", "target": "maintenance.maintenance_schedule_item", "form_read_only": true, "form_hidden": true}
+    ]
+  },
+  {
+    "entity": "maintenance.maintenance_schedule_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true, "searchable": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true, "copy_from": ["item_identifier", "item_name"]},
+      {"field": "description", "type": "formatted_text", "form_read_only": true, "copy_from": ["item_identifier", "description"]},
+      {"field": "start_date", "type": "calendar_date", "required": true, "searchable": true},
+      {"field": "end_date", "type": "calendar_date", "required": true, "searchable": true},
+      {"field": "periodicity", "type": "enumeration", "values": ["", "Weekly", "Monthly", "Quarterly", "Half Yearly", "Yearly", "Random"]},
+      {"field": "number_of_visits", "type": "integer", "required": true},
+      {"field": "sales_person_identifier", "type": "entity_reference", "target": "organization.sales_person"},
+      {"field": "serial_number", "type": "text", "form_read_only": true},
+      {"field": "sales_order_identifier", "type": "entity_reference", "target": "sales.sales_order", "form_read_only": true, "omit_on_copy": true, "searchable": true},
+      {"field": "serial_and_batch_bundle_identifier", "type": "entity_reference", "target": "inventory.serial_and_batch_bundle", "omit_on_copy": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Reference"}
+    ]
+  },
+  {
+    "entity": "maintenance.maintenance_visit",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "maintenance_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "maintenance_manager", "level": 0, "allows": ["create", "read", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "write_once": true, "omit_on_copy": true, "values": ["maintenance visit numbering prefix + four-digit year + configured sequence"]},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "required": true},
+      {"field": "customer_name", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "address_display", "type": "formatted_text", "form_read_only": true, "form_hidden": true},
+      {"field": "contact_display", "type": "text", "form_read_only": true, "form_hidden": true},
+      {"field": "contact_mobile", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "contact_email", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "mntc_date", "type": "calendar_date", "required": true, "omit_on_copy": true, "default": {"context_default": "effective_date"}},
+      {"field": "mntc_time", "type": "time_of_day", "omit_on_copy": true},
+      {"field": "completion_status", "type": "enumeration", "required": true, "values": ["", "Partially Completed", "Fully Completed"]},
+      {"field": "maintenance_type", "type": "enumeration", "required": true, "values": ["", "Scheduled", "Unscheduled", "Breakdown"], "default": "Unscheduled"},
+      {"field": "purposes_rows", "type": "owned_collection", "target": "maintenance.maintenance_visit_purpose"},
+      {"field": "customer_feedback", "type": "text"},
+      {"field": "status", "type": "enumeration", "required": true, "form_read_only": true, "omit_on_copy": true, "values": ["", "Draft", "Cancelled", "Submitted"], "default": "Draft"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "maintenance.maintenance_visit", "form_read_only": true, "omit_on_copy": true, "omit_target_user_filter": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "customer_address_identifier", "type": "entity_reference", "target": "contacts.address"},
+      {"field": "contact_person_identifier", "type": "entity_reference", "target": "contacts.contact"},
+      {"field": "territory_identifier", "type": "entity_reference", "target": "organization.territory"},
+      {"field": "customer_group_identifier", "type": "entity_reference", "target": "organization.customer_group"},
+      {"field": "maintenance_schedule_identifier", "type": "entity_reference", "target": "maintenance.maintenance_schedule", "form_read_only": true},
+      {"field": "maintenance_schedule_detail_identifier", "type": "entity_reference", "target": "maintenance.maintenance_schedule_detail", "form_hidden": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "More Information"},
+      {"control": "section", "purpose": "Contact Info", "visible_when": ["field_has_value", "customer_identifier"]}
+    ]
+  },
+  {
+    "entity": "maintenance.maintenance_visit_purpose",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "item_name", "type": "short_text", "form_read_only": true, "copy_from": ["item_identifier", "item_name"]},
+      {"field": "serial_number_identifier", "type": "entity_reference", "target": "inventory.serial_no"},
+      {"field": "description", "type": "formatted_text", "copy_from": ["item_identifier", "description"], "copy_only_when_empty": true},
+      {"field": "service_person_identifier", "type": "entity_reference", "target": "organization.sales_person", "required": true},
+      {"field": "work_done", "type": "text", "required": true},
+      {"field": "prevdoc_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_hidden": true},
+      {"field": "prevdoc_record_identifier", "type": "selected_entity_reference", "target_selected_by": "prevdoc_entity_type_identifier", "form_hidden": true},
+      {"field": "maintenance_schedule_detail", "type": "short_text", "form_hidden": true}
+    ]
+  }
+]

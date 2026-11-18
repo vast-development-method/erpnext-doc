@@ -1,0 +1,948 @@
+[
+  {
+    "capability": "South African injury and payroll reporting",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "coida_annual_return",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "company_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "industry_class", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "employer_category", "value_kind": "choice", "rules": ["required"], "choices": ["general_employer", "domestic_employer"]},
+          {"purpose": "fiscal_year", "value_kind": "reference", "rules": ["required"], "target": "accounting.fiscal_year", "binding": "shared_model"},
+          {"purpose": "from_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "to_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "uncapped_annual_earnings", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "coida_annual_earnings_cap", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_annual_earnings", "value_kind": "money", "rules": ["required", "read_only"]},
+          {"purpose": "excluded_annual_earnings", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "director_earnings", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "earnings_snapshot", "value_kind": "owned_rows", "rules": ["read_only"], "target": "coida_earnings_snapshot"},
+          {"purpose": "free_food_and_quarters", "value_kind": "money"},
+          {"purpose": "grand_total_earnings", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "monthly_earnings", "value_kind": "owned_rows", "target": "coida_monthly_earnings"},
+          {"purpose": "total_employees", "value_kind": "whole_number", "rules": ["required", "read_only"]},
+          {"purpose": "source_slip_count", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "assessment_rate", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "assessment_fee", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "assessment_before_minimum", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "minimum_assessment", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "cap_rate_rule", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "cap_rate_source", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "assessment_rate_rule", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "assessment_rate_source", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "minimum_assessment_rule", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "minimum_assessment_source", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "source_snapshot_hash", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "calculated_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["draft", "submitted", "paid", "cancelled"]},
+          {"purpose": "submission_date", "value_kind": "civil_day"},
+          {"purpose": "prepared_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "coida_annual_return"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "coida_earnings_snapshot",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "salary_slip", "value_kind": "reference", "rules": ["required", "read_only"], "target": "workforce.salary_slip", "binding": "shared_model"},
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required", "read_only"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "period_start", "value_kind": "civil_day", "rules": ["required", "read_only"]},
+          {"purpose": "period_end", "value_kind": "civil_day", "rules": ["required", "read_only"]},
+          {"purpose": "gross_earnings", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "assessable_earnings", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "capped_assessable_earnings", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "is_director", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "source_hash", "value_kind": "text", "rules": ["required", "read_only"]}
+        ]
+      },
+      {
+        "concept": "coida_industry_rate",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "industry_class", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "industry_description", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "assessment_rate", "value_kind": "percentage", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "coida_monthly_earnings",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "month", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "period_end", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "employees", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "employee_earnings", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "directors", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "director_earnings", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "provisional_employees", "value_kind": "whole_number"},
+          {"purpose": "provisional_employee_earnings", "value_kind": "money"},
+          {"purpose": "provisional_directors", "value_kind": "whole_number"},
+          {"purpose": "provisional_director_earnings", "value_kind": "money"}
+        ]
+      },
+      {
+        "concept": "coida_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "registration_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "reference_number", "value_kind": "text"},
+          {"purpose": "submission_deadline", "value_kind": "civil_day"},
+          {"purpose": "assessment_year", "value_kind": "reference", "target": "accounting.fiscal_year", "binding": "shared_model"},
+          {"purpose": "industry_rates", "value_kind": "owned_rows", "rules": ["required"], "target": "coida_industry_rate"},
+          {"purpose": "allow_legacy_rate_fallback", "value_kind": "boolean"},
+          {"purpose": "legacy_rate_fallback_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "approved"]},
+          {"purpose": "legacy_rate_effective_from", "value_kind": "civil_day"},
+          {"purpose": "legacy_rate_effective_to", "value_kind": "civil_day"},
+          {"purpose": "legacy_rate_source_reference", "value_kind": "text"},
+          {"purpose": "legacy_minimum_assessment", "value_kind": "money"},
+          {"purpose": "legacy_domestic_minimum_assessment", "value_kind": "money"},
+          {"purpose": "legacy_rate_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "legacy_rate_prepared_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "legacy_rate_reviewed_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "legacy_rate_reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "share", "print", "email"], false],
+          ["system_manager", 1, ["read", "write"], false],
+          ["human_resources_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "object_identifier_claim",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "identifier_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "company_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "workplace_injury", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "workplace_injury"},
+          {"purpose": "injury_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "injury_type", "value_kind": "choice", "rules": ["required"], "choices": ["minor", "moderate", "serious", "critical", "fatal"]},
+          {"purpose": "injury_location", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "injury_description", "value_kind": "formatted_text", "rules": ["required"]},
+          {"purpose": "claim_reference", "value_kind": "text"},
+          {"purpose": "claim_date", "value_kind": "civil_day", "rules": ["read_only", "editable_after_submission", "indexed_for_search"]},
+          {"purpose": "claim_status", "value_kind": "choice", "rules": ["required", "read_only", "editable_after_submission", "indexed_for_search"], "choices": ["pending", "submitted", "under_review", "approved", "rejected", "paid", "cancelled"]},
+          {"purpose": "compensation_amount", "value_kind": "money", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "payment_date", "value_kind": "civil_day", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "medical_reports", "value_kind": "owned_rows", "rules": ["editable_after_submission"], "target": "object_identifier_medical_report"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "object_identifier_claim"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "object_identifier_medical_report",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "report_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "medical_provider", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "report_type", "value_kind": "choice", "rules": ["required"], "choices": ["initial_assessment", "progress_report", "specialist_report", "final_report"]},
+          {"purpose": "diagnosis", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "attachment", "value_kind": "file_reference"}
+        ]
+      },
+      {
+        "concept": "workplace_injury",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "department", "value_kind": "reference", "rules": ["read_only"], "target": "organization.department", "binding": "shared_model"},
+          {"purpose": "designation", "value_kind": "reference", "rules": ["read_only"], "target": "organization.designation", "binding": "shared_model"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "company_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "injury_date", "value_kind": "civil_day", "rules": ["required", "indexed_for_search"]},
+          {"purpose": "injury_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "injury_location", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "injury_type", "value_kind": "choice", "rules": ["required"], "choices": ["minor", "moderate", "serious", "critical", "fatal"]},
+          {"purpose": "severity", "value_kind": "choice", "rules": ["required"], "choices": ["low", "medium", "high"]},
+          {"purpose": "injury_description", "value_kind": "formatted_text", "rules": ["required"]},
+          {"purpose": "reported_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "incident_reported_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "incident_mechanism", "value_kind": "text"},
+          {"purpose": "body_part_affected", "value_kind": "text"},
+          {"purpose": "has_witnesses", "value_kind": "boolean"},
+          {"purpose": "witness_details", "value_kind": "text"},
+          {"purpose": "investigation_summary", "value_kind": "formatted_text"},
+          {"purpose": "medical_attention_required", "value_kind": "boolean"},
+          {"purpose": "medical_provider", "value_kind": "text"},
+          {"purpose": "expected_recovery_date", "value_kind": "civil_day"},
+          {"purpose": "requires_leave", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "leave_days", "value_kind": "whole_number", "rules": ["editable_after_submission"]},
+          {"purpose": "injury_leave_type", "value_kind": "reference", "rules": ["editable_after_submission"], "target": "workforce.leave_type", "binding": "shared_model"},
+          {"purpose": "leave_application", "value_kind": "reference", "rules": ["read_only", "editable_after_submission"], "target": "workforce.leave_application", "binding": "shared_model"},
+          {"purpose": "return_to_work_date", "value_kind": "civil_day", "rules": ["editable_after_submission"]},
+          {"purpose": "requires_claim", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "object_identifier_claim", "value_kind": "reference", "rules": ["read_only", "editable_after_submission"], "target": "object_identifier_claim"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["reported", "investigating", "treating", "recovered", "closed"]},
+          {"purpose": "statutory_report_due_on", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "statutory_deadline_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["not_required", "due", "overdue", "submitted_on_time", "submitted_late"]},
+          {"purpose": "compensation_submission_reference", "value_kind": "text", "rules": ["editable_after_submission"]},
+          {"purpose": "compensation_submitted_on", "value_kind": "civil_day", "rules": ["editable_after_submission"]},
+          {"purpose": "compensation_receipt_evidence", "value_kind": "file_reference", "rules": ["editable_after_submission"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "workplace_injury"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "annual_training_report",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "fiscal_year", "value_kind": "reference", "rules": ["required"], "target": "accounting.fiscal_year", "binding": "shared_model"},
+          {"purpose": "seta", "value_kind": "reference", "rules": ["required"], "target": "seta"},
+          {"purpose": "skills_development_facilitator", "value_kind": "reference", "rules": ["required"], "target": "skills_development_facilitator"},
+          {"purpose": "workplace_skills_plan", "value_kind": "reference", "rules": ["required"], "target": "workplace_skills_plan"},
+          {"purpose": "source_reference", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "actual_training_spend", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "training_completed", "value_kind": "owned_rows", "rules": ["required"], "target": "atr_training_completed"},
+          {"purpose": "prepared_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_by", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "review_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft_working_paper", "internally_approved", "cancelled"]},
+          {"purpose": "submission_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "external_filing_status", "value_kind": "choice", "choices": ["not_filed", "filed_externally", "not_applicable"]},
+          {"purpose": "external_filing_reference", "value_kind": "text"},
+          {"purpose": "external_filing_date", "value_kind": "civil_day"},
+          {"purpose": "external_filing_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "annual_training_report"}
+        ],
+        "role_grants": [
+          ["human_resources_user", 0, ["read", "report", "print"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "submit", "report", "export", "print", "email"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 1, ["read", "write"], false],
+          ["south_african_compliance_reviewer", 1, ["read"], false],
+          ["south_african_compliance_manager", 1, ["read", "write"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "atr_training_completed",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "ofo_occupation", "value_kind": "reference", "rules": ["required"], "target": "ofo_occupation"},
+          {"purpose": "occupational_level", "value_kind": "choice", "rules": ["required"], "choices": ["top_management", "senior_management", "professionally_qualified", "skilled_technical", "semi_skilled", "unskilled", "temporary_employees", "non_permanent"]},
+          {"purpose": "training_completed", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "intervention_type", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "qualification_reference", "value_kind": "text"},
+          {"purpose": "training_provider", "value_kind": "reference", "rules": ["required"], "target": "training_provider"},
+          {"purpose": "number_trained", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "actual_cost", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "completion_evidence", "value_kind": "file_reference", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "bargaining_council",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "council_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "industry_sector", "value_kind": "text"},
+          {"purpose": "sector", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "registration_number", "value_kind": "text"},
+          {"purpose": "contact_person", "value_kind": "text"},
+          {"purpose": "contact_email", "value_kind": "text"},
+          {"purpose": "contact_phone", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_trip",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required"], "choices": ["assigned_sequence_with_year"]},
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "trip_purpose", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "from_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "to_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only", "editable_after_submission"], "choices": ["draft", "submitted", "approved", "expense_claim_created", "cancelled"]},
+          {"purpose": "allowances", "value_kind": "owned_rows", "target": "business_trip_allowance"},
+          {"purpose": "total_allowance", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_incidental", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "journeys", "value_kind": "owned_rows", "target": "business_trip_journey"},
+          {"purpose": "total_mileage_claim", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_receipt_claims", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "accommodations", "value_kind": "owned_rows", "target": "business_trip_accommodation"},
+          {"purpose": "total_accommodation", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "other_expenses", "value_kind": "owned_rows", "target": "business_trip_other_expense"},
+          {"purpose": "total_other_expenses", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "grand_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "expense_claim", "value_kind": "reference", "rules": ["read_only", "editable_after_submission"], "target": "workforce.expense_claim", "binding": "shared_model"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "business_trip"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "write", "create", "report", "share", "print", "email"], false],
+          ["employee", 0, ["read", "write", "create", "share", "print", "email"], true]
+        ]
+      },
+      {
+        "concept": "business_trip_accommodation",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "hotel_name", "value_kind": "text"},
+          {"purpose": "city", "value_kind": "text"},
+          {"purpose": "amount", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "receipt_attached", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "business_trip_allowance",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "region", "value_kind": "reference", "rules": ["required"], "target": "business_trip_region"},
+          {"purpose": "daily_rate", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "incidental_rate", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total", "value_kind": "money", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "business_trip_journey",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "from_location", "value_kind": "text"},
+          {"purpose": "to_location", "value_kind": "text"},
+          {"purpose": "transport_mode", "value_kind": "choice", "rules": ["required"], "choices": ["car_private", "company_car", "rental_car", "flight", "train", "taxi", "uber_bolt", "other"]},
+          {"purpose": "distance_km", "value_kind": "decimal"},
+          {"purpose": "mileage_rate", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "mileage_claim", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "receipt_amount", "value_kind": "money"},
+          {"purpose": "receipt_attached", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "business_trip_other_expense",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "description", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "amount", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "receipt_required", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "business_trip_region",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "region_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "country", "value_kind": "reference", "target": "geography.country", "binding": "shared_model"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "daily_allowance_rate", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "incidental_allowance_rate", "value_kind": "money"},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["employee", 0, ["read", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_trip_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "mileage_allowance_rate", "value_kind": "money"},
+          {"purpose": "mileage_expense_claim_type", "value_kind": "reference", "target": "workforce.expense_claim_type", "binding": "shared_model"},
+          {"purpose": "meal_expense_claim_type", "value_kind": "reference", "target": "workforce.expense_claim_type", "binding": "shared_model"},
+          {"purpose": "incidental_expense_claim_type", "value_kind": "reference", "target": "workforce.expense_claim_type", "binding": "shared_model"},
+          {"purpose": "require_manager_approval", "value_kind": "boolean"},
+          {"purpose": "auto_create_expense_claim_on_submit", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "employment_equity_movement",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "effective_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "movement_type", "value_kind": "choice", "rules": ["required"], "choices": ["appointment", "promotion", "demotion", "transfer", "termination", "other"]},
+          {"purpose": "previous_occupational_level", "value_kind": "text"},
+          {"purpose": "new_occupational_level", "value_kind": "text"},
+          {"purpose": "race", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "gender", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "is_disabled", "value_kind": "boolean"},
+          {"purpose": "source_document_type", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "source_document_name", "value_kind": "variable_record_reference", "record_class_field": "source_document_type"},
+          {"purpose": "private_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "employment_equity_movement"}
+        ],
+        "role_grants": [
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 1, ["read", "write"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "employment_equity_target",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "effective_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "occupational_level", "value_kind": "choice", "rules": ["required"], "choices": ["top_management", "senior_management", "professionally_qualified", "skilled_technical", "semi_skilled", "unskilled", "temporary_employees", "non_permanent"]},
+          {"purpose": "race", "value_kind": "choice", "rules": ["required"], "choices": ["all", "african", "coloured", "indian", "white", "other"]},
+          {"purpose": "gender", "value_kind": "choice", "rules": ["required"], "choices": ["all", "male", "female"]},
+          {"purpose": "disability_status", "value_kind": "choice", "rules": ["required"], "choices": ["all", "persons_with_disabilities", "persons_without_disabilities"]},
+          {"purpose": "target_percentage", "value_kind": "percentage"},
+          {"purpose": "target_headcount", "value_kind": "whole_number"},
+          {"purpose": "notes", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "employment_equity_target_plan",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "plan_start_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "plan_end_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "sector", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "ee_amendment_effective_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "sector_targets_effective_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "sector_target_period_end", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "source_basis", "value_kind": "choice", "rules": ["required"], "choices": ["sector_numerical_targets", "eap_statistics", "approved_employer_plan", "other_governed_source"]},
+          {"purpose": "statutory_source", "value_kind": "reference", "target": "south_african_statutory_source", "binding": "configured_optional_dependency", "target_options": ["South African filing and privacy obligations / 1 / south_african_statutory_source"]},
+          {"purpose": "source_reference", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "source_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "small_cell_threshold", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "targets", "value_kind": "owned_rows", "rules": ["required"], "target": "employment_equity_target"},
+          {"purpose": "prepared_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_by", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "review_evidence", "value_kind": "file_reference", "rules": ["required"], "access_level": 1},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft_working_paper", "internally_approved", "cancelled"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "employment_equity_target_plan"}
+        ],
+        "role_grants": [
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "submit", "report", "export", "print", "email"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 1, ["read", "write"], false],
+          ["south_african_compliance_reviewer", 1, ["read"], false],
+          ["south_african_compliance_manager", 1, ["read", "write"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "industry_specific_contribution",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "contribution_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "contribution_type", "value_kind": "choice", "choices": ["provident_fund", "sick_pay_fund", "holiday_fund", "death_benefit_fund", "other"]},
+          {"purpose": "bargaining_council", "value_kind": "reference", "target": "bargaining_council"},
+          {"purpose": "employee_contribution_percentage", "value_kind": "percentage"},
+          {"purpose": "employer_contribution_percentage", "value_kind": "percentage"},
+          {"purpose": "salary_component", "value_kind": "reference", "target": "workforce.salary_component", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "ofo_occupation",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "ofo_code", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "occupation_title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "ofo_version", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "major_group", "value_kind": "text"},
+          {"purpose": "minor_group", "value_kind": "text"},
+          {"purpose": "effective_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_to", "value_kind": "civil_day"},
+          {"purpose": "statutory_source", "value_kind": "reference", "target": "south_african_statutory_source", "binding": "configured_optional_dependency", "target_options": ["South African filing and privacy obligations / 1 / south_african_statutory_source"]},
+          {"purpose": "source_reference", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "source_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "active", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "print"], false],
+          ["human_resources_user", 0, ["read", "report", "print"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "print"], false],
+          ["human_resources_manager", 1, ["read", "write"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "sectoral_minimum_wage",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "worker_category", "value_kind": "choice", "rules": ["required"], "choices": ["general_nmw", "epwp", "learnership_schedule_2", "sector_specific", "special_or_excluded_category"]},
+          {"purpose": "sector", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "position_category", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "effective_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_to", "value_kind": "civil_day"},
+          {"purpose": "hourly_rate", "value_kind": "money"},
+          {"purpose": "monthly_rate", "value_kind": "money"},
+          {"purpose": "schedule_reference", "value_kind": "text"},
+          {"purpose": "special_category_reason", "value_kind": "text"},
+          {"purpose": "statutory_source", "value_kind": "reference", "target": "south_african_statutory_source", "binding": "configured_optional_dependency", "target_options": ["South African filing and privacy obligations / 1 / south_african_statutory_source"]},
+          {"purpose": "source_reference", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "source_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "prepared_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_by", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "review_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "governance_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft_reference", "internally_approved", "cancelled"]},
+          {"purpose": "automation_status", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "sectoral_minimum_wage"}
+        ],
+        "role_grants": [
+          ["human_resources_user", 0, ["read", "report", "print"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "print"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "submit", "report", "print"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print"], false],
+          ["human_resources_manager", 1, ["read", "write"], false],
+          ["south_african_compliance_reviewer", 1, ["read"], false],
+          ["south_african_compliance_manager", 1, ["read", "write"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "seta",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "seta_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "code", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "contact_person", "value_kind": "text"},
+          {"purpose": "contact_email", "value_kind": "text"},
+          {"purpose": "contact_phone", "value_kind": "text"},
+          {"purpose": "source_reference", "value_kind": "text"},
+          {"purpose": "active", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "report", "export", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "skills_development_facilitator",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "employee", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "registration_number", "value_kind": "text"},
+          {"purpose": "effective_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_to", "value_kind": "civil_day"},
+          {"purpose": "appointment_evidence", "value_kind": "file_reference", "rules": ["required"], "access_level": 1},
+          {"purpose": "prepared_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_by", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "review_evidence", "value_kind": "file_reference", "rules": ["required"], "access_level": 1},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "internally_approved", "cancelled"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "skills_development_facilitator"}
+        ],
+        "role_grants": [
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "submit", "report", "print"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 1, ["read", "write"], false],
+          ["south_african_compliance_reviewer", 1, ["read"], false],
+          ["south_african_compliance_manager", 1, ["read", "write"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "skills_development_record",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "fiscal_year", "value_kind": "reference", "rules": ["required"], "target": "accounting.fiscal_year", "binding": "shared_model"},
+          {"purpose": "seta", "value_kind": "reference", "rules": ["required"], "target": "seta"},
+          {"purpose": "workplace_skills_plan", "value_kind": "reference", "rules": ["required"], "target": "workplace_skills_plan"},
+          {"purpose": "annual_training_report", "value_kind": "reference", "target": "annual_training_report"},
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "ofo_occupation", "value_kind": "reference", "rules": ["required"], "target": "ofo_occupation"},
+          {"purpose": "training_program", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "intervention_type", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "qualification_reference", "value_kind": "text"},
+          {"purpose": "training_provider", "value_kind": "reference", "rules": ["required"], "target": "training_provider"},
+          {"purpose": "provider_accreditation_required", "value_kind": "boolean"},
+          {"purpose": "start_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "end_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "training_cost", "value_kind": "money"},
+          {"purpose": "bursary_amount", "value_kind": "money"},
+          {"purpose": "is_disabled_learner", "value_kind": "boolean"},
+          {"purpose": "completion_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "bbbee_scoring_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["controlled_manual_not_calculated"]},
+          {"purpose": "bec_points", "value_kind": "decimal", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "skills_development_record"}
+        ],
+        "role_grants": [
+          ["human_resources_user", 0, ["read", "report", "print"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 1, ["read", "write"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "training_provider",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "provider_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "registration_number", "value_kind": "text"},
+          {"purpose": "contact_details", "value_kind": "text"},
+          {"purpose": "accredited", "value_kind": "boolean"},
+          {"purpose": "accreditation_body", "value_kind": "text"},
+          {"purpose": "accreditation_number", "value_kind": "text"},
+          {"purpose": "accreditation_scope", "value_kind": "text"},
+          {"purpose": "accreditation_from", "value_kind": "civil_day"},
+          {"purpose": "accreditation_to", "value_kind": "civil_day"},
+          {"purpose": "accreditation_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "active", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "print"], false],
+          ["human_resources_user", 0, ["read", "report", "print"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "print"], false],
+          ["human_resources_manager", 1, ["read", "write"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "workplace_skills_plan",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "fiscal_year", "value_kind": "reference", "rules": ["required"], "target": "accounting.fiscal_year", "binding": "shared_model"},
+          {"purpose": "seta", "value_kind": "reference", "rules": ["required"], "target": "seta"},
+          {"purpose": "skills_development_facilitator", "value_kind": "reference", "rules": ["required"], "target": "skills_development_facilitator"},
+          {"purpose": "source_reference", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "total_training_budget", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "training_details", "value_kind": "owned_rows", "rules": ["required"], "target": "wsp_training_detail"},
+          {"purpose": "prepared_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_by", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "review_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft_working_paper", "internally_approved", "cancelled"]},
+          {"purpose": "submission_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "external_filing_status", "value_kind": "choice", "choices": ["not_filed", "filed_externally", "not_applicable"]},
+          {"purpose": "external_filing_reference", "value_kind": "text"},
+          {"purpose": "external_filing_date", "value_kind": "civil_day"},
+          {"purpose": "external_filing_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "workplace_skills_plan"}
+        ],
+        "role_grants": [
+          ["human_resources_user", 0, ["read", "report", "print"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "submit", "report", "export", "print", "email"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 1, ["read", "write"], false],
+          ["south_african_compliance_reviewer", 1, ["read"], false],
+          ["south_african_compliance_manager", 1, ["read", "write"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "wsp_training_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "ofo_occupation", "value_kind": "reference", "rules": ["required"], "target": "ofo_occupation"},
+          {"purpose": "occupational_level", "value_kind": "choice", "rules": ["required"], "choices": ["top_management", "senior_management", "professionally_qualified", "skilled_technical", "semi_skilled", "unskilled", "temporary_employees", "non_permanent"]},
+          {"purpose": "planned_training", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "intervention_type", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "qualification_reference", "value_kind": "text"},
+          {"purpose": "training_provider", "value_kind": "reference", "rules": ["required"], "target": "training_provider"},
+          {"purpose": "number_of_employees", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "estimated_cost", "value_kind": "money", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "bursary_benefit",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required"], "choices": ["assigned_sequence_with_year"]},
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "beneficiary_type", "value_kind": "choice", "rules": ["required"], "choices": ["employee", "dependent"]},
+          {"purpose": "beneficiary_name", "value_kind": "text"},
+          {"purpose": "institution", "value_kind": "text"},
+          {"purpose": "course_name", "value_kind": "text"},
+          {"purpose": "academic_year", "value_kind": "text"},
+          {"purpose": "bursary_amount", "value_kind": "money"},
+          {"purpose": "is_taxable", "value_kind": "boolean"},
+          {"purpose": "taxable_amount", "value_kind": "money"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "bursary_benefit"}
+        ],
+        "role_grants": [
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "cellphone_benefit",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "device_make_model", "value_kind": "text"},
+          {"purpose": "contract_value", "value_kind": "money"},
+          {"purpose": "business_use_percentage", "value_kind": "percentage"},
+          {"purpose": "private_use_percentage", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "monthly_taxable_value", "value_kind": "money", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "company_car_benefit",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["read_only"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "vehicle_registration", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "vehicle_make_model", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "purchase_price", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "purchase_date", "value_kind": "civil_day"},
+          {"purpose": "has_maintenance_plan", "value_kind": "boolean"},
+          {"purpose": "employee_consideration", "value_kind": "money"},
+          {"purpose": "private_km_per_month", "value_kind": "decimal"},
+          {"purpose": "business_km_per_month", "value_kind": "decimal"},
+          {"purpose": "total_km_per_month", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "private_use_percentage", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "business_use_at_least_80_percent", "value_kind": "boolean"},
+          {"purpose": "monthly_taxable_value", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "paye_inclusion_percentage", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "monthly_paye_value", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "calculation_method", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "formatted_text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "company_car_benefit"},
+          {"purpose": "co2_emissions", "value_kind": "whole_number", "rules": ["hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "company_contribution",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "salary_component", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "workforce.salary_component", "binding": "shared_model"},
+          {"purpose": "abbreviation", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "amount", "value_kind": "money", "rules": ["editable_after_submission"]},
+          {"purpose": "condition", "value_kind": "expression_or_structured_text", "rules": ["editable_after_submission"]},
+          {"purpose": "amount_based_on_formula", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "formula", "value_kind": "expression_or_structured_text", "rules": ["editable_after_submission"]}
+        ]
+      },
+      {
+        "concept": "emp201_submission",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "company_abbreviation", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "submission_key", "value_kind": "text", "rules": ["unique", "read_only", "hidden_from_form"]},
+          {"purpose": "fiscal_year", "value_kind": "reference", "rules": ["required"], "target": "accounting.fiscal_year", "binding": "shared_model"},
+          {"purpose": "month", "value_kind": "choice", "rules": ["required"], "choices": ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "submission_period_start_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "submission_period_end_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["draft", "prepared_working_paper", "cancelled"]},
+          {"purpose": "prepared_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "filing_due_date", "value_kind": "civil_day", "rules": ["editable_after_submission"]},
+          {"purpose": "filing_reviewer", "value_kind": "reference", "rules": ["editable_after_submission"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "filing_approver", "value_kind": "reference", "rules": ["editable_after_submission"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "south_african_filing", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_filing", "binding": "configured_optional_dependency", "target_options": ["South African filing and privacy obligations / 1 / south_african_filing"]},
+          {"purpose": "working_paper_file", "value_kind": "file_reference", "rules": ["read_only"]},
+          {"purpose": "working_paper_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "gross_paye_before_eti", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "eti_carried_forward_from_previous", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "eti_generated_current_month", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_eti_available", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "eti_utilized_current_month", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "net_paye_payable", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "eti_to_be_carried_forward", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "eti_reconciliation_refund", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "unemployment_insurance_fund_payable", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "sdl_payable", "value_kind": "money", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["payroll_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "report"], false],
+          ["accounts_user", 0, ["read"], false],
+          ["south_african_compliance_user", 0, ["read", "report", "print"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "report", "print"], false],
+          ["south_african_compliance_manager", 0, ["read", "report", "print"], false]
+        ]
+      },
+      {
+        "concept": "emp501_emp201_reference",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "emp201_submission", "value_kind": "reference", "rules": ["required"], "target": "emp201_submission"},
+          {"purpose": "submission_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "paye", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "sdl", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "unemployment_insurance_fund", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "eti", "value_kind": "money", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "emp501_irp5_reference",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "irp5_certificate", "value_kind": "reference", "rules": ["required"], "target": "irp5_certificate"},
+          {"purpose": "employee", "value_kind": "reference", "rules": ["read_only"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "prepared", "submitted", "accepted", "rejected"]}
+        ]
+      },
+      {
+        "concept": "emp501_reconciliation",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "tax_year", "value_kind": "reference", "rules": ["required"], "target": "accounting.fiscal_year", "binding": "shared_model"},
+          {"purpose": "reconciliation_period", "value_kind": "choice", "rules": ["required"], "choices": ["interim", "final"]},
+          {"purpose": "submission_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["draft", "prepared", "submitted", "accepted", "rejected", "cancelled"]},
+          {"purpose": "from_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "to_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "paye_reference_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "sdl_reference_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "unemployment_insurance_fund_reference_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "total_paye", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_sdl", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_unemployment_insurance_fund", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_eti", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_tax_payable", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "emp201_submissions", "value_kind": "owned_rows", "target": "emp501_emp201_reference"},
+          {"purpose": "irp5_certificates", "value_kind": "owned_rows", "target": "emp501_irp5_reference"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "emp501_reconciliation"},
+          {"purpose": "amended", "value_kind": "boolean"},
+          {"purpose": "previous_submission", "value_kind": "reference", "target": "emp501_reconciliation"},
+          {"purpose": "notes", "value_kind": "formatted_text"},
+          {"purpose": "prepared_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "filing_due_date", "value_kind": "civil_day", "rules": ["editable_after_submission"]},
+          {"purpose": "filing_reviewer", "value_kind": "reference", "rules": ["editable_after_submission"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "filing_approver", "value_kind": "reference", "rules": ["editable_after_submission"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "south_african_filing", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_filing", "binding": "configured_optional_dependency", "target_options": ["South African filing and privacy obligations / 1 / south_african_filing"]},
+          {"purpose": "working_paper_file", "value_kind": "file_reference", "rules": ["read_only"]},
+          {"purpose": "working_paper_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "south_african_revenue_service_submission_status", "value_kind": "choice", "choices": ["not_submitted", "submitted", "accepted", "rejected", "queried"]},
+          {"purpose": "south_african_revenue_service_submission_date", "value_kind": "date_and_time"},
+          {"purpose": "south_african_revenue_service_submission_reference", "value_kind": "text"},
+          {"purpose": "south_african_revenue_service_response", "value_kind": "expression_or_structured_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["payroll_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["payroll_user", 0, ["read", "write", "create", "report", "export", "print"], false],
+          ["human_resources_manager", 0, ["read", "report", "export", "print"], false],
+          ["south_african_compliance_user", 0, ["read", "report", "print"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "report", "print"], false],
+          ["south_african_compliance_manager", 0, ["read", "report", "print"], false]
+        ]
+      },
+      {
+        "concept": "employee_eti_log",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text"},
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "eti_amount", "value_kind": "money"},
+          {"purpose": "carry_forwarding_eti_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "employee_eti_log"},
+          {"purpose": "against_salary_slip", "value_kind": "reference", "rules": ["required"], "target": "workforce.salary_slip", "binding": "shared_model"},
+          {"purpose": "is_qualifying_month", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "qualifying_month_number", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "eligibility_reason", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "hours", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "monthly_remuneration", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "wage_paid", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "minimum_wage", "value_kind": "money", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "employee_final_settlement",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required"], "choices": ["assigned_sequence_with_year"]},
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "separation_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "termination_type", "value_kind": "choice", "choices": ["resignation", "dismissal_misconduct", "dismissal_operational", "mutual_agreement", "end_of_contract"]},
+          {"purpose": "tax_directive", "value_kind": "reference", "target": "tax_directive"},
+          {"purpose": "previous_lump_sum_benefits", "value_kind": "money"},
+          {"purpose": "notice_period_days", "value_kind": "whole_number"},
+          {"purpose": "notice_pay", "value_kind": "money"},
+          {"purpose": "severance_pay", "value_kind": "money"},
+          {"purpose": "leave_payout", "value_kind": "money"},
+          {"purpose": "bonus_prorata", "value_kind": "money"},
+          {"purpose": "total_gross", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "paye", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "unemployment_insurance_fund", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "net_settlement", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "employee_final_settlement"}
+        ],
+        "role_grants": [
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "employee_frequency_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "frequency", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "quarterly", "half_yearly", "yearly"]}
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,31 @@
+# From dated demand to a release recommendation
+
+A planner needs two dates for different decisions. The master schedule estimates when the whole bill of materials must start. The requirements report dates each outstanding replenishment after consuming available supply. The same product can have different lead times in those two calculations.
+
+## Forecast and schedule records
+
+| Record | Grain and relationship | Authority and effect |
+|---|---|---|
+| Sales forecast | Company, starting date, period count, frequency, group warehouse, selected stock items, dated demand rows | Manual generation replaces rows, producing one stock-unit demand per item and period with a starting quantity of one. Weekly generation advances by weeks, monthly by calendar months from the original start. |
+| Master production schedule | One optional forecast plus dated item/warehouse demand, unit of measure, bill of materials and order release date | Mapping requires a submitted forecast in Planned state. Saving a schedule updates the linked forecast to Schedule Generated. Deleting or changing the link recomputes the previous forecast's state. |
+| Sales order schedule | Delivery slice within a specific order line | Consume that line's delivered stock quantity earliest first across its slices before applying the reporting date range. |
+| Material requirements report | Calculation for a selected schedule, warehouses, dates, display bucket and safety-stock setting | Reads supply and demand. Recommendation rows do not reserve stock, authorise work or create a payable. |
+
+A forecast requires a positive number of periods, a company-matching group parent warehouse when provided, eligible stock items and dated rows on or after the start. Zero is an explicit demand quantity. Copy distinct forecast items into the schedule's selector. Fill schedule rows from open demand. The forecast estimate enters the report separately. An empty actual-demand schedule is possible. Validate forecast company, the effective item/unit of measure conversion and each supplied production bill of materials. Lock the forecast while checking for another schedule with that reference. For A on dates 1 and 8, ordered stock quantities 6 and 9, with 8 already delivered, residuals are 0 and 7. Group actual demand by item, date and warehouse, then use the parent warehouse for an empty row warehouse. Material-request balance is stock quantity minus already ordered quantity for a selected, submitted, non-stopped request of this company.
+
+Creating or saving the master production schedule makes its rows available to the requirements report. Saving does not submit the schedule or promise a separately generated planning log.
+
+## Calculate cumulative lead time
+
+1. At each manufactured node use required stock quantity divided by configured daily capacity when capacity is set. Otherwise multiply per-unit manufacturing minutes by quantity and divide by shifts × hours per shift × 60 × workstations. The shift, hours and workstation defaults are 1, 8 and 1 respectively. Add buffer days. A purchased node uses purchase days plus buffer. A missing lead-time record contributes zero for that node.
+2. Scale child quantities by parent demand × component stock quantity / recipe output quantity. Add the longest component branch to the parent's own time. Independent child branches can proceed concurrently.
+3. Round up once at the top and subtract whole calendar days from the delivery date. For 30 finished units, capacity 12 per day and buffer 0.5, own duration is 3 days. Components on parallel paths taking 4.25 and 2 days give 7.25 days in all. A 20 May requirement releases on 12 May.
+4. For the report's individual manufactured row, use nonnegative minutes per unit × *net required quantity* / 1,440 plus buffer days, with zero lead time for zero or negative required quantity. A purchase row with a configured purchase time uses that time plus buffer. Ceil each row's result to assign a release date. An item requiring 90 minutes per unit, 16 units net and a half-day buffer has a 2-day report lead time.
+
+## Net demand in order
+
+Pool forecast by item and delivery date. Split it proportionally across matching actual schedule rows, even when warehouse differs. With zero total planned quantity give the first row the forecast. For an integer forecast in an indivisible stock unit of measure, floor the shares, award the remaining units by descending fractional remainder, and preserve row order on ties. Planned quantities 3 and 2 with a forecast of 7 give forecast shares 4 and 3. The base demand of each row is the larger of planned and forecast. Additional sales demand beyond already represented quantities enters separately. Preserve this aggregation grain when filtering warehouses.
+
+Process dated requirements from earliest to latest. Adjust physical reservation totals to remove overlap with work-order reservations before using the bin. Free stock is actual quantity less adjusted physical reservations, production reservations, subcontract reservations and production-plan reservations. On first encounter of each item reserve the safety target from positive free stock if requested. Add any uncovered part of the safety target to demand. Cover outstanding demand from remaining free stock, then dated procurement supply (including qualifying subcontract output), then dated work-order output. An arrival can cover only the parts due on or after its date. Reduce supply by actual coverage so later dates cannot spend it again. Scale component demand from the remaining quantity and its release date.
+
+For 12 units due on day 10 and another 4 on day 15, start with 7 free, retain 2 for safety, then apply 3 due on day 9. A purchase of 5 due on day 11 is too late for day 10. If a work order for 1 is due on day 10, the first requirement leaves 3 to source. The second consumes 4 of the day-11 purchase, leaving 1 in its supply bucket. Neither the safety requirement nor the day-9 receipt recurs.

@@ -1,0 +1,336 @@
+[
+  {
+    "entity": "nonprofit.certification_application",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "name_of_applicant", "type": "short_text", "required": true},
+      {"field": "email_identifier", "type": "entity_reference", "target": "information_management.user", "required": true},
+      {"field": "certification_status", "type": "enumeration", "values": ["Yet to appear", "Certified", "Not Certified"]},
+      {"field": "paid", "type": "boolean"},
+      {"field": "currency", "type": "enumeration", "values": ["USD", "INR"]},
+      {"field": "amount", "type": "decimal"}
+    ]
+  },
+  {
+    "entity": "nonprofit.certified_consultant",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "non_profit_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "name_of_consultant", "type": "short_text", "required": true},
+      {"field": "country_identifier", "type": "entity_reference", "target": "geography.country", "required": true},
+      {"field": "email_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "phone", "type": "short_text"},
+      {"field": "website_resource_address", "type": "short_text"},
+      {"field": "address", "type": "text"},
+      {"field": "image", "type": "image_file_reference"},
+      {"field": "certification_application_identifier", "type": "entity_reference", "target": "nonprofit.certification_application", "required": true},
+      {"field": "from_date", "type": "calendar_date"},
+      {"field": "to_date", "type": "calendar_date"},
+      {"field": "introduction", "type": "text"},
+      {"field": "details", "type": "formatted_text"},
+      {"field": "discuss_identifier", "type": "short_text"},
+      {"field": "repository_host_identifier", "type": "short_text"},
+      {"field": "show_in_website", "type": "boolean"}
+    ]
+  },
+  {
+    "entity": "nonprofit.chapter",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "non_profit_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "chapter_head_identifier", "type": "entity_reference", "target": "nonprofit.member", "required": true},
+      {"field": "region", "type": "short_text", "required": true},
+      {"field": "introduction", "type": "formatted_text", "required": true},
+      {"field": "meetup_embed_structured_markup", "type": "expression_or_structured_text"},
+      {"field": "address", "type": "text"},
+      {"field": "route", "type": "short_text"},
+      {"field": "published", "type": "boolean"},
+      {"field": "members_rows", "type": "owned_collection", "target": "nonprofit.chapter_member"}
+    ]
+  },
+  {
+    "entity": "nonprofit.chapter_member",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true},
+      {"field": "introduction", "type": "short_text"},
+      {"field": "website_resource_address", "type": "short_text"},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "leave_reason", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "nonprofit.donation",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "non_profit_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "donor_identifier", "type": "entity_reference", "target": "nonprofit.donor", "required": true},
+      {"field": "donor_name", "type": "short_text", "form_read_only": true},
+      {"field": "email", "type": "short_text", "form_read_only": true},
+      {"field": "date", "type": "calendar_date", "required": true},
+      {"field": "amount", "type": "monetary_amount", "required": true},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment"},
+      {"field": "numbering_series", "type": "enumeration", "values": ["donation numbering prefix + four-digit year + configured sequence"]},
+      {"field": "paid", "type": "boolean", "default": "0"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "nonprofit.donation", "form_read_only": true},
+      {"field": "payment_identifier", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "nonprofit.donor",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "non_profit_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "donor_name", "type": "short_text", "required": true},
+      {"field": "donor_type_identifier", "type": "entity_reference", "target": "nonprofit.donor_type", "required": true},
+      {"field": "email", "type": "short_text", "required": true, "unique": true},
+      {"field": "image", "type": "image_file_reference"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "formatted address"},
+      {"control": "formatted_information", "purpose": "formatted contact details"}
+    ]
+  },
+  {
+    "entity": "nonprofit.donor_type",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "non_profit_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "donor_type", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "nonprofit.grant_application",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "non_profit_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "applicant_type", "type": "enumeration", "required": true, "values": ["Individual", "Organization"]},
+      {"field": "applicant_name", "type": "short_text", "required": true},
+      {"field": "contact_person", "type": "short_text"},
+      {"field": "email", "type": "short_text", "required": true},
+      {"field": "status", "type": "enumeration", "values": ["Open", "Received", "In Progress", "Approved", "Rejected", "Expired", "Withdrawn"], "default": "Open"},
+      {"field": "website_resource_address", "type": "short_text"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "grant_description", "type": "long_text", "required": true},
+      {"field": "amount", "type": "monetary_amount", "required": true},
+      {"field": "has_any_past_grant_record", "type": "boolean"},
+      {"field": "route", "type": "short_text"},
+      {"field": "published", "type": "boolean"},
+      {"field": "assessment_mark", "type": "decimal"},
+      {"field": "note", "type": "text"},
+      {"field": "assessment_manager_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "email_notification_sent", "type": "boolean", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "formatted address"},
+      {"control": "formatted_information", "purpose": "formatted contact details"}
+    ]
+  },
+  {
+    "entity": "nonprofit.member",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "non_profit_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "non_profit_member", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["member numbering prefix + four-digit year + configured sequence"]},
+      {"field": "member_name", "type": "short_text", "required": true},
+      {"field": "membership_expiry_date", "type": "calendar_date"},
+      {"field": "membership_type_identifier", "type": "entity_reference", "target": "nonprofit.membership_type", "required": true},
+      {"field": "image", "type": "image_file_reference"},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer"},
+      {"field": "customer_name", "type": "short_text", "form_read_only": true},
+      {"field": "supplier_identifier", "type": "entity_reference", "target": "procurement.supplier"},
+      {"field": "email_identifier", "type": "short_text"},
+      {"field": "subscription_identifier", "type": "short_text", "form_read_only": true},
+      {"field": "customer_identifier_text", "type": "short_text", "form_read_only": true},
+      {"field": "subscription_start", "type": "calendar_date"},
+      {"field": "subscription_end", "type": "calendar_date"},
+      {"field": "subscription_status", "type": "enumeration", "values": ["", "Active", "Halted"]}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "formatted address"},
+      {"control": "formatted_information", "purpose": "formatted contact details"}
+    ]
+  },
+  {
+    "entity": "nonprofit.membership",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "non_profit_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "non_profit_member", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "member_identifier", "type": "entity_reference", "target": "nonprofit.member"},
+      {"field": "membership_type_identifier", "type": "entity_reference", "target": "nonprofit.membership_type", "required": true},
+      {"field": "membership_status", "type": "enumeration", "values": ["New", "Current", "Expired", "Pending", "Cancelled"]},
+      {"field": "from_date", "type": "calendar_date", "required": true},
+      {"field": "to_date", "type": "calendar_date", "required": true},
+      {"field": "member_since_date", "type": "calendar_date"},
+      {"field": "paid", "type": "boolean", "default": "0"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency"},
+      {"field": "amount", "type": "decimal"},
+      {"field": "subscription_identifier", "type": "short_text"},
+      {"field": "payment_identifier", "type": "short_text"},
+      {"field": "invoice_identifier", "type": "entity_reference", "target": "accounting.sales_invoice"},
+      {"field": "member_name", "type": "short_text", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true}
+    ]
+  },
+  {
+    "entity": "nonprofit.membership_type",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "non_profit_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "membership_type", "type": "short_text", "required": true, "unique": true},
+      {"field": "amount", "type": "decimal", "required": true},
+      {"field": "domestic_checkout_provider_plan_identifier", "type": "short_text", "unique": true},
+      {"field": "linked_item_identifier", "type": "entity_reference", "target": "inventory.item", "unique": true}
+    ]
+  },
+  {
+    "entity": "nonprofit.non_profit_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "non_profit_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "non_profit_member", "level": 0, "allows": ["read", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "billing_cycle", "type": "enumeration", "values": ["Monthly", "Yearly"]},
+      {"field": "billing_frequency", "type": "integer"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "send_invoice", "type": "boolean", "default": "0"},
+      {"field": "send_email", "type": "boolean", "default": "0"},
+      {"field": "inv_print_format_identifier", "type": "entity_reference", "target": "document_output.print_format"},
+      {"field": "membership_print_format_identifier", "type": "entity_reference", "target": "document_output.print_format"},
+      {"field": "email_template_identifier", "type": "entity_reference", "target": "mail.email_template"},
+      {"field": "allow_invoicing", "type": "boolean", "default": "0"},
+      {"field": "automate_membership_invoicing", "type": "boolean", "default": "0"},
+      {"field": "automate_membership_payment_entries", "type": "boolean", "default": "0"},
+      {"field": "enable_domestic_checkout_provider_for_memberships", "type": "boolean", "default": "0"},
+      {"field": "membership_payment_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "membership_webhook_secret", "type": "protected_value", "form_read_only": true},
+      {"field": "donation_webhook_secret", "type": "protected_value", "form_read_only": true},
+      {"field": "donation_payment_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "automate_donation_payment_entries", "type": "boolean", "default": "0"},
+      {"field": "membership_debit_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "donation_debit_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "donation_company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "default_donor_type_identifier", "type": "entity_reference", "target": "nonprofit.donor_type", "required": true},
+      {"field": "creation_user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true}
+    ]
+  },
+  {
+    "entity": "nonprofit.tax_exemption_80_g_certificate",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "recipient", "type": "enumeration", "required": true, "values": ["Member", "Donor"]},
+      {"field": "member_identifier", "type": "entity_reference", "target": "nonprofit.member"},
+      {"field": "member_name", "type": "short_text", "form_read_only": true},
+      {"field": "donor_identifier", "type": "entity_reference", "target": "nonprofit.donor"},
+      {"field": "date", "type": "calendar_date", "required": true},
+      {"field": "payments_rows", "type": "owned_collection", "target": "nonprofit.tax_exemption_80_g_certificate_detail"},
+      {"field": "total", "type": "monetary_amount", "form_read_only": true},
+      {"field": "fiscal_year_identifier", "type": "entity_reference", "target": "accounting.fiscal_year"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "numbering_series", "type": "enumeration", "values": ["tax exemption 80 g certificate numbering prefix + four-digit year + configured sequence"]},
+      {"field": "company_address_identifier", "type": "entity_reference", "target": "contacts.address"},
+      {"field": "company_permanent_account_number_number", "type": "short_text", "form_read_only": true},
+      {"field": "company_address_display", "type": "text", "form_read_only": true},
+      {"field": "company_80g_number", "type": "short_text", "form_read_only": true},
+      {"field": "company_80g_wef", "type": "calendar_date", "form_read_only": true},
+      {"field": "donation_identifier", "type": "entity_reference", "target": "nonprofit.donation"},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment", "form_read_only": true},
+      {"field": "date_of_donation", "type": "calendar_date", "form_read_only": true},
+      {"field": "donor_name", "type": "short_text", "form_read_only": true},
+      {"field": "donor_email", "type": "short_text", "form_read_only": true},
+      {"field": "member_email", "type": "short_text", "form_read_only": true},
+      {"field": "member_permanent_account_number_number", "type": "short_text", "form_read_only": true},
+      {"field": "donor_permanent_account_number_number", "type": "short_text", "form_read_only": true},
+      {"field": "title", "type": "short_text"},
+      {"field": "payment_identifier", "type": "short_text", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "get payments"}
+    ]
+  },
+  {
+    "entity": "nonprofit.tax_exemption_80_g_certificate_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "date", "type": "calendar_date", "required": true},
+      {"field": "amount", "type": "monetary_amount", "required": true},
+      {"field": "invoice_identifier", "type": "entity_reference", "target": "accounting.sales_invoice", "required": true},
+      {"field": "membership_identifier", "type": "entity_reference", "target": "nonprofit.membership"},
+      {"field": "payment_identifier", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "nonprofit.volunteer",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "non_profit_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "volunteer_name", "type": "short_text", "required": true},
+      {"field": "volunteer_type_identifier", "type": "entity_reference", "target": "nonprofit.volunteer_type", "required": true},
+      {"field": "email", "type": "short_text", "required": true, "unique": true},
+      {"field": "image", "type": "image_file_reference"},
+      {"field": "availability", "type": "enumeration", "values": ["", "Weekly", "Weekdays", "Weekends"]},
+      {"field": "availability_timeslot", "type": "enumeration", "values": ["", "Morning", "Afternoon", "Evening", "Anytime"]},
+      {"field": "volunteer_skills_rows", "type": "owned_collection", "target": "nonprofit.volunteer_skill"},
+      {"field": "note", "type": "long_text"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "formatted address"},
+      {"control": "formatted_information", "purpose": "formatted contact details"}
+    ]
+  },
+  {
+    "entity": "nonprofit.volunteer_skill",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "volunteer_skill", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "nonprofit.volunteer_type",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "non_profit_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "amount", "type": "decimal", "required": true}
+    ]
+  }
+]

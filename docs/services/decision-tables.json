@@ -1,0 +1,982 @@
+[
+  {
+    "id": "maintenance-admission",
+    "scope": "Site exists, routing and identity initialization are valid. Classify the data-access mode only.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "maintenance",
+        "allow_reads",
+        "use_replica"
+      ],
+      "properties": {
+        "maintenance": {
+          "type": "boolean"
+        },
+        "allow_reads": {
+          "type": "boolean"
+        },
+        "use_replica": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "normal",
+      "stop",
+      "read-replica",
+      "read-only-transaction"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "maintenance",
+            "op": "equal",
+            "value": false
+          }
+        ],
+        "outcome": "normal"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "allow_reads",
+            "op": "equal",
+            "value": false
+          }
+        ],
+        "outcome": "stop"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "use_replica",
+            "op": "equal",
+            "value": true
+          }
+        ],
+        "outcome": "read-replica"
+      },
+      {
+        "whenAll": [],
+        "outcome": "read-only-transaction"
+      }
+    ]
+  },
+  {
+    "id": "site-time-budget",
+    "scope": "Entry counter and limit are expressed in microseconds within the same fixed site window. This models admission, before charging current work.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "consumed",
+        "limit"
+      ],
+      "properties": {
+        "consumed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "throttle",
+      "admit"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "consumed",
+            "op": "greater",
+            "otherField": "limit"
+          }
+        ],
+        "outcome": "throttle"
+      },
+      {
+        "whenAll": [],
+        "outcome": "admit"
+      }
+    ]
+  },
+  {
+    "id": "child-record-access",
+    "scope": "Concrete row and ordinary user, no outer administrative override. Valid-parent-field means an actual containing field configured for this child type.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "valid_parent_type",
+        "valid_parent_field",
+        "field_level",
+        "level_granted",
+        "parent_allows"
+      ],
+      "properties": {
+        "valid_parent_type": {
+          "type": "boolean"
+        },
+        "valid_parent_field": {
+          "type": "boolean"
+        },
+        "field_level": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "level_granted": {
+          "type": "boolean"
+        },
+        "parent_allows": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "deny",
+      "allow"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "valid_parent_type",
+            "op": "equal",
+            "value": false
+          }
+        ],
+        "outcome": "deny"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "valid_parent_field",
+            "op": "equal",
+            "value": false
+          }
+        ],
+        "outcome": "deny"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "field_level",
+            "op": "greater",
+            "value": 0
+          },
+          {
+            "field": "level_granted",
+            "op": "equal",
+            "value": false
+          }
+        ],
+        "outcome": "deny"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "parent_allows",
+            "op": "equal",
+            "value": true
+          }
+        ],
+        "outcome": "allow"
+      },
+      {
+        "whenAll": [],
+        "outcome": "deny"
+      }
+    ]
+  },
+  {
+    "id": "edit-transition",
+    "scope": "Existing ordinary record; queue/write checks have passed. Classify only revision and requested structural transition. Later controller validations and submit/cancel rights still apply.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "revision_matches",
+        "stored",
+        "requested"
+      ],
+      "properties": {
+        "revision_matches": {
+          "type": "boolean"
+        },
+        "stored": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "submitted",
+            "cancelled"
+          ]
+        },
+        "requested": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "submitted",
+            "cancelled"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "stale",
+      "closed",
+      "save",
+      "submit",
+      "restricted-update",
+      "cancel",
+      "illegal-transition"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "revision_matches",
+            "op": "equal",
+            "value": false
+          }
+        ],
+        "outcome": "stale"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "stored",
+            "op": "equal",
+            "value": "cancelled"
+          }
+        ],
+        "outcome": "closed"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "stored",
+            "op": "equal",
+            "value": "draft"
+          },
+          {
+            "field": "requested",
+            "op": "equal",
+            "value": "draft"
+          }
+        ],
+        "outcome": "save"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "stored",
+            "op": "equal",
+            "value": "draft"
+          },
+          {
+            "field": "requested",
+            "op": "equal",
+            "value": "submitted"
+          }
+        ],
+        "outcome": "submit"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "stored",
+            "op": "equal",
+            "value": "submitted"
+          },
+          {
+            "field": "requested",
+            "op": "equal",
+            "value": "submitted"
+          }
+        ],
+        "outcome": "restricted-update"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "stored",
+            "op": "equal",
+            "value": "submitted"
+          },
+          {
+            "field": "requested",
+            "op": "equal",
+            "value": "cancelled"
+          }
+        ],
+        "outcome": "cancel"
+      },
+      {
+        "whenAll": [],
+        "outcome": "illegal-transition"
+      }
+    ]
+  },
+  {
+    "id": "bulk-approval",
+    "scope": "Number of input document identities before per-document approval checks.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "count"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "inline",
+      "enqueue",
+      "reject"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "count",
+            "op": "less",
+            "value": 20
+          }
+        ],
+        "outcome": "inline"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "count",
+            "op": "atMost",
+            "value": 500
+          }
+        ],
+        "outcome": "enqueue"
+      },
+      {
+        "whenAll": [],
+        "outcome": "reject"
+      }
+    ]
+  },
+  {
+    "id": "self-approval",
+    "scope": "A reachable transition exists and role, read-access and optional condition checks passed. This is the dedicated workflow action service.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "administrator",
+        "self_approval_enabled",
+        "actor_is_owner"
+      ],
+      "properties": {
+        "administrator": {
+          "type": "boolean"
+        },
+        "self_approval_enabled": {
+          "type": "boolean"
+        },
+        "actor_is_owner": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "allow",
+      "deny"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "administrator",
+            "op": "equal",
+            "value": true
+          }
+        ],
+        "outcome": "allow"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "self_approval_enabled",
+            "op": "equal",
+            "value": true
+          }
+        ],
+        "outcome": "allow"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "actor_is_owner",
+            "op": "equal",
+            "value": false
+          }
+        ],
+        "outcome": "allow"
+      },
+      {
+        "whenAll": [],
+        "outcome": "deny"
+      }
+    ]
+  },
+  {
+    "id": "queue-deduplication",
+    "scope": "Asynchronous, eligible queue, successful storage. State refers to the prior site-scoped job. Enqueue-after-commit controls actual timing independently.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "deduplicate",
+        "stable_id",
+        "previous"
+      ],
+      "properties": {
+        "deduplicate": {
+          "type": "boolean"
+        },
+        "stable_id": {
+          "type": "boolean"
+        },
+        "previous": {
+          "type": "string",
+          "enum": [
+            "none",
+            "queued",
+            "started",
+            "terminal"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "enqueue",
+      "reject",
+      "suppress",
+      "remove-old-and-enqueue"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "deduplicate",
+            "op": "equal",
+            "value": false
+          }
+        ],
+        "outcome": "enqueue"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "stable_id",
+            "op": "equal",
+            "value": false
+          }
+        ],
+        "outcome": "reject"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "previous",
+            "op": "equal",
+            "value": "queued"
+          }
+        ],
+        "outcome": "suppress"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "previous",
+            "op": "equal",
+            "value": "started"
+          }
+        ],
+        "outcome": "suppress"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "previous",
+            "op": "equal",
+            "value": "terminal"
+          }
+        ],
+        "outcome": "remove-old-and-enqueue"
+      },
+      {
+        "whenAll": [],
+        "outcome": "enqueue"
+      }
+    ]
+  },
+  {
+    "id": "worker-retry",
+    "scope": "A worker failure has occurred. Retry number starts at zero for the initial execution. Eligible errors are explicit retry, deadlock or timeout of the designated internal database kind.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "eligible_failure",
+        "retry_number"
+      ],
+      "properties": {
+        "eligible_failure": {
+          "type": "boolean"
+        },
+        "retry_number": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "rollback-and-retry",
+      "rollback-and-fail"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "eligible_failure",
+            "op": "equal",
+            "value": true
+          },
+          {
+            "field": "retry_number",
+            "op": "less",
+            "value": 5
+          }
+        ],
+        "outcome": "rollback-and-retry"
+      },
+      {
+        "whenAll": [],
+        "outcome": "rollback-and-fail"
+      }
+    ]
+  },
+  {
+    "id": "automation-depth",
+    "scope": "At least one document-trigger rule matched. Depth is that of the currently executing flow. The next trigger would increase it by one. Maximum is already resolved from effective settings.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "depth",
+        "maximum"
+      ],
+      "properties": {
+        "depth": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximum": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "refuse",
+      "queue"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "depth",
+            "op": "atLeast",
+            "otherField": "maximum"
+          }
+        ],
+        "outcome": "refuse"
+      },
+      {
+        "whenAll": [],
+        "outcome": "queue"
+      }
+    ]
+  },
+  {
+    "id": "event-claim",
+    "scope": "One candidate subscription after lock acquisition. Epoch seconds use one clock and precision. The supplied key and event match; absence or mismatch never enters this claim.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "status",
+        "now",
+        "expires"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "waiting",
+            "matched",
+            "timed-out",
+            "cancelled"
+          ]
+        },
+        "now": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expires": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "no-change",
+      "match-and-wake",
+      "timeout-and-wake"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "status",
+            "op": "equal",
+            "value": "matched"
+          }
+        ],
+        "outcome": "no-change"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "status",
+            "op": "equal",
+            "value": "timed-out"
+          }
+        ],
+        "outcome": "no-change"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "status",
+            "op": "equal",
+            "value": "cancelled"
+          }
+        ],
+        "outcome": "no-change"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "now",
+            "op": "less",
+            "otherField": "expires"
+          }
+        ],
+        "outcome": "match-and-wake"
+      },
+      {
+        "whenAll": [],
+        "outcome": "timeout-and-wake"
+      }
+    ]
+  },
+  {
+    "id": "automation-stale-claim",
+    "scope": "Recovery sweep for a single trigger. Age and configured cutoff use the same elapsed seconds relative to the sweep time.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "status",
+        "age_seconds",
+        "cutoff_seconds"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "running",
+            "pending",
+            "scheduled",
+            "failed",
+            "skipped"
+          ]
+        },
+        "age_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cutoff_seconds": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "release-to-pending",
+      "retain"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "status",
+            "op": "equal",
+            "value": "running"
+          },
+          {
+            "field": "age_seconds",
+            "op": "greater",
+            "otherField": "cutoff_seconds"
+          }
+        ],
+        "outcome": "release-to-pending"
+      },
+      {
+        "whenAll": [],
+        "outcome": "retain"
+      }
+    ]
+  },
+  {
+    "id": "automation-queue-settlement",
+    "scope": "The run was finalized normally. Classify its processed queue row. A waiting run has a separate resume row.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "run_status"
+      ],
+      "properties": {
+        "run_status": {
+          "type": "string",
+          "enum": [
+            "success",
+            "partially-failed",
+            "waiting",
+            "failed",
+            "skipped"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "retain-failed",
+      "retain-skipped",
+      "remove-processed-row"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "run_status",
+            "op": "equal",
+            "value": "failed"
+          }
+        ],
+        "outcome": "retain-failed"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "run_status",
+            "op": "equal",
+            "value": "skipped"
+          }
+        ],
+        "outcome": "retain-skipped"
+      },
+      {
+        "whenAll": [],
+        "outcome": "remove-processed-row"
+      }
+    ]
+  },
+  {
+    "id": "report-stall",
+    "scope": "Sweep uses age since creation, not elapsed time since worker start. Assume seconds at the exact observation instant.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "status",
+        "age_seconds"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "queued",
+            "started",
+            "completed",
+            "error",
+            "cancelled"
+          ]
+        },
+        "age_seconds": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "mark-error-and-notify",
+      "retain"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "status",
+            "op": "equal",
+            "value": "started"
+          },
+          {
+            "field": "age_seconds",
+            "op": "greater",
+            "value": 21600
+          }
+        ],
+        "outcome": "mark-error-and-notify"
+      },
+      {
+        "whenAll": [],
+        "outcome": "retain"
+      }
+    ]
+  },
+  {
+    "id": "private-reference-reuse",
+    "scope": "Canonical local URL lookup, before creating another ordinary file reference. Passing permits remaining file validations only.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "matching_records",
+        "administrator",
+        "owns_any",
+        "read_any"
+      ],
+      "properties": {
+        "matching_records": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "administrator": {
+          "type": "boolean"
+        },
+        "owns_any": {
+          "type": "boolean"
+        },
+        "read_any": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "continue",
+      "deny"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "matching_records",
+            "op": "equal",
+            "value": 0
+          }
+        ],
+        "outcome": "continue"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "administrator",
+            "op": "equal",
+            "value": true
+          }
+        ],
+        "outcome": "continue"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "owns_any",
+            "op": "equal",
+            "value": true
+          }
+        ],
+        "outcome": "continue"
+      },
+      {
+        "whenAll": [
+          {
+            "field": "read_any",
+            "op": "equal",
+            "value": true
+          }
+        ],
+        "outcome": "continue"
+      },
+      {
+        "whenAll": [],
+        "outcome": "deny"
+      }
+    ]
+  },
+  {
+    "id": "extension-action-name",
+    "scope": "An action provider is discovered during construction of the effective registry. Evaluate one publication with an already resolved type name.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "already_registered"
+      ],
+      "properties": {
+        "already_registered": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcomes": [
+      "reject-registry",
+      "register"
+    ],
+    "rules": [
+      {
+        "whenAll": [
+          {
+            "field": "already_registered",
+            "op": "equal",
+            "value": true
+          }
+        ],
+        "outcome": "reject-registry"
+      },
+      {
+        "whenAll": [],
+        "outcome": "register"
+      }
+    ]
+  }
+]

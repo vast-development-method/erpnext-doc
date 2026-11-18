@@ -1,0 +1,1502 @@
+[
+  {
+    "capability": "Cargo bookings and container movements",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "booking_order",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "customer_order_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "customer_order_type", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "import", "export", "domestic"]},
+          {"purpose": "transport_type", "value_kind": "reference", "rules": ["required"], "target": "transport_mode"},
+          {"purpose": "customer", "value_kind": "reference", "rules": ["required"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "cargo_owner", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "bill_to", "value_kind": "choice"},
+          {"purpose": "services", "value_kind": "owned_rows", "target": "fixed_freight_servicess"},
+          {"purpose": "bill_of_landing_number", "value_kind": "text"},
+          {"purpose": "shipping_line", "value_kind": "reference", "target": "fixed_freight_shippingline"},
+          {"purpose": "commodity", "value_kind": "reference", "target": "fixed_freight_commodities"},
+          {"purpose": "demurrage_date", "value_kind": "civil_day"},
+          {"purpose": "cargo_details", "value_kind": "owned_rows", "rules": ["required"], "target": "cargo_detail_detail"},
+          {"purpose": "delivery_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "dropoff_location", "value_kind": "reference", "rules": ["read_only"], "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "pickup_location", "value_kind": "reference", "rules": ["read_only"], "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "booking_order"},
+          {"purpose": "mm_loading_station", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "mm_offloading_station", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "fm_pickup_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "fm_dropoff_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "lm_pickup_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "lm_dropoff_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "empty_pickup_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "empty_pickup_dropoff_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "empty_return_dropoff_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "empty_return_pickup_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required", "write_once"], "choices": ["assigned_sequence_with_year"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["hidden_from_form"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "long_haul_pickup_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "long_haul_dropoff_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "short_haul_pickup_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "short_haul_dropoff_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "location_of_cross_stuff", "value_kind": "reference", "target": "service_type"},
+          {"purpose": "sales_person", "value_kind": "reference", "rules": ["read_only"], "target": "organization.sales_person", "binding": "shared_model"},
+          {"purpose": "miscellaneous_services", "value_kind": "owned_rows", "target": "fixed_freight_servicess"},
+          {"purpose": "total", "value_kind": "money", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["read", "write", "create", "submit", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "cargo_detail_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "cargo_type", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "size", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "20", "40"]},
+          {"purpose": "average_weight", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "bag_quantity", "value_kind": "whole_number"},
+          {"purpose": "bag_weight", "value_kind": "decimal"},
+          {"purpose": "rate_type", "value_kind": "reference", "rules": ["required"], "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "rate", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "quantity", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "amount", "value_kind": "money"}
+        ]
+      },
+      {
+        "concept": "container_details",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "container_details_classification", "value_kind": "reference", "rules": ["required"], "target": "container_type"},
+          {"purpose": "container_details_number", "value_kind": "text"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["unselected", "empty", "filled"]},
+          {"purpose": "pickup_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "dropoff_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "freight_order_identifier", "value_kind": "text"},
+          {"purpose": "state", "value_kind": "choice", "choices": ["unselected", "loaded", "in_transit", "gate_in", "gate_out", "delivered"]},
+          {"purpose": "job_identifier", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "container_or_vehicle_request",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "request_date", "value_kind": "date_and_time"},
+          {"purpose": "booking_order_identifier", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "booking_order"},
+          {"purpose": "cargo_type", "value_kind": "choice", "choices": ["unselected", "containerised", "non_containerised"]},
+          {"purpose": "yard_location", "value_kind": "reference", "rules": ["required"], "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "table_ktch", "value_kind": "owned_rows", "target": "container_or_vehicle_request_detail"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "container_or_vehicle_request"},
+          {"purpose": "cross_stuff_performance", "value_kind": "reference", "rules": ["read_only"], "target": "perform_cross_stuff"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "container_or_vehicle_request_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "quantity", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "size", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "20", "40", "45"]},
+          {"purpose": "container_or_vehicle_request_detail_classification", "value_kind": "reference", "rules": ["required"], "target": "container_type"},
+          {"purpose": "last_free_date", "value_kind": "date_and_time"},
+          {"purpose": "pickup_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "empty_return_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "container_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "display_name", "value_kind": "text"},
+          {"purpose": "size", "value_kind": "whole_number"},
+          {"purpose": "length_m", "value_kind": "decimal"},
+          {"purpose": "width_m", "value_kind": "decimal"},
+          {"purpose": "height_m", "value_kind": "decimal"},
+          {"purpose": "capacity_m3", "value_kind": "whole_number"},
+          {"purpose": "tare_weight_kg", "value_kind": "whole_number"},
+          {"purpose": "maximum_cargo_weight_kg", "value_kind": "whole_number"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "expenses_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "job_identifier", "value_kind": "text"},
+          {"purpose": "client", "value_kind": "reference", "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "amount", "value_kind": "decimal"},
+          {"purpose": "remarks", "value_kind": "text"},
+          {"purpose": "expense_type", "value_kind": "reference", "rules": ["required"], "target": "fixed_freight_cost_type"},
+          {"purpose": "invoiced", "value_kind": "boolean"},
+          {"purpose": "slip", "value_kind": "image_reference"},
+          {"purpose": "customer_invoice_number", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.sales_invoice", "binding": "shared_model"},
+          {"purpose": "container_number", "value_kind": "reference", "target": "fixed_freight_containers"},
+          {"purpose": "purchase_invoiced_created", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "supplier_invoice_number", "value_kind": "text", "rules": ["editable_after_submission"]}
+        ]
+      },
+      {
+        "concept": "fixed_freight_commodities",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "comodity_name", "value_kind": "choice", "choices": ["unselected", "bulk_goods", "manufactured", "consumer_goods", "non_perishable_food", "industrial"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "fixed_freight_containers",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "container_number", "value_kind": "text"},
+          {"purpose": "container_type", "value_kind": "reference", "target": "container_type"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["unselected", "empty", "filled"]},
+          {"purpose": "state", "value_kind": "choice", "choices": ["unselected", "loaded", "in_transit", "gate_in", "gate_out", "delivered"]},
+          {"purpose": "active_job_identifier", "value_kind": "text"},
+          {"purpose": "container_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "freight_order_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "container_next_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "booking_order_identifier", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "fixed_freight_cost_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "cost_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "job_mode", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "train_job", "truck_job", "yard_job", "cross_stuff_job"]},
+          {"purpose": "fixed", "value_kind": "boolean"},
+          {"purpose": "item_identifier", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "cost", "value_kind": "decimal", "rules": ["nonnegative"]},
+          {"purpose": "movement_type", "value_kind": "choice", "choices": ["unselected", "up", "down"]},
+          {"purpose": "location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "fixed_freight_freight_orders",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "freight_order_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "customer_order_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "client", "value_kind": "reference", "rules": ["read_only"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "jobs", "value_kind": "owned_rows", "target": "fixed_freight_jobs"},
+          {"purpose": "container_number", "value_kind": "text"},
+          {"purpose": "weight", "value_kind": "decimal"},
+          {"purpose": "container_type", "value_kind": "reference", "target": "container_type"},
+          {"purpose": "documents_received", "value_kind": "date_and_time"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["unselected", "draft", "assigned", "cross_stuff", "in_progress", "completed"]},
+          {"purpose": "last_job", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "next_job", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "size", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "mm_completed", "value_kind": "boolean"},
+          {"purpose": "bounded", "value_kind": "boolean"},
+          {"purpose": "seal_number", "value_kind": "text"},
+          {"purpose": "rate", "value_kind": "money", "rules": ["hidden_from_form", "nonnegative"]},
+          {"purpose": "rate_type", "value_kind": "reference", "rules": ["hidden_from_form"], "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "bag_quantity", "value_kind": "whole_number"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "fixed_freight_jobs",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "job_name", "value_kind": "reference", "target": "service_type"},
+          {"purpose": "current_status", "value_kind": "text"},
+          {"purpose": "start_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "end_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "job_identifier", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "fixed_freight_jobs_sequence",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "sequence", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "transport_mode", "value_kind": "reference", "rules": ["required"], "target": "transport_mode"},
+          {"purpose": "customer_order_type", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "domestic", "import", "export"]},
+          {"purpose": "service_name", "value_kind": "reference", "target": "service_type"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "middle_mile_freight_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "mm_job_identifier", "value_kind": "reference", "target": "freight_rail_job"},
+          {"purpose": "wagon_number", "value_kind": "reference", "rules": ["read_only"], "target": "wagons"},
+          {"purpose": "job", "value_kind": "text"},
+          {"purpose": "container", "value_kind": "reference", "target": "fixed_freight_containers"},
+          {"purpose": "container_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "fo", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "size", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "weight", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "departed", "value_kind": "boolean"},
+          {"purpose": "loaded", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "fixed_freight_perform_middle_mile",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "rail_number", "value_kind": "text", "rules": ["required", "unique", "nonnegative"]},
+          {"purpose": "movement_type", "value_kind": "choice", "choices": ["unselected", "up", "down"]},
+          {"purpose": "expected_time_of_arrival_eta", "value_kind": "date_and_time"},
+          {"purpose": "middle_mile", "value_kind": "owned_rows", "target": "middle_mile_freight_detail"},
+          {"purpose": "expected_departure_time_eda", "value_kind": "date_and_time"},
+          {"purpose": "loco_number", "value_kind": "text"},
+          {"purpose": "break_number", "value_kind": "text"},
+          {"purpose": "departure_time", "value_kind": "date_and_time"},
+          {"purpose": "loading_time", "value_kind": "date_and_time"},
+          {"purpose": "loading_end_time", "value_kind": "date_and_time"},
+          {"purpose": "middle_mile_in_loading", "value_kind": "owned_rows", "target": "middle_mile_freight_detail"},
+          {"purpose": "actual_arrival_datetime", "value_kind": "date_and_time"},
+          {"purpose": "offloading_start_time", "value_kind": "date_and_time"},
+          {"purpose": "offloading_end_time", "value_kind": "date_and_time"},
+          {"purpose": "middle_mile_copy", "value_kind": "owned_rows", "target": "new_mm_detail"},
+          {"purpose": "departure_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "wagons", "value_kind": "owned_rows", "target": "fixed_freight_wagon_detail"},
+          {"purpose": "finish_train_formation", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "finish_loading", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "finish_departure", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "finish_arrival", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "expenses", "value_kind": "owned_rows", "target": "expenses_detail"},
+          {"purpose": "arrival_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["unselected", "train_formed", "loaded", "departed", "arrived"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "fixed_freight_servicess",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "transport_mode", "value_kind": "text"},
+          {"purpose": "services", "value_kind": "reference", "target": "service_type"},
+          {"purpose": "applicable", "value_kind": "boolean"},
+          {"purpose": "service_name", "value_kind": "text", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "fixed_freight_shippingline",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "shipping_line_name", "value_kind": "text", "rules": ["required", "unique"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "fixed_freight_wagon_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "wagon_number", "value_kind": "reference", "target": "wagons"},
+          {"purpose": "wagon_type", "value_kind": "reference", "target": "fixed_freight_wagons"},
+          {"purpose": "loaded", "value_kind": "boolean"},
+          {"purpose": "current_status", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "fixed_freight_wagons",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "display_name", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "fixed_freight_wagons_classification", "value_kind": "choice", "choices": ["unselected", "small", "conventional", "large", "dummy", "break"]},
+          {"purpose": "size", "value_kind": "choice", "choices": ["unselected", "20", "40", "60"]},
+          {"purpose": "maximum_weight_ton", "value_kind": "decimal"},
+          {"purpose": "state", "value_kind": "choice", "choices": ["unselected", "empty", "loaded", "drail", "maintenance"]},
+          {"purpose": "maximum_count", "value_kind": "whole_number"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "fixed_freight_cross_stuff_job",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "freight_order_identifier", "value_kind": "text"},
+          {"purpose": "customer_order_number", "value_kind": "text"},
+          {"purpose": "client", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "cross_stuff_performance_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "container_number", "value_kind": "text"},
+          {"purpose": "job_type", "value_kind": "reference", "target": "service_type"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["unselected", "draft", "assigned", "completed", "cancelled"]},
+          {"purpose": "assigned_at", "value_kind": "date_and_time"},
+          {"purpose": "performance_details", "value_kind": "reference", "target": "perform_cross_stuff"},
+          {"purpose": "job_name", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "freight_rail_job",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "freight_order_identifier", "value_kind": "text"},
+          {"purpose": "customer_order_number", "value_kind": "text"},
+          {"purpose": "client", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "job_start_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "job_end_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "job_type", "value_kind": "reference", "target": "service_type"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["unselected", "draft", "assigned", "completed", "cancelled"]},
+          {"purpose": "container_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "assigned_at", "value_kind": "date_and_time"},
+          {"purpose": "train_number", "value_kind": "reference", "target": "fixed_freight_perform_middle_mile"},
+          {"purpose": "train_arrival_datetime", "value_kind": "date_and_time"},
+          {"purpose": "job_name", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "freight_road_job",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "freight_order_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "vehicle_number", "value_kind": "text"},
+          {"purpose": "vehicle_supplier", "value_kind": "reference", "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "driver_name", "value_kind": "text"},
+          {"purpose": "assigned_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "job_type", "value_kind": "reference", "rules": ["read_only"], "target": "service_type"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "assigned", "completed", "cancelled"]},
+          {"purpose": "customer_order_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "client", "value_kind": "reference", "rules": ["read_only"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "job_start_location", "value_kind": "reference", "rules": ["read_only"], "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "job_end_location", "value_kind": "reference", "rules": ["read_only"], "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "container_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "pickup_arrival", "value_kind": "date_and_time"},
+          {"purpose": "pickup_departure", "value_kind": "date_and_time"},
+          {"purpose": "dropoff_arrival", "value_kind": "date_and_time"},
+          {"purpose": "dropoff_completed", "value_kind": "date_and_time"},
+          {"purpose": "expenses", "value_kind": "owned_rows", "target": "expenses_detail"},
+          {"purpose": "double_20", "value_kind": "boolean"},
+          {"purpose": "container_number_to_link", "value_kind": "reference", "target": "fixed_freight_containers"},
+          {"purpose": "job_name", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "freight_yard_job",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "freight_order_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "job_type", "value_kind": "reference", "rules": ["read_only"], "target": "service_type"},
+          {"purpose": "gate_in", "value_kind": "date_and_time"},
+          {"purpose": "gate_out", "value_kind": "date_and_time"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "draft", "assigned", "completed", "cancelled"]},
+          {"purpose": "customer_order_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "client", "value_kind": "reference", "rules": ["read_only"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "job_start_location", "value_kind": "reference", "rules": ["read_only"], "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "job_end_location", "value_kind": "reference", "rules": ["read_only"], "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "container_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "expenses", "value_kind": "owned_rows", "target": "expenses_detail"},
+          {"purpose": "assigned_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "job_name", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "grounded_empty_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "container_number", "value_kind": "reference", "target": "fixed_freight_containers"},
+          {"purpose": "size", "value_kind": "whole_number"},
+          {"purpose": "weight", "value_kind": "decimal"},
+          {"purpose": "reference_container", "value_kind": "reference", "target": "fixed_freight_containers"}
+        ]
+      },
+      {
+        "concept": "grounded_filled_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "container_number", "value_kind": "reference", "target": "fixed_freight_containers"},
+          {"purpose": "weight", "value_kind": "decimal"},
+          {"purpose": "empty_return_location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "weight_to_transfer", "value_kind": "decimal"},
+          {"purpose": "reference_container", "value_kind": "reference", "target": "fixed_freight_containers"},
+          {"purpose": "fo_bags_quantity", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "bags_to_transfer", "value_kind": "whole_number", "rules": ["nonnegative"]}
+        ]
+      },
+      {
+        "concept": "new_mm_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "job", "value_kind": "text"},
+          {"purpose": "mm_job_identifier", "value_kind": "reference", "target": "freight_rail_job"},
+          {"purpose": "container", "value_kind": "reference", "target": "fixed_freight_containers"},
+          {"purpose": "wagon_number", "value_kind": "reference", "target": "wagons"},
+          {"purpose": "received", "value_kind": "boolean"},
+          {"purpose": "container_number", "value_kind": "text"},
+          {"purpose": "fo", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "perform_cross_stuff",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "applicable_date", "value_kind": "date_and_time"},
+          {"purpose": "booking_order_identifier", "value_kind": "reference", "target": "booking_order"},
+          {"purpose": "grounded_yard_location", "value_kind": "reference", "rules": ["read_only"], "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "grounded_filled_containers", "value_kind": "owned_rows", "target": "grounded_filled_detail"},
+          {"purpose": "job_before_cross_stuff", "value_kind": "reference", "target": "service_type"},
+          {"purpose": "total_weight", "value_kind": "decimal", "rules": ["nonnegative"]},
+          {"purpose": "remaining_weight", "value_kind": "decimal"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "hidden_from_form", "indexed_for_search"], "target": "perform_cross_stuff"},
+          {"purpose": "expenses", "value_kind": "owned_rows", "rules": ["editable_after_submission"], "target": "expenses_detail"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "rail_freight_cost",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "wagon_type", "value_kind": "choice", "choices": ["unselected", "small", "conventional", "large", "dummy", "break"]},
+          {"purpose": "container_count", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "average_weight", "value_kind": "decimal", "rules": ["nonnegative"]},
+          {"purpose": "rate_20", "value_kind": "money", "rules": ["nonnegative"]},
+          {"purpose": "container_count_40", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "average_weight_40", "value_kind": "decimal", "rules": ["nonnegative"]},
+          {"purpose": "rate_40", "value_kind": "money", "rules": ["nonnegative"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "display_name", "value_kind": "text"},
+          {"purpose": "transport_mode", "value_kind": "reference", "target": "transport_mode"},
+          {"purpose": "applicable", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "job_type", "value_kind": "choice", "choices": ["unselected", "road", "rail", "yard", "cross_stuff"]},
+          {"purpose": "miscellaneous", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "transport_mode",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "mode", "value_kind": "choice", "choices": ["unselected", "rail", "road"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "wagons",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "wagon_number", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "wagons_classification", "value_kind": "reference", "rules": ["required"], "target": "fixed_freight_wagons"},
+          {"purpose": "train_number", "value_kind": "reference", "target": "fixed_freight_perform_middle_mile"},
+          {"purpose": "loaded", "value_kind": "boolean"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["unselected", "loaded", "in_transit", "received", "derailed"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Carrier dispatch automation",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "carrier_service_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "service_interface_token", "value_kind": "text"},
+          {"purpose": "enable_allocation", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Carrier service and parcel booking",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "parcel_carrier",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "use_test_environment", "value_kind": "boolean"},
+          {"purpose": "bearer_token", "value_kind": "protected_text"},
+          {"purpose": "inbound_event_notification_secret", "value_kind": "protected_text"},
+          {"purpose": "default_timeout_ms", "value_kind": "whole_number"},
+          {"purpose": "tracking_inbound_event_notification_subscribed", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "shipment_submission_status_inbound_event_notification_subscribed", "value_kind": "boolean", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "parcel_service",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "parcel_service_name", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "parcel_service_code", "value_kind": "text"},
+          {"purpose": "resource_address_reference", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "parcel_service_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "parcel_service", "value_kind": "reference", "rules": ["required"], "target": "parcel_service"},
+          {"purpose": "parcel_service_type", "value_kind": "text", "rules": ["required", "write_once"]},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "parcel_service_type_alias", "value_kind": "owned_rows", "target": "parcel_service_type_alias"},
+          {"purpose": "show_in_preferred_services_list", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "parcel_service_type_alias",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "parcel_service", "value_kind": "reference", "rules": ["read_only", "hidden_from_form"], "target": "parcel_service"},
+          {"purpose": "parcel_type_alias", "value_kind": "text", "rules": ["required"]}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Carrier tracking and shipment registration",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "attachments",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "attachment", "value_kind": "file_reference", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "auto_shipment_creation_logs",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "shipment_reference", "value_kind": "reference", "rules": ["read_only"], "target": "inventory.shipment", "binding": "shared_model"},
+          {"purpose": "air_waybill_number", "value_kind": "text"},
+          {"purpose": "recommendation_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["true", "false"]},
+          {"purpose": "recommendation_message", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "shipment_creation_time", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "allocated_carrier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "account_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "order_creation_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["error", "success", "pending"]},
+          {"purpose": "recommendation_reference", "value_kind": "owned_rows", "rules": ["read_only"], "target": "shipment_creation_log_table"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "air_waybill_registration",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "air_waybill_number", "value_kind": "text", "rules": ["required", "editable_after_submission"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "editable_after_submission", "indexed_for_search"], "target": "air_waybill_registration"},
+          {"purpose": "carrier_partner", "value_kind": "reference", "target": "carrier_partner"},
+          {"purpose": "carrier_partner_identifier", "value_kind": "text"},
+          {"purpose": "carrier_account_name", "value_kind": "text"},
+          {"purpose": "shipment_identifier", "value_kind": "text", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "tracking_status", "value_kind": "text", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "tracking_status_info", "value_kind": "text", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "pod_file", "value_kind": "file_reference", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "shipment_update", "value_kind": "owned_rows", "rules": ["read_only", "editable_after_submission"], "target": "shipment_update"},
+          {"purpose": "shipment_tracking_status", "value_kind": "text", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "pickup_from_type", "value_kind": "choice", "choices": ["company", "customer", "supplier"]},
+          {"purpose": "pickup_company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "pickup_customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "pickup_supplier", "value_kind": "reference", "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "pickup", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "pickup_address_name", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "pickup_address", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "pickup_contact_name", "value_kind": "reference", "target": "contacts.contact", "binding": "shared_model"},
+          {"purpose": "pickup_contact_email", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "pickup_contact", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "delivery_to_type", "value_kind": "choice", "choices": ["company", "customer", "supplier"]},
+          {"purpose": "delivery_company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "delivery_customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "delivery_supplier", "value_kind": "reference", "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "delivery_to", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "delivery_address_name", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "delivery_address", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "delivery_contact_name", "value_kind": "reference", "target": "contacts.contact", "binding": "shared_model"},
+          {"purpose": "delivery_contact_email", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "delivery_contact", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "shipment_parcel", "value_kind": "owned_rows", "target": "inventory.shipment_parcel", "binding": "shared_model"},
+          {"purpose": "parcel_template", "value_kind": "reference", "target": "inventory.shipment_parcel_template", "binding": "shared_model"},
+          {"purpose": "pallets", "value_kind": "choice", "choices": ["number", "yes"]},
+          {"purpose": "value_of_goods", "value_kind": "money"},
+          {"purpose": "pickup_date", "value_kind": "civil_day", "rules": ["editable_after_submission"]},
+          {"purpose": "pickup_from", "value_kind": "time_of_day", "rules": ["editable_after_submission"]},
+          {"purpose": "pickup_to", "value_kind": "time_of_day", "rules": ["editable_after_submission"]},
+          {"purpose": "shipment_type", "value_kind": "choice", "choices": ["goods", "documents"]},
+          {"purpose": "pickup_type", "value_kind": "choice", "choices": ["pickup", "self_delivery"]},
+          {"purpose": "description_of_content", "value_kind": "text"},
+          {"purpose": "service_provider", "value_kind": "text"},
+          {"purpose": "shipment_amount", "value_kind": "money"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only", "editable_after_submission"], "choices": ["draft", "submitted", "booked", "cancelled", "completed"]},
+          {"purpose": "tracking_resource_address", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "incoterm", "value_kind": "reference", "target": "organization.incoterm", "binding": "shared_model"},
+          {"purpose": "shipment_delivery_note", "value_kind": "owned_rows", "target": "inventory.shipment_delivery_note", "binding": "shared_model"},
+          {"purpose": "pickup_contact_person", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "total_weight", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "customer_invoice", "value_kind": "owned_rows", "target": "customer_invoice_shipment"},
+          {"purpose": "delivery_type", "value_kind": "choice", "choices": ["unselected", "forward", "rvp"]},
+          {"purpose": "order_type", "value_kind": "choice", "choices": ["unselected", "cod", "prepaid"]},
+          {"purpose": "cod_value", "value_kind": "money"},
+          {"purpose": "delivery_contact_phone", "value_kind": "text"},
+          {"purpose": "pickup_contact_person_name", "value_kind": "text"},
+          {"purpose": "pickup_contact_phone", "value_kind": "text"},
+          {"purpose": "start_time", "value_kind": "date_and_time", "rules": ["editable_after_submission"]},
+          {"purpose": "end_time", "value_kind": "date_and_time", "rules": ["editable_after_submission"]},
+          {"purpose": "reason_for_appointment", "value_kind": "text", "rules": ["editable_after_submission"]},
+          {"purpose": "appointment_attachments", "value_kind": "text", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "appointment_status", "value_kind": "text", "rules": ["editable_after_submission"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false],
+          ["sales_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false],
+          ["delivery_user", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false],
+          ["delivery_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "carrier_partner",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "shipment_tracking_partner_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "shipment_tracking_partner_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "reference_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "account_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "account_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "active", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "is_rvp", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "supplier", "value_kind": "reference", "target": "procurement.supplier", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["all", 0, ["read", "write", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "shipment_tracking_configuration",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enable", "value_kind": "boolean"},
+          {"purpose": "enable_service_interface_log", "value_kind": "boolean"},
+          {"purpose": "username", "value_kind": "text"},
+          {"purpose": "key", "value_kind": "protected_text"},
+          {"purpose": "resource_address", "value_kind": "text"},
+          {"purpose": "manual_update_status", "value_kind": "boolean"},
+          {"purpose": "use_carrier_recommendation", "value_kind": "boolean"},
+          {"purpose": "recommendation_type", "value_kind": "choice", "choices": ["manual_selection", "automatic_order_creation"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "shipment_tracking_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "service_interface_method", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "service_interface_resource_address", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "payload", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "response", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "header", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "reference_record_class", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "reference_record_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "status_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "message", "value_kind": "expression_or_structured_text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "item_box_mapping",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "customer_invoice", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.sales_invoice", "binding": "shared_model"},
+          {"purpose": "box", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "stock_keeping_unit", "value_kind": "reference", "rules": ["read_only"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "stock_keeping_unit_count", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "description", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "product_category", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "harmonized_system_of_nomenclature_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "manufacturer_country", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "manufacturer_country_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "price", "value_kind": "money", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "multiple_attachments",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "attachment", "value_kind": "reference", "target": "attachments"}
+        ]
+      },
+      {
+        "concept": "customer_invoice_shipment",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "customer_invoice", "value_kind": "reference", "rules": ["required"], "target": "accounting.sales_invoice", "binding": "shared_model"},
+          {"purpose": "grand_total", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "e_waybill_number", "value_kind": "text", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "e_waybill_expiry_date", "value_kind": "civil_day", "rules": ["read_only", "editable_after_submission"]}
+        ]
+      },
+      {
+        "concept": "shipment_creation_log_table",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "carrier_name", "value_kind": "text"},
+          {"purpose": "current_status", "value_kind": "text"},
+          {"purpose": "message", "value_kind": "expression_or_structured_text"},
+          {"purpose": "shipment_tracking_log", "value_kind": "reference", "target": "shipment_tracking_log"}
+        ]
+      },
+      {
+        "concept": "shipment_update",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "created_at", "value_kind": "date_and_time", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "shipment_tracking_status_code", "value_kind": "text"},
+          {"purpose": "timestamp", "value_kind": "date_and_time", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "location", "value_kind": "text"},
+          {"purpose": "remark", "value_kind": "text"},
+          {"purpose": "current_status", "value_kind": "text"},
+          {"purpose": "task_management_service_status_bucket", "value_kind": "boolean"},
+          {"purpose": "checkpoint_identifier", "value_kind": "text"},
+          {"purpose": "tracking_identifier", "value_kind": "text"},
+          {"purpose": "is_latest", "value_kind": "boolean", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "shipment_tracking_status_bucket_description", "value_kind": "text"},
+          {"purpose": "shipment_tracking_status_description", "value_kind": "text"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Carrier tracking and shipment registration",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "shipment_parcel", "purpose": "parcel", "value_kind": "reference", "placement": "count"},
+      {"on": "shipment", "purpose": "pickup_contact_person_name", "value_kind": "text", "placement": "pickup_contact_name", "rules": ["read_only", "translatable"]},
+      {"on": "shipment", "purpose": "pickup_contact_phone", "value_kind": "text", "placement": "pickup_contact_person_name", "rules": ["read_only", "translatable"]},
+      {"on": "shipment", "purpose": "purpose", "value_kind": "choice", "placement": "pickup_contact", "rules": ["required", "translatable"]},
+      {"on": "shipment", "purpose": "air_waybill_order", "value_kind": "text", "placement": "air_waybill_number", "rules": ["editable_after_submission", "translatable"]},
+      {"on": "shipment", "purpose": "delivery_contact_phone", "value_kind": "text", "placement": "delivery_contact_email", "rules": ["translatable"]},
+      {"on": "shipment", "purpose": "carrier_partner", "value_kind": "reference", "placement": "delivery_contact"},
+      {"on": "shipment", "purpose": "carrier_partner_identifier", "value_kind": "text", "placement": "carrier_partner", "rules": ["read_only", "translatable"]},
+      {"on": "shipment", "purpose": "carrier_partner_name", "value_kind": "text", "placement": "carrier_partner_identifier", "rules": ["read_only", "translatable"]},
+      {"on": "shipment", "purpose": "appointment_info_field_group", "value_kind": "field_group", "placement": "carrier_partner_name"},
+      {"on": "shipment", "purpose": "start_time", "value_kind": "date_and_time", "placement": "appointment_info_field_group"},
+      {"on": "shipment", "purpose": "field_column_for_end_time", "value_kind": "field_column", "placement": "start_time"},
+      {"on": "shipment", "purpose": "end_time", "value_kind": "date_and_time", "placement": "field_column_for_end_time"},
+      {"on": "shipment", "purpose": "delivery_type", "value_kind": "choice", "placement": "add_template", "rules": ["translatable"]},
+      {"on": "shipment", "purpose": "order_type", "value_kind": "choice", "placement": "delivery_type", "rules": ["translatable"]},
+      {"on": "shipment", "purpose": "customer_invoice", "value_kind": "owned_rows", "placement": "shipment_delivery_note"},
+      {"on": "shipment", "purpose": "cod_value", "value_kind": "money", "placement": "customer_invoice"},
+      {"on": "shipment", "purpose": "waybill_number", "value_kind": "text", "placement": "amended_from", "rules": ["read_only", "editable_after_submission", "translatable"]},
+      {"on": "shipment", "purpose": "shipment_tracking_status", "value_kind": "choice", "placement": "waybill_number", "rules": ["read_only", "editable_after_submission", "translatable"]},
+      {"on": "shipment", "purpose": "pod_file", "value_kind": "file_reference", "placement": "shipment_tracking_status", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "shipment", "purpose": "field_group_for_shipment_update", "value_kind": "field_group", "placement": "pod_file"},
+      {"on": "shipment", "purpose": "shipment_update", "value_kind": "owned_rows", "placement": "field_group_for_shipment_update", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "address", "purpose": "upload_to_shipment_tracking", "value_kind": "boolean", "placement": "disabled"},
+      {"on": "address", "purpose": "shipment_tracking_location_identifier", "value_kind": "text", "placement": "upload_to_shipment_tracking", "rules": ["read_only", "translatable"]},
+      {"on": "address", "purpose": "transport_mode", "value_kind": "choice", "placement": "shipment_tracking_location_identifier", "rules": ["translatable"]},
+      {"on": "address", "purpose": "type_of_location", "value_kind": "choice", "placement": "transport_mode", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "shipment_reference", "value_kind": "reference", "placement": "due_date", "rules": ["read_only", "editable_after_submission"]}
+    ]
+  },
+  {
+    "capability": "Carrier tracking and shipment registration",
+    "configuration": 1,
+    "rule_addresses": [
+      ["shipment", null, "allow_import", "boolean"],
+      ["address", "email_identifier", "mandatory_depends_on", "text"],
+      ["shipment", "shipment_identifier", "allow_on_submit", "check"],
+      ["shipment", "air_waybill_number", "allow_on_submit", "check"],
+      ["shipment", "shipment_identifier", "read_only", "boolean"],
+      ["shipment", "air_waybill_number", "read_only", "boolean"],
+      ["shipment", "tracking_status", "allow_on_submit", "check"],
+      ["shipment", "tracking_status_info", "allow_on_submit", "check"],
+      ["shipment", "tracking_status", "read_only", "boolean"],
+      ["shipment", "tracking_status", "field_type", "choice"],
+      ["shipment", "tracking_status", "options", "text"],
+      ["shipment_parcel", null, "field_order", "text"],
+      ["shipment", "carrier", "hidden", "boolean"],
+      ["shipment", "carrier_service", "hidden", "boolean"],
+      ["shipment_parcel", "weight", "label", "text"],
+      ["address", "phone", "options", "text"],
+      ["shipment", "service_provider", "hidden", "boolean"],
+      ["shipment", "shipment_amount", "hidden", "boolean"],
+      ["shipment", "air_waybill_number", "depends_on", "text"]
+    ]
+  },
+  {
+    "capability": "Cashbook and treasury categories",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "easy_cash_category",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "category_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "easy_cash_category_classification", "value_kind": "choice", "rules": ["required"], "choices": ["cash_in", "cash_out"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "account", "value_kind": "reference", "rules": ["required"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "disabled", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["accounts_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "easy_cash_entry",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["hidden_from_form", "write_once"], "choices": ["assigned_sequence_of_4_digits"]},
+          {"purpose": "entry_type", "value_kind": "choice", "rules": ["required"], "choices": ["cash_in", "cash_out"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "posting_date", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "treasury", "value_kind": "reference", "rules": ["required"], "target": "treasury"},
+          {"purpose": "cash_account", "value_kind": "reference", "rules": ["read_only", "hidden_from_form"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "reference_number", "value_kind": "text", "rules": ["editable_after_submission"]},
+          {"purpose": "category_lines", "value_kind": "owned_rows", "rules": ["required"], "target": "easy_cash_entry_detail"},
+          {"purpose": "total_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["read_only"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "conversion_rate", "value_kind": "decimal", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "remarks", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "easy_cash_entry"}
+        ],
+        "role_grants": [
+          ["accounts_user", 0, ["read", "write", "create", "submit", "report", "export", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "easy_cash_entry_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "category", "value_kind": "reference", "rules": ["required"], "target": "easy_cash_category"},
+          {"purpose": "account", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "amount", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "cost_center", "value_kind": "reference", "target": "accounting.cost_center", "binding": "shared_model"},
+          {"purpose": "project", "value_kind": "reference", "target": "projects.project", "binding": "shared_model"},
+          {"purpose": "description", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "treasury",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "treasury_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "account", "value_kind": "reference", "rules": ["required"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["read_only"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "responsible_person", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "disabled", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["accounts_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Certificate-based document signing",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "digital_signing_certificate_agent_registration",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["assigned_sequence_of_5_digits"]},
+          {"purpose": "user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "display_name", "value_kind": "text"},
+          {"purpose": "agent_fingerprint", "value_kind": "text"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "paired_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "last_seen_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "os_platform", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "agent_version", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "site_token_hash", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create", "delete"], false],
+          ["digital_signing_certificate_signer", 0, ["read"], true],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_audit_event",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["assigned_sequence_of_5_digits"]},
+          {"purpose": "request", "value_kind": "reference", "rules": ["required"], "target": "digital_signing_certificate_signing_request"},
+          {"purpose": "event_type", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "occurred_at", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "actor_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "client_network_address", "value_kind": "text"},
+          {"purpose": "user_agent", "value_kind": "text"},
+          {"purpose": "details_structured_data", "value_kind": "long_text"},
+          {"purpose": "event_hash", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "previous_event_hash", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "create", "report"], false],
+          ["digital_signing_certificate_auditor", 0, ["read", "report"], false],
+          ["system_manager", 0, ["read", "create"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_document_sign",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["assigned_sequence_of_5_digits"]},
+          {"purpose": "uploaded_portable_document", "value_kind": "file_reference", "rules": ["required"]},
+          {"purpose": "profile", "value_kind": "reference", "rules": ["required"], "target": "digital_signing_certificate_profile"},
+          {"purpose": "signature_template", "value_kind": "reference", "target": "digital_signing_certificate_signature_template"},
+          {"purpose": "sig_page", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "sig_x", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "sig_y", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "sig_width", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "sig_height", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "pending", "in_progress", "signed", "failed", "cancelled"]},
+          {"purpose": "signing_request", "value_kind": "reference", "rules": ["read_only"], "target": "digital_signing_certificate_signing_request"},
+          {"purpose": "signed_file", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.file", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create", "delete", "report", "share", "print", "email"], false],
+          ["digital_signing_certificate_signer", 0, ["read", "write", "create", "delete"], false],
+          ["digital_signing_certificate_auditor", 0, ["read", "report"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_expiry_warning_day",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "days", "value_kind": "whole_number", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_previous_certificate",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "certificate_fingerprint", "value_kind": "text"},
+          {"purpose": "certificate_common_name", "value_kind": "text"},
+          {"purpose": "certificate_not_after", "value_kind": "date_and_time"},
+          {"purpose": "replaced_on", "value_kind": "date_and_time"}
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_profile",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "profile_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "label", "value_kind": "text"},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "allowed_users", "value_kind": "owned_rows", "target": "digital_signing_certificate_profile_user"},
+          {"purpose": "certificate_fingerprint", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "certificate_common_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "certificate_issuer", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "certificate_serial", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "certificate_not_before", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "certificate_not_after", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "registered_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "certificate_pem_public", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "previous_certificates", "value_kind": "owned_rows", "target": "digital_signing_certificate_previous_certificate"},
+          {"purpose": "designation_for_stamp", "value_kind": "text"},
+          {"purpose": "signature_image", "value_kind": "image_reference"},
+          {"purpose": "seal_image", "value_kind": "image_reference"}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create", "delete", "report", "share", "print", "email"], false],
+          ["digital_signing_certificate_signer", 0, ["read"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_profile_user",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_rule",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "rule_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "priority", "value_kind": "whole_number"},
+          {"purpose": "is_enabled", "value_kind": "boolean"},
+          {"purpose": "target_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "trigger_event", "value_kind": "choice", "rules": ["required"], "choices": ["on_submit", "on_update", "on_change", "on_workflow_action"]},
+          {"purpose": "trigger_workflow_state", "value_kind": "text"},
+          {"purpose": "conditions", "value_kind": "owned_rows", "target": "digital_signing_certificate_rule_condition"},
+          {"purpose": "profile", "value_kind": "reference", "rules": ["required"], "target": "digital_signing_certificate_profile"},
+          {"purpose": "print_format", "value_kind": "reference", "rules": ["required"], "target": "document_output.print_format", "binding": "shared_model"},
+          {"purpose": "signature_template", "value_kind": "reference", "rules": ["required"], "target": "digital_signing_certificate_signature_template"},
+          {"purpose": "is_mandatory", "value_kind": "boolean"},
+          {"purpose": "block_print_until_signed", "value_kind": "boolean"},
+          {"purpose": "block_email_until_signed", "value_kind": "boolean"},
+          {"purpose": "auto_attach_to_source", "value_kind": "boolean"},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create", "delete", "report"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_rule_condition",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "digital_signing_certificate_rule_condition_field_selection", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "operator", "value_kind": "choice", "rules": ["required"], "choices": ["equals", "not_equals", "greater_than", "less_than", "in", "not_in", "contains", "is_set", "is_not_set"]},
+          {"purpose": "digital_signing_certificate_rule_condition_value", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "default_reason", "value_kind": "text"},
+          {"purpose": "default_location", "value_kind": "text"},
+          {"purpose": "signing_timeout_seconds", "value_kind": "whole_number"},
+          {"purpose": "retention_years_for_requests", "value_kind": "whole_number"},
+          {"purpose": "agent_listen_port", "value_kind": "whole_number"},
+          {"purpose": "enable_anonymous_telemetry", "value_kind": "boolean"},
+          {"purpose": "portable_document_preparation_engine", "value_kind": "choice", "choices": ["pyhanko"]},
+          {"purpose": "default_hash_algorithm", "value_kind": "choice", "choices": ["sha256", "sha384"]},
+          {"purpose": "trust_store_bundle", "value_kind": "file_reference"},
+          {"purpose": "enable_expiry_warnings", "value_kind": "boolean"},
+          {"purpose": "expiry_warning_days", "value_kind": "owned_rows", "target": "digital_signing_certificate_expiry_warning_day"},
+          {"purpose": "hmac_secret", "value_kind": "protected_text"},
+          {"purpose": "enforce_signer_location", "value_kind": "boolean"},
+          {"purpose": "geocoding_provider", "value_kind": "choice", "choices": ["nominatim", "workspace_service"]},
+          {"purpose": "geocoding_service_access_key", "value_kind": "protected_text"},
+          {"purpose": "geocoding_user_agent", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create"], false],
+          ["system_manager", 0, ["read", "write", "create"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_signature_field",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "field_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "page_number", "value_kind": "whole_number"},
+          {"purpose": "x", "value_kind": "decimal"},
+          {"purpose": "y", "value_kind": "decimal"},
+          {"purpose": "width", "value_kind": "decimal"},
+          {"purpose": "height", "value_kind": "decimal"},
+          {"purpose": "assigned_profile", "value_kind": "reference", "target": "digital_signing_certificate_profile"}
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_signature_template",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "template_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "target_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "print_format", "value_kind": "reference", "rules": ["required"], "target": "document_output.print_format", "binding": "shared_model"},
+          {"purpose": "version", "value_kind": "whole_number"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "fields", "value_kind": "owned_rows", "target": "digital_signing_certificate_signature_field"},
+          {"purpose": "stamp_show_signer_name", "value_kind": "boolean"},
+          {"purpose": "stamp_show_designation", "value_kind": "boolean"},
+          {"purpose": "stamp_show_digitally_signed_by", "value_kind": "boolean"},
+          {"purpose": "stamp_show_timestamp", "value_kind": "boolean"},
+          {"purpose": "stamp_timestamp_format", "value_kind": "text"},
+          {"purpose": "stamp_show_reason", "value_kind": "boolean"},
+          {"purpose": "stamp_show_location", "value_kind": "boolean"},
+          {"purpose": "stamp_show_delivery_note_cn", "value_kind": "boolean"},
+          {"purpose": "stamp_include_signature_image", "value_kind": "boolean"},
+          {"purpose": "stamp_include_seal_image", "value_kind": "boolean"},
+          {"purpose": "stamp_font_family", "value_kind": "text"},
+          {"purpose": "stamp_font_size", "value_kind": "decimal"},
+          {"purpose": "stamp_border", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create", "delete", "report"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_signing_request",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["assigned_sequence_of_5_digits"]},
+          {"purpose": "source_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "source_name", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "source_record_class"},
+          {"purpose": "rule", "value_kind": "reference", "target": "digital_signing_certificate_rule"},
+          {"purpose": "profile", "value_kind": "reference", "rules": ["required"], "target": "digital_signing_certificate_profile"},
+          {"purpose": "signature_template", "value_kind": "reference", "target": "digital_signing_certificate_signature_template"},
+          {"purpose": "expected_signer_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "actual_signer_user", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["pending", "in_progress", "signed", "failed", "cancelled"]},
+          {"purpose": "failure_reason", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "hash_algorithm", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "hash_to_be_signed", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "signature_bytes", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "certificate_fingerprint_presented", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "ocsp_response_b64", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "signed_file", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.file", "binding": "shared_model"},
+          {"purpose": "created_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "signed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "cancelled_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "sign_duration_seconds", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "client_network_address", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "client_user_agent", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "signer_latitude", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "signer_longitude", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "signer_accuracy_m", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "signer_address", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "signer_location_provider", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create", "report", "share", "print", "email"], false],
+          ["digital_signing_certificate_signer", 0, ["read", "write"], false],
+          ["digital_signing_certificate_auditor", 0, ["read", "report"], false],
+          ["system_manager", 0, ["read", "write", "create"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Certificate-based document signing",
+    "configuration": 2,
+    "entity_contracts": [
+      {
+        "concept": "digital_signing_certificate_agent_registration",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["assigned_sequence_of_5_digits"]},
+          {"purpose": "user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "display_name", "value_kind": "text"},
+          {"purpose": "agent_fingerprint", "value_kind": "text"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "paired_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "last_seen_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "os_platform", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "agent_version", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "site_token_hash", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create", "delete"], false],
+          ["digital_signing_certificate_signer", 0, ["read"], true],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_audit_event",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["assigned_sequence_of_5_digits"]},
+          {"purpose": "request", "value_kind": "reference", "rules": ["required"], "target": "digital_signing_certificate_signing_request"},
+          {"purpose": "event_type", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "occurred_at", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "actor_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "client_network_address", "value_kind": "text"},
+          {"purpose": "user_agent", "value_kind": "text"},
+          {"purpose": "details_structured_data", "value_kind": "long_text"},
+          {"purpose": "event_hash", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "previous_event_hash", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "create", "report"], false],
+          ["digital_signing_certificate_auditor", 0, ["read", "report"], false],
+          ["system_manager", 0, ["read", "create"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_document_sign",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["assigned_sequence_of_5_digits"]},
+          {"purpose": "uploaded_portable_document", "value_kind": "file_reference", "rules": ["required"]},
+          {"purpose": "profile", "value_kind": "reference", "rules": ["required"], "target": "digital_signing_certificate_profile"},
+          {"purpose": "signature_template", "value_kind": "reference", "target": "digital_signing_certificate_signature_template"},
+          {"purpose": "sig_page", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "sig_x", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "sig_y", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "sig_width", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "sig_height", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "pending", "in_progress", "signed", "failed", "cancelled"]},
+          {"purpose": "signing_request", "value_kind": "reference", "rules": ["read_only"], "target": "digital_signing_certificate_signing_request"},
+          {"purpose": "signed_file", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.file", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create", "delete", "report", "share", "print", "email"], false],
+          ["digital_signing_certificate_signer", 0, ["read", "write", "create", "delete"], false],
+          ["digital_signing_certificate_auditor", 0, ["read", "report"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_expiry_warning_day",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "days", "value_kind": "whole_number", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_previous_certificate",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "certificate_fingerprint", "value_kind": "text"},
+          {"purpose": "certificate_common_name", "value_kind": "text"},
+          {"purpose": "certificate_not_after", "value_kind": "date_and_time"},
+          {"purpose": "replaced_on", "value_kind": "date_and_time"}
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_profile",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "profile_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "label", "value_kind": "text"},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "allowed_users", "value_kind": "owned_rows", "target": "digital_signing_certificate_profile_user"},
+          {"purpose": "certificate_fingerprint", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "certificate_common_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "certificate_issuer", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "certificate_serial", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "certificate_not_before", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "certificate_not_after", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "registered_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "certificate_pem_public", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "previous_certificates", "value_kind": "owned_rows", "target": "digital_signing_certificate_previous_certificate"},
+          {"purpose": "designation_for_stamp", "value_kind": "text"},
+          {"purpose": "signature_image", "value_kind": "image_reference"},
+          {"purpose": "seal_image", "value_kind": "image_reference"}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create", "delete", "report", "share", "print", "email"], false],
+          ["digital_signing_certificate_signer", 0, ["read"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_profile_user",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_rule",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "rule_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "priority", "value_kind": "whole_number"},
+          {"purpose": "is_enabled", "value_kind": "boolean"},
+          {"purpose": "target_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "trigger_event", "value_kind": "choice", "rules": ["required"], "choices": ["on_submit", "on_update", "on_change", "on_workflow_action"]},
+          {"purpose": "trigger_workflow_state", "value_kind": "text"},
+          {"purpose": "conditions", "value_kind": "owned_rows", "target": "digital_signing_certificate_rule_condition"},
+          {"purpose": "profile", "value_kind": "reference", "rules": ["required"], "target": "digital_signing_certificate_profile"},
+          {"purpose": "print_format", "value_kind": "reference", "rules": ["required"], "target": "document_output.print_format", "binding": "shared_model"},
+          {"purpose": "signature_template", "value_kind": "reference", "rules": ["required"], "target": "digital_signing_certificate_signature_template"},
+          {"purpose": "is_mandatory", "value_kind": "boolean"},
+          {"purpose": "block_print_until_signed", "value_kind": "boolean"},
+          {"purpose": "block_email_until_signed", "value_kind": "boolean"},
+          {"purpose": "auto_attach_to_source", "value_kind": "boolean"},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create", "delete", "report"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_rule_condition",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "digital_signing_certificate_rule_condition_field_selection", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "operator", "value_kind": "choice", "rules": ["required"], "choices": ["equals", "not_equals", "greater_than", "less_than", "in", "not_in", "contains", "is_set", "is_not_set"]},
+          {"purpose": "digital_signing_certificate_rule_condition_value", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "default_reason", "value_kind": "text"},
+          {"purpose": "default_location", "value_kind": "text"},
+          {"purpose": "signing_timeout_seconds", "value_kind": "whole_number"},
+          {"purpose": "retention_years_for_requests", "value_kind": "whole_number"},
+          {"purpose": "agent_listen_port", "value_kind": "whole_number"},
+          {"purpose": "enable_anonymous_telemetry", "value_kind": "boolean"},
+          {"purpose": "portable_document_preparation_engine", "value_kind": "choice", "choices": ["pyhanko"]},
+          {"purpose": "default_hash_algorithm", "value_kind": "choice", "choices": ["sha256", "sha384"]},
+          {"purpose": "trust_store_bundle", "value_kind": "file_reference"},
+          {"purpose": "enable_expiry_warnings", "value_kind": "boolean"},
+          {"purpose": "expiry_warning_days", "value_kind": "owned_rows", "target": "digital_signing_certificate_expiry_warning_day"},
+          {"purpose": "hmac_secret", "value_kind": "protected_text"},
+          {"purpose": "enforce_signer_location", "value_kind": "boolean"},
+          {"purpose": "geocoding_provider", "value_kind": "choice", "choices": ["nominatim", "workspace_service"]},
+          {"purpose": "geocoding_service_access_key", "value_kind": "protected_text"},
+          {"purpose": "geocoding_user_agent", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create"], false],
+          ["system_manager", 0, ["read", "write", "create"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_signature_field",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "field_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "page_number", "value_kind": "whole_number"},
+          {"purpose": "x", "value_kind": "decimal"},
+          {"purpose": "y", "value_kind": "decimal"},
+          {"purpose": "width", "value_kind": "decimal"},
+          {"purpose": "height", "value_kind": "decimal"},
+          {"purpose": "assigned_profile", "value_kind": "reference", "target": "digital_signing_certificate_profile"}
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_signature_template",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "template_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "target_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "print_format", "value_kind": "reference", "rules": ["required"], "target": "document_output.print_format", "binding": "shared_model"},
+          {"purpose": "version", "value_kind": "whole_number"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "fields", "value_kind": "owned_rows", "target": "digital_signing_certificate_signature_field"},
+          {"purpose": "stamp_show_signer_name", "value_kind": "boolean"},
+          {"purpose": "stamp_show_designation", "value_kind": "boolean"},
+          {"purpose": "stamp_show_digitally_signed_by", "value_kind": "boolean"},
+          {"purpose": "stamp_show_timestamp", "value_kind": "boolean"},
+          {"purpose": "stamp_timestamp_format", "value_kind": "text"},
+          {"purpose": "stamp_show_reason", "value_kind": "boolean"},
+          {"purpose": "stamp_show_location", "value_kind": "boolean"},
+          {"purpose": "stamp_show_delivery_note_cn", "value_kind": "boolean"},
+          {"purpose": "stamp_include_signature_image", "value_kind": "boolean"},
+          {"purpose": "stamp_include_seal_image", "value_kind": "boolean"},
+          {"purpose": "stamp_font_family", "value_kind": "text"},
+          {"purpose": "stamp_font_size", "value_kind": "decimal"},
+          {"purpose": "stamp_border", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create", "delete", "report"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "digital_signing_certificate_signing_request",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["assigned_sequence_of_5_digits"]},
+          {"purpose": "source_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "source_name", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "source_record_class"},
+          {"purpose": "rule", "value_kind": "reference", "target": "digital_signing_certificate_rule"},
+          {"purpose": "profile", "value_kind": "reference", "rules": ["required"], "target": "digital_signing_certificate_profile"},
+          {"purpose": "signature_template", "value_kind": "reference", "target": "digital_signing_certificate_signature_template"},
+          {"purpose": "expected_signer_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "actual_signer_user", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["pending", "in_progress", "signed", "failed", "cancelled"]},
+          {"purpose": "failure_reason", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "hash_algorithm", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "hash_to_be_signed", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "signature_bytes", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "certificate_fingerprint_presented", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "ocsp_response_b64", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "signed_file", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.file", "binding": "shared_model"},
+          {"purpose": "created_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "signed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "cancelled_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "sign_duration_seconds", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "client_network_address", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "client_user_agent", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "signer_latitude", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "signer_longitude", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "signer_accuracy_m", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "signer_address", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "signer_location_provider", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["digital_signing_certificate_administrator", 0, ["read", "write", "create", "report", "share", "print", "email"], false],
+          ["digital_signing_certificate_signer", 0, ["read", "write"], false],
+          ["digital_signing_certificate_auditor", 0, ["read", "report"], false],
+          ["system_manager", 0, ["read", "write", "create"], false]
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,1403 @@
+[
+  {
+    "capability": "Assisted operations approval",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "assisted_operation_learned_pattern",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "detector_identifier", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "pattern_key", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "domain", "value_kind": "choice", "rules": ["required"], "choices": ["selling", "buying", "stock", "accounts", "projects", "org"]},
+          {"purpose": "roles", "value_kind": "owned_rows", "target": "assisted_operation_learned_pattern_role"},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "pattern_statement", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "skill_draft", "value_kind": "long_text", "rules": ["required"]},
+          {"purpose": "approved_draft", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "draft_edited", "value_kind": "boolean"},
+          {"purpose": "draft_polished", "value_kind": "boolean"},
+          {"purpose": "support_n", "value_kind": "whole_number"},
+          {"purpose": "n_rows", "value_kind": "whole_number"},
+          {"purpose": "exception_n", "value_kind": "whole_number"},
+          {"purpose": "confidence_percentage", "value_kind": "decimal"},
+          {"purpose": "wilson_low", "value_kind": "decimal"},
+          {"purpose": "gap", "value_kind": "decimal"},
+          {"purpose": "strength_band", "value_kind": "choice", "choices": ["unselected", "high", "medium", "low"]},
+          {"purpose": "temporal_spread", "value_kind": "expression_or_structured_text"},
+          {"purpose": "evidence", "value_kind": "expression_or_structured_text"},
+          {"purpose": "exceptions_cluster", "value_kind": "text"},
+          {"purpose": "sensitivity", "value_kind": "choice", "choices": ["unselected", "a", "b", "c"]},
+          {"purpose": "effective_sensitivity", "value_kind": "choice", "choices": ["unselected", "a", "b", "c"]},
+          {"purpose": "not_applicable", "value_kind": "boolean"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["proposed", "approved", "active", "rejected", "snoozed", "stale", "superseded", "archived"]},
+          {"purpose": "surfaced", "value_kind": "boolean"},
+          {"purpose": "surfaced_at", "value_kind": "date_and_time"},
+          {"purpose": "reviewed_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "approved_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_at", "value_kind": "date_and_time"},
+          {"purpose": "review_note", "value_kind": "text"},
+          {"purpose": "snoozed_until", "value_kind": "civil_day"},
+          {"purpose": "first_seen_run", "value_kind": "reference", "target": "assisted_operation_pattern_run"},
+          {"purpose": "last_seen_run", "value_kind": "reference", "target": "assisted_operation_pattern_run"},
+          {"purpose": "superseded_by", "value_kind": "reference", "target": "assisted_operation_learned_pattern"},
+          {"purpose": "materialized_skill", "value_kind": "reference", "target": "assisted_operation_custom_skill"},
+          {"purpose": "last_validated_at", "value_kind": "date_and_time"},
+          {"purpose": "stale_reason", "value_kind": "text"},
+          {"purpose": "counter_evidence", "value_kind": "expression_or_structured_text"},
+          {"purpose": "flags_count", "value_kind": "whole_number"},
+          {"purpose": "flag_band_cap", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "high", "medium", "low"]},
+          {"purpose": "overlap_warning", "value_kind": "text"},
+          {"purpose": "personalise_origin", "value_kind": "boolean", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "report", "export", "print", "email"], false],
+          ["assisted_operation_skill_reviewer", 0, ["read", "write"], false],
+          ["assisted_operation_administrator", 0, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_learned_pattern_role",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "role", "value_kind": "reference", "rules": ["required"], "target": "information_management.role", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "assisted_operation_llm_pool_model",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "provider", "value_kind": "text"},
+          {"purpose": "model", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "tier", "value_kind": "choice", "choices": ["strong", "cheap"]},
+          {"purpose": "order", "value_kind": "whole_number"},
+          {"purpose": "base_resource_address", "value_kind": "text"},
+          {"purpose": "credential_type", "value_kind": "choice", "choices": ["service_access_key", "subscription"]},
+          {"purpose": "service_access_key", "value_kind": "protected_text"},
+          {"purpose": "rotation", "value_kind": "choice", "choices": ["sticky", "round_robin", "least_used"]},
+          {"purpose": "subscription_accounts", "value_kind": "protected_text"}
+        ]
+      },
+      {
+        "concept": "assisted_operation_llm_pool_subscription_account",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "originating_service", "value_kind": "choice", "rules": ["required"], "choices": ["hosted_language_model", "language_model_provider", "workspace_service", "text_generation_service"]},
+          {"purpose": "account_reference", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "label", "value_kind": "text"},
+          {"purpose": "delegated_authorization_blob", "value_kind": "protected_text"}
+        ]
+      },
+      {
+        "concept": "assisted_operation_macro",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "macro_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "skip_confirmation", "value_kind": "boolean"},
+          {"purpose": "stop_on_error", "value_kind": "boolean"},
+          {"purpose": "administrator_hold", "value_kind": "boolean", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "administrator_hold_reason", "value_kind": "text", "rules": ["read_only", "hidden_from_form"], "access_level": 1},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "steps", "value_kind": "owned_rows", "rules": ["required"], "target": "assisted_operation_macro_step"},
+          {"purpose": "merged_prompt", "value_kind": "long_text"},
+          {"purpose": "merge_status", "value_kind": "choice", "choices": ["unselected", "pending", "ready", "failed"]},
+          {"purpose": "merge_conversation", "value_kind": "text"},
+          {"purpose": "schedule_enabled", "value_kind": "boolean"},
+          {"purpose": "schedule_frequency", "value_kind": "choice", "choices": ["daily", "weekly", "monthly", "once", "hourly", "custom"]},
+          {"purpose": "schedule_date", "value_kind": "civil_day"},
+          {"purpose": "schedule_weekday", "value_kind": "choice", "choices": ["unselected", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]},
+          {"purpose": "schedule_day_of_month", "value_kind": "whole_number"},
+          {"purpose": "schedule_time", "value_kind": "time_of_day"},
+          {"purpose": "schedule_cron", "value_kind": "text"},
+          {"purpose": "last_run_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "next_run_at", "value_kind": "date_and_time", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["assisted_operation_user", 0, ["read", "write", "create", "delete"], true],
+          ["system_manager", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_macro_run",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "macro", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "assisted_operation_macro"},
+          {"purpose": "conversation", "value_kind": "reference", "target": "assisted_operation_conversation"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["indexed_for_search"], "choices": ["queued", "running", "waiting_capacity", "waiting_report", "completed", "failed", "stopped"]},
+          {"purpose": "current_step", "value_kind": "whole_number"},
+          {"purpose": "total_steps", "value_kind": "whole_number"},
+          {"purpose": "run_mode", "value_kind": "choice", "choices": ["unselected", "stepped", "merged"]},
+          {"purpose": "capacity_attempts", "value_kind": "whole_number"},
+          {"purpose": "trigger", "value_kind": "choice", "choices": ["manual", "scheduled"]},
+          {"purpose": "started_at", "value_kind": "date_and_time"},
+          {"purpose": "finished_at", "value_kind": "date_and_time"},
+          {"purpose": "error", "value_kind": "text"},
+          {"purpose": "steps_snapshot", "value_kind": "long_text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "waiting_on", "value_kind": "long_text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "waiting_since", "value_kind": "date_and_time", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "resume_turn", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "resume_count", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "step_resumes", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "resume_compensations", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "waiting_failed", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "waited", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "step_continuations", "value_kind": "long_text", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["assisted_operation_user", 0, ["read"], true],
+          ["system_manager", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_macro_step",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "label", "value_kind": "text"},
+          {"purpose": "prompt", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "model_override", "value_kind": "text"},
+          {"purpose": "thinking_override", "value_kind": "choice", "choices": ["unselected", "low", "medium", "high"]},
+          {"purpose": "skills", "value_kind": "structured_value"}
+        ]
+      },
+      {
+        "concept": "assisted_operation_mobile_device",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "read_only", "write_once", "indexed_for_search"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "device_label", "value_kind": "text"},
+          {"purpose": "platform", "value_kind": "text"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "last_used", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "token_identifier", "value_kind": "text", "rules": ["required", "unique", "read_only", "write_once"]},
+          {"purpose": "secret_hash", "value_kind": "text", "rules": ["required", "read_only", "hidden_from_form", "write_once"]},
+          {"purpose": "revoked_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "revoked_by", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "revoked_reason", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["assisted_operation_user", 0, ["read"], true],
+          ["system_manager", 0, ["read", "write", "delete"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_pattern_detector_state",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "detector_identifier", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "last_watermark", "value_kind": "date_and_time"},
+          {"purpose": "last_full_scan_at", "value_kind": "date_and_time"},
+          {"purpose": "rows_scanned_total", "value_kind": "whole_number"},
+          {"purpose": "data_starved", "value_kind": "boolean"},
+          {"purpose": "not_applicable", "value_kind": "boolean"},
+          {"purpose": "last_error", "value_kind": "text"},
+          {"purpose": "last_run_at", "value_kind": "date_and_time"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "report", "export"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_pattern_run",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["queued", "running", "paused", "completed", "partial", "failed"]},
+          {"purpose": "trigger", "value_kind": "choice", "choices": ["scheduled", "manual"]},
+          {"purpose": "requested_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "window_start_used", "value_kind": "time_of_day"},
+          {"purpose": "window_end_used", "value_kind": "time_of_day"},
+          {"purpose": "started_at", "value_kind": "date_and_time"},
+          {"purpose": "ended_at", "value_kind": "date_and_time"},
+          {"purpose": "heartbeat_at", "value_kind": "date_and_time"},
+          {"purpose": "scan_mode", "value_kind": "text"},
+          {"purpose": "detectors_total", "value_kind": "whole_number"},
+          {"purpose": "detectors_completed", "value_kind": "whole_number"},
+          {"purpose": "detectors_skipped", "value_kind": "expression_or_structured_text"},
+          {"purpose": "record_classes_read", "value_kind": "expression_or_structured_text"},
+          {"purpose": "rows_scanned", "value_kind": "whole_number"},
+          {"purpose": "candidates_found", "value_kind": "whole_number"},
+          {"purpose": "proposals_created", "value_kind": "whole_number"},
+          {"purpose": "proposals_updated", "value_kind": "whole_number"},
+          {"purpose": "duplicates_suppressed", "value_kind": "whole_number"},
+          {"purpose": "patterns_revalidated", "value_kind": "whole_number"},
+          {"purpose": "patterns_marked_stale", "value_kind": "whole_number"},
+          {"purpose": "errors", "value_kind": "expression_or_structured_text"},
+          {"purpose": "remaining_units", "value_kind": "expression_or_structured_text"},
+          {"purpose": "coverage_note", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "report", "export", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_pattern_snapshot",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "detector_identifier", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "period", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "snapshot_key", "value_kind": "text", "rules": ["unique", "read_only"]},
+          {"purpose": "rows_ingested", "value_kind": "whole_number"},
+          {"purpose": "payload", "value_kind": "expression_or_structured_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "report", "export"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_payment_calendar_settings",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "unique"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["read_only"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "safety_floor", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "revision", "value_kind": "whole_number", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete"], false],
+          ["accounts_manager", 0, ["read", "write", "create"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_portable_document_template",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "template_key", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "label", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "accent_color", "value_kind": "colour"},
+          {"purpose": "dark_color", "value_kind": "colour"},
+          {"purpose": "body_font", "value_kind": "choice", "choices": ["sans", "serif", "inter", "lato", "worksans", "lora", "merriweather", "ptserif"]},
+          {"purpose": "display_font", "value_kind": "choice", "choices": ["sans", "serif", "inter", "lato", "worksans", "lora", "merriweather", "ptserif"]},
+          {"purpose": "masthead_align", "value_kind": "choice", "choices": ["left", "center"]},
+          {"purpose": "cover", "value_kind": "choice", "choices": ["auto", "on", "off"]},
+          {"purpose": "show_logo", "value_kind": "boolean"},
+          {"purpose": "accent_bar", "value_kind": "boolean"},
+          {"purpose": "watermark", "value_kind": "text"},
+          {"purpose": "page_size", "value_kind": "choice", "choices": ["a4", "letter", "legal"]},
+          {"purpose": "orientation", "value_kind": "choice", "choices": ["portrait", "landscape"]},
+          {"purpose": "margins_mm", "value_kind": "whole_number"},
+          {"purpose": "use_letterhead_footer", "value_kind": "boolean"},
+          {"purpose": "company_letter_heads", "value_kind": "owned_rows", "target": "assisted_operation_portable_document_template_company_letter_head"},
+          {"purpose": "based_on", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_portable_document_template_company_letter_head",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "letter_head", "value_kind": "reference", "rules": ["required"], "target": "document_output.letter_head", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "assisted_operation_pending_action",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "kind", "value_kind": "choice", "rules": ["required"], "choices": ["chat", "file_box_held", "file_box_sheet"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["pending", "executing", "executed", "failed", "discarded", "cancelled", "superseded"]},
+          {"purpose": "reason_code", "value_kind": "choice", "choices": ["unselected", "failed", "already_handled", "busy", "superseded", "stale", "target_missing", "unverifiable", "tampered", "identity_refused", "interrupted", "partial", "owner_disabled", "cancelled", "archived", "discarded", "expired", "use_existing", "stuck", "safety_update"]},
+          {"purpose": "reason", "value_kind": "text"},
+          {"purpose": "tool", "value_kind": "text"},
+          {"purpose": "summary", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "card", "value_kind": "structured_value", "rules": ["read_only"]},
+          {"purpose": "preview", "value_kind": "structured_value", "rules": ["read_only"]},
+          {"purpose": "origin_conversation", "value_kind": "text"},
+          {"purpose": "conversation", "value_kind": "reference", "target": "assisted_operation_conversation"},
+          {"purpose": "adopted_conversation", "value_kind": "text"},
+          {"purpose": "owner_user", "value_kind": "text"},
+          {"purpose": "exec_user", "value_kind": "text"},
+          {"purpose": "decided_by", "value_kind": "text"},
+          {"purpose": "skill_record_identifier", "value_kind": "text"},
+          {"purpose": "run_identifier", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "agent_close_fences", "value_kind": "structured_value", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "actor", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "collaboration_binding", "value_kind": "text", "rules": ["read_only", "indexed_for_search"]},
+          {"purpose": "collaboration_grant_revision", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "collaboration_epoch", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "collaboration_call_key", "value_kind": "text", "rules": ["unique", "read_only"]},
+          {"purpose": "batch_identifier", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "corrects", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "correction_message", "value_kind": "text", "rules": ["read_only", "indexed_for_search"]},
+          {"purpose": "open_key", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "dedup_keys", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "executing_at", "value_kind": "date_and_time"},
+          {"purpose": "decided_at", "value_kind": "date_and_time"},
+          {"purpose": "result_record_class", "value_kind": "text"},
+          {"purpose": "result_name", "value_kind": "text"},
+          {"purpose": "settled", "value_kind": "boolean"},
+          {"purpose": "settled_at", "value_kind": "date_and_time"},
+          {"purpose": "settle_attempts", "value_kind": "whole_number"},
+          {"purpose": "needs_input", "value_kind": "structured_value"},
+          {"purpose": "edited", "value_kind": "boolean"},
+          {"purpose": "collecting", "value_kind": "boolean", "access_level": 1},
+          {"purpose": "collecting_turn", "value_kind": "text", "access_level": 1},
+          {"purpose": "record_count", "value_kind": "whole_number", "access_level": 1},
+          {"purpose": "question_count", "value_kind": "whole_number", "access_level": 1},
+          {"purpose": "sheet_counts", "value_kind": "structured_value", "access_level": 1},
+          {"purpose": "needs_fix", "value_kind": "structured_value", "access_level": 1},
+          {"purpose": "sheet_outcome", "value_kind": "structured_value", "access_level": 1},
+          {"purpose": "apply_token", "value_kind": "text", "access_level": 1},
+          {"purpose": "apply_request", "value_kind": "structured_value", "access_level": 1},
+          {"purpose": "apply_errors", "value_kind": "structured_value", "access_level": 1},
+          {"purpose": "stop_requested", "value_kind": "boolean", "access_level": 1},
+          {"purpose": "sealed_call", "value_kind": "long_text", "access_level": 1},
+          {"purpose": "sealed_settlement", "value_kind": "long_text", "access_level": 1},
+          {"purpose": "sealed_undo", "value_kind": "long_text", "access_level": 1},
+          {"purpose": "waiters", "value_kind": "owned_rows", "target": "assisted_operation_pending_action_waiter"}
+        ]
+      },
+      {
+        "concept": "assisted_operation_pending_action_waiter",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "conversation", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "assisted_operation_conversation"},
+          {"purpose": "role", "value_kind": "choice", "choices": ["primary", "waiter"]},
+          {"purpose": "resume_state", "value_kind": "choice", "choices": ["unselected", "due", "claimed", "done", "failed"]},
+          {"purpose": "resume_attempts", "value_kind": "whole_number"},
+          {"purpose": "resumed_at", "value_kind": "date_and_time"}
+        ]
+      },
+      {
+        "concept": "assisted_operation_pending_delegated_authorization_capture",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "capture_identifier", "value_kind": "text", "rules": ["required", "unique", "read_only"]},
+          {"purpose": "owner_user", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "provider", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "originating_service", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "agent_provider", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "provider_subject_hash", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "safe_label", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "account_email", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "account_reference", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "bound_agent_resource_address", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "nonce_hash", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "encrypted_delegated_authorization_blob", "value_kind": "protected_text"},
+          {"purpose": "expires_at", "value_kind": "date_and_time", "rules": ["required", "read_only"]},
+          {"purpose": "consumed_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "consumed_by_operation", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "revocation_state", "value_kind": "choice", "rules": ["read_only"], "choices": ["pending", "revoked", "unsupported", "failed", "consumed"]},
+          {"purpose": "revocation_attempts", "value_kind": "whole_number", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "assisted_operation_personalise_question",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "question", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "context_md", "value_kind": "long_text"},
+          {"purpose": "origin", "value_kind": "choice", "rules": ["required"], "choices": ["behavioural_learning", "from_your_organisation", "from_your_chat_patterns", "from_your_reviewer"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["indexed_for_search"], "choices": ["unanswered", "answered", "ignored", "deleted"]},
+          {"purpose": "source_pattern", "value_kind": "reference", "target": "assisted_operation_learned_pattern"},
+          {"purpose": "source_configuration", "value_kind": "reference", "target": "assisted_operation_personalise_question_rule"},
+          {"purpose": "asked_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "answer_note", "value_kind": "reference", "target": "assisted_operation_voice_note"},
+          {"purpose": "answered_at", "value_kind": "date_and_time"},
+          {"purpose": "ignored_at", "value_kind": "date_and_time"}
+        ],
+        "role_grants": [
+          ["assisted_operation_user", 0, ["read", "write", "create", "delete"], true],
+          ["assisted_operation_administrator", 0, ["read", "write", "create", "delete"], true],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_personalise_question_rule",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "question", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "context_md", "value_kind": "long_text"},
+          {"purpose": "scope", "value_kind": "choice", "rules": ["required"], "choices": ["org", "role", "user"]},
+          {"purpose": "target_role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "target_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "active", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_physical_count",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "approval_request", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "assisted_operation_approval_request"},
+          {"purpose": "source_run", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "read_only"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "warehouse", "value_kind": "reference", "rules": ["required", "read_only", "indexed_for_search"], "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "counted_at", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "recorded_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "recorded_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "entry_key", "value_kind": "text", "rules": ["unique", "read_only", "hidden_from_form"]},
+          {"purpose": "entry_digest", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "hidden_from_form"], "target": "assisted_operation_physical_count"},
+          {"purpose": "items", "value_kind": "owned_rows", "rules": ["required"], "target": "assisted_operation_physical_count_item"}
+        ],
+        "role_grants": [
+          ["stock_user", 0, ["read", "write", "create", "submit", "cancel", "amend", "print"], false],
+          ["stock_manager", 0, ["read", "write", "create", "submit", "cancel", "amend", "print"], false],
+          ["system_manager", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_physical_count_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "product_identifier", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "counted_quantity", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "inventory_unit_of_measure", "value_kind": "reference", "rules": ["read_only"], "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "batch_detail_recorded", "value_kind": "boolean", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "assisted_operation_relay_pump",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "relay_target_identifier", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "transport_mode", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "pump", "draining", "legacy"]},
+          {"purpose": "mode_epoch", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "mirror_mismatch", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "pump_epoch", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "lease_holder", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "lease_expires_at", "value_kind": "date_and_time", "rules": ["read_only", "indexed_for_search"]},
+          {"purpose": "loop_heartbeat_instant", "value_kind": "date_and_time", "rules": ["read_only", "indexed_for_search"]},
+          {"purpose": "hop_counter", "value_kind": "whole_number", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read"], false],
+          ["assisted_operation_administrator", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_reorder_safety_fence",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "legacy_confirmation_generation", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "hide_shortcut_without_access", "value_kind": "boolean"},
+          {"purpose": "token_budget_monthly", "value_kind": "whole_number"},
+          {"purpose": "conversation_retention_days", "value_kind": "whole_number"},
+          {"purpose": "agent_run_budget_monthly", "value_kind": "whole_number"},
+          {"purpose": "activation_module_ceiling", "value_kind": "whole_number"},
+          {"purpose": "intake_daily_cap", "value_kind": "whole_number"},
+          {"purpose": "macro_step_budget_monthly", "value_kind": "whole_number"},
+          {"purpose": "enforce_agent_minimum_model", "value_kind": "boolean", "access_level": 2},
+          {"purpose": "intake_daily_cap_per_user", "value_kind": "whole_number"},
+          {"purpose": "agent_name", "value_kind": "text"},
+          {"purpose": "holiday_touches_enabled", "value_kind": "boolean"},
+          {"purpose": "birthday_greetings_enabled", "value_kind": "boolean"},
+          {"purpose": "brand_logo", "value_kind": "image_reference"},
+          {"purpose": "brand_favicon", "value_kind": "image_reference"},
+          {"purpose": "default_portable_document_template", "value_kind": "text"},
+          {"purpose": "models", "value_kind": "owned_rows", "target": "assisted_operation_llm_pool_model"},
+          {"purpose": "preset", "value_kind": "text"},
+          {"purpose": "routing_mode", "value_kind": "choice", "choices": ["unselected", "dynamic", "failover"]},
+          {"purpose": "llm_provider", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "llm_model", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "proxy_active", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "proxy_recommended", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "llm_service_access_key", "value_kind": "protected_text", "rules": ["read_only"]},
+          {"purpose": "llm_base_resource_address", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "llm_temperature", "value_kind": "decimal"},
+          {"purpose": "llm_maximum_output_tokens", "value_kind": "whole_number"},
+          {"purpose": "vision_attachments_enabled", "value_kind": "boolean"},
+          {"purpose": "llm_authentication_mode", "value_kind": "choice", "rules": ["required", "read_only"], "choices": ["service_access_key", "subscription", "delegated_authorization"]},
+          {"purpose": "llm_delegated_authorization_account_email", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "llm_delegated_authorization_connected_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "pattern_learning_enabled", "value_kind": "boolean"},
+          {"purpose": "pattern_llm_polish", "value_kind": "boolean"},
+          {"purpose": "pattern_window_start", "value_kind": "time_of_day"},
+          {"purpose": "pattern_window_end", "value_kind": "time_of_day"},
+          {"purpose": "pattern_maximum_proposals_per_run", "value_kind": "whole_number"},
+          {"purpose": "pattern_row_budget_per_night", "value_kind": "whole_number"},
+          {"purpose": "pattern_last_run_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "pattern_last_run_status", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "pattern_next_run_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "pattern_scan_mode", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "personalise_enabled", "value_kind": "boolean"},
+          {"purpose": "chat_question_mining_enabled", "value_kind": "boolean"},
+          {"purpose": "personalise_daily_question_cap", "value_kind": "whole_number"},
+          {"purpose": "chat_mining_watermark", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "chat_mining_last_run_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "chat_mining_last_run_status", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "voice_features_enabled", "value_kind": "boolean"},
+          {"purpose": "knowledge_library_enabled", "value_kind": "boolean"},
+          {"purpose": "persona_enabled", "value_kind": "boolean"},
+          {"purpose": "knowledge_library_nudge_cooldown_hours", "value_kind": "whole_number"},
+          {"purpose": "knowledge_language", "value_kind": "choice", "choices": ["english", "original"]},
+          {"purpose": "voice_notes_last_processed_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "voice_notes_last_process_status", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "knowledge_library_lint_last_run_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "knowledge_library_lint_summary", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "knowledge_library_mirror_last_synchronized_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "knowledge_library_mirror_last_synchronization_status", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "agent_resource_address", "value_kind": "text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "paired_site", "value_kind": "text", "rules": ["read_only", "hidden_from_form"], "access_level": 1},
+          {"purpose": "pairing_blocked", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"], "access_level": 1},
+          {"purpose": "pairing_blocked_reason", "value_kind": "text", "rules": ["read_only", "hidden_from_form"], "access_level": 1},
+          {"purpose": "agent_token", "value_kind": "protected_text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "callback_key", "value_kind": "protected_text", "rules": ["read_only", "hidden_from_form"], "access_level": 1},
+          {"purpose": "agent_token_issued_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "agent_token_maximum_age_days", "value_kind": "whole_number"},
+          {"purpose": "tenant_authority_generation", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "tenant_authority_handle", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "foreign_sessions_seen", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "foreign_session_last_at", "value_kind": "date_and_time", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "instance_changed", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "chat_device_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "chat_device_public_key", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "chat_device_private_key", "value_kind": "protected_text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "chat_device_token", "value_kind": "protected_text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "disable_armed_skip", "value_kind": "boolean"},
+          {"purpose": "enable_customizations_clause", "value_kind": "boolean"},
+          {"purpose": "enable_role_profiles", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "file_box_sheets", "value_kind": "boolean"},
+          {"purpose": "payment_calendar_chat_handoff", "value_kind": "boolean", "rules": ["hidden_from_form"], "access_level": 2},
+          {"purpose": "run_query_record_class_allowlist", "value_kind": "text", "access_level": 1},
+          {"purpose": "run_method_blocklist", "value_kind": "text", "access_level": 1},
+          {"purpose": "core_applications_override", "value_kind": "text"},
+          {"purpose": "connector_egress_rules", "value_kind": "text"},
+          {"purpose": "last_synchronization_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "last_synchronization_requested_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "last_synchronization_status", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "last_synchronization_attempt_error", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "llm_direct_synchronized_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "chat_was_ready_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "llm_pool_synchronized_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "chat_ready_authority", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "installed_applications_synchronized", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "maximum_concurrent_chats", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "last_subscription_status", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "subscription_health", "value_kind": "long_text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "last_synchronization_warnings", "value_kind": "long_text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "last_model_statuses", "value_kind": "long_text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "llm_last_apply_fingerprint", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "skills_synchronized_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "skills_synchronization_status", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "learned_skills_synchronized_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "learned_skills_synchronization_status", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "agent_skills_synchronized_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "agent_skills_synchronization_status", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "agent_catalog_dirty", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "agent_catalog_version", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "last_validated_pool_fp", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "role_profiles_pushed", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "role_profiles_pushed_at", "value_kind": "date_and_time", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "role_profiles_configuration", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "role_profiles_configuration_version", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "role_profiles_configuration_synchronized_at", "value_kind": "date_and_time", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "redaction_patterns", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "redaction_patterns_synchronized_at", "value_kind": "date_and_time", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "release_notice_active", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "latest_assisted_operation_version", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "release_notice_tier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "release_notice_behind", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "release_banner_interval_days", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "release_notice_message", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "announcement_active", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "announcement_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "announcement_title", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "announcement_severity", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "announcement_expires_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "announcement_interval_days", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "announcement_message", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "announcement_link_resource_address", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "announcement_link_label", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "chat_sharing_enabled", "value_kind": "boolean"},
+          {"purpose": "deployment_mode", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "assisted_operation_administrator_resource_address", "value_kind": "text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "assisted_operation_administrator_service_access_key", "value_kind": "protected_text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "assisted_operation_administrator_customer_email", "value_kind": "text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "assisted_operation_administrator_service_interface_secret", "value_kind": "protected_text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "assisted_operation_administrator_customer_password", "value_kind": "protected_text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "signup_context", "value_kind": "long_text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "network_mode", "value_kind": "choice", "access_level": 1, "choices": ["unselected", "private"]},
+          {"purpose": "public_address", "value_kind": "text", "access_level": 1},
+          {"purpose": "maintenance_active", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "maintenance_message", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "catalogue_visibility_governed", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "catalogue_visibility_synchronized_at", "value_kind": "date_and_time", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "connector_catalogue_disabled", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "connector_catalogue_synchronized_at", "value_kind": "date_and_time", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "holiday_policy_disabled", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "holiday_policy_disabled_designs", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "holiday_policy_synchronized_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "holiday_policy_names", "value_kind": "long_text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create"], false],
+          ["system_manager", 1, ["read", "write", "report", "export"], false],
+          ["assisted_operation_administrator", 0, ["read", "write"], false],
+          ["system_manager", 2, ["read"], false],
+          ["administrator", 0, ["read", "write"], false],
+          ["administrator", 2, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_shared_skill_slug",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "slug", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "skill", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_skill_administrator_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "verb", "value_kind": "choice", "rules": ["required", "read_only"], "choices": ["hold", "release", "delete", "handover", "edit"]},
+          {"purpose": "administrator", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "acted_at", "value_kind": "date_and_time", "rules": ["required", "read_only"]},
+          {"purpose": "skill", "value_kind": "text", "rules": ["required", "read_only", "indexed_for_search"]},
+          {"purpose": "skill_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "skill_owner", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "new_owner", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "needs_apply", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "reason", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read"], false],
+          ["assisted_operation_administrator", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_skill_promotion_request",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "skill", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "assisted_operation_custom_skill"},
+          {"purpose": "skill_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "instructions_snapshot", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "description_snapshot", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "user_invocable_snapshot", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "use_in_file_box_snapshot", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "file_box_creates_snapshot", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "snapshotted", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "from_scope", "value_kind": "choice", "rules": ["required"], "choices": ["user", "role", "org"]},
+          {"purpose": "to_scope", "value_kind": "choice", "rules": ["required"], "choices": ["role", "org"]},
+          {"purpose": "target_role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "target_roles", "value_kind": "owned_rows", "target": "assisted_operation_custom_skill_allowed_role"},
+          {"purpose": "note", "value_kind": "text"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["indexed_for_search"], "choices": ["pending", "approved", "rejected"]},
+          {"purpose": "reviewer", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "decided_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "decision_note", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["assisted_operation_user", 0, ["read"], true],
+          ["assisted_operation_administrator", 0, ["read"], true],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_trigger",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "trigger_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "target_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "record_event", "value_kind": "choice", "choices": ["validate", "before_submit", "after_insert", "on_update", "on_submit", "on_cancel", "on_trash", "on_update_after_submit"]},
+          {"purpose": "record_events", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "condition", "value_kind": "expression_or_structured_text"},
+          {"purpose": "action_type", "value_kind": "choice", "rules": ["required"], "choices": ["script", "llm", "intake"]},
+          {"purpose": "script_body", "value_kind": "expression_or_structured_text"},
+          {"purpose": "server_script", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.server_script", "binding": "shared_model"},
+          {"purpose": "llm_instruction", "value_kind": "text"},
+          {"purpose": "llm_daily_cap", "value_kind": "whole_number"},
+          {"purpose": "llm_allow_lookups", "value_kind": "boolean"},
+          {"purpose": "intake_source", "value_kind": "choice", "choices": ["folder", "record"]},
+          {"purpose": "intake_folder", "value_kind": "text"},
+          {"purpose": "intake_record_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "intake_record_event", "value_kind": "choice", "choices": ["file_attached", "after_insert", "on_submit"]},
+          {"purpose": "intake_target_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "intake_spec", "value_kind": "structured_value"},
+          {"purpose": "intake_instructions", "value_kind": "text"},
+          {"purpose": "allow_incomplete_drafts", "value_kind": "boolean"},
+          {"purpose": "intake_status_field", "value_kind": "text"},
+          {"purpose": "intake_link_field", "value_kind": "text"},
+          {"purpose": "source_conversation", "value_kind": "text", "rules": ["hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete"], false],
+          ["assisted_operation_administrator", 0, ["read", "write", "create", "delete"], false],
+          ["assisted_operation_user", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_trigger_activity",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "trigger", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "trigger_label", "value_kind": "text"},
+          {"purpose": "target_record_class", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "target_record_identifier", "value_kind": "text"},
+          {"purpose": "record_event", "value_kind": "text"},
+          {"purpose": "action_type", "value_kind": "text"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["success", "failed", "blocked", "skipped", "queued", "running", "needs_review"]},
+          {"purpose": "summary", "value_kind": "text"},
+          {"purpose": "detail", "value_kind": "long_text", "access_level": 1},
+          {"purpose": "duration_ms", "value_kind": "whole_number"},
+          {"purpose": "event_user", "value_kind": "text"},
+          {"purpose": "source_file", "value_kind": "reference", "target": "information_management.file", "binding": "shared_model"},
+          {"purpose": "file_hash", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "draft_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "draft_name", "value_kind": "variable_record_reference", "record_class_field": "draft_record_class"},
+          {"purpose": "reading_structured_data", "value_kind": "long_text"},
+          {"purpose": "attempts", "value_kind": "whole_number"},
+          {"purpose": "read_on", "value_kind": "civil_day", "rules": ["indexed_for_search"]},
+          {"purpose": "approval_request", "value_kind": "reference", "target": "assisted_operation_approval_request"},
+          {"purpose": "duplicate_of", "value_kind": "reference", "target": "assisted_operation_trigger_activity"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "delete"], false],
+          ["system_manager", 1, ["read"], false],
+          ["assisted_operation_administrator", 0, ["read"], false],
+          ["desk_user", 0, ["read"], true]
+        ]
+      },
+      {
+        "concept": "assisted_operation_turn_effect",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "turn", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "assisted_operation_chat_turn"},
+          {"purpose": "effect_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["pending", "running", "done"]},
+          {"purpose": "attempts", "value_kind": "whole_number"},
+          {"purpose": "claim_token", "value_kind": "text"},
+          {"purpose": "claimed_at", "value_kind": "date_and_time"},
+          {"purpose": "applied_at", "value_kind": "date_and_time"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read"], false],
+          ["assisted_operation_administrator", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_turn_usage",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "run_identifier", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "session_key", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "user", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "profile_agent_identifier", "value_kind": "text"},
+          {"purpose": "profile_tier", "value_kind": "text"},
+          {"purpose": "model", "value_kind": "text"},
+          {"purpose": "tokens_in", "value_kind": "whole_number"},
+          {"purpose": "tokens_out", "value_kind": "whole_number"},
+          {"purpose": "tokens_out_estimated", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "cache_read", "value_kind": "whole_number"},
+          {"purpose": "cache_write", "value_kind": "whole_number"},
+          {"purpose": "cache_reported", "value_kind": "boolean"},
+          {"purpose": "tool_calls", "value_kind": "whole_number"},
+          {"purpose": "day", "value_kind": "civil_day", "rules": ["indexed_for_search"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read"], false],
+          ["assisted_operation_administrator", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_user_memory",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "content", "value_kind": "long_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_user_model_usage",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "model", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "month_key", "value_kind": "text"},
+          {"purpose": "month_input_tokens", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "month_output_tokens", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "monthly_token_limit", "value_kind": "whole_number"}
+        ]
+      },
+      {
+        "concept": "assisted_operation_user_settings",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "notify_enabled", "value_kind": "boolean"},
+          {"purpose": "activity_detail", "value_kind": "boolean"},
+          {"purpose": "default_auto_mode", "value_kind": "boolean"},
+          {"purpose": "auto_mode_acknowledged", "value_kind": "boolean"},
+          {"purpose": "preferred_persona", "value_kind": "choice", "choices": ["assisted_operation", "jara"]},
+          {"purpose": "support_context_copy_pref", "value_kind": "choice", "choices": ["unselected", "yes", "number"]},
+          {"purpose": "show_holiday_touches", "value_kind": "boolean"},
+          {"purpose": "business_greeting_state", "value_kind": "choice", "rules": ["read_only"], "access_level": 1, "choices": ["unselected", "dismissed"]},
+          {"purpose": "business_greeting_chat_count", "value_kind": "whole_number", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "business_greeting_hidden_at_count", "value_kind": "whole_number", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "holiday_touch_shown", "value_kind": "text", "rules": ["read_only", "hidden_from_form"], "access_level": 1},
+          {"purpose": "pulse_last_period_key", "value_kind": "text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "pulse_offer_count", "value_kind": "whole_number", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "sidebar_order", "value_kind": "text"},
+          {"purpose": "prompt_suggestions", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "prompt_suggestions_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "monthly_token_limit", "value_kind": "whole_number", "access_level": 1},
+          {"purpose": "limit_period", "value_kind": "choice", "access_level": 1, "choices": ["all_time", "daily", "weekly", "monthly"]},
+          {"purpose": "usage_month", "value_kind": "text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "month_input_tokens", "value_kind": "whole_number", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "month_output_tokens", "value_kind": "whole_number", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "month_tokens", "value_kind": "whole_number", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "total_tokens", "value_kind": "whole_number", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "period_key", "value_kind": "text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "period_tokens", "value_kind": "whole_number", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "last_usage_at", "value_kind": "date_and_time", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "last_synchronized_at", "value_kind": "date_and_time", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "user_model_usage", "value_kind": "owned_rows", "rules": ["read_only"], "access_level": 1, "target": "assisted_operation_user_model_usage"},
+          {"purpose": "payment_calendar_preferences", "value_kind": "text", "rules": ["hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["assisted_operation_user", 0, ["read", "write"], true],
+          ["assisted_operation_user", 1, ["read"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false],
+          ["system_manager", 1, ["read", "write"], false],
+          ["assisted_operation_administrator", 0, ["read", "write", "create", "delete"], false],
+          ["assisted_operation_administrator", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_voice_note",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "kind", "value_kind": "choice", "choices": ["text", "voice", "attachment", "link"]},
+          {"purpose": "transcript", "value_kind": "long_text"},
+          {"purpose": "duration_s", "value_kind": "whole_number"},
+          {"purpose": "attachment", "value_kind": "file_reference"},
+          {"purpose": "resource_address", "value_kind": "text"},
+          {"purpose": "extracted_text", "value_kind": "long_text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "context_type", "value_kind": "choice", "choices": ["business", "conversation"]},
+          {"purpose": "conversation", "value_kind": "reference", "target": "assisted_operation_conversation"},
+          {"purpose": "question", "value_kind": "reference", "target": "assisted_operation_personalise_question"},
+          {"purpose": "entities", "value_kind": "structured_value"},
+          {"purpose": "source", "value_kind": "choice", "choices": ["business_tab", "chat_nudge", "personalise", "mobile"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["indexed_for_search"], "choices": ["new", "processed", "archived"]},
+          {"purpose": "processed_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "processed_note", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["assisted_operation_user", 0, ["read", "write", "create", "delete"], true],
+          ["system_manager", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_knowledge_library_graph_history",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "snapshot_date", "value_kind": "civil_day", "rules": ["required", "unique"]},
+          {"purpose": "pages", "value_kind": "whole_number"},
+          {"purpose": "links", "value_kind": "whole_number"},
+          {"purpose": "orphans", "value_kind": "whole_number"},
+          {"purpose": "stale", "value_kind": "whole_number"},
+          {"purpose": "contradictions", "value_kind": "whole_number"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "report", "export"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_knowledge_library_page",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "slug", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "page_type", "value_kind": "choice", "rules": ["required", "indexed_for_search"], "choices": ["customer", "supplier", "item", "process", "record_class", "exception", "integration", "people", "org"]},
+          {"purpose": "scope", "value_kind": "choice", "rules": ["required"], "choices": ["org", "role", "user"]},
+          {"purpose": "target_role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "target_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reference_record_class", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "reference_name", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "summary", "value_kind": "text"},
+          {"purpose": "body_md", "value_kind": "long_text"},
+          {"purpose": "sensitivity", "value_kind": "choice", "choices": ["a", "b", "c"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["indexed_for_search"], "choices": ["active", "archived"]},
+          {"purpose": "sources", "value_kind": "structured_value", "rules": ["read_only"]},
+          {"purpose": "last_confirmed_at", "value_kind": "date_and_time"},
+          {"purpose": "contradiction_flag", "value_kind": "boolean"},
+          {"purpose": "manual_links", "value_kind": "structured_value"},
+          {"purpose": "mirror_hash", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["desk_user", 0, ["read"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "assisted_operation_knowledge_library_promotion_request",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "page", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "assisted_operation_knowledge_library_page"},
+          {"purpose": "from_scope", "value_kind": "choice", "rules": ["required"], "choices": ["org", "role", "user"]},
+          {"purpose": "to_scope", "value_kind": "choice", "rules": ["required"], "choices": ["org", "role", "user"]},
+          {"purpose": "target_role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "body_snapshot", "value_kind": "long_text"},
+          {"purpose": "note", "value_kind": "text"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["indexed_for_search"], "choices": ["pending", "approved", "rejected"]},
+          {"purpose": "reviewer", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "decided_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "decision_note", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["assisted_operation_user", 0, ["read"], true],
+          ["assisted_operation_administrator", 0, ["read"], true],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "assistant_tool_interface_delegated_authorization_client",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "connector", "value_kind": "reference", "rules": ["required", "unique", "read_only"], "target": "assisted_operation_connector"},
+          {"purpose": "registration_mode", "value_kind": "choice", "rules": ["required", "read_only"], "choices": ["static", "dcr"]},
+          {"purpose": "authentication_method", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "client_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "client_secret", "value_kind": "protected_text"},
+          {"purpose": "registration_access_token", "value_kind": "protected_text"},
+          {"purpose": "issuer", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "authorization_endpoint", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "token_endpoint", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "registration_endpoint", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "resource", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "resource_indicator", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "scope", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "iss_param_supported", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "discovered_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "as_metadata", "value_kind": "structured_value", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "assistant_tool_interface_delegated_authorization_token",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "connector", "value_kind": "reference", "rules": ["required", "read_only"], "target": "assisted_operation_connector"},
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "expires_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "token_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "access_token", "value_kind": "protected_text"},
+          {"purpose": "refresh_token", "value_kind": "protected_text"},
+          {"purpose": "granted_scopes", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "resource", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Assisted text generation",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "hosted_language_model_integration_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "service_access_key", "value_kind": "text"},
+          {"purpose": "model", "value_kind": "choice", "choices": ["auto", "text_generation_service_4o_mini", "text_generation_service_4_turbo", "text_generation_service_4", "text_generation_service_3_5_turbo", "text_generation_service_3_5_turbo_16k"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "hosted_language_model_prompt_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "prompt_message", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "response_message", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "timestamp", "value_kind": "date_and_time", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Attachment object storage",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "object_storage_service_integration_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "hosted_infrastructure_access_key_identifier", "value_kind": "text"},
+          {"purpose": "hosted_infrastructure_secret_access_key", "value_kind": "protected_text"},
+          {"purpose": "region_name", "value_kind": "text"},
+          {"purpose": "bucket_name", "value_kind": "text"},
+          {"purpose": "folder_prefix", "value_kind": "text"},
+          {"purpose": "endpoint_resource_address", "value_kind": "text"},
+          {"purpose": "use_path_style", "value_kind": "boolean"},
+          {"purpose": "current_status", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "enable_attachments_object_storage_service", "value_kind": "boolean"},
+          {"purpose": "stream_from_object_storage_service", "value_kind": "boolean"},
+          {"purpose": "delete_from_object_storage_service_on_file_delete", "value_kind": "boolean"},
+          {"purpose": "enable_backups_object_storage_service", "value_kind": "boolean"},
+          {"purpose": "migrate_only_unmigrated", "value_kind": "boolean"},
+          {"purpose": "upload_database_backup", "value_kind": "boolean"},
+          {"purpose": "upload_files_backup", "value_kind": "boolean"},
+          {"purpose": "create_new_backup_before_synchronization", "value_kind": "boolean"},
+          {"purpose": "backup_folder_prefix", "value_kind": "text"},
+          {"purpose": "delete_backups_older_than_days", "value_kind": "whole_number"},
+          {"purpose": "backup_cron_expression", "value_kind": "text"},
+          {"purpose": "last_backup_synchronization", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "keep_local_backups", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "object_storage_service_synchronization_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["success", "failed"]},
+          {"purpose": "message", "value_kind": "expression_or_structured_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Attachment object storage",
+    "configuration": 2,
+    "entity_contracts": [
+      {
+        "concept": "object_storage_service_file_attachment",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "delete_file_from_cloud", "value_kind": "boolean"},
+          {"purpose": "bucket_name", "value_kind": "text"},
+          {"purpose": "hosted_infrastructure_key", "value_kind": "text"},
+          {"purpose": "hosted_infrastructure_secret", "value_kind": "text"},
+          {"purpose": "region_name", "value_kind": "text"},
+          {"purpose": "folder_name", "value_kind": "text"},
+          {"purpose": "signed_resource_address_expiry_time", "value_kind": "whole_number"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Attachment routing by storage folder",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "storage_routing_external_storage",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "storage_routing_external_storage_classification", "value_kind": "choice", "rules": ["required"], "choices": ["object_storage_service_compatible"]},
+          {"purpose": "access_key", "value_kind": "text"},
+          {"purpose": "secret_key", "value_kind": "protected_text"},
+          {"purpose": "region", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "bucket_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "endpoint", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "secure", "value_kind": "boolean"},
+          {"purpose": "folders", "value_kind": "owned_selection_rows", "target": "storage_routing_external_storage_by_folder"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "files_within", "value_kind": "whole_number", "rules": ["hidden_from_form", "computed_value", "nonnegative"]},
+          {"purpose": "presigned_resource_addresses", "value_kind": "boolean"},
+          {"purpose": "presigned_mimetypes_starting", "value_kind": "text"},
+          {"purpose": "stream_buffer_size", "value_kind": "whole_number"},
+          {"purpose": "cache_files_smaller_than", "value_kind": "whole_number"},
+          {"purpose": "cache_expiration_secs", "value_kind": "whole_number"},
+          {"purpose": "presigned_resource_address_expiration", "value_kind": "whole_number"},
+          {"purpose": "remote_size_enabled", "value_kind": "boolean"},
+          {"purpose": "record_classes_ignored", "value_kind": "owned_selection_rows", "target": "storage_routing_external_storage_ignored_record_class"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "storage_routing_external_storage_by_folder",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "folder", "value_kind": "reference", "rules": ["required"], "target": "information_management.file", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "storage_routing_external_storage_ignored_record_class",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "record_class_to_ignore", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Attachment routing by storage folder",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "file", "purpose": "column_break_storage_routing_a_a_field_column", "value_kind": "field_column", "placement": "storage_routing_external_storage"},
+      {"on": "file", "purpose": "section_break_storage_routing_a_field_group", "value_kind": "field_group", "placement": "uploaded_to_workspace_service_drive"},
+      {"on": "file", "purpose": "storage_routing_external_storage_object_storage_service_key", "value_kind": "text", "placement": "column_break_storage_routing_a_a_field_column", "rules": ["read_only"]},
+      {"on": "file", "purpose": "storage_routing_external_storage", "value_kind": "reference", "placement": "section_break_storage_routing_a_field_group"}
+    ]
+  },
+  {
+    "capability": "Attachment routing by storage folder",
+    "configuration": 1,
+    "rule_addresses": [
+      ["file", null, "field_order", "text"],
+      ["file", "storage_routing_external_storage", "in_list_view", "boolean"],
+      ["file", "folder", "in_list_view", "boolean"],
+      ["file", "file_size", "in_list_view", "boolean"],
+      ["file", "file_name", "in_list_view", "boolean"],
+      ["file", "folder", "hidden", "boolean"]
+    ]
+  },
+  {
+    "capability": "Attendance and overtime time sheets",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "earned_bonus_vs_attained_score",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "lower_limit", "value_kind": "percentage"},
+          {"purpose": "upper_limit", "value_kind": "percentage"},
+          {"purpose": "attained_score", "value_kind": "percentage"}
+        ]
+      },
+      {
+        "concept": "holiday_overtime",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "timesheet", "value_kind": "reference", "rules": ["required"], "target": "projects.timesheet", "binding": "shared_model"},
+          {"purpose": "hours", "value_kind": "decimal"}
+        ]
+      },
+      {
+        "concept": "business_services_attendance",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "attendance_date", "value_kind": "civil_day"},
+          {"purpose": "hours_worked", "value_kind": "decimal"},
+          {"purpose": "billiable_hours", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "include_unpaid_breaks", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "unpaid_breaks_minutes", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "minimum_hours_to_include_a_break", "value_kind": "decimal", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "business_services_custom_payroll_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "maximum_monthly_hours", "value_kind": "decimal"},
+          {"purpose": "overtime_15_activity", "value_kind": "reference", "target": "projects.activity_type", "binding": "shared_model"},
+          {"purpose": "overtime_20_activity", "value_kind": "reference", "target": "projects.activity_type", "binding": "shared_model"},
+          {"purpose": "include_early_entry", "value_kind": "boolean"},
+          {"purpose": "bonus_vs_score_matrix", "value_kind": "owned_rows", "target": "earned_bonus_vs_attained_score"},
+          {"purpose": "overtime_threshold", "value_kind": "decimal"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "regular_overtime",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "timesheet", "value_kind": "reference", "rules": ["required"], "target": "projects.timesheet", "binding": "shared_model"},
+          {"purpose": "hours", "value_kind": "decimal"}
+        ]
+      },
+      {
+        "concept": "timesheet_center",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "start_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "end_date", "value_kind": "civil_day", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Attendance and overtime time sheets",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "shift_type", "purpose": "include_unpaid_breaks", "value_kind": "boolean", "placement": "end_time"},
+      {"on": "shift_type", "purpose": "unpaid_breaks_minutes", "value_kind": "decimal", "placement": "include_unpaid_breaks"},
+      {"on": "shift_type", "purpose": "minimum_hours_to_include_a_break", "value_kind": "decimal", "placement": "unpaid_breaks_minutes"},
+      {"on": "attendance", "purpose": "payment_hours", "value_kind": "decimal", "placement": "working_hours", "rules": ["read_only"]},
+      {"on": "attendance", "purpose": "overtime", "value_kind": "decimal", "placement": "payment_hours", "rules": ["read_only"]},
+      {"on": "salary_structure", "purpose": "wage_based_salary_hours", "value_kind": "boolean", "placement": "salary_slip_based_on_timesheet"},
+      {"on": "salary_slip", "purpose": "wage_based_salary_hours", "value_kind": "boolean", "placement": "salary_slip_based_on_timesheet", "rules": ["read_only"]},
+      {"on": "salary_slip", "purpose": "page_group_after_deduct_tax_for_unsubmitted_tax_exemption_proof", "value_kind": "page_group", "placement": "deduct_tax_for_unsubmitted_tax_exemption_proof"},
+      {"on": "salary_slip", "purpose": "field_group_for_attendance", "value_kind": "field_group", "placement": "page_group_after_deduct_tax_for_unsubmitted_tax_exemption_proof"},
+      {"on": "salary_slip", "purpose": "attendance", "value_kind": "owned_rows", "placement": "field_group_for_attendance"},
+      {"on": "salary_slip", "purpose": "field_group_for_regular_overtime", "value_kind": "field_group", "placement": "attendance"},
+      {"on": "salary_slip", "purpose": "regular_overtime", "value_kind": "owned_rows", "placement": "field_group_for_regular_overtime"},
+      {"on": "salary_slip", "purpose": "field_group_for_regular_working_hours", "value_kind": "field_group", "placement": "holiday_overtime"},
+      {"on": "salary_slip", "purpose": "business_services_calculated_cb_ss_02_field_column", "value_kind": "field_column", "placement": "regular_overtime"},
+      {"on": "salary_slip", "purpose": "holiday_overtime", "value_kind": "owned_rows", "placement": "business_services_calculated_cb_ss_02_field_column"},
+      {"on": "salary_slip", "purpose": "overtime_hours", "value_kind": "decimal", "placement": "regular_working_hours", "rules": ["read_only"]},
+      {"on": "salary_slip", "purpose": "holiday_hours", "value_kind": "decimal", "placement": "overtime_hours", "rules": ["read_only"]},
+      {"on": "salary_slip", "purpose": "business_services_calculated_cb_ss_01_field_column", "value_kind": "field_column", "placement": "holiday_hours"},
+      {"on": "salary_slip", "purpose": "hourly_rate", "value_kind": "money", "placement": "business_services_calculated_cb_ss_01_field_column"},
+      {"on": "salary_slip", "purpose": "regular_working_hours", "value_kind": "decimal", "placement": "field_group_for_regular_working_hours", "rules": ["read_only"]},
+      {"on": "timesheet", "purpose": "attendance", "value_kind": "reference", "placement": "note", "rules": ["unique", "read_only", "hidden_from_form"]}
+    ]
+  },
+  {
+    "capability": "Attendance device collection",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "device_configuration",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "device_network_address", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "device_user", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "device_user_password", "value_kind": "protected_text", "rules": ["required"]},
+          {"purpose": "major", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "minor", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "device_name", "value_kind": "text", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Audience-specific alerts",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "alert",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required", "translatable", "indexed_for_search"]},
+          {"purpose": "alert_type", "value_kind": "reference", "rules": ["required", "bypasses_value_selection_restrictions", "indexed_for_search"], "target": "alert_type"},
+          {"purpose": "from_date", "value_kind": "civil_day", "rules": ["required", "indexed_for_search"]},
+          {"purpose": "until_date", "value_kind": "civil_day", "rules": ["indexed_for_search"]},
+          {"purpose": "message", "value_kind": "formatted_text", "rules": ["required"]},
+          {"purpose": "for_roles", "value_kind": "owned_selection_rows", "target": "alert_for_role"},
+          {"purpose": "for_users", "value_kind": "owned_selection_rows", "target": "alert_for_user"},
+          {"purpose": "is_repeatable", "value_kind": "boolean"},
+          {"purpose": "number_of_repeats", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "seen_by", "value_kind": "owned_rows", "rules": ["editable_after_submission"], "target": "alert_seen_by"},
+          {"purpose": "reached", "value_kind": "whole_number", "rules": ["hidden_from_form", "editable_after_submission"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only", "hidden_from_form", "editable_after_submission", "indexed_for_search"], "choices": ["draft", "pending", "active", "finished", "cancelled"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "import", "share", "print", "email"], false],
+          ["administrator", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "import", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "alert_for_role",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "role", "value_kind": "reference", "rules": ["required", "bypasses_value_selection_restrictions"], "target": "information_management.role", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "alert_for_user",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "bypasses_value_selection_restrictions"], "target": "information_management.user", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "alert_seen_by",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "bypasses_value_selection_restrictions"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "time", "value_kind": "time_of_day", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "alert_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "disabled", "value_kind": "boolean", "rules": ["indexed_for_search"]},
+          {"purpose": "display_priority", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "display_timeout", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "display_sound", "value_kind": "choice", "choices": ["none", "alert", "error", "click", "cancel", "submit", "custom"]},
+          {"purpose": "notification_sound_attachment", "value_kind": "file_reference"},
+          {"purpose": "background", "value_kind": "colour"},
+          {"purpose": "border_color", "value_kind": "colour"},
+          {"purpose": "title_color", "value_kind": "colour"},
+          {"purpose": "content_color", "value_kind": "colour"},
+          {"purpose": "dark_background", "value_kind": "colour"},
+          {"purpose": "dark_border_color", "value_kind": "colour"},
+          {"purpose": "dark_title_color", "value_kind": "colour"},
+          {"purpose": "dark_content_color", "value_kind": "colour"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "import", "share", "print", "email"], false],
+          ["administrator", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "import", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "alerts_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "is_enabled", "value_kind": "boolean"},
+          {"purpose": "use_fallback_synchronization", "value_kind": "boolean"},
+          {"purpose": "fallback_synchronization_delay", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "auto_check_for_update", "value_kind": "boolean"},
+          {"purpose": "send_update_notification", "value_kind": "boolean"},
+          {"purpose": "update_notification_sender", "value_kind": "reference", "rules": ["bypasses_value_selection_restrictions"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "update_notification_receivers", "value_kind": "owned_selection_rows", "target": "alerts_update_receiver"},
+          {"purpose": "current_version", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "latest_version", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "latest_check", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "has_update", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "import", "share", "print", "email"], false],
+          ["administrator", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "import", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "alerts_update_receiver",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "bypasses_value_selection_restrictions"], "target": "information_management.user", "binding": "shared_model"}
+        ]
+      }
+    ]
+  }
+]

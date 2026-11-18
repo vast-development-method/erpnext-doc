@@ -1,0 +1,1935 @@
+[
+  {
+    "entity": "information_management.access_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "export_from", "type": "short_text", "form_read_only": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "timestamp", "type": "date_and_time", "form_read_only": true, "default": {"context_default": "current_instant"}},
+      {"field": "reference_document", "type": "short_text", "form_read_only": true},
+      {"field": "file_type", "type": "short_text", "form_read_only": true},
+      {"field": "report_name", "type": "short_text", "form_read_only": true},
+      {"field": "page", "type": "formatted_markup", "form_read_only": true},
+      {"field": "method", "type": "short_text", "form_read_only": true},
+      {"field": "filters", "type": "expression_or_structured_text", "form_read_only": true, "visible_when": ["coercive_unequal", ["current_field", "filters"], ["literal", null]]},
+      {"field": "columns", "type": "formatted_markup", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Log Data"},
+      {"control": "section", "purpose": "File Information"},
+      {"control": "section", "purpose": "Report Information"},
+      {"control": "section", "purpose": "RAW Information Log"},
+      {"control": "action", "purpose": "Show Report", "visible_when": ["field_has_value", "report_name"]},
+      {"control": "action", "purpose": "Show Document", "visible_when": ["field_has_value", "reference_document"]}
+    ]
+  },
+  {
+    "entity": "information_management.activity_log",
+    "kind": "independent_record",
+    "import_supported": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["email", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "subject", "type": "text", "required": true},
+      {"field": "content", "type": "formatted_text"},
+      {"field": "communication_date", "type": "date_and_time", "default": {"context_default": "current_instant"}},
+      {"field": "operation", "type": "enumeration", "values": ["", "Login", "Logout", "Impersonate"]},
+      {"field": "status", "type": "enumeration", "values": ["", "Success", "Failed", "Linked", "Closed"]},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier"},
+      {"field": "reference_owner", "type": "display_value", "copy_from": ["reference_name_identifier", "owning_user_identifier"]},
+      {"field": "timeline_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "timeline_name_identifier", "type": "selected_entity_reference", "target_selected_by": "timeline_entity_type_identifier"},
+      {"field": "link_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "link_name_identifier", "type": "selected_entity_reference", "target_selected_by": "link_entity_type_identifier", "form_read_only": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true, "omit_target_user_filter": true, "default": {"context_default": "current_user"}},
+      {"field": "full_name", "type": "short_text"},
+      {"field": "network_address_address", "type": "short_text"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "More Information"},
+      {"control": "section", "purpose": "Reference"}
+    ]
+  },
+  {
+    "entity": "information_management.amended_document_naming_settings",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "action", "type": "enumeration", "required": true, "values": ["Amend Counter", "Default Naming"], "default": "Amend Counter"},
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "information_management.analytical_database_sync",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "sales_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "database_tables_rows", "type": "owned_collection", "target": "information_management.analytical_database_sync_item"},
+      {"field": "entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "information_management.analytical_database_sync", "form_read_only": true, "omit_on_copy": true, "searchable": true},
+      {"field": "filename", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "information_management.analytical_database_sync_item",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "table", "type": "short_text"},
+      {"field": "synced", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "information_management.attachment_queue",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["create", "delete", "read", "write"]}
+    ],
+    "fields": [
+      {"field": "source_file", "type": "file_reference", "required": true},
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "searchable": true},
+      {"field": "created_document_identifier", "type": "selected_entity_reference", "target_selected_by": "document_type_identifier", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "information_management.audit_trail",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "entity_type_name_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "document_identifier", "type": "selected_entity_reference", "target_selected_by": "entity_type_name_identifier", "required": true},
+      {"field": "start_date", "type": "calendar_date"},
+      {"field": "end_date", "type": "calendar_date"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "version_table"},
+      {"control": "formatted_information", "purpose": "rows added"},
+      {"control": "formatted_information", "purpose": "rows removed"},
+      {"control": "section", "purpose": "Rows Added"},
+      {"control": "section", "purpose": "Rows Removed"},
+      {"control": "section", "purpose": "Date Range", "expanded_when": ["or", ["current_field", "start_date"], ["current_field", "end_date"]]}
+    ]
+  },
+  {
+    "entity": "information_management.background_queue_worker",
+    "kind": "computed_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "worker_name", "type": "short_text", "unique": true},
+      {"field": "status", "type": "short_text"},
+      {"field": "current_job_identifier", "type": "entity_reference", "target": "information_management.queued_work_item"},
+      {"field": "process_identifier", "type": "short_text"},
+      {"field": "last_heartbeat", "type": "date_and_time"},
+      {"field": "birth_date", "type": "date_and_time"},
+      {"field": "successful_job_count", "type": "integer"},
+      {"field": "failed_job_count", "type": "integer"},
+      {"field": "total_working_time", "type": "duration"},
+      {"field": "queue", "type": "short_text"},
+      {"field": "queue_type", "type": "enumeration", "values": ["default", "long", "short"]},
+      {"field": "utilization_percent", "type": "percentage"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Worker Information"},
+      {"control": "section", "purpose": "Statistics"}
+    ]
+  },
+  {
+    "entity": "information_management.background_task",
+    "kind": "independent_record",
+    "configuration_variant": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "owner_only": true, "allows": ["email", "export", "print", "read", "report", "share"]},
+      {"role": "system_manager", "level": 0, "allows": ["permission_level", "read"]}
+    ],
+    "fields": [
+      {"field": "task_identifier", "type": "short_text", "required": true, "unique": true},
+      {"field": "job_identifier", "type": "short_text"},
+      {"field": "task_name", "type": "short_text", "required": true},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["queued", "running", "completed", "failed", "cancelled"]},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true},
+      {"field": "method", "type": "short_text", "required": true},
+      {"field": "arguments", "type": "structured_value"},
+      {"field": "on_success_callback", "type": "short_text"},
+      {"field": "on_failure_callback", "type": "short_text"},
+      {"field": "result", "type": "long_text"},
+      {"field": "exception", "type": "long_text"},
+      {"field": "started_at", "type": "date_and_time"},
+      {"field": "ended_at", "type": "date_and_time"},
+      {"field": "reference_record_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "reference_record_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_record_type_identifier"},
+      {"field": "queue", "type": "short_text"},
+      {"field": "progress", "type": "percentage"},
+      {"field": "stage", "type": "short_text"},
+      {"field": "allow_user_cancellation", "type": "boolean"},
+      {"field": "allow_user_retry", "type": "boolean"},
+      {"field": "show_progress_bar", "type": "boolean"}
+    ]
+  },
+  {
+    "entity": "information_management.block_module",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "module", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "information_management.comment",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "website_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "comment_type", "type": "enumeration", "required": true, "values": ["Comment", "Like", "Info", "Label", "Workflow", "Created", "Submitted", "Cancelled", "Updated", "Deleted", "Assigned", "Assignment Completed", "Attachment", "Attachment Removed", "Shared", "Unshared", "Bot", "Relinked", "Edit"], "default": "Comment"},
+      {"field": "comment_email", "type": "short_text"},
+      {"field": "subject", "type": "text"},
+      {"field": "comment_by", "type": "short_text"},
+      {"field": "published", "type": "boolean", "default": "0"},
+      {"field": "seen", "type": "boolean", "default": "0"},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier"},
+      {"field": "reference_owner", "type": "short_text", "form_read_only": true},
+      {"field": "content", "type": "formatted_markup"},
+      {"field": "network_address_address", "type": "short_text", "form_hidden": true}
+    ]
+  },
+  {
+    "entity": "information_management.communication",
+    "kind": "independent_record",
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "read", "report", "share"]},
+      {"role": "system_manager", "level": 1, "allows": ["delete", "email", "export", "print", "read", "report", "share"]},
+      {"role": "system_manager", "level": 2, "allows": ["delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "inbox_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read"]},
+      {"role": "all", "level": 0, "owner_only": true, "allows": ["delete", "email", "read"]}
+    ],
+    "fields": [
+      {"field": "subject", "type": "text", "required": true},
+      {"field": "communication_medium", "type": "enumeration", "values": ["", "Email", "Chat", "Phone", "SMS", "Event", "Meeting", "Visit", "Other"]},
+      {"field": "sender", "type": "short_text", "maximum_length": 255, "visible_when": ["strict_equal", ["current_field", "communication_medium"], ["literal", "Email"]]},
+      {"field": "recipients", "type": "expression_or_structured_text"},
+      {"field": "copy_recipients", "type": "expression_or_structured_text", "visible_when": ["strict_equal", ["current_field", "communication_medium"], ["literal", "Email"]]},
+      {"field": "blind_copy_recipients", "type": "expression_or_structured_text", "visible_when": ["strict_equal", ["current_field", "communication_medium"], ["literal", "Email"]]},
+      {"field": "phone_number", "type": "short_text", "visible_when": ["call", ["context", "contains_value"], ["list", ["literal", "Phone"], ["literal", "SMS"]], ["current_field", "communication_medium"]]},
+      {"field": "delivery_status", "type": "enumeration", "form_hidden": true, "values": ["", "Sent", "Bounced", "Opened", "Marked As Spam", "Rejected", "Delayed", "Soft-Bounced", "Clicked", "Recipient Unsubscribed", "Error", "Expired", "Sending", "Read", "Scheduled"]},
+      {"field": "content", "type": "formatted_text"},
+      {"field": "text_content", "type": "expression_or_structured_text", "form_hidden": true},
+      {"field": "communication_type", "type": "enumeration", "required": true, "form_read_only": true, "values": ["Communication", "Automated Message"], "default": "Communication"},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Open", "Replied", "Closed", "Linked"], "visible_when": ["strict_equal", ["current_field", "communication_type"], ["literal", "Communication"]]},
+      {"field": "sent_or_received", "type": "enumeration", "required": true, "values": ["Sent", "Received"], "visible_when": ["strict_equal", ["current_field", "communication_type"], ["literal", "Communication"]]},
+      {"field": "communication_date", "type": "date_and_time", "default": {"context_default": "current_instant"}},
+      {"field": "read_receipt", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "sender_full_name", "type": "short_text", "form_read_only": true},
+      {"field": "read_by_recipient", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "read_by_recipient_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier"},
+      {"field": "reference_owner", "type": "display_value", "searchable": true, "copy_from": ["reference_name_identifier", "owning_user_identifier"]},
+      {"field": "email_account_identifier", "type": "entity_reference", "target": "mail.email_account", "form_read_only": true, "visible_when": ["strict_equal", ["current_field", "communication_medium"], ["literal", "Email"]]},
+      {"field": "in_reply_to_identifier", "type": "entity_reference", "target": "information_management.communication", "form_read_only": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true, "omit_target_user_filter": true, "default": {"context_default": "current_user"}},
+      {"field": "unread_notification_sent", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "seen", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "user_tags", "type": "short_text", "form_hidden": true, "omit_on_copy": true},
+      {"field": "message_identifier", "type": "text", "form_read_only": true, "maximum_length": 995},
+      {"field": "unique_identifier", "type": "integer", "form_hidden": true, "omit_on_copy": true},
+      {"field": "email_status", "type": "enumeration", "values": ["Open", "Spam", "Trash"]},
+      {"field": "has_attachment", "type": "boolean", "form_hidden": true, "default": "0"},
+      {"field": "email_template_identifier", "type": "entity_reference", "target": "mail.email_template", "form_read_only": true},
+      {"field": "timeline_links_rows", "type": "owned_collection", "target": "information_management.communication_link", "access_level": 2},
+      {"field": "mailbox_access_folder", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "send_after", "type": "date_and_time"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "To and CC"},
+      {"control": "section", "purpose": "Status"},
+      {"control": "section", "purpose": "More Information"},
+      {"control": "section", "purpose": "Reference"},
+      {"control": "section", "purpose": "Email Inbox"},
+      {"control": "section", "purpose": "Timeline Links"}
+    ]
+  },
+  {
+    "entity": "information_management.communication_link",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "link_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "link_name_identifier", "type": "selected_entity_reference", "target_selected_by": "link_entity_type_identifier", "required": true},
+      {"field": "link_title", "type": "display_value", "form_read_only": true},
+      {"field": "communication_date", "type": "date_and_time", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "information_management.custom_entity_permission",
+    "kind": "independent_record",
+    "import_supported": true,
+    "form_read_only": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "role_identifier", "type": "entity_reference", "target": "information_management.role", "required": true},
+      {"field": "if_owner", "type": "boolean", "default": "0"},
+      {"field": "access_level", "type": "integer", "default": "0"},
+      {"field": "read", "type": "boolean", "default": "1"},
+      {"field": "write", "type": "boolean", "default": "0"},
+      {"field": "create", "type": "boolean", "default": "0"},
+      {"field": "delete", "type": "boolean", "default": "0"},
+      {"field": "submit", "type": "boolean", "default": "0"},
+      {"field": "cancel", "type": "boolean", "default": "0"},
+      {"field": "amend", "type": "boolean", "default": "0"},
+      {"field": "mask", "type": "boolean", "default": "0"},
+      {"field": "report", "type": "boolean", "default": "0"},
+      {"field": "export", "type": "boolean", "default": "1"},
+      {"field": "import", "type": "boolean", "default": "0"},
+      {"field": "share", "type": "boolean", "default": "0"},
+      {"field": "print", "type": "boolean", "default": "0"},
+      {"field": "email", "type": "boolean", "default": "0"},
+      {"field": "parent", "type": "short_text", "form_read_only": true, "searchable": true},
+      {"field": "select", "type": "boolean", "default": "0"},
+      {"field": "is_application_disabled", "type": "boolean", "configuration_variant": true, "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Role and Level"},
+      {"control": "section", "purpose": "Permissions"},
+      {"control": "section", "purpose": "Additional Permissions"}
+    ]
+  },
+  {
+    "entity": "information_management.custom_icon",
+    "kind": "independent_record",
+    "configuration_variant": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "icon_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "scalable_vector_graphics", "type": "expression_or_structured_text"}
+    ]
+  },
+  {
+    "entity": "information_management.custom_role",
+    "kind": "independent_record",
+    "import_supported": true,
+    "form_read_only": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "page_identifier", "type": "entity_reference", "target": "information_management.page"},
+      {"field": "report_identifier", "type": "entity_reference", "target": "information_management.report"},
+      {"field": "roles_rows", "type": "owned_collection", "target": "information_management.has_role"},
+      {"field": "reference_entity_type", "type": "short_text"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Permission Rules"},
+      {"control": "formatted_information", "purpose": "response"}
+    ]
+  },
+  {
+    "entity": "information_management.data_export",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "file_type", "type": "enumeration", "required": true, "values": ["Excel", "CSV"], "default": "CSV"},
+      {"field": "export_without_main_header", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "visible_when": ["field_has_value", "reference_entity_type_identifier"]},
+      {"control": "formatted_information", "purpose": "Filter List"},
+      {"control": "formatted_information", "purpose": "Fields Multicheck"}
+    ]
+  },
+  {
+    "entity": "information_management.data_import",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "write_once": true},
+      {"field": "import_type", "type": "enumeration", "required": true, "write_once": true, "values": ["Insert New Records", "Update Existing Records", "Insert or Update Records"], "default": "Insert New Records"},
+      {"field": "import_file", "type": "file_reference", "visible_when": ["and", ["current_field", "reference_entity_type_identifier"], ["current_field", "import_type"]], "read_only_when": ["call", ["member", ["list", ["literal", "Success"], ["literal", "Partial Success"]], "includes"], ["current_field", "status"]]},
+      {"field": "template_options", "type": "expression_or_structured_text", "form_read_only": true, "form_hidden": true},
+      {"field": "tree_parent_overrides", "type": "expression_or_structured_text", "form_read_only": true, "form_hidden": true},
+      {"field": "value_mappings_rows", "type": "owned_collection", "target": "information_management.data_import_value_mapping", "visible_when": ["and", ["not", ["current_field", "is_new_record"]], ["or", ["current_field", "import_file"], ["current_field", "hosted_personal_productivity_sheets_resource_address"]]], "read_only_when": ["call", ["member", ["list", ["literal", "Success"], ["literal", "Partial Success"]], "includes"], ["current_field", "status"]]},
+      {"field": "skipped_rows", "type": "owned_collection", "target": "information_management.data_import_skipped_row", "form_hidden": true, "visible_when": ["and", ["not", ["current_field", "is_new_record"]], ["or", ["current_field", "import_file"], ["current_field", "hosted_personal_productivity_sheets_resource_address"]]], "read_only_when": ["call", ["member", ["list", ["literal", "Success"], ["literal", "Partial Success"]], "includes"], ["current_field", "status"]]},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "values": ["Pending", "In Progress", "Success", "Partial Success", "Error", "Timed Out"], "default": "Pending"},
+      {"field": "template_warnings", "type": "expression_or_structured_text", "form_hidden": true},
+      {"field": "submit_after_import", "type": "boolean", "write_once": true, "default": "0"},
+      {"field": "mute_emails", "type": "boolean", "write_once": true, "default": "1"},
+      {"field": "hosted_personal_productivity_sheets_resource_address", "type": "short_text", "visible_when": ["and", ["and", ["current_field", "reference_entity_type_identifier"], ["current_field", "import_type"]], ["not", ["current_field", "import_file"]]], "read_only_when": ["call", ["member", ["list", ["literal", "Success"], ["literal", "Partial Success"]], "includes"], ["current_field", "status"]]},
+      {"field": "payload_count", "type": "integer", "form_read_only": true, "form_hidden": true},
+      {"field": "delimiter_options", "type": "short_text", "default": ",;\\t|", "visible_when": ["and", ["current_field", "custom_delimiters"], ["or", ["current_field", "hosted_personal_productivity_sheets_resource_address"], ["and", ["current_field", "import_file"], ["strict_equal", ["call", ["member", ["call", ["member", ["call", ["member", ["current_field", "import_file"], "split"], ["literal", "."]], "pop"]], "to_lower_case"]], ["literal", "csv"]]]]], "read_only_when": ["call", ["member", ["list", ["literal", "Success"], ["literal", "Partial Success"]], "includes"], ["current_field", "status"]]},
+      {"field": "custom_delimiters", "type": "boolean", "default": "0", "visible_when": ["or", ["current_field", "hosted_personal_productivity_sheets_resource_address"], ["and", ["current_field", "import_file"], ["strict_equal", ["call", ["member", ["call", ["member", ["call", ["member", ["current_field", "import_file"], "split"], ["literal", "."]], "pop"]], "to_lower_case"]], ["literal", "csv"]]]], "read_only_when": ["call", ["member", ["list", ["literal", "Success"], ["literal", "Partial Success"]], "includes"], ["current_field", "status"]]},
+      {"field": "use_csv_sniffer", "type": "boolean", "default": "0", "visible_when": ["or", ["current_field", "hosted_personal_productivity_sheets_resource_address"], ["and", ["current_field", "import_file"], ["strict_equal", ["call", ["member", ["call", ["member", ["call", ["member", ["current_field", "import_file"], "split"], ["literal", "."]], "pop"]], "to_lower_case"]], ["literal", "csv"]]]], "read_only_when": ["call", ["member", ["list", ["literal", "Success"], ["literal", "Partial Success"]], "includes"], ["current_field", "status"]]},
+      {"field": "show_failed_logs", "type": "boolean", "configuration_variant": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Tree Preview"},
+      {"control": "formatted_information", "purpose": "Tree Preview"},
+      {"control": "formatted_information", "purpose": "Import Preview"},
+      {"control": "section", "purpose": "Preview", "expanded_when": ["or", ["current_field", "import_file"], ["current_field", "hosted_personal_productivity_sheets_resource_address"]]},
+      {"control": "section", "purpose": "Value Mappings"},
+      {"control": "section", "purpose": "Skipped Rows", "visible_when": ["and", ["not", ["current_field", "is_new_record"]], ["or", ["current_field", "import_file"], ["current_field", "hosted_personal_productivity_sheets_resource_address"]]]},
+      {"control": "formatted_information", "purpose": "Import Log"},
+      {"control": "formatted_information", "purpose": "Import Log Preview"},
+      {"control": "section", "purpose": "Import File Errors and Warnings"},
+      {"control": "formatted_information", "purpose": "Import Warnings"},
+      {"control": "action", "purpose": "Download Template", "visible_when": ["and", ["current_field", "reference_entity_type_identifier"], ["current_field", "import_type"]]},
+      {"control": "action", "purpose": "Refresh hosted productivity service Sheet", "visible_when": ["and", ["current_field", "hosted_personal_productivity_sheets_resource_address"], ["not", ["current_field", "unsaved"]]]}
+    ]
+  },
+  {
+    "entity": "information_management.data_import_log",
+    "kind": "independent_record",
+    "form_read_only": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "data_import_identifier", "type": "entity_reference", "target": "information_management.data_import"},
+      {"field": "record_identifier", "type": "short_text"},
+      {"field": "exception", "type": "text"},
+      {"field": "row_indexes", "type": "expression_or_structured_text"},
+      {"field": "success", "type": "boolean", "default": "0"},
+      {"field": "import_action", "type": "enumeration", "values": ["", "Insert", "Update"]},
+      {"field": "log_index", "type": "integer"},
+      {"field": "messages", "type": "expression_or_structured_text"}
+    ]
+  },
+  {
+    "entity": "information_management.data_import_skipped_row",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "row_number", "type": "integer", "required": true, "form_read_only": true},
+      {"field": "row_data", "type": "expression_or_structured_text", "required": true, "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "information_management.data_import_value_mapping",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "column_label", "type": "short_text", "form_read_only": true},
+      {"field": "source_value", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "number_of_rows", "type": "short_text", "form_read_only": true},
+      {"field": "row_numbers", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "target_value", "type": "short_text"},
+      {"field": "create_new", "type": "boolean", "form_hidden": true, "default": "0"},
+      {"field": "can_create", "type": "boolean", "form_read_only": true, "form_hidden": true, "default": "0"},
+      {"field": "column", "type": "integer", "required": true, "form_read_only": true, "form_hidden": true},
+      {"field": "field_name", "type": "short_text", "required": true, "form_read_only": true, "form_hidden": true},
+      {"field": "parent_field", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "field_type", "type": "enumeration", "required": true, "form_read_only": true, "form_hidden": true, "values": ["Select", "Link"]},
+      {"field": "link_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true, "visible_when": ["coercive_equal", ["current_field", "field_type"], ["literal", "Link"]]},
+      {"field": "select_options", "type": "text", "form_hidden": true}
+    ]
+  },
+  {
+    "entity": "information_management.default_value",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "defkey", "type": "short_text", "required": true},
+      {"field": "defvalue", "type": "text"}
+    ]
+  },
+  {
+    "entity": "information_management.deleted_document",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "export", "read"]}
+    ],
+    "fields": [
+      {"field": "deleted_name", "type": "short_text", "form_read_only": true},
+      {"field": "deleted_entity_type", "type": "short_text", "form_read_only": true},
+      {"field": "restored", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "new_name", "type": "display_value"},
+      {"field": "deleted_record_snapshot", "type": "expression_or_structured_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "information_management.document_naming_rule",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "prefix", "type": "short_text", "required": true, "required_when": ["strict_equal", ["current_field", "naming_by"], ["literal", "Numbered"]]},
+      {"field": "counter", "type": "integer", "omit_on_copy": true, "default": "0"},
+      {"field": "prefix_digits", "type": "integer", "required": true, "default": "5", "required_when": ["strict_equal", ["current_field", "naming_by"], ["literal", "Numbered"]]},
+      {"field": "conditions_rows", "type": "owned_collection", "target": "information_management.document_naming_rule_condition"},
+      {"field": "priority", "type": "integer"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Naming"},
+      {"control": "section", "purpose": "Rule Conditions", "expanded_when": ["field_has_value", "conditions_rows"]}
+    ]
+  },
+  {
+    "entity": "information_management.document_naming_rule_condition",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "tested_field_name", "type": "enumeration", "required": true},
+      {"field": "condition", "type": "enumeration", "required": true, "values": ["=", "!=", ">", "<", ">=", "<="]},
+      {"field": "value", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "information_management.document_naming_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "user_must_always_select", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "transaction_type"]},
+      {"field": "prefix", "type": "suggested_text"},
+      {"field": "current_value", "type": "integer"},
+      {"field": "numbering_series_options", "type": "text", "visible_when": ["field_has_value", "transaction_type"]},
+      {"field": "try_numbering_series", "type": "short_text", "visible_when": ["field_has_value", "transaction_type"]},
+      {"field": "transaction_type", "type": "suggested_text"},
+      {"field": "series_preview", "type": "text", "form_read_only": true},
+      {"field": "default_amend_naming", "type": "enumeration", "required": true, "values": ["Amend Counter", "Default Naming"], "default": "Amend Counter"},
+      {"field": "amend_naming_override_rows", "type": "owned_collection", "target": "information_management.amended_document_naming_settings"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Setup Series for transactions"},
+      {"control": "formatted_information", "purpose": "Help HTML", "visible_when": ["field_has_value", "transaction_type"]},
+      {"control": "action", "purpose": "Update", "visible_when": ["field_has_value", "transaction_type"]},
+      {"control": "section", "purpose": "Update Series Counter"},
+      {"control": "action", "purpose": "Update Series Number"},
+      {"control": "tab", "purpose": "Naming Series"},
+      {"control": "section", "purpose": "Amended Documents"},
+      {"control": "action", "purpose": "Update Amendment Naming"}
+    ]
+  },
+  {
+    "entity": "information_management.document_share_key",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "form_read_only": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true, "searchable": true},
+      {"field": "reference_record_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "form_read_only": true, "searchable": true},
+      {"field": "sharing_key", "type": "short_text", "form_read_only": true},
+      {"field": "expires_on", "type": "calendar_date", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "information_management.document_template",
+    "kind": "independent_record",
+    "configuration_variant": true,
+    "grants": [
+      {"role": "desk_user", "level": 0, "owner_only": true, "allows": ["create", "delete", "read", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["read"]},
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "template_name", "type": "short_text", "required": true},
+      {"field": "reference_record_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "private", "type": "boolean"},
+      {"field": "template_contents", "type": "expression_or_structured_text", "required": true},
+      {"field": "disabled", "type": "boolean"}
+    ]
+  },
+  {
+    "entity": "information_management.domain",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "administrator", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "system_manager", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "workspace_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "domain", "type": "short_text", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "information_management.domain_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "active_domains_rows", "type": "owned_collection", "target": "information_management.has_domain", "form_read_only": true, "form_hidden": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Active Domains"},
+      {"control": "formatted_information", "purpose": "Domains HTML"}
+    ]
+  },
+  {
+    "entity": "information_management.dynamic_link",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "link_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "link_name_identifier", "type": "selected_entity_reference", "target_selected_by": "link_entity_type_identifier", "required": true},
+      {"field": "link_title", "type": "display_value", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "information_management.entity_field_definition",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "label", "type": "short_text", "searchable": true, "maximum_length": 255},
+      {"field": "field_type", "type": "enumeration", "required": true, "searchable": true, "values": ["Autocomplete", "Attach", "Attach Image", "Attachment Gallery", "Barcode", "Button", "Check", "Code", "Color", "Column Break", "Currency", "Data", "Date", "Datetime", "Duration", "Dynamic Link", "Float", "Fold", "Geolocation", "Heading", "HTML", "HTML Editor", "Icon", "Image", "Int", "JSON", "Link", "Long Text", "Markdown Editor", "Password", "Percent", "Phone", "Read Only", "Rating", "Section Break", "Select", "Signature", "Small Text", "Tab Break", "Table", "Table MultiSelect", "Text", "Text Editor", "Time", "Interactive Component"], "default": "Data"},
+      {"field": "field_name", "type": "short_text", "searchable": true},
+      {"field": "required", "type": "boolean", "default": "0", "visible_when": ["not", ["call", ["member", ["list", ["literal", "Section Break"], ["literal", "Column Break"], ["literal", "Button"], ["literal", "HTML"], ["literal", "Attachment Gallery"]], "includes"], ["current_field", "field_type"]]]},
+      {"field": "precision", "type": "enumeration", "values": ["", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], "visible_when": ["call", ["context", "contains_value"], ["list", ["literal", "Float"], ["literal", "Currency"], ["literal", "Percent"]], ["current_field", "field_type"]]},
+      {"field": "length", "type": "integer", "visible_when": ["call", ["context", "contains_value"], ["list", ["literal", "Data"], ["literal", "Link"], ["literal", "Dynamic Link"], ["literal", "Password"], ["literal", "Select"], ["literal", "Read Only"], ["literal", "Attach"], ["literal", "Attach Image"], ["literal", "Int"], ["literal", "Float"], ["literal", "Currency"], ["literal", "Percent"]], ["current_field", "field_type"]]},
+      {"field": "search_index", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "in_list_view", "type": "boolean", "default": "0", "visible_when": ["and", ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]], ["not", ["current_field", "is_virtual"]]]},
+      {"field": "in_standard_filter", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "in_global_search", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["call", ["member", ["list", ["literal", "Data"], ["literal", "Select"], ["literal", "Table"], ["literal", "Text"], ["literal", "Text Editor"], ["literal", "Link"], ["literal", "Small Text"], ["literal", "Long Text"], ["literal", "Read Only"], ["literal", "Heading"], ["literal", "Dynamic Link"]], "index_of"], ["current_field", "field_type"]], ["negate", ["literal", 1]]]},
+      {"field": "in_preview", "type": "boolean", "default": "0", "visible_when": ["not", ["call", ["member", ["list", ["literal", "Table"], ["literal", "Table MultiSelect"], ["literal", "Attachment Gallery"]], "includes"], ["current_field", "field_type"]]]},
+      {"field": "allow_in_quick_entry", "type": "boolean", "default": "0", "visible_when": ["not", ["call", ["member", ["list", ["literal", "Tab Break"], ["literal", "Table"], ["literal", "Attachment Gallery"]], "includes"], ["current_field", "field_type"]]]},
+      {"field": "bold", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "translatable", "type": "boolean", "default": "0", "visible_when": ["call", ["member", ["list", ["literal", "Data"], ["literal", "Select"], ["literal", "Text"], ["literal", "Small Text"], ["literal", "Text Editor"]], "includes"], ["current_field", "field_type"]]},
+      {"field": "collapsible", "type": "boolean", "maximum_length": 255, "default": "0", "visible_when": ["strict_equal", ["current_field", "field_type"], ["literal", "Section Break"]]},
+      {"field": "collapsible_depends_on", "type": "expression_or_structured_text", "visible_when": ["and", ["coercive_equal", ["current_field", "field_type"], ["literal", "Section Break"]], ["current_field", "collapsible"]]},
+      {"field": "options", "type": "text", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "default", "type": "text", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "fetch_from", "type": "text"},
+      {"field": "fetch_if_empty", "type": "boolean", "default": "0"},
+      {"field": "depends_on", "type": "expression_or_structured_text", "maximum_length": 255},
+      {"field": "hidden", "type": "boolean", "default": "0"},
+      {"field": "read_only", "type": "boolean", "default": "0"},
+      {"field": "unique", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "set_only_once", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "allow_bulk_edit", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "field_type"], ["literal", "Table"]]},
+      {"field": "access_level", "type": "integer", "default": "0", "visible_when": ["not", ["call", ["context", "contains_value"], ["list", ["literal", "Section Break"], ["literal", "Column Break"], ["literal", "Tab Break"]], ["current_field", "field_type"]]]},
+      {"field": "ignore_user_permissions", "type": "boolean", "default": "0", "visible_when": ["call", ["member", ["list", ["literal", "Link"], ["literal", "Dynamic Link"], ["literal", "Table MultiSelect"]], "includes"], ["current_field", "field_type"]]},
+      {"field": "allow_on_submit", "type": "boolean", "default": "0", "visible_when": ["or", ["member", ["context", "owning_record"], "is_submittable"], ["member", ["context", "owning_record"], "istable"]]},
+      {"field": "report_hide", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "remember_last_selected_value", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "field_type"], ["literal", "Link"]]},
+      {"field": "ignore_xss_filter", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "in_filter", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "no_copy", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "print_hide", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "print_hide_if_no_value", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["call", ["member", ["list", ["literal", "Int"], ["literal", "Float"], ["literal", "Currency"], ["literal", "Percent"]], "index_of"], ["current_field", "field_type"]], ["negate", ["literal", 1]]]},
+      {"field": "print_width", "type": "short_text", "maximum_length": 10, "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "width", "type": "short_text", "maximum_length": 10, "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "columns", "type": "integer", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "description", "type": "text"},
+      {"field": "oldfieldname", "type": "short_text", "form_hidden": true},
+      {"field": "oldfieldtype", "type": "short_text", "form_hidden": true},
+      {"field": "mandatory_depends_on", "type": "expression_or_structured_text", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "read_only_depends_on", "type": "expression_or_structured_text"},
+      {"field": "alignment", "type": "enumeration", "values": ["", "Left", "Center", "Right"], "visible_when": ["call", ["context", "contains_value"], ["list", ["literal", "Data"], ["literal", "Int"], ["literal", "Float"], ["literal", "Currency"], ["literal", "Percent"]], ["current_field", "field_type"]]},
+      {"field": "hide_days", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "field_type"], ["literal", "Duration"]]},
+      {"field": "hide_seconds", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "field_type"], ["literal", "Duration"]]},
+      {"field": "hide_border", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "field_type"], ["literal", "Section Break"]]},
+      {"field": "non_negative", "type": "boolean", "default": "0", "visible_when": ["call", ["context", "contains_value"], ["list", ["literal", "Int"], ["literal", "Float"], ["literal", "Currency"], ["literal", "Percent"]], ["current_field", "field_type"]]},
+      {"field": "maximum_height", "type": "short_text", "maximum_length": 10, "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "show_dashboard", "type": "boolean", "default": "0", "visible_when": ["strict_equal", ["current_field", "field_type"], ["literal", "Tab Break"]]},
+      {"field": "is_virtual", "type": "boolean", "default": "0", "visible_when": ["not", ["call", ["member", ["list", ["literal", "Link"], ["literal", "Attachment Gallery"]], "includes"], ["current_field", "field_type"]]]},
+      {"field": "documentation_resource_address", "type": "short_text", "visible_when": ["not", ["call", ["member", ["list", ["literal", "Tab Break"], ["literal", "Section Break"], ["literal", "Column Break"], ["literal", "Button"], ["literal", "HTML"], ["literal", "Attachment Gallery"]], "includes"], ["current_field", "field_type"]]]},
+      {"field": "sort_options", "type": "boolean", "default": "0", "visible_when": ["strict_equal", ["current_field", "field_type"], ["literal", "Select"]]},
+      {"field": "link_filters", "type": "structured_value", "visible_when": ["call", ["member", ["list", ["literal", "Attachment Gallery"], ["literal", "Link"]], "includes"], ["current_field", "field_type"]]},
+      {"field": "not_nullable", "type": "boolean", "default": "0", "visible_when": ["not", ["call", ["member", ["list", ["literal", "Check"], ["literal", "Currency"], ["literal", "Float"], ["literal", "Int"], ["literal", "Percent"], ["literal", "Rating"], ["literal", "Select"], ["literal", "Table"], ["literal", "Table MultiSelect"], ["literal", "Attachment Gallery"]], "includes"], ["current_field", "field_type"]]]},
+      {"field": "show_on_timeline", "type": "boolean", "default": "0", "visible_when": ["and", ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]], ["current_field", "hidden"]]},
+      {"field": "placeholder", "type": "short_text", "visible_when": ["strict_unequal", ["current_field", "field_type"], ["literal", "Attachment Gallery"]]},
+      {"field": "make_attachment_public", "type": "boolean", "default": "0", "visible_when": ["call", ["member", ["list", ["literal", "Attach"], ["literal", "Attach Image"], ["literal", "Attachment Gallery"]], "includes"], ["current_field", "field_type"]]},
+      {"field": "sticky", "type": "boolean", "default": "0", "visible_when": ["not", ["call", ["member", ["list", ["literal", "Table"], ["literal", "Table MultiSelect"], ["literal", "Attachment Gallery"]], "includes"], ["current_field", "field_type"]]]},
+      {"field": "mask", "type": "boolean", "default": "0", "visible_when": ["call", ["member", ["list", ["literal", "Select"], ["literal", "Read Only"], ["literal", "Phone"], ["literal", "Percent"], ["literal", "Password"], ["literal", "Link"], ["literal", "Int"], ["literal", "Float"], ["literal", "Dynamic Link"], ["literal", "Duration"], ["literal", "Datetime"], ["literal", "Currency"], ["literal", "Data"], ["literal", "Date"]], "includes"], ["current_field", "field_type"]]},
+      {"field": "button_color", "type": "enumeration", "values": ["", "Default", "Primary", "Info", "Success", "Warning", "Danger"], "visible_when": ["strict_equal", ["current_field", "field_type"], ["literal", "Button"]]},
+      {"field": "show_description_on_click", "type": "boolean", "default": "0"},
+      {"field": "in_import_template", "type": "boolean", "default": "0"},
+      {"field": "minimum_value", "type": "decimal", "configuration_variant": true},
+      {"field": "maximum_value", "type": "decimal", "configuration_variant": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Permissions"},
+      {"control": "section", "purpose": "Display"},
+      {"control": "section", "purpose": "Defaults"},
+      {"control": "section", "purpose": "Visibility"},
+      {"control": "section", "purpose": "Constraints"},
+      {"control": "section", "purpose": "List / Search Settings"}
+    ]
+  },
+  {
+    "entity": "information_management.entity_permission",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "role_identifier", "type": "entity_reference", "target": "information_management.role", "required": true},
+      {"field": "if_owner", "type": "boolean", "default": "0"},
+      {"field": "access_level", "type": "integer", "default": "0"},
+      {"field": "read", "type": "boolean", "default": "1"},
+      {"field": "write", "type": "boolean", "default": "1"},
+      {"field": "create", "type": "boolean", "default": "1"},
+      {"field": "delete", "type": "boolean", "default": "1"},
+      {"field": "submit", "type": "boolean", "default": "0"},
+      {"field": "cancel", "type": "boolean", "default": "0"},
+      {"field": "amend", "type": "boolean", "default": "0"},
+      {"field": "report", "type": "boolean", "default": "1"},
+      {"field": "export", "type": "boolean", "default": "1"},
+      {"field": "import", "type": "boolean", "default": "0"},
+      {"field": "share", "type": "boolean", "default": "1"},
+      {"field": "print", "type": "boolean", "default": "1"},
+      {"field": "email", "type": "boolean", "default": "1"},
+      {"field": "select", "type": "boolean", "default": "0"},
+      {"field": "mask", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Role and Level"},
+      {"control": "section", "purpose": "Permissions"},
+      {"control": "section", "purpose": "Additional Permissions"}
+    ]
+  },
+  {
+    "entity": "information_management.entity_type",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "write"]},
+      {"role": "administrator", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "required": true, "searchable": true},
+      {"field": "is_submittable", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "istable", "type": "boolean", "default": "0"},
+      {"field": "issingle", "type": "boolean", "write_once": true, "default": "0", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "editable_grid", "type": "boolean", "default": "1", "visible_when": ["field_has_value", "istable"]},
+      {"field": "quick_entry", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "track_changes", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "track_seen", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "track_views", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "custom", "type": "boolean", "default": "0"},
+      {"field": "beta", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "deprecated", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "fields_rows", "type": "owned_collection", "target": "information_management.entity_field_definition"},
+      {"field": "autoname", "type": "short_text"},
+      {"field": "description", "type": "text"},
+      {"field": "image_field", "type": "short_text"},
+      {"field": "timeline_field", "type": "short_text", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "maximum_attachments", "type": "integer"},
+      {"field": "hide_toolbar", "type": "boolean", "default": "0"},
+      {"field": "allow_copy", "type": "boolean", "default": "0"},
+      {"field": "allow_rename", "type": "boolean", "default": "1", "visible_when": ["not", ["current_field", "issingle"]]},
+      {"field": "allow_import", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "issingle"]]},
+      {"field": "allow_events_in_timeline", "type": "boolean", "default": "0"},
+      {"field": "allow_auto_repeat", "type": "boolean", "default": "0"},
+      {"field": "title_field", "type": "short_text", "visible_when": ["not", ["current_field", "istable"]], "required_when": ["current_field", "show_title_field_in_link"]},
+      {"field": "search_fields", "type": "short_text", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "default_print_format", "type": "short_text"},
+      {"field": "sort_field", "type": "short_text", "default": "creation", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "sort_order", "type": "enumeration", "values": ["ASC", "DESC"], "default": "DESC", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "document_type", "type": "enumeration", "values": ["", "Document", "Setup", "System", "Other"]},
+      {"field": "icon", "type": "icon"},
+      {"field": "color", "type": "short_text"},
+      {"field": "show_preview_popup", "type": "boolean", "default": "0"},
+      {"field": "show_name_in_global_search", "type": "boolean", "default": "0"},
+      {"field": "permissions_rows", "type": "owned_collection", "target": "information_management.entity_permission"},
+      {"field": "restrict_to_domain_identifier", "type": "entity_reference", "target": "information_management.domain"},
+      {"field": "read_only", "type": "boolean", "default": "0"},
+      {"field": "in_create", "type": "boolean", "default": "0"},
+      {"field": "has_web_view", "type": "boolean", "default": "0"},
+      {"field": "allow_guest_to_view", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "has_web_view"]},
+      {"field": "route", "type": "short_text", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "is_published_field", "type": "short_text", "visible_when": ["field_has_value", "has_web_view"]},
+      {"field": "engine", "type": "enumeration", "values": ["InnoDB", "MyISAM"], "default": "InnoDB", "visible_when": ["not", ["current_field", "issingle"]]},
+      {"field": "is_tree", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "nsm_parent_field", "type": "short_text", "visible_when": ["field_has_value", "is_tree"]},
+      {"field": "documentation", "type": "short_text"},
+      {"field": "actions_rows", "type": "owned_collection", "target": "information_management.entity_type_action"},
+      {"field": "links_rows", "type": "owned_collection", "target": "information_management.entity_type_link"},
+      {"field": "subject_field", "type": "short_text", "visible_when": ["field_has_value", "email_append_to"]},
+      {"field": "sender_field", "type": "short_text", "visible_when": ["field_has_value", "email_append_to"], "required_when": ["field_has_value", "email_append_to"]},
+      {"field": "email_append_to", "type": "boolean", "default": "0"},
+      {"field": "index_web_pages_for_search", "type": "boolean", "default": "1"},
+      {"field": "is_virtual", "type": "boolean", "default": "0"},
+      {"field": "default_email_template_identifier", "type": "entity_reference", "target": "mail.email_template"},
+      {"field": "website_search_field", "type": "short_text", "visible_when": ["field_has_value", "has_web_view"]},
+      {"field": "naming_rule", "type": "enumeration", "maximum_length": 40, "values": ["", "Set by user", "Autoincrement", "By fieldname", "By \"Naming Series\" field", "Expression", "Expression (old style)", "Random", "UUID", "By script"]},
+      {"field": "migration_hash", "type": "short_text", "form_hidden": true},
+      {"field": "states_rows", "type": "owned_collection", "target": "information_management.entity_type_state"},
+      {"field": "show_title_field_in_link", "type": "boolean", "default": "0"},
+      {"field": "translated_entity_type", "type": "boolean", "default": "0"},
+      {"field": "link_display_mode", "type": "enumeration", "values": ["Search", "Select"], "default": "Search"},
+      {"field": "show_image_in_link", "type": "boolean", "default": "0", "visible_when": ["current_field", "image_field"]},
+      {"field": "make_attachments_public", "type": "boolean", "default": "0"},
+      {"field": "enable_upload_first_workflow", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "queue_in_background", "type": "boolean", "default": "0", "visible_when": ["current_field", "is_submittable"]},
+      {"field": "default_view", "type": "enumeration"},
+      {"field": "force_re_route_to_default_view", "type": "boolean", "default": "0"},
+      {"field": "is_calendar_and_gantt", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "istable"]]},
+      {"field": "sender_name_field", "type": "short_text", "visible_when": ["field_has_value", "email_append_to"]},
+      {"field": "row_format", "type": "enumeration", "form_hidden": true, "values": ["Dynamic", "Compressed"], "default": "Dynamic"},
+      {"field": "grid_page_length", "type": "integer", "nonnegative": true, "default": "50", "visible_when": ["field_has_value", "istable"]},
+      {"field": "protect_attached_files", "type": "boolean", "default": "0"},
+      {"field": "rows_threshold_for_grid_search", "type": "integer", "nonnegative": true, "default": "20", "visible_when": ["field_has_value", "istable"]},
+      {"field": "recipient_account_field", "type": "short_text", "visible_when": ["field_has_value", "email_append_to"]},
+      {"field": "allow_bulk_edit", "type": "boolean", "default": "1", "visible_when": ["field_has_value", "istable"]}
+    ],
+    "presentation": [
+      {"control": "tab", "purpose": "Naming"},
+      {"control": "section", "purpose": "Form Settings", "visible_when": ["not", ["current_field", "istable"]]},
+      {"control": "section", "purpose": "View Settings", "visible_when": ["not", ["current_field", "istable"]]},
+      {"control": "tab", "purpose": "Web View", "visible_when": ["and", ["strict_equal", ["current_field", "custom"], ["literal", 0]], ["not", ["current_field", "istable"]]]},
+      {"control": "section", "purpose": "Advanced"},
+      {"control": "tab", "purpose": "Actions", "visible_when": ["not", ["current_field", "istable"]], "expanded_when": ["field_has_value", "actions_rows"]},
+      {"control": "tab", "purpose": "Links", "visible_when": ["not", ["current_field", "istable"]], "expanded_when": ["field_has_value", "links_rows"]},
+      {"control": "section", "purpose": "Email Settings", "visible_when": ["not", ["current_field", "istable"]]},
+      {"control": "tab", "purpose": "States", "visible_when": ["not", ["current_field", "istable"]]},
+      {"control": "tab", "purpose": "Settings"},
+      {"control": "tab", "purpose": "Form", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"control": "formatted_information", "purpose": "Form Builder"},
+      {"control": "section", "purpose": "Fields"},
+      {"control": "tab", "purpose": "Connections"},
+      {"control": "tab", "purpose": "Permissions", "visible_when": ["not", ["current_field", "istable"]]},
+      {"control": "tab", "purpose": "Fields"}
+    ]
+  },
+  {
+    "entity": "information_management.entity_type_action",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "label", "type": "short_text", "required": true},
+      {"field": "group", "type": "short_text"},
+      {"field": "action_type", "type": "enumeration", "required": true, "values": ["Server Action", "Route"]},
+      {"field": "action", "type": "text", "required": true},
+      {"field": "hidden", "type": "boolean", "default": "0"},
+      {"field": "custom", "type": "boolean", "form_hidden": true, "default": "0"}
+    ]
+  },
+  {
+    "entity": "information_management.entity_type_link",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "link_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "link_field_name", "type": "short_text", "required": true},
+      {"field": "group", "type": "short_text"},
+      {"field": "hidden", "type": "boolean", "default": "0"},
+      {"field": "custom", "type": "boolean", "form_hidden": true, "default": "0"},
+      {"field": "parent_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "visible_when": ["field_has_value", "is_child_table"], "required_when": ["field_has_value", "is_child_table"]},
+      {"field": "is_child_table", "type": "boolean", "form_read_only": true, "default": "0", "copy_from": ["link_entity_type_identifier", "istable"]},
+      {"field": "table_field_name", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "information_management.entity_type_settings_map",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "applies_to_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "write_once": true},
+      {"field": "is_standard", "type": "boolean", "write_once": true, "default": "0"},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "visible_when": ["field_has_value", "is_standard"], "required_when": ["field_has_value", "is_standard"]},
+      {"field": "is_active", "type": "boolean", "default": "1"},
+      {"field": "mappings_rows", "type": "owned_collection", "target": "information_management.entity_type_settings_map_item"}
+    ]
+  },
+  {
+    "entity": "information_management.entity_type_settings_map_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "settings_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "setting_field", "type": "suggested_text", "required": true}
+    ]
+  },
+  {
+    "entity": "information_management.entity_type_state",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true},
+      {"field": "color", "type": "enumeration", "required": true, "values": ["Blue", "Cyan", "Gray", "Green", "Light Blue", "Orange", "Pink", "Purple", "Red", "Yellow"], "default": "Blue"},
+      {"field": "custom", "type": "boolean", "form_hidden": true, "default": "0"}
+    ]
+  },
+  {
+    "entity": "information_management.entity_type_to_sync",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"}
+    ]
+  },
+  {
+    "entity": "information_management.error_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "seen", "type": "boolean", "form_hidden": true, "default": "0"},
+      {"field": "method", "type": "short_text", "form_read_only": true},
+      {"field": "error", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_name", "type": "short_text", "form_read_only": true, "searchable": true},
+      {"field": "trace_identifier", "type": "short_text", "form_read_only": true},
+      {"field": "metadata", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "fingerprint", "type": "short_text", "form_hidden": true, "searchable": true}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "Fingerprint Stats"}
+    ]
+  },
+  {
+    "entity": "information_management.file",
+    "kind": "independent_record",
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "all", "level": 0, "allows": ["create", "delete", "read", "write"]}
+    ],
+    "fields": [
+      {"field": "file_name", "type": "short_text", "form_read_only": true},
+      {"field": "is_private", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "is_folder"]]},
+      {"field": "is_home_folder", "type": "boolean", "form_hidden": true, "searchable": true, "default": "0"},
+      {"field": "is_attachments_folder", "type": "boolean", "form_hidden": true, "default": "0"},
+      {"field": "file_size", "type": "integer", "form_read_only": true, "maximum_length": 20},
+      {"field": "file_resource_address", "type": "expression_or_structured_text", "form_read_only": true, "visible_when": ["not", ["current_field", "is_folder"]]},
+      {"field": "thumbnail_resource_address", "type": "text", "form_read_only": true},
+      {"field": "folder_identifier", "type": "entity_reference", "target": "information_management.file", "form_read_only": true, "form_hidden": true, "maximum_length": 255},
+      {"field": "is_folder", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "attached_to_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "attached_to_name", "type": "short_text", "form_read_only": true},
+      {"field": "attached_to_field", "type": "short_text", "form_read_only": true},
+      {"field": "previous_parent_identifier", "type": "short_text", "form_hidden": true},
+      {"field": "content_hash", "type": "short_text", "form_read_only": true},
+      {"field": "uploaded_to_remote_file_storage", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "uploaded_to_hosted_personal_productivity_drive", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "file_type", "type": "short_text", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Preview"},
+      {"control": "formatted_information", "purpose": "Preview HTML"},
+      {"control": "section", "visible_when": ["not", ["current_field", "is_folder"]]}
+    ]
+  },
+  {
+    "entity": "information_management.has_domain",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "domain_identifier", "type": "entity_reference", "target": "information_management.domain"}
+    ]
+  },
+  {
+    "entity": "information_management.has_role",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "role_identifier", "type": "entity_reference", "target": "information_management.role"}
+    ]
+  },
+  {
+    "entity": "information_management.installed_application",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "configuration_branch", "type": "short_text", "form_read_only": true},
+      {"field": "application_name", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "application_version", "type": "short_text", "form_read_only": true},
+      {"field": "has_setup_wizard", "type": "boolean", "default": "0"},
+      {"field": "is_setup_complete", "type": "boolean", "default": "0"},
+      {"field": "disabled", "type": "boolean", "configuration_variant": true, "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "information_management.installed_applications",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "installed_applications_rows", "type": "owned_collection", "target": "information_management.installed_application", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "information_management.language",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "read", "write"]},
+      {"role": "all", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "language_code", "type": "short_text", "required": true, "unique": true},
+      {"field": "language_name", "type": "short_text", "required": true, "write_once": true},
+      {"field": "flag", "type": "short_text"},
+      {"field": "based_on_identifier", "type": "entity_reference", "target": "information_management.language"},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "date_format", "type": "enumeration", "values": ["", "yyyy-mm-dd", "dd-mm-yyyy", "dd/mm/yyyy", "dd.mm.yyyy", "mm/dd/yyyy", "mm-dd-yyyy"]},
+      {"field": "time_format", "type": "enumeration", "values": ["", "HH:mm:ss", "HH:mm"]},
+      {"field": "number_format", "type": "enumeration", "values": ["", "#,###.##", "#.###,##", "# ###.##", "# ###,##", "#'###.##", "#, ###.##", "#,##,###.##", "#,###.###", "#.###", "#,###"]},
+      {"field": "first_day_of_the_week", "type": "enumeration", "values": ["", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]}
+    ]
+  },
+  {
+    "entity": "information_management.log_setting_user",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "information_management.log_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "logs_to_clear_rows", "type": "owned_collection", "target": "information_management.logs_to_clear"}
+    ]
+  },
+  {
+    "entity": "information_management.logs_to_clear",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "days", "type": "integer", "required": true, "nonnegative": true, "default": "30"}
+    ]
+  },
+  {
+    "entity": "information_management.map_reduce_job",
+    "kind": "independent_record",
+    "configuration_variant": true,
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "information_management.map_reduce_job", "form_read_only": true},
+      {"field": "map", "type": "short_text"},
+      {"field": "reduce", "type": "short_text"},
+      {"field": "data", "type": "structured_value"},
+      {"field": "result", "type": "structured_value", "form_read_only": true},
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "document_name_identifier", "type": "selected_entity_reference", "target_selected_by": "document_type_identifier", "form_read_only": true},
+      {"field": "callback", "type": "short_text"},
+      {"field": "callback_executed", "type": "boolean"}
+    ]
+  },
+  {
+    "entity": "information_management.map_reduce_task",
+    "kind": "independent_record",
+    "configuration_variant": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "master_identifier", "type": "entity_reference", "target": "information_management.map_reduce_job", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["queued", "running", "paused", "completed", "canceled"]},
+      {"field": "map", "type": "short_text", "form_read_only": true},
+      {"field": "reduce", "type": "short_text", "form_read_only": true},
+      {"field": "map_partial", "type": "structured_value", "form_read_only": true},
+      {"field": "chunk", "type": "structured_value", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "information_management.module_def",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "administrator", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "select", "share", "write"]},
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "read", "report", "select", "write"]},
+      {"role": "all", "level": 0, "allows": ["read", "report", "select"]}
+    ],
+    "fields": [
+      {"field": "module_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "application_name", "type": "enumeration", "searchable": true, "required_when": ["not", ["current_field", "custom"]]},
+      {"field": "restrict_to_domain_identifier", "type": "entity_reference", "target": "information_management.domain"},
+      {"field": "custom", "type": "boolean", "default": "0"},
+      {"field": "package_identifier", "type": "entity_reference", "target": "information_management.package", "visible_when": ["field_has_value", "custom"]}
+    ],
+    "presentation": [
+      {"control": "tab", "purpose": "Connections"},
+      {"control": "tab", "purpose": "Details"}
+    ]
+  },
+  {
+    "entity": "information_management.module_profile",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "module_profile_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "block_modules_rows", "type": "owned_collection", "target": "information_management.block_module", "form_read_only": true, "form_hidden": true}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "Module HTML"}
+    ]
+  },
+  {
+    "entity": "information_management.navbar_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_label", "type": "short_text", "required_when": ["or", ["coercive_equal", ["current_field", "item_type"], ["literal", "Route"]], ["coercive_equal", ["current_field", "item_type"], ["literal", "Action"]]]},
+      {"field": "item_type", "type": "enumeration", "values": ["Route", "Action", "Separator"], "read_only_when": ["current_field", "is_standard"]},
+      {"field": "hidden", "type": "boolean", "default": "0"},
+      {"field": "is_standard", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "route", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "item_type"], ["literal", "Route"]], "read_only_when": ["current_field", "is_standard"], "required_when": ["coercive_equal", ["current_field", "item_type"], ["literal", "Route"]]},
+      {"field": "action", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "item_type"], ["literal", "Action"]], "read_only_when": ["current_field", "is_standard"], "required_when": ["coercive_equal", ["current_field", "item_type"], ["literal", "Action"]]},
+      {"field": "condition", "type": "expression_or_structured_text"},
+      {"field": "icon", "type": "icon"}
+    ]
+  },
+  {
+    "entity": "information_management.navbar_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "application_logo", "type": "image_file_reference"},
+      {"field": "settings_dropdown_rows", "type": "owned_collection", "target": "information_management.navbar_item"},
+      {"field": "help_dropdown_rows", "type": "owned_collection", "target": "information_management.navbar_item"},
+      {"field": "announcement_widget", "type": "formatted_text"},
+      {"field": "announcement_widget_color", "type": "color"},
+      {"field": "dismissible_announcement_widget", "type": "boolean", "default": "1"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Dropdowns"},
+      {"control": "section", "purpose": "Application Logo"},
+      {"control": "section", "purpose": "Announcements"}
+    ]
+  },
+  {
+    "entity": "information_management.package",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "readme", "type": "formatted_text"},
+      {"field": "package_name", "type": "short_text", "required": true},
+      {"field": "license_type", "type": "enumeration", "values": ["", "MIT License", "GNU General Public License", "GNU Affero General Public License"]},
+      {"field": "license", "type": "formatted_text"}
+    ]
+  },
+  {
+    "entity": "information_management.package_import",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "attach_package", "type": "file_reference"},
+      {"field": "activate", "type": "boolean", "default": "0"},
+      {"field": "import_log", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "force", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "information_management.package_release",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "package_identifier", "type": "entity_reference", "target": "information_management.package", "required": true},
+      {"field": "major", "type": "integer"},
+      {"field": "minor", "type": "integer"},
+      {"field": "patch", "type": "integer", "omit_on_copy": true},
+      {"field": "path", "type": "text", "form_read_only": true},
+      {"field": "release_notes", "type": "formatted_text"},
+      {"field": "publish", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "information_management.page",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "administrator", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]},
+      {"role": "system_manager", "level": 0, "allows": ["email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "system_page", "type": "boolean", "default": "0"},
+      {"field": "page_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "title", "type": "short_text", "omit_on_copy": true},
+      {"field": "type", "type": "enumeration", "values": ["", "Interactive interface"]},
+      {"field": "island", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "type"], ["literal", "Interactive interface"]]},
+      {"field": "icon", "type": "short_text"},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "required": true},
+      {"field": "restrict_to_domain_identifier", "type": "entity_reference", "target": "information_management.domain"},
+      {"field": "standard", "type": "enumeration", "required": true, "searchable": true, "values": ["Yes", "No"]},
+      {"field": "roles_rows", "type": "owned_collection", "target": "information_management.has_role", "visible_when": ["coercive_equal", ["current_field", "standard"], ["literal", "Yes"]]},
+      {"field": "shared_page", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Page HTML"}
+    ]
+  },
+  {
+    "entity": "information_management.patch_log",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "administrator", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "system_manager", "level": 0, "allows": ["email", "export", "print", "read", "report"]}
+    ],
+    "fields": [
+      {"field": "patch", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "skipped", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "traceback", "type": "expression_or_structured_text", "form_read_only": true, "visible_when": ["coercive_equal", ["current_field", "skipped"], ["literal", 1]]}
+    ]
+  },
+  {
+    "entity": "information_management.permission_inspector",
+    "kind": "computed_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write"]}
+    ],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "record_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true},
+      {"field": "output", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "permission_type", "type": "enumeration", "values": ["read", "write", "create", "delete", "submit", "cancel", "select", "amend", "print", "email", "report", "import", "export", "share"]}
+    ]
+  },
+  {
+    "entity": "information_management.permission_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "report"]}
+    ],
+    "fields": [
+      {"field": "changed_by_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "changed_at", "type": "date_and_time", "computed": true, "form_read_only": true},
+      {"field": "changes", "type": "text", "form_hidden": true},
+      {"field": "for_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "form_read_only": true},
+      {"field": "for_document_identifier", "type": "selected_entity_reference", "target_selected_by": "for_entity_type_identifier", "required": true, "form_read_only": true},
+      {"field": "reference_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_type_identifier", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "form_hidden": true, "values": ["Updated", "Removed", "Added"]}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "Changes"},
+      {"control": "section", "purpose": "More Info"}
+    ]
+  },
+  {
+    "entity": "information_management.permission_type",
+    "kind": "independent_record",
+    "form_read_only": true,
+    "grants": [
+      {"role": "administrator", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "perm_type", "type": "short_text", "required": true},
+      {"field": "entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true}
+    ]
+  },
+  {
+    "entity": "information_management.prepared_report",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "prepared_report_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "report_name", "type": "short_text", "required": true, "form_read_only": true, "searchable": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "form_hidden": true, "searchable": true, "values": ["Error", "Queued", "Completed", "Started", "Cancelled"], "default": "Queued"},
+      {"field": "report_end_time", "type": "date_and_time", "form_read_only": true},
+      {"field": "error_message", "type": "expression_or_structured_text", "form_read_only": true, "omit_on_copy": true},
+      {"field": "filters", "type": "text", "form_read_only": true, "form_hidden": true},
+      {"field": "job_identifier", "type": "short_text", "form_read_only": true, "omit_on_copy": true},
+      {"field": "queued_by", "type": "short_text", "computed": true, "form_read_only": true},
+      {"field": "queued_at", "type": "date_and_time", "computed": true, "form_read_only": true},
+      {"field": "peak_memory_usage", "type": "integer", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "visible_when": ["coercive_equal", ["current_field", "status"], ["literal", "Error"]]},
+      {"control": "section", "purpose": "Filters"},
+      {"control": "formatted_information", "purpose": "Filter Values"}
+    ]
+  },
+  {
+    "entity": "information_management.queued_work_item",
+    "kind": "computed_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]},
+      {"role": "administrator", "level": 0, "allows": ["delete", "email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "queue", "type": "enumeration", "values": ["default", "short", "long"]},
+      {"field": "status", "type": "enumeration", "values": ["queued", "started", "finished", "failed", "deferred", "scheduled", "canceled"]},
+      {"field": "job_identifier", "type": "short_text", "unique": true},
+      {"field": "exc_info", "type": "expression_or_structured_text"},
+      {"field": "job_name", "type": "short_text"},
+      {"field": "arguments", "type": "expression_or_structured_text"},
+      {"field": "timeout", "type": "duration"},
+      {"field": "time_taken", "type": "duration"},
+      {"field": "started_at", "type": "date_and_time"},
+      {"field": "ended_at", "type": "date_and_time"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Job Info"},
+      {"control": "section", "purpose": "Job Status"}
+    ]
+  },
+  {
+    "entity": "information_management.record_access_grant",
+    "kind": "independent_record",
+    "import_supported": true,
+    "audit_changes": true,
+    "form_read_only": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "export", "import", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "searchable": true},
+      {"field": "share_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "searchable": true},
+      {"field": "share_name_identifier", "type": "selected_entity_reference", "target_selected_by": "share_entity_type_identifier", "required": true, "searchable": true},
+      {"field": "read", "type": "boolean", "default": "0"},
+      {"field": "write", "type": "boolean", "default": "0"},
+      {"field": "share", "type": "boolean", "default": "0"},
+      {"field": "everyone", "type": "boolean", "searchable": true, "default": "0"},
+      {"field": "notify_by_email", "type": "boolean", "default": "1"},
+      {"field": "submit", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "information_management.record_type_layout_child_table",
+    "kind": "owned_row",
+    "configuration_variant": true,
+    "grants": [],
+    "fields": [
+      {"field": "table_field_name", "type": "short_text", "required": true},
+      {"field": "child_layout_identifier", "type": "entity_reference", "target": "configuration.entity_type_layout", "required": true}
+    ]
+  },
+  {
+    "entity": "information_management.recorder",
+    "kind": "computed_record",
+    "grants": [
+      {"role": "administrator", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "path", "type": "short_text"},
+      {"field": "command", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "event_type"], ["literal", "HTTP Request"]]},
+      {"field": "duration", "type": "decimal"},
+      {"field": "time", "type": "date_and_time"},
+      {"field": "number_of_queries", "type": "integer"},
+      {"field": "time_in_queries", "type": "decimal"},
+      {"field": "number_of_events", "type": "integer"},
+      {"field": "request_headers", "type": "expression_or_structured_text", "visible_when": ["coercive_equal", ["current_field", "event_type"], ["literal", "HTTP Request"]]},
+      {"field": "form_dict", "type": "expression_or_structured_text", "visible_when": ["coercive_equal", ["current_field", "event_type"], ["literal", "HTTP Request"]]},
+      {"field": "method", "type": "enumeration", "values": ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"], "visible_when": ["coercive_equal", ["current_field", "event_type"], ["literal", "HTTP Request"]]},
+      {"field": "database_query_queries_rows", "type": "owned_collection", "target": "information_management.recorder_query"},
+      {"field": "event_type", "type": "short_text", "form_hidden": true},
+      {"field": "applications_involved", "type": "short_text", "form_read_only": true},
+      {"field": "timeline_rows", "type": "owned_collection", "target": "information_management.recorder_event", "form_read_only": true},
+      {"field": "profile", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "suggested_indexes_rows", "type": "owned_collection", "target": "information_management.recorder_suggested_index"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Timeline"}
+    ]
+  },
+  {
+    "entity": "information_management.recorder_event",
+    "kind": "computed_record",
+    "grants": [],
+    "fields": [
+      {"field": "label", "type": "short_text", "form_read_only": true},
+      {"field": "reference_entity_type", "type": "short_text", "form_read_only": true},
+      {"field": "reference_name", "type": "short_text", "form_read_only": true},
+      {"field": "applications", "type": "short_text", "form_read_only": true},
+      {"field": "queries", "type": "integer", "form_read_only": true},
+      {"field": "duration", "type": "decimal", "form_read_only": true},
+      {"field": "method", "type": "short_text", "form_read_only": true},
+      {"field": "depth", "type": "integer", "form_read_only": true},
+      {"field": "sequence", "type": "integer", "form_read_only": true},
+      {"field": "handlers", "type": "text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "information_management.recorder_query",
+    "kind": "computed_record",
+    "grants": [],
+    "fields": [
+      {"field": "query", "type": "short_text", "maximum_length": 2},
+      {"field": "normalized_query", "type": "short_text"},
+      {"field": "duration", "type": "decimal"},
+      {"field": "exact_copies", "type": "integer"},
+      {"field": "normalized_copies", "type": "integer"},
+      {"field": "stack", "type": "text", "form_hidden": true},
+      {"field": "explain_result", "type": "text", "form_hidden": true},
+      {"field": "index", "type": "integer"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "Stack Trace"},
+      {"control": "formatted_information", "purpose": "Relational query execution plan"}
+    ]
+  },
+  {
+    "entity": "information_management.recorder_suggested_index",
+    "kind": "computed_record",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "table", "type": "short_text"},
+      {"field": "column", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "information_management.report",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "administrator", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "report_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["email", "print", "read", "report"]}
+    ],
+    "fields": [
+      {"field": "report_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "reference_report", "type": "short_text"},
+      {"field": "is_standard", "type": "enumeration", "required": true, "values": ["No", "Yes"]},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "copy_from": ["reference_entity_type_identifier", "module_identifier"], "copy_only_when_empty": true},
+      {"field": "documentation_resource_address", "type": "short_text"},
+      {"field": "add_total_row", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["current_field", "report_type"], ["literal", "Report Builder"]]},
+      {"field": "report_type", "type": "enumeration", "required": true, "values": ["Report Builder", "Query Report", "Script Report", "Custom Report"]},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "letter_head_identifier", "type": "entity_reference", "target": "document_output.letter_head", "visible_when": ["coercive_equal", ["current_field", "is_standard"], ["literal", "No"]]},
+      {"field": "query", "type": "expression_or_structured_text", "visible_when": ["coercive_equal", ["current_field", "report_type"], ["literal", "Query Report"]]},
+      {"field": "client_interaction_rules", "type": "expression_or_structured_text", "visible_when": ["and", ["coercive_equal", ["current_field", "report_type"], ["literal", "Script Report"]], ["strict_equal", ["current_field", "is_standard"], ["literal", "No"]]]},
+      {"field": "structured_data", "type": "expression_or_structured_text", "form_read_only": true, "visible_when": ["or", ["coercive_equal", ["current_field", "report_type"], ["literal", "Report Builder"]], ["literal", "Custom Report"]]},
+      {"field": "roles_rows", "type": "owned_collection", "target": "information_management.has_role"},
+      {"field": "prepared_report", "type": "boolean", "default": "0"},
+      {"field": "report_script", "type": "expression_or_structured_text", "visible_when": ["and", ["strict_equal", ["current_field", "report_type"], ["literal", "Script Report"]], ["strict_equal", ["current_field", "is_standard"], ["literal", "No"]]]},
+      {"field": "filters_rows", "type": "owned_collection", "target": "information_management.report_filter", "visible_when": ["not", ["call", ["member", ["list", ["literal", "Custom Report"], ["literal", "Report Builder"]], "includes"], ["current_field", "report_type"]]]},
+      {"field": "columns_rows", "type": "owned_collection", "target": "information_management.report_column", "visible_when": ["not", ["call", ["member", ["list", ["literal", "Custom Report"], ["literal", "Report Builder"]], "includes"], ["current_field", "report_type"]]]},
+      {"field": "timeout", "type": "integer", "visible_when": ["field_has_value", "prepared_report"]},
+      {"field": "add_translate_data", "type": "boolean", "default": "0"},
+      {"field": "disable_prepared_report_automation", "type": "boolean", "default": "0", "visible_when": ["strict_equal", ["current_field", "report_type"], ["literal", "Script Report"]]},
+      {"field": "entity_type_to_sync_rows", "type": "owned_collection", "target": "information_management.entity_type_to_sync", "visible_when": ["current_field", "snapshot_report"]},
+      {"field": "snapshot_report", "type": "boolean", "default": "0"},
+      {"field": "generate_comma_separated_values", "type": "boolean", "configuration_variant": true},
+      {"field": "default_print_format_identifier", "type": "entity_reference", "configuration_variant": true, "target": "document_output.print_format"},
+      {"field": "default_letter_head_identifier", "type": "entity_reference", "configuration_variant": true, "target": "document_output.letter_head"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Query / Script"},
+      {"control": "section", "purpose": "Filters", "visible_when": ["coercive_unequal", ["current_field", "report_type"], ["literal", "Custom Report"]], "expanded_when": ["field_has_value", "filters_rows"]},
+      {"control": "section", "purpose": "Columns", "visible_when": ["coercive_unequal", ["current_field", "report_type"], ["literal", "Custom Report"]], "expanded_when": ["field_has_value", "columns_rows"]},
+      {"control": "section", "purpose": "Client Code", "expanded_when": ["field_has_value", "client_interaction_rules"]}
+    ]
+  },
+  {
+    "entity": "information_management.report_column",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "field_name", "type": "short_text", "required": true},
+      {"field": "label", "type": "short_text", "required": true},
+      {"field": "field_type", "type": "enumeration", "required": true, "values": ["Check", "Currency", "Data", "Date", "Datetime", "Duration", "Dynamic Link", "Float", "Fold", "Int", "Link", "Select", "Time"]},
+      {"field": "options", "type": "short_text"},
+      {"field": "width", "type": "integer"}
+    ]
+  },
+  {
+    "entity": "information_management.report_filter",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "field_name", "type": "short_text", "required": true},
+      {"field": "label", "type": "short_text", "required": true},
+      {"field": "field_type", "type": "enumeration", "required": true, "values": ["Check", "Currency", "Data", "Date", "Datetime", "Dynamic Link", "Float", "Fold", "Int", "Link", "Select", "Time"]},
+      {"field": "mandatory", "type": "boolean", "default": "0"},
+      {"field": "options", "type": "text"},
+      {"field": "wildcard_filter", "type": "boolean", "default": "0"},
+      {"field": "default", "type": "text"}
+    ]
+  },
+  {
+    "entity": "information_management.role",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "role_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "home_page", "type": "short_text"},
+      {"field": "restrict_to_domain_identifier", "type": "entity_reference", "target": "information_management.domain"},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "is_custom", "type": "boolean", "default": "0"},
+      {"field": "desk_access", "type": "boolean", "default": "1"},
+      {"field": "two_factor_authentication", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Role Profiles"},
+      {"control": "formatted_information", "purpose": "Role Profiles"},
+      {"control": "tab", "purpose": "Users"},
+      {"control": "formatted_information", "purpose": "Users"},
+      {"control": "tab", "purpose": "Documents"},
+      {"control": "formatted_information", "purpose": "Document Permissions"},
+      {"control": "tab", "purpose": "Reports"},
+      {"control": "formatted_information", "purpose": "Reports"},
+      {"control": "tab", "purpose": "Pages"},
+      {"control": "formatted_information", "purpose": "Pages"},
+      {"control": "tab", "purpose": "Workspaces"},
+      {"control": "formatted_information", "purpose": "Workspaces"}
+    ]
+  },
+  {
+    "entity": "information_management.role_permission_for_page_and_report",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "set_role_for", "type": "enumeration", "required": true, "values": ["", "Page", "Report"]},
+      {"field": "page_identifier", "type": "entity_reference", "target": "information_management.page", "visible_when": ["coercive_equal", ["current_field", "set_role_for"], ["literal", "Page"]]},
+      {"field": "report_identifier", "type": "entity_reference", "target": "information_management.report", "visible_when": ["coercive_equal", ["current_field", "set_role_for"], ["literal", "Report"]]},
+      {"field": "roles_rows", "type": "owned_collection", "target": "information_management.has_role", "form_read_only": true, "form_hidden": true},
+      {"field": "enable_prepared_report", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "report_identifier"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Allow Roles"},
+      {"control": "formatted_information", "purpose": "Roles Html"}
+    ]
+  },
+  {
+    "entity": "information_management.role_profile",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "system_manager", "level": 1, "allows": ["email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "role_profile", "type": "short_text", "required": true, "unique": true},
+      {"field": "roles_rows", "type": "owned_collection", "target": "information_management.has_role", "form_read_only": true, "form_hidden": true, "access_level": 1}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "Roles HTML"}
+    ]
+  },
+  {
+    "entity": "information_management.scheduled_job_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "status", "type": "enumeration", "required": true, "form_read_only": true, "values": ["Scheduled", "Complete", "Failed"]},
+      {"field": "details", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "scheduled_job_type_identifier", "type": "entity_reference", "target": "information_management.scheduled_job_type", "required": true, "form_read_only": true},
+      {"field": "debug_log", "type": "expression_or_structured_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "information_management.scheduled_job_type",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "method", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "stopped", "type": "boolean", "default": "0"},
+      {"field": "create_log", "type": "boolean", "default": "0", "visible_when": ["or", ["call", ["member", ["list", ["literal", "All"], ["literal", "Cron"]], "includes"], ["current_field", "frequency"]], ["current_field", "server_script_identifier"]]},
+      {"field": "last_execution", "type": "date_and_time", "form_read_only": true},
+      {"field": "cron_format", "type": "short_text", "form_read_only": true, "nonnullable": true, "visible_when": ["strict_equal", ["current_field", "frequency"], ["literal", "Cron"]]},
+      {"field": "frequency", "type": "enumeration", "required": true, "form_read_only": true, "values": ["All", "Hourly", "Hourly Long", "Hourly Maintenance", "Daily", "Daily Long", "Daily Maintenance", "Weekly", "Weekly Long", "Monthly", "Monthly Long", "Cron", "Yearly", "Annual"]},
+      {"field": "server_script_identifier", "type": "entity_reference", "target": "information_management.server_script", "form_read_only": true, "searchable": true},
+      {"field": "next_execution", "type": "date_and_time", "computed": true, "form_read_only": true},
+      {"field": "scheduler_event_identifier", "type": "entity_reference", "target": "information_management.scheduler_event", "form_read_only": true},
+      {"field": "queue", "type": "enumeration", "configuration_variant": true, "values": ["", "default", "short", "long"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Status"}
+    ]
+  },
+  {
+    "entity": "information_management.scheduler_event",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "scheduled_against_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "method", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "information_management.security_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "public_expires", "type": "date_and_time"},
+      {"field": "public_contacts_rows", "type": "owned_collection", "target": "information_management.security_settings_contact"},
+      {"field": "public_languages_rows", "type": "owned_selection", "target": "information_management.security_settings_language"},
+      {"field": "public_policy", "type": "short_text"},
+      {"field": "security_txt", "type": "text", "computed": true, "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Security.txt"}
+    ]
+  },
+  {
+    "entity": "information_management.security_settings_contact",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "type", "type": "enumeration", "required": true, "values": ["Website", "Email", "Phone"]},
+      {"field": "contact", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "information_management.security_settings_language",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "language_identifier", "type": "entity_reference", "target": "information_management.language", "required": true}
+    ]
+  },
+  {
+    "entity": "information_management.server_script",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "script_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "script_type", "type": "enumeration", "required": true, "values": ["Entity type Event", "Scheduler Event", "Permission Query", "API", "Workflow Task"]},
+      {"field": "script", "type": "expression_or_structured_text", "required": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "searchable": true, "visible_when": ["call", ["member", ["list", ["literal", "Entity type Event"], ["literal", "Permission Query"]], "includes"], ["current_field", "script_type"]]},
+      {"field": "entity_type_event", "type": "enumeration", "values": ["Before Insert", "Before Validate", "Before Save", "After Insert", "After Save", "Before Rename", "After Rename", "Before Submit", "After Submit", "Before Cancel", "After Cancel", "Before Discard", "After Discard", "Before Delete", "After Delete", "Before Save (Submitted Document)", "After Save (Submitted Document)", "Before Print", "On Payment Authorization", "On Payment Paid", "On Payment Failed", "On Payment Charge Processed", "On Payment Mandate Charge Processed", "On Payment Mandate Acquisition Processed"], "visible_when": ["strict_equal", ["current_field", "script_type"], ["literal", "Entity type Event"]]},
+      {"field": "service_interface_method", "type": "short_text", "visible_when": ["strict_equal", ["current_field", "script_type"], ["literal", "API"]]},
+      {"field": "allow_guest", "type": "boolean", "default": "0", "visible_when": ["strict_equal", ["current_field", "script_type"], ["literal", "API"]]},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "event_frequency", "type": "enumeration", "values": ["All", "Hourly", "Daily", "Weekly", "Monthly", "Yearly", "Hourly Long", "Daily Long", "Weekly Long", "Monthly Long", "Cron"], "visible_when": ["coercive_equal", ["current_field", "script_type"], ["literal", "Scheduler Event"]], "required_when": ["coercive_equal", ["current_field", "script_type"], ["literal", "Scheduler Event"]]},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "searchable": true},
+      {"field": "enable_rate_limit", "type": "boolean", "default": "0"},
+      {"field": "rate_limit_count", "type": "integer", "default": "5", "visible_when": ["field_has_value", "enable_rate_limit"]},
+      {"field": "rate_limit_seconds", "type": "integer", "default": "86400", "visible_when": ["field_has_value", "enable_rate_limit"]},
+      {"field": "cron_format", "type": "short_text", "visible_when": ["and", ["strict_equal", ["current_field", "script_type"], ["literal", "Scheduler Event"]], ["strict_equal", ["current_field", "event_frequency"], ["literal", "Cron"]]]},
+      {"field": "queue", "type": "enumeration", "configuration_variant": true, "values": ["", "default", "short", "long"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Help"},
+      {"control": "formatted_information", "purpose": "help structured markup"},
+      {"control": "section", "purpose": "Rate Limiting", "visible_when": ["strict_equal", ["current_field", "script_type"], ["literal", "API"]]}
+    ]
+  },
+  {
+    "entity": "information_management.service_interface_request_log",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "path", "type": "short_text"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "method", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "information_management.session_default",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true}
+    ]
+  },
+  {
+    "entity": "information_management.session_default_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "session_defaults_rows", "type": "owned_collection", "target": "information_management.session_default"}
+    ]
+  },
+  {
+    "entity": "information_management.submission_queue",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]},
+      {"role": "desk_user", "level": 0, "owner_only": true, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "job_identifier", "type": "entity_reference", "target": "information_management.queued_work_item", "form_read_only": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_record_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "form_read_only": true, "searchable": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "form_hidden": true, "values": ["Queued", "Finished", "Failed"]},
+      {"field": "enqueued_by", "type": "short_text", "computed": true, "form_read_only": true},
+      {"field": "ended_at", "type": "date_and_time", "form_read_only": true},
+      {"field": "created_at", "type": "date_and_time", "computed": true, "form_read_only": true},
+      {"field": "exception", "type": "long_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "information_management.success_action",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "unique": true},
+      {"field": "first_success_message", "type": "short_text", "required": true, "default": "Congratulations on first creations"},
+      {"field": "message", "type": "short_text", "required": true, "default": "Successfully created"},
+      {"field": "next_actions", "type": "short_text", "form_hidden": true},
+      {"field": "action_timeout", "type": "integer", "default": "7"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "Next Actions HTML"}
+    ]
+  },
+  {
+    "entity": "information_management.system_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "country_identifier", "type": "entity_reference", "target": "geography.country"},
+      {"field": "language_identifier", "type": "entity_reference", "target": "information_management.language", "required": true},
+      {"field": "time_zone", "type": "enumeration", "required": true, "form_read_only": true},
+      {"field": "setup_complete", "type": "boolean", "form_read_only": true, "form_hidden": true, "default": "0"},
+      {"field": "date_format", "type": "enumeration", "required": true, "values": ["yyyy-mm-dd", "dd-mm-yyyy", "dd/mm/yyyy", "dd.mm.yyyy", "mm/dd/yyyy", "mm-dd-yyyy"]},
+      {"field": "time_format", "type": "enumeration", "required": true, "values": ["HH:mm:ss", "HH:mm"], "default": "HH:mm:ss"},
+      {"field": "number_format", "type": "enumeration", "required": true, "values": ["#,###.##", "#.###,##", "# ###.##", "# ###,##", "#'###.##", "#, ###.##", "#,##,###.##", "#,###.###", "#.###", "#,###"]},
+      {"field": "float_precision", "type": "enumeration", "values": ["", "2", "3", "4", "5", "6", "7", "8", "9"]},
+      {"field": "currency_precision", "type": "enumeration", "values": ["", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]},
+      {"field": "backup_limit", "type": "integer", "default": "3"},
+      {"field": "enable_scheduler", "type": "boolean", "form_hidden": true, "default": "0"},
+      {"field": "submission_queue_timeout", "type": "integer", "nonnegative": true, "default": "600"},
+      {"field": "apply_strict_user_permissions", "type": "boolean", "default": "0"},
+      {"field": "session_expiry", "type": "short_text", "default": "170:00"},
+      {"field": "deny_multiple_sessions", "type": "boolean", "default": "0"},
+      {"field": "allow_login_using_mobile_number", "type": "boolean", "default": "0"},
+      {"field": "allow_login_using_user_name", "type": "boolean", "default": "0"},
+      {"field": "allow_error_traceback", "type": "boolean", "default": "1"},
+      {"field": "force_user_to_reset_password", "type": "integer"},
+      {"field": "enable_password_policy", "type": "boolean", "default": "1"},
+      {"field": "minimum_password_score", "type": "enumeration", "values": ["1", "2", "3", "4"], "default": "2", "visible_when": ["coercive_equal", ["current_field", "enable_password_policy"], ["literal", 1]]},
+      {"field": "allow_consecutive_login_attempts", "type": "integer", "default": "10"},
+      {"field": "allow_login_after_fail", "type": "integer", "default": "60"},
+      {"field": "enable_two_factor_authentication", "type": "boolean", "default": "0"},
+      {"field": "bypass_two_factor_authentication_for_retricted_network_address_users", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "enable_two_factor_authentication"]},
+      {"field": "bypass_restrict_network_address_check_if_two_factor_authentication_enabled", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "enable_two_factor_authentication"]},
+      {"field": "two_factor_method", "type": "enumeration", "values": ["OTP App", "SMS", "Email"], "default": "OTP App", "visible_when": ["field_has_value", "enable_two_factor_authentication"]},
+      {"field": "lifespan_qrcode_image", "type": "integer", "visible_when": ["and", ["current_field", "enable_two_factor_authentication"], ["coercive_equal", ["current_field", "two_factor_method"], ["literal", "OTP App"]]]},
+      {"field": "one_time_password_issuer_name", "type": "short_text", "default": "Application", "visible_when": ["field_has_value", "enable_two_factor_authentication"]},
+      {"field": "email_footer_address", "type": "text"},
+      {"field": "disable_standard_email_footer", "type": "boolean", "default": "0"},
+      {"field": "hide_footer_in_auto_email_reports", "type": "boolean", "default": "0"},
+      {"field": "allow_guests_to_upload_files", "type": "boolean", "default": "0"},
+      {"field": "dormant_days", "type": "integer", "default": "4"},
+      {"field": "password_reset_limit", "type": "integer", "default": "3"},
+      {"field": "logout_on_password_reset", "type": "boolean", "default": "1"},
+      {"field": "enable_onboarding", "type": "boolean", "default": "0"},
+      {"field": "attach_view_link", "type": "boolean", "default": "1"},
+      {"field": "application_name", "type": "short_text", "form_hidden": true, "default": "Application"},
+      {"field": "strip_exif_metadata_from_uploaded_images", "type": "boolean", "default": "1"},
+      {"field": "encrypt_backup", "type": "boolean", "default": "0"},
+      {"field": "disable_system_update_notification", "type": "boolean", "default": "0"},
+      {"field": "first_day_of_the_week", "type": "enumeration", "values": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], "default": "Sunday"},
+      {"field": "document_share_key_expiry", "type": "integer", "default": "30"},
+      {"field": "maximum_auto_email_report_per_user", "type": "integer", "default": "20"},
+      {"field": "disable_change_log_notification", "type": "boolean", "default": "0"},
+      {"field": "reset_password_link_expiry_duration", "type": "duration", "nonnegative": true, "default": "1200"},
+      {"field": "email_retry_limit", "type": "integer", "default": "3"},
+      {"field": "disable_user_pass_login", "type": "boolean", "default": "0"},
+      {"field": "login_with_email_link", "type": "boolean", "default": "1"},
+      {"field": "login_with_email_link_expiry", "type": "integer", "default": "10", "visible_when": ["field_has_value", "login_with_email_link"]},
+      {"field": "rounding_method", "type": "enumeration", "values": ["Banker's Rounding (legacy)", "Banker's Rounding", "Commercial Rounding"], "default": "Banker's Rounding (legacy)"},
+      {"field": "disable_document_sharing", "type": "boolean", "default": "0"},
+      {"field": "enable_telemetry", "type": "boolean", "default": "1"},
+      {"field": "welcome_email_template_identifier", "type": "entity_reference", "target": "mail.email_template"},
+      {"field": "reset_password_template_identifier", "type": "entity_reference", "target": "mail.email_template"},
+      {"field": "force_web_capture_mode_for_uploads", "type": "boolean", "default": "0"},
+      {"field": "maximum_file_size", "type": "integer", "nonnegative": true},
+      {"field": "allowed_file_extensions", "type": "text"},
+      {"field": "link_field_results_limit", "type": "integer", "nonnegative": true, "default": "10"},
+      {"field": "store_attached_portable_document_document", "type": "boolean", "default": "1"},
+      {"field": "default_application", "type": "enumeration"},
+      {"field": "dashboards", "type": "enumeration", "values": ["Insights", "Classic"], "default": "Insights"},
+      {"field": "rate_limit_email_link_login", "type": "integer", "visible_when": ["field_has_value", "login_with_email_link"]},
+      {"field": "use_number_format_from_currency", "type": "boolean", "default": "0"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency"},
+      {"field": "hide_empty_read_only_fields", "type": "boolean", "default": "1"},
+      {"field": "maximum_report_rows", "type": "integer", "default": "100000"},
+      {"field": "show_absolute_datetime_in_timeline", "type": "boolean", "default": "0"},
+      {"field": "log_service_interface_requests", "type": "boolean", "default": "0"},
+      {"field": "delete_background_exported_reports_after", "type": "integer", "nonnegative": true, "default": "48"},
+      {"field": "maximum_signups_allowed_per_hour", "type": "integer", "nonnegative": true, "default": "300"},
+      {"field": "show_external_link_warning", "type": "enumeration", "values": ["Never", "Ask", "Always"], "default": "Never"},
+      {"field": "one_time_password_text_message_template", "type": "text", "visible_when": ["and", ["coercive_equal", ["current_field", "enable_two_factor_authentication"], ["literal", 1]], ["coercive_equal", ["current_field", "two_factor_method"], ["literal", "SMS"]]]},
+      {"field": "disable_product_suggestion", "type": "boolean", "default": "0"},
+      {"field": "only_allow_system_managers_to_upload_public_files", "type": "boolean", "default": "0"},
+      {"field": "allow_clearing_link_fields", "type": "boolean", "default": "0"},
+      {"field": "enable_combobox_link_field", "type": "boolean", "default": "0"},
+      {"field": "allowed_entity_types_for_guest_uploads", "type": "text", "visible_when": ["coercive_equal", ["current_field", "allow_guests_to_upload_files"], ["literal", 1]]},
+      {"field": "frequency", "type": "enumeration", "values": ["Daily", "Weekly"], "default": "Weekly", "visible_when": ["current_field", "enable_snapshot_reports"]},
+      {"field": "sync_timeout", "type": "integer", "visible_when": ["current_field", "enable_snapshot_reports"]},
+      {"field": "enable_snapshot_reports", "type": "boolean", "default": "0"},
+      {"field": "sync_in_batch", "type": "boolean", "default": "1", "visible_when": ["current_field", "enable_snapshot_reports"]},
+      {"field": "maximum_zip_extract_size", "type": "integer", "nonnegative": true},
+      {"field": "enable_mcp", "type": "boolean", "default": "1"},
+      {"field": "server_name", "type": "short_text"},
+      {"field": "agent_instructions", "type": "long_text"},
+      {"field": "use_classic_charts", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Date and Number Format"},
+      {"control": "section", "purpose": "Background Workers"},
+      {"control": "section", "purpose": "Permissions"},
+      {"control": "section", "purpose": "Password"},
+      {"control": "section", "purpose": "Brute Force Security"},
+      {"control": "section", "purpose": "Two Factor Authentication"},
+      {"control": "section", "purpose": "Reports"},
+      {"control": "section", "purpose": "Telemetry"},
+      {"control": "tab", "purpose": "Login"},
+      {"control": "tab", "purpose": "Email"},
+      {"control": "tab", "purpose": "Files"},
+      {"control": "tab", "purpose": "Display"},
+      {"control": "tab", "purpose": "Backups"},
+      {"control": "tab", "purpose": "Advanced"},
+      {"control": "tab", "purpose": "Password"},
+      {"control": "section", "purpose": "Login Methods"},
+      {"control": "section", "purpose": "Search"},
+      {"control": "tab", "purpose": "App"},
+      {"control": "section", "purpose": "API Logging"},
+      {"control": "section", "purpose": "Snapshot Reports"},
+      {"control": "tab", "purpose": "AI Agents"},
+      {"control": "section", "purpose": "MCP Settings"},
+      {"control": "section", "purpose": "Applicationctl"},
+      {"control": "formatted_information", "purpose": "service management help"}
+    ]
+  },
+  {
+    "entity": "information_management.text_message_log",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["email", "print", "read", "report"]}
+    ],
+    "fields": [
+      {"field": "sender_name", "type": "short_text", "form_read_only": true},
+      {"field": "sent_on", "type": "calendar_date", "form_read_only": true},
+      {"field": "message", "type": "text", "form_read_only": true},
+      {"field": "number_of_requested_text_message", "type": "integer", "form_read_only": true},
+      {"field": "requested_numbers", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "number_of_sent_text_message", "type": "integer", "form_read_only": true},
+      {"field": "sent_to", "type": "expression_or_structured_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "information_management.text_message_parameter",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "parameter", "type": "short_text", "required": true},
+      {"field": "value", "type": "short_text", "required": true, "maximum_length": 255},
+      {"field": "header", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "information_management.text_message_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "text_message_gateway_resource_address", "type": "text", "required": true},
+      {"field": "message_parameter", "type": "short_text", "required": true},
+      {"field": "receiver_parameter", "type": "short_text", "required": true},
+      {"field": "parameters_rows", "type": "owned_collection", "target": "information_management.text_message_parameter"},
+      {"field": "use_post", "type": "boolean", "default": "0"},
+      {"field": "allowed_roles_rows", "type": "owned_collection", "target": "information_management.has_role"}
+    ]
+  }
+]

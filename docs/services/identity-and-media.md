@@ -1,0 +1,24 @@
+# Bulk identity changes and video statistics
+
+## Rename and merge master records
+
+| Stage | Decision and durable result |
+|---|---|
+| Select | A system manager needs write rights on the renaming tool and target record type. The target must exist, permit renaming and belong to a business area that allows key changes. Verify the right to write the source record and the destination record when merging. |
+| Admit | Use an attachment belonging to this tool. A supplied file address selects that attachment, otherwise take the most recently created matching attachment. Reject a missing attachment. Parse the delimited rows and register work after commit in consecutive blocks of at most 500. An empty input creates no work. Clear the tool's attachment field if it still refers to that file and consume the file. |
+| Interpret | The first two cells are the old and proposed keys. A third cell equal to 1 or case-insensitive “true” requests a merge. Skip a row missing either key. The first row is ordinary data. Each block processes its rows in order, and separate blocks may run independently. |
+| Validate | Apply the record's naming policy, including any permitted adjustment to the requested key. An ordinary rename requires an existing source and unused target. A merge requires an existing target. Reject an identical source and destination. Where comparison ignores case or accents, distinguish an actual spelling correction from a collision. |
+| Apply | A rename changes the primary key and associated owned-row references. A merge transfers assignments to the survivor and removes the old master. Update declared direct and polymorphic references, user preferences, attachments and audit-history references. Apply the record-specific post-change behaviour, retain an audit comment and publish old and new identities after commit. |
+| Settle | Commit successful rows individually. On error, roll back the failed row, record the reason and process the next row. Each finished block schedules search index refresh and reports failed row count, total submitted rows and safe error descriptions to the actor. Skipped incomplete rows still count toward the input size. Retrying a partial file must account for keys already changed. |
+
+For 501 complete rows, schedule blocks of 500 and 1. A valid first rename, a collision on the second row and a valid third rename produce two committed key changes and one failure. A receiving interface following an old identifier must resolve the committed change under its user's current permissions.
+
+## Published video assets
+
+A video retains a title, hosting service, resource address and, where the service supports it, a stable provider identifier and engagement counts. On creation or address change, the supported statistics adapter derives the identifier using its allowed host, path and query rules. The short-link form uses the first path segment. Embedded, short-form and live routes use the media segment; the ordinary watch route uses the first video selector. The identifier is eleven ASCII letters, digits, underscores or hyphens for this adapter. An alternative display-only host can store a playable resource address without running those statistics rules.
+
+Tracking defaults to disabled. Enabling it requires a refresh frequency and a verified service credential. The credential check queries provider capabilities. A failed check records the authentication failure and blocks the settings change. Supported cycle thresholds are one, six and twenty-four hours, with one hour as the default. Normalize a stored half-hour selection to one hour when the settings are saved. A missing last attempt makes a refresh due immediately. Otherwise truncate both instants to their hour boundaries and compare the elapsed hours with the selected threshold.
+
+Saving a supported video with tracking enabled can request the statistics for that asset. Copy likes, views, dislikes and comments from the first returned result. A failed provider request is recorded and the local video can still be saved. Batch refresh requires write authority for tracking settings. Select only supported assets with a provider identifier, request up to 50 at a time, and update by returned identifier. A missing counter in a returned result becomes zero; a missing result leaves the entire asset unchanged. Provider failure can skip a batch. After the batch operation returns, advance the last-attempt time even if a request was skipped. A setup or storage failure that interrupts the operation can prevent that final update.
+
+With 51 selected identifiers, the adapter makes two requests. If the second omits its only asset, keep that asset's counters. If the first response includes a video but omits likes, write zero likes for that video and apply its other returned values. A collection of zero engagement values is distinguishable from a provider failure.

@@ -1,0 +1,1224 @@
+[
+  {
+    "capability": "Restaurant orders and station routing",
+    "configuration": 2,
+    "entity_contracts": [
+      {
+        "concept": "aggregator_settings",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "price_list", "value_kind": "reference", "target": "inventory.price_list", "binding": "shared_model"},
+          {"purpose": "mode_of_payments", "value_kind": "reference", "target": "accounting.mode_of_payment", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "item_add_on",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "kitchen_display_order_type",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "order_type", "value_kind": "choice", "choices": ["unselected", "dine_in", "phone_in", "take_away", "delivery", "aggregators"]}
+        ]
+      },
+      {
+        "concept": "menu_for_room",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "menu", "value_kind": "reference", "target": "restaurant_menu"},
+          {"purpose": "room", "value_kind": "reference", "target": "restaurant_room"}
+        ]
+      },
+      {
+        "concept": "multiple_rooms",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "room", "value_kind": "reference", "target": "restaurant_room"}
+        ]
+      },
+      {
+        "concept": "order_type_menu",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "order_type", "value_kind": "choice", "choices": ["unselected", "phone_in", "take_away", "delivery"]},
+          {"purpose": "menu", "value_kind": "reference", "target": "restaurant_menu"}
+        ]
+      },
+      {
+        "concept": "point_of_sale_item_variants",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "role_permitted",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "sub_point_of_sale_closing",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "period_start_date", "value_kind": "date_and_time", "rules": ["required", "read_only"]},
+          {"purpose": "period_end_date", "value_kind": "date_and_time", "rules": ["required", "read_only"]},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "posting_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "point_of_sale_opening_entry", "value_kind": "reference", "rules": ["required"], "target": "accounting.point_of_sale_opening_entry", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only", "hidden_from_form", "editable_after_submission"], "choices": ["draft", "submitted", "queued", "failed", "cancelled"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "rules": ["required"], "target": "accounting.point_of_sale_profile", "binding": "shared_model"},
+          {"purpose": "user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "point_of_sale_transactions", "value_kind": "owned_rows", "target": "sub_point_of_sale_invoices"},
+          {"purpose": "payment_reconciliation", "value_kind": "owned_rows", "target": "sub_point_of_sale_closing_payment"},
+          {"purpose": "grand_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "net_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_quantity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "sub_point_of_sale_closing", "equivalent_declarations": 2}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 1, ["read"], false],
+          ["restaurant_cashier", 0, ["select", "read", "write", "create", "submit"], false],
+          ["restaurant_captain", 0, ["select", "read"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "sub_point_of_sale_closing_payment",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "mode_of_payment", "value_kind": "reference", "rules": ["required"], "target": "accounting.mode_of_payment", "binding": "shared_model"},
+          {"purpose": "opening_amount", "value_kind": "money"},
+          {"purpose": "expected_amount", "value_kind": "money", "access_level": 1},
+          {"purpose": "closing_amount", "value_kind": "money"},
+          {"purpose": "difference", "value_kind": "money", "access_level": 1}
+        ]
+      },
+      {
+        "concept": "sub_point_of_sale_invoices",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "point_of_sale_invoice", "value_kind": "reference", "target": "accounting.point_of_sale_invoice", "binding": "shared_model"},
+          {"purpose": "posting_date", "value_kind": "civil_day"},
+          {"purpose": "grand_total", "value_kind": "money"}
+        ]
+      },
+      {
+        "concept": "restaurant_checklist_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item_label", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "applies_to", "value_kind": "choice", "choices": ["opening", "closing", "both"]},
+          {"purpose": "is_mandatory", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "restaurant_checklist_log_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item_label", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "is_mandatory", "value_kind": "boolean"},
+          {"purpose": "is_checked", "value_kind": "boolean"},
+          {"purpose": "remarks", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "restaurant_cost_of_goods",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "product_identifier", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "item_group", "value_kind": "reference", "rules": ["required"], "target": "organization.item_group", "binding": "shared_model"},
+          {"purpose": "quantity", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "buying_price", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "amount", "value_kind": "money", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "restaurant_daily_p_and_l",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "branch", "value_kind": "reference", "rules": ["required", "write_once"], "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required", "write_once"]},
+          {"purpose": "electricity_opening", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "electricity_closing", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "other_expenses", "value_kind": "owned_rows", "target": "restaurant_p_and_l_breakup"},
+          {"purpose": "gross_sales", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "gross_sales_percent", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "cash_discount_round_off", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "cash_discount_round_off_percent", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "tax", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "tax_percent", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "net_sales", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "net_sales_percent", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "cost_of_goods_sold", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "cost_of_goods_sold_percent", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "total_direct_expenses", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_direct_expenses_percent", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "gross_profit", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "gross_profit_percent", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "depreciation", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "depreciation_percent", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "total_other_expenses", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "other_expenses_percent", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "total_indirect_expenses", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_indirect_expenses_percent", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "net_profit", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "net_profit_percent", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "direct_expenses_breakup", "value_kind": "owned_rows", "rules": ["read_only"], "target": "restaurant_p_and_l_breakup"},
+          {"purpose": "employee_costs_breakup", "value_kind": "owned_rows", "rules": ["read_only"], "target": "restaurant_p_and_l_breakup"},
+          {"purpose": "indirect_expenses_breakup", "value_kind": "owned_rows", "rules": ["read_only"], "target": "restaurant_p_and_l_breakup"},
+          {"purpose": "cost_of_goods", "value_kind": "owned_rows", "rules": ["read_only"], "target": "restaurant_cost_of_goods"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "restaurant_daily_p_and_l"},
+          {"purpose": "remarks", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "total_employee_costs", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_employee_costs_percent", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "materials_consumed", "value_kind": "owned_rows", "target": "restaurant_p_and_l_materials"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_fixed_expenses",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "expense", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "amount", "value_kind": "money", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "restaurant_kitchen_order_ticket",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "invoice", "value_kind": "text", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "restaurant_table", "value_kind": "reference", "rules": ["editable_after_submission"], "target": "restaurant_table"},
+          {"purpose": "customer_name", "value_kind": "reference", "rules": ["read_only", "editable_after_submission"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "original_kitchen_order_ticket", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "time", "value_kind": "time_of_day"},
+          {"purpose": "restaurant_kitchen_order_ticket_classification", "value_kind": "choice", "rules": ["read_only", "editable_after_submission"], "choices": ["unselected", "new_order", "order_modified", "cancelled", "partially_cancelled", "duplicate"]},
+          {"purpose": "order_status", "value_kind": "text", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "production", "value_kind": "reference", "target": "restaurant_production_unit"},
+          {"purpose": "start_time_prep", "value_kind": "time_of_day", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "start_time_serv", "value_kind": "text", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "kitchen_order_ticket_items", "value_kind": "owned_rows", "rules": ["editable_after_submission"], "target": "restaurant_kitchen_order_ticket_items"},
+          {"purpose": "numbering_rule", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "rules": ["read_only", "hidden_from_form"], "target": "accounting.point_of_sale_profile", "binding": "shared_model"},
+          {"purpose": "comments", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "branch", "value_kind": "reference", "rules": ["read_only"], "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "verified", "value_kind": "boolean", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "order_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "verified_by", "value_kind": "reference", "rules": ["read_only", "editable_after_submission"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "customer_group", "value_kind": "text"},
+          {"purpose": "table_takeaway", "value_kind": "boolean"},
+          {"purpose": "user", "value_kind": "text"},
+          {"purpose": "aggregator_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "is_aggregator", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "restaurant_kitchen_order_ticket"},
+          {"purpose": "production_time", "value_kind": "text", "rules": ["read_only", "editable_after_submission"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_captain", 0, ["select", "read", "write", "create", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false],
+          ["restaurant_cashier", 0, ["select", "read", "write", "create", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_kitchen_order_ticket_error_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "kitchen_order_ticket", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "time", "value_kind": "time_of_day", "rules": ["read_only"]},
+          {"purpose": "invoice", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invoice_creation_time", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "branch", "value_kind": "reference", "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "production", "value_kind": "text"},
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "target": "accounting.point_of_sale_profile", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_captain", 0, ["select", "read", "write", "create", "export"], false],
+          ["restaurant_cashier", 0, ["select", "read", "write", "create"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_kitchen_order_ticket_items",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text"},
+          {"purpose": "quantity", "value_kind": "text"},
+          {"purpose": "cancelled_quantity", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "comments", "value_kind": "text"},
+          {"purpose": "course", "value_kind": "reference", "rules": ["read_only"], "target": "restaurant_menu_course"},
+          {"purpose": "serve_priority", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "indicate_course", "value_kind": "boolean", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "restaurant_materials",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "cost_per_unit", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "material", "value_kind": "text", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "restaurant_menu",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "price_list", "value_kind": "reference", "rules": ["read_only"], "target": "inventory.price_list", "binding": "shared_model"},
+          {"purpose": "items", "value_kind": "owned_rows", "rules": ["required"], "target": "restaurant_menu_item"},
+          {"purpose": "branch", "value_kind": "reference", "rules": ["required"], "target": "organization.branch", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_captain", 0, ["select", "read", "report", "print", "email"], false],
+          ["restaurant_cashier", 0, ["select", "read", "write", "print"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_menu_course",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "course", "value_kind": "text", "rules": ["required", "unique", "translatable"]},
+          {"purpose": "icon", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_captain", 0, ["select", "read", "report", "export", "share", "print", "email"], false],
+          ["restaurant_cashier", 0, ["select", "read", "report", "export", "share", "print", "email"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_menu_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text"},
+          {"purpose": "rate", "value_kind": "money"},
+          {"purpose": "special_dish", "value_kind": "boolean"},
+          {"purpose": "disabled", "value_kind": "boolean"},
+          {"purpose": "course", "value_kind": "reference", "target": "restaurant_menu_course"},
+          {"purpose": "course_icon", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "restaurant_merged_point_of_sale_invoice_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "product_identifier", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text"},
+          {"purpose": "quantity", "value_kind": "decimal"},
+          {"purpose": "rate", "value_kind": "money"},
+          {"purpose": "amount", "value_kind": "money"}
+        ]
+      },
+      {
+        "concept": "restaurant_notification_recipient",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "receiver_by_role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "restaurant_order",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "take_away", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "restaurant_table", "value_kind": "reference", "rules": ["hidden_from_form"], "target": "restaurant_table"},
+          {"purpose": "item_search", "value_kind": "text"},
+          {"purpose": "customer_name", "value_kind": "reference", "rules": ["required"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "number_of_pax", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "add_item", "value_kind": "reference", "rules": ["hidden_from_form"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "grand_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "last_invoice", "value_kind": "reference", "rules": ["read_only", "hidden_from_form"], "target": "accounting.point_of_sale_invoice", "binding": "shared_model"},
+          {"purpose": "items", "value_kind": "owned_rows", "target": "restaurant_order_item"},
+          {"purpose": "waiter", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.point_of_sale_profile", "binding": "shared_model"},
+          {"purpose": "cashier", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "comments", "value_kind": "text"},
+          {"purpose": "modified_time", "value_kind": "date_and_time"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "share", "print", "email"], false],
+          ["restaurant_captain", 0, ["read", "write", "create", "delete", "print", "email"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_order_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item", "value_kind": "reference", "rules": ["required", "read_only"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "quantity", "value_kind": "whole_number"},
+          {"purpose": "rate", "value_kind": "money", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "comments", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "restaurant_ordering_device",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "device_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "device_identifier", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "ordering_profile", "value_kind": "reference", "rules": ["required"], "target": "restaurant_self_ordering_profile"},
+          {"purpose": "branch", "value_kind": "reference", "rules": ["read_only"], "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "device_type", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "kiosk", "table_tablet", "portable_tablet"]},
+          {"purpose": "layout", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "tablet", "landscape_kiosk", "portrait_kiosk"]},
+          {"purpose": "table_mode", "value_kind": "choice", "choices": ["unselected", "none", "fixed", "selectable"]},
+          {"purpose": "fixed_table", "value_kind": "reference", "target": "restaurant_table"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "credential_hash", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "last_seen", "value_kind": "date_and_time", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_cashier", 0, ["select", "read", "report", "print", "email"], false],
+          ["self_ordering_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_ordering_session",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "ordering_profile", "value_kind": "reference", "rules": ["required"], "target": "restaurant_self_ordering_profile"},
+          {"purpose": "source", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "machine_readable_code_table", "machine_readable_code_pickup", "kiosk", "table_tablet"]},
+          {"purpose": "device", "value_kind": "reference", "target": "restaurant_ordering_device"},
+          {"purpose": "table", "value_kind": "reference", "target": "restaurant_table"},
+          {"purpose": "token_hash", "value_kind": "text", "rules": ["required", "read_only", "hidden_from_form"]},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["unselected", "active", "expired", "closed"]},
+          {"purpose": "opened_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "expires_at", "value_kind": "date_and_time"},
+          {"purpose": "last_activity", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "invoice", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.point_of_sale_invoice", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_cashier", 0, ["select", "read", "report", "print"], false],
+          ["self_ordering_manager", 0, ["select", "read", "report", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_p_and_l_breakup",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "breakup", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "amount", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "percent", "value_kind": "percentage", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "restaurant_p_and_l_materials",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "cost_per_unit", "value_kind": "money", "rules": ["required", "read_only"]},
+          {"purpose": "units_consumed", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "amount", "value_kind": "money", "rules": ["required", "read_only"]},
+          {"purpose": "material", "value_kind": "text", "rules": ["required", "read_only"]}
+        ]
+      },
+      {
+        "concept": "restaurant_payment_terminal",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "terminal_identifier", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "device", "value_kind": "reference", "target": "restaurant_ordering_device"},
+          {"purpose": "provider", "value_kind": "choice", "choices": ["simulated", "ingenico", "pax", "verifone", "other"]},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["idle", "busy", "offline"]},
+          {"purpose": "last_transaction_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "last_seen", "value_kind": "date_and_time", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_cashier", 0, ["select", "read", "report", "print", "email"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_payment_terminal_transaction",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "terminal", "value_kind": "reference", "rules": ["required"], "target": "restaurant_payment_terminal"},
+          {"purpose": "invoice", "value_kind": "reference", "rules": ["required"], "target": "accounting.point_of_sale_invoice", "binding": "shared_model"},
+          {"purpose": "transaction_identifier", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "amount", "value_kind": "money"},
+          {"purpose": "currency", "value_kind": "text"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["pending", "approved", "declined", "cancelled"]},
+          {"purpose": "created_at", "value_kind": "date_and_time", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_cashier", 0, ["select", "read", "report", "print", "email"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_point_of_sale_checklist_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "rules": ["required"], "target": "accounting.point_of_sale_profile", "binding": "shared_model"},
+          {"purpose": "branch", "value_kind": "reference", "rules": ["required"], "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "checklist_type", "value_kind": "choice", "rules": ["required"], "choices": ["opening", "closing"]},
+          {"purpose": "point_of_sale_opening_entry", "value_kind": "reference", "target": "accounting.point_of_sale_opening_entry", "binding": "shared_model"},
+          {"purpose": "shift_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["in_progress", "complete"]},
+          {"purpose": "completed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "completed_at", "value_kind": "date_and_time"},
+          {"purpose": "items", "value_kind": "owned_rows", "target": "restaurant_checklist_log_item"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_captain", 0, ["select", "read", "write", "create", "export"], false],
+          ["restaurant_cashier", 0, ["select", "read", "write", "create"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_printer_settings",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "bill", "value_kind": "boolean"},
+          {"purpose": "printer", "value_kind": "reference", "target": "document_output.network_printer_settings", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "restaurant_production_item_groups",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item_group", "value_kind": "reference", "target": "organization.item_group", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "restaurant_production_unit",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "production", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "target": "accounting.point_of_sale_profile", "binding": "shared_model"},
+          {"purpose": "branch", "value_kind": "reference", "rules": ["read_only"], "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "warehouse", "value_kind": "reference", "rules": ["read_only"], "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "item_groups", "value_kind": "owned_rows", "target": "restaurant_production_item_groups"},
+          {"purpose": "printer_settings", "value_kind": "owned_rows", "target": "restaurant_printer_settings"},
+          {"purpose": "enable_order_type_wise_display_on_mosaic", "value_kind": "boolean"},
+          {"purpose": "order_type", "value_kind": "owned_rows", "target": "kitchen_display_order_type"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_captain", 0, ["select", "read", "report", "export", "share", "print", "email"], false],
+          ["restaurant_cashier", 0, ["select", "read", "report", "export", "share", "print", "email"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_report_settings",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "branch", "value_kind": "reference", "rules": ["required", "unique"], "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "extended_hours", "value_kind": "boolean", "rules": ["required"]},
+          {"purpose": "hours", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "buying_price_list", "value_kind": "reference", "rules": ["required"], "target": "inventory.price_list", "binding": "shared_model"},
+          {"purpose": "direct_fixed_expenses", "value_kind": "owned_rows", "target": "restaurant_fixed_expenses"},
+          {"purpose": "indirect_fixed_expenses", "value_kind": "owned_rows", "target": "restaurant_fixed_expenses"},
+          {"purpose": "percentage_expenses", "value_kind": "owned_rows", "target": "restaurant_variable_expenses"},
+          {"purpose": "depreciation", "value_kind": "money"},
+          {"purpose": "electricity_charges", "value_kind": "money"},
+          {"purpose": "consumables", "value_kind": "owned_rows", "target": "restaurant_materials"},
+          {"purpose": "employee_costs", "value_kind": "owned_rows", "target": "restaurant_fixed_expenses"},
+          {"purpose": "monthly_fixed_expenses", "value_kind": "owned_rows", "target": "restaurant_fixed_expenses"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_restaurant",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "image", "value_kind": "image_reference", "rules": ["hidden_from_form"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "invoice_series_prefix", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "active_menu", "value_kind": "reference", "target": "restaurant_menu"},
+          {"purpose": "branch", "value_kind": "reference", "rules": ["required"], "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "default_tax_template", "value_kind": "reference", "target": "accounting.sales_taxes_and_charges_template", "binding": "shared_model"},
+          {"purpose": "address", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "room_wise_menu", "value_kind": "boolean"},
+          {"purpose": "menu_for_room", "value_kind": "owned_rows", "target": "menu_for_room"},
+          {"purpose": "default_room", "value_kind": "reference", "rules": ["required"], "target": "restaurant_room"},
+          {"purpose": "aggregator_series_prefix", "value_kind": "text"},
+          {"purpose": "order_type_wise_menu", "value_kind": "boolean"},
+          {"purpose": "order_type_menu", "value_kind": "owned_rows", "target": "order_type_menu"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_captain", 0, ["select", "read", "report", "print", "email"], false],
+          ["restaurant_cashier", 0, ["select", "read", "write"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_room",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "room_type", "value_kind": "choice", "choices": ["ac", "non_ac"]},
+          {"purpose": "printer_settings", "value_kind": "owned_rows", "target": "restaurant_printer_settings"},
+          {"purpose": "branch", "value_kind": "reference", "rules": ["required"], "target": "organization.branch", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_captain", 0, ["select", "read", "report", "print", "email"], false],
+          ["restaurant_cashier", 0, ["select", "read", "write", "print"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_self_ordering_profile",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "profile_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "restaurant", "value_kind": "reference", "rules": ["required"], "target": "restaurant_restaurant"},
+          {"purpose": "branch", "value_kind": "reference", "rules": ["required"], "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "rules": ["required"], "target": "accounting.point_of_sale_profile", "binding": "shared_model"},
+          {"purpose": "default_customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "enable_machine_readable_code_table_ordering", "value_kind": "boolean"},
+          {"purpose": "enable_machine_readable_code_pickup_ordering", "value_kind": "boolean"},
+          {"purpose": "enable_kiosk_ordering", "value_kind": "boolean"},
+          {"purpose": "allow_add_to_running_table", "value_kind": "boolean"},
+          {"purpose": "enable_product_detail_page", "value_kind": "boolean"},
+          {"purpose": "show_item_images", "value_kind": "boolean"},
+          {"purpose": "show_item_descriptions", "value_kind": "boolean"},
+          {"purpose": "enable_item_notes", "value_kind": "boolean"},
+          {"purpose": "enable_request_bill", "value_kind": "boolean"},
+          {"purpose": "enable_customer_payment", "value_kind": "boolean"},
+          {"purpose": "enable_payment_link", "value_kind": "boolean"},
+          {"purpose": "enable_pay_at_counter", "value_kind": "boolean"},
+          {"purpose": "session_idle_timeout_minutes", "value_kind": "whole_number"},
+          {"purpose": "machine_readable_code_signing_secret", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "staff_pin", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_cashier", 0, ["select", "read", "report", "print", "email"], false],
+          ["self_ordering_manager", 0, ["select", "read", "write", "create", "report", "export", "share", "print", "email"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_service_request",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "request_type", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "bill", "assistance"]},
+          {"purpose": "table", "value_kind": "reference", "rules": ["required"], "target": "restaurant_table"},
+          {"purpose": "invoice", "value_kind": "reference", "target": "accounting.point_of_sale_invoice", "binding": "shared_model"},
+          {"purpose": "session", "value_kind": "reference", "target": "restaurant_ordering_session"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["unselected", "open", "acknowledged", "resolved"]},
+          {"purpose": "requested_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "resolved_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "resolved_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_cashier", 0, ["select", "read", "write", "report", "print"], false],
+          ["restaurant_captain", 0, ["select", "read", "write", "report", "print"], false],
+          ["self_ordering_manager", 0, ["select", "read", "write", "report", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_table",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "number_of_seats", "value_kind": "whole_number"},
+          {"purpose": "minimum_seating", "value_kind": "whole_number"},
+          {"purpose": "restaurant", "value_kind": "reference", "rules": ["required"], "target": "restaurant_restaurant"},
+          {"purpose": "restaurant_room", "value_kind": "reference", "rules": ["required"], "target": "restaurant_room"},
+          {"purpose": "branch", "value_kind": "reference", "rules": ["required"], "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "is_take_away", "value_kind": "boolean"},
+          {"purpose": "occupied", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "latest_invoice_time", "value_kind": "time_of_day", "rules": ["read_only"]},
+          {"purpose": "table_shape", "value_kind": "choice", "choices": ["unselected", "rectangle", "square", "circle"]},
+          {"purpose": "layout_x", "value_kind": "decimal"},
+          {"purpose": "layout_width", "value_kind": "decimal"},
+          {"purpose": "layout_y", "value_kind": "decimal"},
+          {"purpose": "layout_height", "value_kind": "decimal"},
+          {"purpose": "merged_with", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_captain", 0, ["select", "read", "report", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_cashier", 0, ["select", "read", "write", "print"], false],
+          ["restaurant_administrator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_table_reservation",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "branch", "value_kind": "reference", "rules": ["required"], "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "reserved_table", "value_kind": "reference", "rules": ["required"], "target": "restaurant_table"},
+          {"purpose": "customer", "value_kind": "reference", "rules": ["required"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "customer_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "customer_phone", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "number_of_pax", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "reserved_at", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["requested", "confirmed", "completed", "cancelled", "number_show"]},
+          {"purpose": "point_of_sale_invoice", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.point_of_sale_invoice", "binding": "shared_model"},
+          {"purpose": "reserved_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "point_of_sale_opening_entry", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.point_of_sale_opening_entry", "binding": "shared_model"},
+          {"purpose": "comments", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_captain", 0, ["read", "write", "create", "report", "print", "email"], false],
+          ["restaurant_cashier", 0, ["read", "write", "create", "report", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_user",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "room", "value_kind": "reference", "target": "restaurant_room"}
+        ]
+      },
+      {
+        "concept": "restaurant_variable_expenses",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "expense", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "percentage_type", "value_kind": "choice", "rules": ["required"], "choices": ["gross_sales", "net_sales"]},
+          {"purpose": "percent", "value_kind": "percentage", "rules": ["required"]}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Restaurant orders and station routing",
+    "configuration": 2,
+    "additional_fields": [
+      {"on": "branch", "purpose": "number_taxes", "value_kind": "boolean", "placement": "make_unpaid", "equivalent_declarations": 2},
+      {"on": "branch", "purpose": "field_group_for_enable_reservation", "value_kind": "field_group", "placement": "number_taxes"},
+      {"on": "branch", "purpose": "enable_reservation", "value_kind": "boolean", "placement": "field_group_for_enable_reservation"},
+      {"on": "branch", "purpose": "buffer_time", "value_kind": "whole_number", "placement": "enable_reservation", "rules": ["nonnegative"]},
+      {"on": "branch", "purpose": "grace_period", "value_kind": "whole_number", "placement": "buffer_time", "rules": ["nonnegative"]},
+      {"on": "branch", "purpose": "average_table_time_last_day", "value_kind": "decimal", "placement": "grace_period", "rules": ["read_only"]},
+      {"on": "branch", "purpose": "average_table_time_last_week", "value_kind": "decimal", "placement": "average_table_time_last_day", "rules": ["read_only"]},
+      {"on": "branch", "purpose": "user", "value_kind": "owned_rows", "placement": "branch", "rules": ["required"], "equivalent_declarations": 2},
+      {"on": "branch", "purpose": "aggregators_field_group", "value_kind": "field_group", "placement": "user", "equivalent_declarations": 2},
+      {"on": "branch", "purpose": "aggregator_settings", "value_kind": "owned_rows", "placement": "aggregators_field_group", "equivalent_declarations": 2},
+      {"on": "branch", "purpose": "make_unpaid", "value_kind": "boolean", "placement": "aggregator_settings", "equivalent_declarations": 2},
+      {"on": "point_of_sale_opening_entry", "purpose": "restaurant_last_aggregator_invoice", "value_kind": "text", "placement": "restaurant_last_invoice", "rules": ["read_only", "hidden_from_form", "editable_after_submission"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_opening_entry", "purpose": "restaurant_last_invoice", "value_kind": "text", "placement": "quality_checklist", "rules": ["read_only", "hidden_from_form", "editable_after_submission"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_opening_entry", "purpose": "sub_point_of_sale_close_entry", "value_kind": "text", "placement": "point_of_sale_profile", "rules": ["read_only", "editable_after_submission"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_opening_entry", "purpose": "room", "value_kind": "text", "placement": "user", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_opening_entry", "purpose": "restaurant_info_field_group", "value_kind": "field_group", "placement": "user", "equivalent_declarations": 2},
+      {"on": "point_of_sale_opening_entry", "purpose": "rooms", "value_kind": "owned_rows", "placement": "user", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_opening_entry", "purpose": "restaurant", "value_kind": "reference", "placement": "restaurant_info_field_group", "rules": ["required"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_opening_entry", "purpose": "field_column_for_branch", "value_kind": "field_column", "placement": "restaurant", "equivalent_declarations": 2},
+      {"on": "point_of_sale_opening_entry", "purpose": "branch", "value_kind": "reference", "placement": "field_column_for_branch", "rules": ["required"], "equivalent_declarations": 2},
+      {"on": "restaurant_menu_course", "purpose": "indicate_in_kitchen_display", "value_kind": "boolean", "placement": "serving_priority", "equivalent_declarations": 2},
+      {"on": "restaurant_menu_course", "purpose": "serving_priority", "value_kind": "whole_number", "placement": "course", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "enable_kitchen_order_ticket_reprint", "value_kind": "boolean", "placement": "field_column_for_enable_kitchen_order_ticket_reprint", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "restaurant_info_field_group", "value_kind": "field_group", "placement": "company_address", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "restaurant", "value_kind": "reference", "placement": "restaurant_info_field_group", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "field_column_for_branch", "value_kind": "field_column", "placement": "restaurant", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "branch", "value_kind": "reference", "placement": "field_column_for_branch", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "printer_info_field_group", "value_kind": "field_group", "placement": "branch", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "kitchen_order_ticket_settings_field_group", "value_kind": "field_group", "placement": "branch", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "printer_settings", "value_kind": "owned_rows", "placement": "printer_info_field_group", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "qz_print", "value_kind": "boolean", "placement": "printer_settings", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "qz_host", "value_kind": "text", "placement": "qz_print", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "field_group_for_transfer_role_permissions", "value_kind": "field_group", "placement": "qz_host", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "transfer_role_permissions", "value_kind": "owned_selection_rows", "placement": "field_group_for_transfer_role_permissions", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "role_allowed_for_billing", "value_kind": "owned_selection_rows", "placement": "transfer_role_permissions", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "table_attention_time", "value_kind": "whole_number", "placement": "role_allowed_for_billing", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "paid_limit", "value_kind": "whole_number", "placement": "table_attention_time", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "field_column_for_role_restricted_for_table_order", "value_kind": "field_column", "placement": "paid_limit", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "role_restricted_for_table_order", "value_kind": "owned_selection_rows", "placement": "field_column_for_role_restricted_for_table_order", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "view_all_status", "value_kind": "boolean", "placement": "role_restricted_for_table_order", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "remove_items", "value_kind": "boolean", "placement": "view_all_status", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "show_image", "value_kind": "boolean", "placement": "remove_items", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "daily_point_of_sale_close", "value_kind": "boolean", "placement": "show_image", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "enable_discount", "value_kind": "boolean", "placement": "daily_point_of_sale_close", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "multiple_cashier_configuration_field_group", "value_kind": "field_group", "placement": "enable_discount", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "edit_order_type", "value_kind": "boolean", "placement": "enable_discount", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "enable_multiple_cashier", "value_kind": "boolean", "placement": "multiple_cashier_configuration_field_group", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "kitchen_order_ticket_numbering_rule", "value_kind": "text", "placement": "kitchen_order_ticket_settings_field_group", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "kitchen_order_ticket_alert", "value_kind": "boolean", "placement": "kitchen_order_ticket_numbering_rule", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "kitchen_order_ticket_alert_sound", "value_kind": "file_reference", "placement": "kitchen_order_ticket_alert", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "cl_field_column", "value_kind": "field_column", "placement": "kitchen_order_ticket_alert_sound", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "kitchen_order_ticket_warning_time", "value_kind": "whole_number", "placement": "cl_field_column", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "notify_kitchen_order_ticket_delay", "value_kind": "boolean", "placement": "kitchen_order_ticket_warning_time", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "reset_order_number_daily", "value_kind": "boolean", "placement": "kitchen_order_ticket_warning_time", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "recipients", "value_kind": "owned_rows", "placement": "notify_kitchen_order_ticket_delay", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "field_column_for_enable_kitchen_order_ticket_reprint", "value_kind": "field_column", "placement": "recipients", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "table_order_printer", "value_kind": "reference", "placement": "parcel_order_printer", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "restaurant_prefix", "value_kind": "boolean", "placement": "allow_discount_change", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "reprint_kitchen_order_ticket_format", "value_kind": "reference", "placement": "table_order_printer", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "parcel_order_printer", "value_kind": "reference", "placement": "enable_kitchen_order_ticket_reprint", "equivalent_declarations": 2},
+      {"on": "point_of_sale_profile", "purpose": "checklist_items", "value_kind": "owned_rows", "placement": "daily_point_of_sale_close"},
+      {"on": "point_of_sale_profile_user", "purpose": "main_cashier", "value_kind": "boolean", "placement": "default", "equivalent_declarations": 2},
+      {"on": "restaurant_printer_settings", "purpose": "kitchen_order_ticket_print", "value_kind": "boolean", "placement": "bill", "equivalent_declarations": 3},
+      {"on": "restaurant_printer_settings", "purpose": "kitchen_order_ticket_print_format", "value_kind": "reference", "placement": "printer", "equivalent_declarations": 3},
+      {"on": "restaurant_printer_settings", "purpose": "block_takeaway_kitchen_order_ticket", "value_kind": "boolean", "placement": "kitchen_order_ticket_print_format", "equivalent_declarations": 3},
+      {"on": "restaurant_printer_settings", "purpose": "waiter_print", "value_kind": "boolean", "placement": "kitchen_order_ticket_print", "equivalent_declarations": 2},
+      {"on": "restaurant_printer_settings", "purpose": "waiter_print_format", "value_kind": "reference", "placement": "waiter_print", "equivalent_declarations": 2},
+      {"on": "point_of_sale_closing_entry_detail", "purpose": "closing_amount", "value_kind": "money", "placement": "expected_amount", "equivalent_declarations": 2},
+      {"on": "price_list", "purpose": "restaurant_menu", "value_kind": "reference", "placement": "currency", "equivalent_declarations": 2},
+      {"on": "customer", "purpose": "mobile_number", "value_kind": "text", "placement": "customer_type", "equivalent_declarations": 2},
+      {"on": "customer_invoice_item", "purpose": "course", "value_kind": "text", "placement": "item_name", "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "mobile_number", "value_kind": "text", "placement": "customer_name", "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "order_info_field_group", "value_kind": "field_group", "placement": "amended_from", "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "order_type", "value_kind": "choice", "placement": "order_info_field_group", "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "waiter", "value_kind": "text", "placement": "order_type", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "aggregator_identifier", "value_kind": "text", "placement": "waiter", "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "field_column_for_number_of_pax", "value_kind": "field_column", "placement": "aggregator_identifier", "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "number_of_pax", "value_kind": "whole_number", "placement": "field_column_for_number_of_pax", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "cashier", "value_kind": "text", "placement": "number_of_pax", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "restaurant_info_field_group", "value_kind": "field_group", "placement": "cashier", "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "restaurant", "value_kind": "reference", "placement": "restaurant_info_field_group", "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "branch", "value_kind": "reference", "placement": "restaurant", "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "restaurant_table", "value_kind": "reference", "placement": "branch", "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "restaurant_room", "value_kind": "reference", "placement": "restaurant_table", "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "field_column_for_arrived_time", "value_kind": "field_column", "placement": "restaurant_room", "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "arrived_time", "value_kind": "text", "placement": "field_column_for_arrived_time", "equivalent_declarations": 2},
+      {"on": "customer_invoice", "purpose": "total_spend_time", "value_kind": "text", "placement": "arrived_time", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "mobile_number", "value_kind": "text", "placement": "customer_name", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "order_info_field_group", "value_kind": "field_group", "placement": "return_against", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "order_type", "value_kind": "choice", "placement": "order_info_field_group", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "waiter", "value_kind": "text", "placement": "order_type", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "invoice_printed", "value_kind": "boolean", "placement": "waiter", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "field_column_for_number_of_pax", "value_kind": "field_column", "placement": "invoice_printed", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "number_of_pax", "value_kind": "text", "placement": "field_column_for_number_of_pax", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "cashier", "value_kind": "text", "placement": "number_of_pax", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "invoice_created", "value_kind": "boolean", "placement": "cashier", "rules": ["read_only", "hidden_from_form"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "aggregator_identifier", "value_kind": "text", "placement": "invoice_created", "rules": ["translatable"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "restaurant_info_field_group", "value_kind": "field_group", "placement": "aggregator_identifier", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "restaurant", "value_kind": "reference", "placement": "restaurant_info_field_group", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "branch", "value_kind": "reference", "placement": "restaurant", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "restaurant_table", "value_kind": "reference", "placement": "branch", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "merged_tables", "value_kind": "text", "placement": "restaurant_table", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "split_from", "value_kind": "reference", "placement": "merged_tables", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "split_group", "value_kind": "text", "placement": "split_from", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "restaurant_room", "value_kind": "reference", "placement": "restaurant_table", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "field_column_for_arrived_time", "value_kind": "field_column", "placement": "restaurant_room", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "arrived_time", "value_kind": "text", "placement": "field_column_for_arrived_time", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "total_spend_time", "value_kind": "text", "placement": "arrived_time", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "field_group_for_cancel_reason", "value_kind": "field_group", "placement": "total_spend_time", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "cancel_reason", "value_kind": "text", "placement": "field_group_for_cancel_reason", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "restaurant_order_number", "value_kind": "text", "placement": "current_status", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "print", "value_kind": "action_control", "placement": "against_income_account", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "comments", "value_kind": "text", "placement": "print", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "field_group_for_merged_point_of_sale_invoice", "value_kind": "field_group", "placement": "total_spend_time", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "merged_point_of_sale_invoice", "value_kind": "reference", "placement": "field_group_for_merged_point_of_sale_invoice", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "merged_point_of_sale_invoice_details", "value_kind": "owned_rows", "placement": "merged_point_of_sale_invoice", "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice", "purpose": "merged_total", "value_kind": "money", "placement": "merged_point_of_sale_invoice_details", "rules": ["read_only"], "equivalent_declarations": 2},
+      {"on": "point_of_sale_invoice_item", "purpose": "comment", "value_kind": "text", "placement": "quantity", "equivalent_declarations": 3},
+      {"on": "point_of_sale_invoice_item", "purpose": "course", "value_kind": "text", "placement": "comment", "equivalent_declarations": 3},
+      {"on": "employee", "purpose": "payment_type", "value_kind": "choice", "placement": "salary_currency", "equivalent_declarations": 2},
+      {"on": "employee", "purpose": "payment_amount", "value_kind": "money", "placement": "payment_type", "equivalent_declarations": 2},
+      {"on": "restaurant_production_unit", "purpose": "disable", "value_kind": "boolean", "placement": "item_groups"},
+      {"on": "item", "purpose": "point_of_sale_add_on_items", "value_kind": "owned_rows", "placement": "point_of_sale_variants_page_group"},
+      {"on": "item", "purpose": "point_of_sale_item_variants", "value_kind": "owned_rows", "placement": "point_of_sale_add_on_items"},
+      {"on": "item", "purpose": "point_of_sale_variants_page_group", "value_kind": "page_group", "placement": "serial_number_series"}
+    ]
+  },
+  {
+    "capability": "Restaurant orders and station routing",
+    "configuration": 2,
+    "rule_addresses": [
+      ["point_of_sale_closing_entry_detail", "closing_amount", "label", "text"],
+      ["item", "barcodes", "hidden", "boolean"],
+      ["item", "product_identifier", "hidden", "boolean"],
+      ["item", "product_identifier", "required", "boolean"],
+      ["item", "item_name", "translatable", "boolean"],
+      ["item", null, "field_order", "text"],
+      ["item", "numbering_rule", "hidden", "boolean"],
+      ["item", "numbering_rule", "options", "text"],
+      ["item", "numbering_rule", "required", "boolean"],
+      ["point_of_sale_invoice_item", "barcode", "hidden", "boolean"]
+    ]
+  },
+  {
+    "capability": "Restaurant till settlement import",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "customer_wise_price_list",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "price_list", "value_kind": "reference", "target": "inventory.price_list", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "restaurant_checkout_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "params", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "time_elapsed", "value_kind": "elapsed_time", "rules": ["read_only"]},
+          {"purpose": "restaurant_checkout_log_payload", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "traceback", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "resource_address", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "method", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "endpoint", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "response", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "error", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "log_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["success", "error"]},
+          {"purpose": "invoice_status", "value_kind": "choice", "choices": ["not_processed", "created", "cancelled", "duplicate", "error"]},
+          {"purpose": "invoice_error", "value_kind": "expression_or_structured_text"},
+          {"purpose": "invoice_identifier", "value_kind": "text"},
+          {"purpose": "branch", "value_kind": "reference", "target": "accounting.cost_center", "binding": "shared_model"},
+          {"purpose": "order_identifier", "value_kind": "text"},
+          {"purpose": "point_of_sale_created_on", "value_kind": "date_and_time"},
+          {"purpose": "business_date", "value_kind": "civil_day"},
+          {"purpose": "resource_exchange_identifier", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_checkout_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "secret", "value_kind": "expression_or_structured_text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "enable", "value_kind": "boolean"},
+          {"purpose": "creation_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "default_swiggy_customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "default_zomato_customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "place_of_supply", "value_kind": "text"},
+          {"purpose": "restaurant_checkout_vs_enterprise_mode_of_payment_mapping", "value_kind": "owned_rows", "target": "restaurant_checkout_vs_enterprise_mode_of_payment_mapping"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_checkout_vs_enterprise_mode_of_payment_mapping",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "restaurant_checkout_mode_of_payment", "value_kind": "text"},
+          {"purpose": "enterprise_mode_of_payment", "value_kind": "reference", "target": "accounting.mode_of_payment", "binding": "shared_model"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Restaurant till settlement import",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "cost_center", "purpose": "address", "value_kind": "reference", "placement": "warehouse"},
+      {"on": "cost_center", "purpose": "consider_in_previous_business_date_till", "value_kind": "time_of_day", "placement": "territory"},
+      {"on": "cost_center", "purpose": "customer_wise_price_list", "value_kind": "owned_rows", "placement": "field_group_for_customer_wise_price_list"},
+      {"on": "cost_center", "purpose": "default_business_to_consumer_customer", "value_kind": "reference", "placement": "company"},
+      {"on": "cost_center", "purpose": "default_mode_of_payment_field_group", "value_kind": "field_group", "placement": "address"},
+      {"on": "cost_center", "purpose": "restaurant_checkout_restaurant_identifier", "value_kind": "text", "placement": "old_parent", "rules": ["unique"]},
+      {"on": "cost_center", "purpose": "restaurant_checkout_vs_enterprise_mode_of_payment_mapping", "value_kind": "owned_rows", "placement": "default_mode_of_payment_field_group"},
+      {"on": "cost_center", "purpose": "field_group_for_customer_wise_price_list", "value_kind": "field_group", "placement": "restaurant_checkout_vs_enterprise_mode_of_payment_mapping"},
+      {"on": "cost_center", "purpose": "territory", "value_kind": "reference", "placement": "default_business_to_consumer_customer"},
+      {"on": "cost_center", "purpose": "warehouse", "value_kind": "reference", "placement": "restaurant_checkout_restaurant_identifier"},
+      {"on": "mode_of_payment", "purpose": "consider_in_previous_business_date_till", "value_kind": "time_of_day", "placement": "type"},
+      {"on": "customer_invoice", "purpose": "billing_address_goods_and_services_tax_registration_number", "value_kind": "text", "placement": "address_display", "rules": ["read_only"]},
+      {"on": "customer_invoice", "purpose": "company_goods_and_services_tax_registration_number", "value_kind": "text", "placement": "company_address", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "business_date", "value_kind": "civil_day", "placement": "restaurant_checkout_order_date_time"},
+      {"on": "customer_invoice", "purpose": "field_column_for_restaurant_checkout_mode_of_payment", "value_kind": "field_column", "placement": "restaurant_checkout_unique_order_identifier"},
+      {"on": "customer_invoice", "purpose": "field_column_for_end_customer_address", "value_kind": "field_column", "placement": "end_customer_phone"},
+      {"on": "customer_invoice", "purpose": "end_customer_address", "value_kind": "text", "placement": "field_column_for_end_customer_address"},
+      {"on": "customer_invoice", "purpose": "end_customer_name", "value_kind": "text", "placement": "field_group_for_end_customer_name"},
+      {"on": "customer_invoice", "purpose": "end_customer_phone", "value_kind": "text", "placement": "end_customer_name"},
+      {"on": "customer_invoice", "purpose": "restaurant_checkout_page_group", "value_kind": "page_group", "placement": "total_billing_amount"},
+      {"on": "customer_invoice", "purpose": "restaurant_checkout_log_identifier", "value_kind": "reference", "placement": "restaurant_checkout_order_identifier"},
+      {"on": "customer_invoice", "purpose": "restaurant_checkout_order_date_time", "value_kind": "date_and_time", "placement": "restaurant_checkout_mode_of_payment"},
+      {"on": "customer_invoice", "purpose": "restaurant_checkout_order_identifier", "value_kind": "text", "placement": "restaurant_checkout_page_group"},
+      {"on": "customer_invoice", "purpose": "restaurant_checkout_mode_of_payment", "value_kind": "text", "placement": "field_column_for_restaurant_checkout_mode_of_payment"},
+      {"on": "customer_invoice", "purpose": "restaurant_checkout_unique_order_identifier", "value_kind": "text", "placement": "restaurant_checkout_log_identifier", "rules": ["unique"]},
+      {"on": "customer_invoice", "purpose": "field_group_for_end_customer_name", "value_kind": "field_group", "placement": "territory"},
+      {"on": "customer_invoice", "purpose": "distance", "value_kind": "whole_number", "placement": "vehicle_number"},
+      {"on": "customer_invoice", "purpose": "driver", "value_kind": "reference", "placement": "goods_and_services_tax_transporter_identifier"},
+      {"on": "customer_invoice", "purpose": "driver_name", "value_kind": "text", "placement": "mode_of_transport"},
+      {"on": "customer_invoice", "purpose": "e_waybill_status", "value_kind": "choice", "placement": "ewaybill", "rules": ["editable_after_submission", "translatable"]},
+      {"on": "customer_invoice", "purpose": "electronic_commerce_goods_and_services_tax_registration_number", "value_kind": "text", "placement": "field_group_for_electronic_commerce_goods_and_services_tax_registration_number"},
+      {"on": "customer_invoice", "purpose": "electronic_commerce_supply_type", "value_kind": "text", "placement": "electronic_commerce_goods_and_services_tax_registration_number", "rules": ["read_only", "editable_after_submission", "computed_value"]},
+      {"on": "customer_invoice", "purpose": "einvoice_status", "value_kind": "choice", "placement": "current_status", "rules": ["read_only", "hidden_from_form", "translatable"]},
+      {"on": "customer_invoice", "purpose": "ewaybill", "value_kind": "text", "placement": "customer_name", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "goods_and_services_tax_breakup_table", "value_kind": "formatted_text", "placement": "section_goods_and_services_tax_breakup_field_group", "rules": ["read_only", "editable_after_submission", "computed_value"]},
+      {"on": "customer_invoice", "purpose": "goods_and_services_tax_category", "value_kind": "text", "placement": "billing_address_goods_and_services_tax_registration_number", "rules": ["read_only"]},
+      {"on": "customer_invoice", "purpose": "field_column_for_port_code", "value_kind": "field_column", "placement": "electronic_commerce_goods_and_services_tax_registration_number"},
+      {"on": "customer_invoice", "purpose": "field_group_for_electronic_commerce_goods_and_services_tax_registration_number", "value_kind": "field_group", "placement": "goods_and_services_tax_vehicle_type"},
+      {"on": "customer_invoice", "purpose": "goods_and_services_tax_transporter_identifier", "value_kind": "text", "placement": "transporter"},
+      {"on": "customer_invoice", "purpose": "goods_and_services_tax_vehicle_type", "value_kind": "choice", "placement": "lr_date"},
+      {"on": "customer_invoice", "purpose": "invoice_copy", "value_kind": "choice", "placement": "preceding_field_column_in_customer_invoice", "rules": ["editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "invoice_registration_number", "value_kind": "text", "placement": "customer", "rules": ["read_only", "hidden_from_form"]},
+      {"on": "customer_invoice", "purpose": "is_export_with_goods_and_services_tax", "value_kind": "boolean", "placement": "is_reverse_charge"},
+      {"on": "customer_invoice", "purpose": "is_reverse_charge", "value_kind": "boolean", "placement": "is_debit_note", "rules": ["hidden_from_form"]},
+      {"on": "customer_invoice", "purpose": "lr_date", "value_kind": "civil_day", "placement": "driver_name"},
+      {"on": "customer_invoice", "purpose": "lr_number", "value_kind": "text", "placement": "driver"},
+      {"on": "customer_invoice", "purpose": "mode_of_transport", "value_kind": "choice", "placement": "transporter_name"},
+      {"on": "customer_invoice", "purpose": "place_of_supply", "value_kind": "suggested_text", "placement": "goods_and_services_tax_category"},
+      {"on": "customer_invoice", "purpose": "port_address", "value_kind": "reference", "placement": "shipping_address"},
+      {"on": "customer_invoice", "purpose": "port_code", "value_kind": "suggested_text", "placement": "field_column_for_port_code"},
+      {"on": "customer_invoice", "purpose": "section_goods_and_services_tax_breakup_field_group", "value_kind": "field_group", "placement": "other_charges_calculation"},
+      {"on": "customer_invoice", "purpose": "shipping_bill_date", "value_kind": "civil_day", "placement": "shipping_bill_number"},
+      {"on": "customer_invoice", "purpose": "shipping_bill_number", "value_kind": "text", "placement": "port_code"},
+      {"on": "customer_invoice", "purpose": "transporter", "value_kind": "reference", "placement": "transporter_info_field_group"},
+      {"on": "customer_invoice", "purpose": "field_column_for_transporter_name", "value_kind": "field_column", "placement": "distance"},
+      {"on": "customer_invoice", "purpose": "transporter_info_field_group", "value_kind": "field_group", "placement": "language"},
+      {"on": "customer_invoice", "purpose": "transporter_name", "value_kind": "text", "placement": "field_column_for_transporter_name", "rules": ["read_only"]},
+      {"on": "customer_invoice", "purpose": "vehicle_number", "value_kind": "text", "placement": "lr_number"},
+      {"on": "customer_invoice_item", "purpose": "cb_goods_and_services_tax_details_field_column", "value_kind": "field_column", "placement": "cess_non_advol_rate"},
+      {"on": "customer_invoice_item", "purpose": "cess_amount", "value_kind": "money", "placement": "state_goods_and_services_tax_amount", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "cess_non_advol_amount", "value_kind": "money", "placement": "cess_amount", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "cess_non_advol_rate", "value_kind": "decimal", "placement": "cess_rate", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "cess_rate", "value_kind": "decimal", "placement": "state_goods_and_services_tax_rate", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "central_goods_and_services_tax_amount", "value_kind": "money", "placement": "integrated_goods_and_services_tax_amount", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "central_goods_and_services_tax_rate", "value_kind": "decimal", "placement": "integrated_goods_and_services_tax_rate", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "field_group_for_integrated_goods_and_services_tax_rate", "value_kind": "field_group", "placement": "taxable_value"},
+      {"on": "customer_invoice_item", "purpose": "goods_and_services_tax_harmonized_system_of_nomenclature_code", "value_kind": "text", "placement": "description", "rules": ["editable_after_submission"]},
+      {"on": "customer_invoice_item", "purpose": "goods_and_services_tax_treatment", "value_kind": "suggested_text", "placement": "item_tax_template", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "integrated_goods_and_services_tax_amount", "value_kind": "money", "placement": "cb_goods_and_services_tax_details_field_column", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "integrated_goods_and_services_tax_rate", "value_kind": "decimal", "placement": "field_group_for_integrated_goods_and_services_tax_rate", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "state_goods_and_services_tax_amount", "value_kind": "money", "placement": "central_goods_and_services_tax_amount", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "state_goods_and_services_tax_rate", "value_kind": "decimal", "placement": "central_goods_and_services_tax_rate", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "taxable_value", "value_kind": "money", "placement": "base_net_amount", "rules": ["read_only"]},
+      {"on": "sales_taxes_and_charges", "purpose": "goods_and_services_tax_tax_type", "value_kind": "text", "placement": "rate", "rules": ["read_only"]}
+    ]
+  },
+  {
+    "capability": "Restaurant till settlement import",
+    "configuration": 1,
+    "rule_addresses": [
+      ["cost_center", "company", "in_list_view", "boolean"],
+      ["cost_center", "cost_center_name", "in_list_view", "boolean"],
+      ["cost_center", "cost_center_number", "in_list_view", "boolean"],
+      ["cost_center", "is_group", "in_list_view", "boolean"],
+      ["cost_center", null, "field_order", "text"],
+      ["cost_center", "parent_cost_center", "in_list_view", "boolean"],
+      ["mode_of_payment", null, "field_order", "text"],
+      ["packed_item", "rate", "read_only", "boolean"],
+      ["customer_invoice", "additional_discount_account", "hidden", "boolean"],
+      ["customer_invoice", "additional_discount_account", "mandatory_depends_on", "expression_or_structured_text"],
+      ["customer_invoice", "base_rounded_total", "hidden", "boolean"],
+      ["customer_invoice", "base_rounded_total", "print_hide", "boolean"],
+      ["customer_invoice", "disable_rounded_total", "default", "text"],
+      ["customer_invoice", "due_date", "print_hide", "boolean"],
+      ["customer_invoice", "in_words", "hidden", "boolean"],
+      ["customer_invoice", "in_words", "print_hide", "boolean"],
+      ["customer_invoice", null, "default_print_format", "text"],
+      ["customer_invoice", null, "field_order", "text"],
+      ["customer_invoice", null, "track_changes", "boolean"],
+      ["customer_invoice", "numbering_rule", "options", "text"],
+      ["customer_invoice", "payment_schedule", "print_hide", "boolean"],
+      ["customer_invoice", "rounded_total", "hidden", "boolean"],
+      ["customer_invoice", "rounded_total", "print_hide", "boolean"],
+      ["customer_invoice", "sales_team_section_break", "hidden", "boolean"],
+      ["customer_invoice", "scan_barcode", "hidden", "boolean"],
+      ["customer_invoice", "section_break2", "hidden", "boolean"],
+      ["customer_invoice", "subscription_section", "hidden", "boolean"],
+      ["customer_invoice", "tax_identifier", "hidden", "boolean"],
+      ["customer_invoice", "tax_identifier", "print_hide", "boolean"],
+      ["customer_invoice_item", "barcode", "hidden", "boolean"],
+      ["customer_invoice_item", "discount_account", "hidden", "boolean"],
+      ["customer_invoice_item", "discount_account", "mandatory_depends_on", "expression_or_structured_text"],
+      ["customer_invoice_item", "target_warehouse", "hidden", "boolean"]
+    ]
+  },
+  {
+    "capability": "Retail checkout",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "delivery_personnel",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "delivery_personnel", "value_kind": "text", "rules": ["required", "unique"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "retail_checkout_customer_invoice_reference",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "customer_invoice", "value_kind": "reference", "rules": ["required"], "target": "accounting.sales_invoice", "binding": "shared_model"},
+          {"purpose": "posting_date", "value_kind": "civil_day"},
+          {"purpose": "customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "amount", "value_kind": "money"}
+        ]
+      },
+      {
+        "concept": "business_messaging_chat",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "label", "value_kind": "text", "rules": ["available_in_short_form"]},
+          {"purpose": "business_messaging_chat_classification", "value_kind": "choice", "rules": ["write_once"], "choices": ["outgoing", "incoming"]},
+          {"purpose": "current_status", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "to", "value_kind": "text", "rules": ["write_once", "available_in_short_form"]},
+          {"purpose": "from", "value_kind": "text", "rules": ["write_once"]},
+          {"purpose": "profile_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "use_template", "value_kind": "boolean"},
+          {"purpose": "template", "value_kind": "reference", "target": "business_messaging_message_templates"},
+          {"purpose": "template_parameters", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "template_header_parameters", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "message", "value_kind": "formatted_text", "rules": ["write_once", "available_in_short_form"]},
+          {"purpose": "message_type", "value_kind": "choice", "rules": ["read_only", "available_in_short_form"], "choices": ["manual", "template"]},
+          {"purpose": "message_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "conversation_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "content_type", "value_kind": "choice", "rules": ["required", "available_in_short_form"], "choices": ["text", "document", "image", "video", "audio", "flow", "reaction", "location", "contact", "button"]},
+          {"purpose": "attach", "value_kind": "file_reference", "rules": ["available_in_short_form"]},
+          {"purpose": "is_reply", "value_kind": "boolean"},
+          {"purpose": "reply_to_message_identifier", "value_kind": "text"},
+          {"purpose": "reference_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "bulk_message_reference", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "reference_name", "value_kind": "variable_record_reference", "record_class_field": "reference_record_class"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["read", "write", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_messaging_conversations",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "label", "value_kind": "text", "rules": ["available_in_short_form"]},
+          {"purpose": "business_messaging_conversations_classification", "value_kind": "choice", "rules": ["write_once"], "choices": ["outgoing", "incoming"]},
+          {"purpose": "current_status", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "to", "value_kind": "text", "rules": ["write_once", "available_in_short_form"]},
+          {"purpose": "from", "value_kind": "text", "rules": ["write_once"]},
+          {"purpose": "profile_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "use_template", "value_kind": "boolean"},
+          {"purpose": "template", "value_kind": "reference", "target": "business_messaging_message_templates"},
+          {"purpose": "template_parameters", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "template_header_parameters", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "message", "value_kind": "formatted_text", "rules": ["write_once", "available_in_short_form"]},
+          {"purpose": "message_type", "value_kind": "choice", "rules": ["read_only", "available_in_short_form"], "choices": ["manual", "template"]},
+          {"purpose": "message_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "conversation_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "content_type", "value_kind": "choice", "rules": ["required", "available_in_short_form"], "choices": ["text", "document", "image", "video", "audio", "flow", "reaction", "location", "contact", "button"]},
+          {"purpose": "attach", "value_kind": "file_reference", "rules": ["available_in_short_form"]},
+          {"purpose": "is_reply", "value_kind": "boolean"},
+          {"purpose": "reply_to_message_identifier", "value_kind": "text"},
+          {"purpose": "reference_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "bulk_message_reference", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "reference_name", "value_kind": "variable_record_reference", "record_class_field": "reference_record_class"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_messaging_message_notification",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "notification_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "notification_type", "value_kind": "choice", "rules": ["required"], "choices": ["record_class_event", "scheduler_event"]},
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "field_name", "value_kind": "text"},
+          {"purpose": "event_frequency", "value_kind": "choice", "choices": ["all", "hourly", "daily", "weekly", "monthly", "yearly", "hourly_long", "daily_long", "weekly_long", "monthly_long"]},
+          {"purpose": "record_class_event", "value_kind": "choice", "choices": ["before_insert", "before_validate", "before_save", "after_insert", "after_save", "before_submit", "after_submit", "before_cancel", "after_cancel", "before_delete", "after_delete", "before_save_submitted_document", "after_save_submitted_document", "days_after", "days_before"]},
+          {"purpose": "days_in_advance", "value_kind": "whole_number"},
+          {"purpose": "date_changed", "value_kind": "choice"},
+          {"purpose": "disabled", "value_kind": "boolean"},
+          {"purpose": "template", "value_kind": "reference", "rules": ["required"], "target": "business_messaging_message_templates"},
+          {"purpose": "code", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "attach_document_print", "value_kind": "boolean"},
+          {"purpose": "attachment", "value_kind": "boolean"},
+          {"purpose": "attach", "value_kind": "file_reference"},
+          {"purpose": "attach_from_field", "value_kind": "text"},
+          {"purpose": "file_name", "value_kind": "text"},
+          {"purpose": "condition", "value_kind": "expression_or_structured_text"},
+          {"purpose": "set_property_after_alert", "value_kind": "choice"},
+          {"purpose": "property_value", "value_kind": "text"},
+          {"purpose": "header_type", "value_kind": "text", "rules": ["hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_messaging_message_templates",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "template_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "actual_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "template", "value_kind": "expression_or_structured_text", "rules": ["required"]},
+          {"purpose": "sample_values", "value_kind": "text"},
+          {"purpose": "for_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "field_names", "value_kind": "text"},
+          {"purpose": "category", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "transactional", "marketing", "one_time_password", "utility", "authentication"]},
+          {"purpose": "language", "value_kind": "reference", "rules": ["required"], "target": "information_management.language", "binding": "shared_model"},
+          {"purpose": "language_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "header_type", "value_kind": "choice", "choices": ["unselected", "text", "document", "image"]},
+          {"purpose": "header", "value_kind": "text"},
+          {"purpose": "sample", "value_kind": "file_reference"},
+          {"purpose": "footer", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_messaging_setup",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "token", "value_kind": "protected_text", "rules": ["required"]},
+          {"purpose": "resource_address", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "version", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "phone_identifier", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "business_identifier", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "application_identifier", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "inbound_event_notification_verify_token", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  }
+]

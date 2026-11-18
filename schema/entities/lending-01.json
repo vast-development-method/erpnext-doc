@@ -1,0 +1,1700 @@
+[
+  {
+    "entity": "lending.bulk_repayment_log",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.bulk_repayment_log", "form_read_only": true},
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"},
+      {"field": "details", "type": "long_text"},
+      {"field": "status", "type": "enumeration", "values": ["", "Success", "Failure"]},
+      {"field": "traceback", "type": "long_text"},
+      {"field": "timestamp", "type": "date_and_time"},
+      {"field": "trace_identifier", "type": "short_text"},
+      {"field": "failed_repayment", "type": "text"},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement"}
+    ]
+  },
+  {
+    "entity": "lending.co_lender_schedule",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "payment_date", "type": "calendar_date"},
+      {"field": "number_of_days", "type": "integer"},
+      {"field": "principal_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "interest_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_payment", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "balance_loan_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}}
+    ]
+  },
+  {
+    "entity": "lending.collection_activity",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "activity_type", "type": "enumeration", "required": true, "values": ["Call", "SMS", "Email", "mobile messaging", "Field Visit", "Legal Notice", "System Dunning"]},
+      {"field": "channel", "type": "enumeration", "values": ["Email", "SMS", "mobile messaging", "Phone", "In Person"]},
+      {"field": "activity_date", "type": "date_and_time", "required": true},
+      {"field": "agent_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "outcome", "type": "enumeration", "values": ["", "Answered", "No Response", "Promise to Pay", "Dispute Raised", "Paid", "Refused", "Number Unreachable"]},
+      {"field": "template_used_identifier", "type": "entity_reference", "target": "mail.email_template"},
+      {"field": "notes", "type": "text"}
+    ]
+  },
+  {
+    "entity": "lending.collection_case",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_officer", "level": 0, "allows": ["read", "write", "create", "report", "export", "print", "email", "share"]},
+      {"role": "loan_processor", "level": 0, "allows": ["read", "write", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true},
+      {"field": "applicant_type", "type": "enumeration", "form_read_only": true, "values": ["Customer", "Employee"]},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type", "form_read_only": true},
+      {"field": "applicant_email", "type": "short_text", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "branch_identifier", "type": "entity_reference", "target": "organization.branch"},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product"},
+      {"field": "bucket", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "classification_code_identifier", "type": "entity_reference", "target": "lending.loan_classification", "required": true, "form_read_only": true},
+      {"field": "days_past_due", "type": "integer", "required": true, "form_read_only": true},
+      {"field": "outstanding_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Open", "In Progress", "Promise to Pay", "Broken PTP", "Hardship Requested", "Resolved", "Closed"], "default": "Open"},
+      {"field": "assigned_agent_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "next_action_date", "type": "calendar_date"},
+      {"field": "opened_on", "type": "calendar_date", "required": true, "form_read_only": true},
+      {"field": "closed_on", "type": "calendar_date", "form_read_only": true},
+      {"field": "resolution_reason", "type": "text"},
+      {"field": "linked_restructure_identifier", "type": "entity_reference", "target": "lending.loan_restructure", "form_read_only": true},
+      {"field": "promise_to_pay_rows", "type": "owned_collection", "target": "lending.promise_to_pay"},
+      {"field": "activities_rows", "type": "owned_collection", "target": "lending.collection_activity"}
+    ]
+  },
+  {
+    "entity": "lending.collection_case_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "loan_manager", "level": 0, "allows": ["read", "create", "report", "export", "print", "email", "share"]},
+      {"role": "loan_officer", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "collection_case_identifier", "type": "entity_reference", "target": "lending.collection_case", "required": true, "form_read_only": true},
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true, "form_read_only": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "form_read_only": true},
+      {"field": "from_bucket", "type": "short_text", "form_read_only": true},
+      {"field": "to_bucket", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "days_past_due", "type": "integer", "required": true, "form_read_only": true},
+      {"field": "event", "type": "enumeration", "required": true, "form_read_only": true, "values": ["Case Opened", "Bucket Escalated", "Bucket De-escalated", "Dunning Sent", "Promise to Pay Captured", "Promise to Pay Broken", "Hardship Requested", "Resolved"]},
+      {"field": "process_collection_dunning_identifier", "type": "entity_reference", "target": "lending.process_collection_dunning", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.days_past_due_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "form_read_only": true},
+      {"field": "posting_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "days_past_due", "type": "integer", "form_read_only": true},
+      {"field": "process_loan_classification_identifier", "type": "entity_reference", "target": "lending.process_loan_classification", "form_read_only": true},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.dunning_rule",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_officer", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "rule_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product"},
+      {"field": "classification_code_identifier", "type": "entity_reference", "target": "lending.loan_classification"},
+      {"field": "minimum_days_past_due", "type": "integer", "required": true},
+      {"field": "maximum_days_past_due", "type": "integer", "required": true},
+      {"field": "cadence_days", "type": "integer", "required": true, "default": "1"},
+      {"field": "disabled", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "lending.lending_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "auto_create_customer", "type": "boolean", "default": "0"},
+      {"field": "portal_logo", "type": "image_file_reference"}
+    ]
+  },
+  {
+    "entity": "lending.lending_telemetry_milestone",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "event", "type": "short_text", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "lending.loan",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]},
+      {"role": "employee", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "applicant_type", "type": "enumeration", "required": true, "values": ["Customer", "Employee"]},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type", "required": true},
+      {"field": "applicant_name", "type": "short_text", "form_read_only": true},
+      {"field": "loan_application_identifier", "type": "entity_reference", "target": "lending.loan_application", "form_read_only": true},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product", "required": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["", "Draft", "Sanctioned", "Partially Disbursed", "Disbursed", "Active", "Loan Closure Requested", "Closed", "Written Off", "Settled"]},
+      {"field": "loan_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "rate_of_interest", "type": "percentage", "required": true},
+      {"field": "disbursement_date", "type": "calendar_date"},
+      {"field": "repayment_start_date", "type": "calendar_date"},
+      {"field": "repayment_method", "type": "enumeration", "values": ["", "Repay Fixed Amount per Period", "Repay Over Number of Periods"]},
+      {"field": "repayment_periods", "type": "integer"},
+      {"field": "monthly_repayment_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "payment_account_identifier", "type": "entity_reference", "target": "accounting.account", "form_read_only": true},
+      {"field": "loan_account_identifier", "type": "entity_reference", "target": "accounting.account", "form_read_only": true},
+      {"field": "interest_income_account_identifier", "type": "entity_reference", "target": "accounting.account", "form_read_only": true},
+      {"field": "total_payment", "type": "monetary_amount", "form_read_only": true, "default": "0", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_interest_payable", "type": "monetary_amount", "form_read_only": true, "default": "0", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_amount_paid", "type": "monetary_amount", "form_read_only": true, "editable_after_posting": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan", "form_read_only": true},
+      {"field": "is_secured_loan", "type": "boolean", "default": "0"},
+      {"field": "is_term_loan", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "penalty_income_account_identifier", "type": "entity_reference", "target": "accounting.account", "form_read_only": true},
+      {"field": "total_principal_paid", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "disbursed_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "maximum_loan_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "written_off_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "closure_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "disbursement_account_identifier", "type": "entity_reference", "target": "accounting.account", "form_read_only": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "refund_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "credit_adjustment_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "debit_adjustment_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "is_nonperforming_asset", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "repayment_schedule_type", "type": "short_text", "form_read_only": true},
+      {"field": "no_interest_till_month_end", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "days_past_due", "type": "integer", "form_read_only": true},
+      {"field": "manual_nonperforming_asset", "type": "boolean", "editable_after_posting": true, "default": "0"},
+      {"field": "loan_restructure_count", "type": "integer", "form_read_only": true},
+      {"field": "watch_period_end_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "tenure_post_restructure", "type": "integer", "form_read_only": true},
+      {"field": "classification_code_identifier", "type": "entity_reference", "target": "lending.loan_classification", "form_read_only": true},
+      {"field": "classification_name", "type": "short_text", "form_read_only": true},
+      {"field": "repayment_frequency", "type": "enumeration", "values": ["Monthly", "Daily", "Weekly", "Bi-Weekly", "Quarterly", "One Time"]},
+      {"field": "loan_charges_rows", "type": "owned_collection", "target": "lending.loan_disbursement_charge"},
+      {"field": "treatment_of_interest", "type": "enumeration", "values": ["", "Capitalize", "Add to first repayment"]},
+      {"field": "moratorium_tenure", "type": "integer"},
+      {"field": "limit_applicable_start", "type": "calendar_date", "editable_after_posting": true},
+      {"field": "limit_applicable_end", "type": "calendar_date", "editable_after_posting": true},
+      {"field": "maximum_limit_amount", "type": "monetary_amount", "editable_after_posting": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "loan_category_identifier", "type": "entity_reference", "target": "lending.loan_category"},
+      {"field": "available_limit_amount", "type": "monetary_amount", "form_read_only": true, "editable_after_posting": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "utilized_limit_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "moratorium_type", "type": "enumeration", "values": ["", "EMI", "Principal"]},
+      {"field": "freeze_account", "type": "boolean", "editable_after_posting": true, "default": "0"},
+      {"field": "freeze_date", "type": "calendar_date", "editable_after_posting": true},
+      {"field": "cancellation_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "loan_partner_identifier", "type": "entity_reference", "target": "lending.loan_partner"},
+      {"field": "fldg_triggered", "type": "boolean", "default": "0"},
+      {"field": "unmark_nonperforming_asset", "type": "boolean", "editable_after_posting": true, "default": "0"},
+      {"field": "fldg_trigger_date", "type": "calendar_date"},
+      {"field": "excess_amount_paid", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "penalty_charges_rate", "type": "percentage"},
+      {"field": "settlement_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "is_imported", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "migration_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "loan_import_details_rows", "type": "owned_collection", "target": "lending.loan_import_details"},
+      {"field": "auto_create_disbursement_on_loan_booking", "type": "boolean", "default": "0"},
+      {"field": "installment_skip_approver_identifier", "type": "entity_reference", "target": "information_management.user", "editable_after_posting": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_accrual_repost",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_accrual_repost", "form_read_only": true},
+      {"field": "loans_rows", "type": "owned_collection", "target": "lending.loan_accrual_repost_detail"},
+      {"field": "from_date", "type": "calendar_date", "required": true},
+      {"field": "to_date", "type": "calendar_date", "required": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_accrual_repost_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"}
+    ]
+  },
+  {
+    "entity": "lending.loan_adjustment",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_adjustment", "form_read_only": true},
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true},
+      {"field": "adjustments_rows", "type": "owned_collection", "target": "lending.loan_adjustment_detail"},
+      {"field": "posting_date", "type": "date_and_time", "required": true},
+      {"field": "foreclosure_type", "type": "enumeration", "values": ["", "Manual Foreclosure", "Internal Foreclosure"]},
+      {"field": "payment_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement"}
+    ]
+  },
+  {
+    "entity": "lending.loan_adjustment_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "loan_repayment_type", "type": "enumeration", "values": ["Normal Repayment", "Interest Waiver", "Penalty Waiver", "Charges Waiver", "Principal Capitalization", "Interest Capitalization", "Charges Capitalization", "Penalty Capitalization", "Principal Adjustment", "Interest Adjustment", "Interest Carry Forward", "Loan Closure", "Security Deposit Adjustment"]},
+      {"field": "amount", "type": "monetary_amount"}
+    ]
+  },
+  {
+    "entity": "lending.loan_application",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]},
+      {"role": "employee", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 1, "allows": ["read", "write", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 1, "allows": ["read", "report", "export", "print", "email"]},
+      {"role": "employee", "level": 1, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "loan_los_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "applicant_type", "type": "enumeration", "required": true, "values": ["Employee", "Customer"], "default": "Customer"},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type"},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "status", "type": "enumeration", "editable_after_posting": true, "access_level": 1, "values": ["Open", "Approved", "Rejected"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product", "required": true},
+      {"field": "loan_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "repayment_method", "type": "enumeration", "values": ["", "Repay Fixed Amount per Period", "Repay Over Number of Periods"], "default": "Repay Over Number of Periods"},
+      {"field": "rate_of_interest", "type": "percentage", "form_read_only": true},
+      {"field": "total_payable_interest", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "repayment_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "repayment_frequency", "type": "enumeration", "values": ["Monthly", "Weekly", "Bi-Weekly", "Quarterly"], "default": "Monthly"},
+      {"field": "repayment_periods", "type": "integer"},
+      {"field": "total_payable_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_application", "form_read_only": true},
+      {"field": "is_secured_loan", "type": "boolean", "default": "0"},
+      {"field": "proposed_pledges_rows", "type": "owned_collection", "target": "lending.proposed_pledge"},
+      {"field": "maximum_loan_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "is_term_loan", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "applicant_email_address", "type": "short_text"},
+      {"field": "applicant_phone_number", "type": "telephone_number"},
+      {"field": "address_line_1", "type": "short_text"},
+      {"field": "address_line_2", "type": "short_text"},
+      {"field": "zip_code", "type": "integer"},
+      {"field": "city", "type": "short_text"},
+      {"field": "state", "type": "short_text"},
+      {"field": "country_identifier", "type": "entity_reference", "target": "geography.country"},
+      {"field": "documents_rows", "type": "owned_collection", "target": "lending.loan_application_document"},
+      {"field": "co_applicants_rows", "type": "owned_collection", "target": "lending.loan_co_applicants"},
+      {"field": "applicant_name", "type": "short_text"},
+      {"field": "loan_purpose_identifier", "type": "entity_reference", "target": "lending.loan_purpose"}
+    ]
+  },
+  {
+    "entity": "lending.loan_application_document",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "file", "type": "file_reference", "required": true},
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "lending.loan_document_type", "required": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_balance_adjustment",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true},
+      {"field": "applicant_type", "type": "enumeration", "form_read_only": true, "values": ["Employee", "Member", "Customer"]},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true, "form_read_only": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "reference_number", "type": "short_text"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_balance_adjustment", "form_read_only": true},
+      {"field": "adjustment_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "amount", "type": "monetary_amount", "required": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "adjustment_type", "type": "enumeration", "required": true, "values": ["Credit Adjustment", "Debit Adjustment"]},
+      {"field": "remarks", "type": "short_text"},
+      {"field": "reference_document_type", "type": "enumeration", "values": ["Loan Repayment", "Loan Restructure"]},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_document_type"},
+      {"field": "adjustment_receivable_account_identifier", "type": "entity_reference", "target": "accounting.account"}
+    ]
+  },
+  {
+    "entity": "lending.loan_category",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "loan_category_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "loan_category_code", "type": "short_text", "required": true, "unique": true},
+      {"field": "disabled", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "lending.loan_charge_reference",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "sales_invoice_identifier", "type": "entity_reference", "target": "accounting.sales_invoice"},
+      {"field": "pending_charge_amount", "type": "monetary_amount"},
+      {"field": "allocated_amount", "type": "monetary_amount"},
+      {"field": "charge_identifier", "type": "entity_reference", "target": "inventory.item"}
+    ]
+  },
+  {
+    "entity": "lending.loan_charges",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "charge_type_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "charge_based_on", "type": "enumeration", "values": ["Percentage", "Fixed Amount"]},
+      {"field": "amount", "type": "monetary_amount"},
+      {"field": "percentage", "type": "percentage"},
+      {"field": "income_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "receivable_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "waiver_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "write_off_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "suspense_account_identifier", "type": "entity_reference", "target": "accounting.account"}
+    ]
+  },
+  {
+    "entity": "lending.loan_classification",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "classification_code", "type": "short_text", "required": true, "unique": true},
+      {"field": "classification_name", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_classification_range",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "classification_code_identifier", "type": "entity_reference", "target": "lending.loan_classification"},
+      {"field": "classification_name", "type": "short_text", "form_read_only": true},
+      {"field": "minimum_days_past_due_range", "type": "integer"},
+      {"field": "maximum_days_past_due_range", "type": "integer"},
+      {"field": "is_written_off", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "lending.loan_co_applicants",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "applicant_name", "type": "short_text"},
+      {"field": "applicant_email", "type": "short_text"},
+      {"field": "applicant_mobile", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "lending.loan_demand",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "demand_date", "type": "date_and_time"},
+      {"field": "demand_type", "type": "enumeration", "values": ["EMI", "Penalty", "Normal", "Charges", "BPI", "Additional Interest"]},
+      {"field": "demand_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_demand", "form_read_only": true},
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"},
+      {"field": "paid_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "waived_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "outstanding_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product"},
+      {"field": "applicant_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type_identifier"},
+      {"field": "repayment_schedule_detail", "type": "short_text"},
+      {"field": "demand_subtype", "type": "short_text"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "sales_invoice_identifier", "type": "entity_reference", "target": "accounting.sales_invoice"},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "process_loan_demand_identifier", "type": "entity_reference", "target": "lending.process_loan_demand"},
+      {"field": "loan_repayment_schedule_identifier", "type": "entity_reference", "target": "lending.loan_repayment_schedule"},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement"},
+      {"field": "disbursement_date", "type": "calendar_date"},
+      {"field": "is_term_loan", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "loan_partner_identifier", "type": "entity_reference", "target": "lending.loan_partner"},
+      {"field": "invoice_date", "type": "calendar_date"},
+      {"field": "posting_date", "type": "date_and_time"},
+      {"field": "partner_share", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "partner_share_allocated", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "loan_repayment_identifier", "type": "entity_reference", "target": "lending.loan_repayment"},
+      {"field": "is_imported", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "is_general_ledger_cancelled", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "is_partial_pre_paid_interest", "type": "boolean", "default": "0"},
+      {"field": "process_loan_accounting_voucher_identifier", "type": "entity_reference", "target": "lending.process_loan_accounting", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_demand_offset_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "demand_type", "type": "enumeration", "values": ["EMI (Principal + Interest)", "Principal", "Interest", "Additional Interest", "Penalty", "Charges"]}
+    ]
+  },
+  {
+    "entity": "lending.loan_demand_offset_order",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "unique": true},
+      {"field": "components_rows", "type": "owned_collection", "target": "lending.loan_demand_offset_detail"}
+    ]
+  },
+  {
+    "entity": "lending.loan_disbursement",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "against_loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true},
+      {"field": "disbursement_date", "type": "calendar_date", "required": true},
+      {"field": "disbursed_amount", "type": "monetary_amount", "required": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_disbursement", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true, "form_read_only": true},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type", "required": true, "form_read_only": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "posting_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "applicant_type", "type": "enumeration", "required": true, "form_read_only": true, "values": ["Employee", "Member", "Customer"]},
+      {"field": "bank_account_identifier", "type": "entity_reference", "target": "accounting.bank_account"},
+      {"field": "reference_date", "type": "calendar_date"},
+      {"field": "reference_number", "type": "short_text"},
+      {"field": "clearance_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "disbursement_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "loan_account_identifier", "type": "entity_reference", "target": "accounting.account", "form_read_only": true},
+      {"field": "is_term_loan", "type": "boolean", "default": "0"},
+      {"field": "withhold_security_deposit", "type": "boolean", "default": "0"},
+      {"field": "monthly_repayment_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product", "form_read_only": true},
+      {"field": "loan_disbursement_charges_rows", "type": "owned_collection", "target": "lending.loan_disbursement_charge"},
+      {"field": "repayment_frequency", "type": "enumeration", "values": ["Monthly", "Daily", "Weekly", "Bi-Weekly", "Quarterly", "One Time"]},
+      {"field": "repayment_schedule_type", "type": "short_text", "form_read_only": true},
+      {"field": "repayment_start_date", "type": "calendar_date"},
+      {"field": "tenure", "type": "integer"},
+      {"field": "repayment_method", "type": "enumeration", "values": ["", "Repay Over Number of Periods", "Repay Fixed Amount per Period"]},
+      {"field": "sanctioned_loan_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "current_disbursed_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "broken_period_interest", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "loan_partner_identifier", "type": "entity_reference", "target": "lending.loan_partner"},
+      {"field": "refund_account_identifier", "type": "entity_reference", "target": "accounting.account", "editable_after_posting": true},
+      {"field": "days_past_due", "type": "integer"},
+      {"field": "broken_period_interest_difference_date", "type": "calendar_date", "editable_after_posting": true},
+      {"field": "broken_period_interest_amount_difference", "type": "monetary_amount", "editable_after_posting": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "principal_amount_paid", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["", "Draft", "Submitted", "Cancelled", "Closed"], "default": "Draft"},
+      {"field": "broken_period_interest_days", "type": "integer"},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment"},
+      {"field": "is_imported", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "total_equated_monthly_installment_charges", "type": "monetary_amount"},
+      {"field": "tranche_number", "type": "integer", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_disbursement_charge",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "charge_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "amount", "type": "monetary_amount"},
+      {"field": "account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "treatment_of_charge", "type": "enumeration", "values": ["Billed Separately", "Add to first repayment"]}
+    ]
+  },
+  {
+    "entity": "lending.loan_document_type",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "loan_document_type", "type": "short_text", "unique": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_freeze_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"},
+      {"field": "freeze_date", "type": "calendar_date"},
+      {"field": "reason_for_freezing", "type": "text"},
+      {"field": "unfreeze_date", "type": "calendar_date"}
+    ]
+  },
+  {
+    "entity": "lending.loan_import_details",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "loan_disbursement_identifier", "type": "short_text"},
+      {"field": "opening_principal_outstanding", "type": "monetary_amount", "default": "Company:company:default_currency"},
+      {"field": "opening_interest_outstanding", "type": "monetary_amount", "default": "Company:company:default_currency"},
+      {"field": "opening_penalty_outstanding", "type": "monetary_amount", "default": "Company:company:default_currency"},
+      {"field": "opening_additional_outstanding", "type": "monetary_amount", "default": "Company:company:default_currency"},
+      {"field": "opening_charge_outstanding", "type": "monetary_amount", "default": "Company:company:default_currency"},
+      {"field": "disbursement_date", "type": "calendar_date"},
+      {"field": "disbursed_amount", "type": "monetary_amount", "default": "Company:company:default_currency"},
+      {"field": "repayment_method", "type": "enumeration", "values": ["", "Repay Over Number of Periods", "Repay Fixed Amount per Period"]},
+      {"field": "repayment_frequency", "type": "enumeration", "values": ["", "Monthly", "Daily", "Weekly", "Bi-Weekly", "Quarterly", "One Time"]},
+      {"field": "repayment_periods", "type": "integer"},
+      {"field": "repayment_start_date", "type": "calendar_date"}
+    ]
+  },
+  {
+    "entity": "lending.loan_income_recognition_and_asset_classification_provisioning_configuration",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "provision_rate", "type": "percentage"},
+      {"field": "classification_code_identifier", "type": "entity_reference", "target": "lending.loan_classification"},
+      {"field": "classification_name", "type": "short_text", "form_read_only": true},
+      {"field": "security_type", "type": "enumeration", "values": ["Secured", "Unsecured", "Semi-Secured"]}
+    ]
+  },
+  {
+    "entity": "lending.loan_installment_skip_request",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "employee", "level": 0, "allows": ["read", "write", "create", "delete", "if_owner"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true},
+      {"field": "applicant_type", "type": "short_text", "form_read_only": true},
+      {"field": "applicant", "type": "short_text", "form_read_only": true},
+      {"field": "applicant_name", "type": "short_text", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "form_read_only": true},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Open", "Approved", "Rejected", "Cancelled"], "default": "Open"},
+      {"field": "approver_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "approver_name", "type": "short_text", "form_read_only": true},
+      {"field": "skipped_installments_rows", "type": "owned_collection", "target": "lending.loan_skipped_installment", "required": true},
+      {"field": "new_repayment_method", "type": "enumeration", "values": ["Repay Fixed Amount per Period", "Repay Over Number of Periods"], "default": "Repay Fixed Amount per Period"},
+      {"field": "reason", "type": "text"},
+      {"field": "loan_restructure_identifier", "type": "entity_reference", "target": "lending.loan_restructure", "form_read_only": true},
+      {"field": "approver_remarks", "type": "text"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_installment_skip_request", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_interest_accrual",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true},
+      {"field": "posting_date", "type": "date_and_time"},
+      {"field": "interest_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_interest_accrual", "form_read_only": true},
+      {"field": "applicant_type", "type": "enumeration", "values": ["Employee", "Member", "Customer"]},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "is_term_loan", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "process_loan_interest_accrual_identifier", "type": "entity_reference", "target": "lending.process_loan_interest_accrual"},
+      {"field": "accrual_type", "type": "enumeration", "values": ["Regular", "Repayment", "Disbursement", "Credit Adjustment", "Debit Adjustment", "Refund"]},
+      {"field": "last_accrual_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product", "form_read_only": true},
+      {"field": "is_nonperforming_asset", "type": "boolean", "default": "0"},
+      {"field": "start_date", "type": "date_and_time"},
+      {"field": "interest_type", "type": "enumeration", "values": ["Normal Interest", "Penal Interest"]},
+      {"field": "rate_of_interest", "type": "decimal"},
+      {"field": "additional_interest_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "company_currency_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "loan_demand_identifier", "type": "entity_reference", "target": "lending.loan_demand"},
+      {"field": "loan_repayment_schedule_identifier", "type": "entity_reference", "target": "lending.loan_repayment_schedule"},
+      {"field": "accrual_date", "type": "calendar_date"},
+      {"field": "loan_repayment_schedule_detail", "type": "short_text", "form_read_only": true},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement"},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "normal_interest_journal_entry_identifier", "type": "entity_reference", "target": "accounting.journal_entry"},
+      {"field": "additional_interest_suspense_entry_identifier", "type": "entity_reference", "target": "accounting.journal_entry"},
+      {"field": "unmark_nonperforming_asset", "type": "boolean", "default": "0"},
+      {"field": "is_imported", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "is_general_ledger_cancelled", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "process_loan_accounting_voucher_identifier", "type": "entity_reference", "target": "lending.process_loan_accounting", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_lead",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_lead", "form_read_only": true},
+      {"field": "applicant_name", "type": "short_text", "required": true},
+      {"field": "permanent_account_number", "type": "short_text"},
+      {"field": "employment_type", "type": "enumeration", "values": ["Salaried", "Self-employed"]},
+      {"field": "lead_source", "type": "short_text"},
+      {"field": "company_name", "type": "short_text"},
+      {"field": "date_of_birth", "type": "calendar_date"},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product", "required": true},
+      {"field": "loan_amount", "type": "monetary_amount", "required": true},
+      {"field": "mobile_number", "type": "telephone_number", "required": true},
+      {"field": "status", "type": "short_text", "form_read_only": true},
+      {"field": "address_identifier", "type": "entity_reference", "target": "contacts.address"},
+      {"field": "contact_identifier", "type": "entity_reference", "target": "contacts.contact"},
+      {"field": "email", "type": "short_text", "required": true},
+      {"field": "text_message_one_time_password", "type": "protected_value", "form_read_only": true},
+      {"field": "mobile_verification_status", "type": "enumeration", "form_read_only": true, "values": ["Pending", "Initiated", "Verified"]},
+      {"field": "email_one_time_password", "type": "protected_value", "form_read_only": true},
+      {"field": "email_verification_status", "type": "enumeration", "form_read_only": true, "values": ["Pending", "Initiated", "Verified"]},
+      {"field": "income", "type": "monetary_amount"},
+      {"field": "applicant_type", "type": "enumeration", "required": true, "values": ["Individual", "Business"]},
+      {"field": "age", "type": "integer"},
+      {"field": "proposed_tenure", "type": "integer"}
+    ]
+  },
+  {
+    "entity": "lending.loan_limit_change_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"},
+      {"field": "event", "type": "enumeration", "values": ["Loan Booking", "Limit Renewal", "Disbursement", "Repayment"]},
+      {"field": "change_date", "type": "calendar_date"},
+      {"field": "value_change", "type": "monetary_amount"},
+      {"field": "value_type", "type": "enumeration", "values": ["Maximum Limit Amount", "Utilized Limit Amount", "Available Limit Amount"]}
+    ]
+  },
+  {
+    "entity": "lending.loan_nonperforming_asset_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"},
+      {"field": "nonperforming_asset", "type": "boolean", "default": "0"},
+      {"field": "manual_nonperforming_asset", "type": "boolean", "default": "0"},
+      {"field": "event", "type": "short_text"},
+      {"field": "nonperforming_asset_date", "type": "calendar_date"},
+      {"field": "delinked", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "lending.loan_origination_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "unique_customer", "type": "boolean", "default": "0"},
+      {"field": "employee_loans", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "lending.loan_partner",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "effective_date", "type": "calendar_date", "required": true},
+      {"field": "repayment_schedule_type", "type": "enumeration", "required": true, "values": ["", "EMI (PMT) based", "Collection at partner's percentage", "POS reduction plus interest at partner ROI"]},
+      {"field": "organization_type", "type": "enumeration", "required": true, "values": ["", "Centralized", "Decentralized"]},
+      {"field": "primary_address_identifier", "type": "entity_reference", "target": "contacts.address"},
+      {"field": "shareables_rows", "type": "owned_collection", "target": "lending.loan_partner_shareable"},
+      {"field": "partner_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "partner_loan_share_percentage", "type": "percentage", "required": true},
+      {"field": "partner_base_interest_rate", "type": "percentage", "required": true},
+      {"field": "fldg_trigger_days_past_due", "type": "integer"},
+      {"field": "fldg_limit_calculation_component", "type": "enumeration", "values": ["", "Disbursement", "Outstanding Principal", "Outstanding Principal & Interest Accrued"]},
+      {"field": "fldg_fixed_deposit_percentage", "type": "percentage"},
+      {"field": "fldg_corporate_guarantee_percentage", "type": "percentage"},
+      {"field": "servicer_fee", "type": "boolean", "default": "0"},
+      {"field": "partner_code", "type": "short_text", "required": true, "unique": true},
+      {"field": "type_of_fldg_applicable", "type": "enumeration", "values": ["", "Fixed Deposit Only", "Corporate Guarantee Only", "Both Fixed Deposit and Corporate Guarantee"]},
+      {"field": "waiving_of_charges_applicable", "type": "boolean", "default": "0"},
+      {"field": "restructure_of_loans_applicable", "type": "boolean", "default": "0"},
+      {"field": "receivable_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "credit_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "payable_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "fldg_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "partner_interest_share_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "partial_payment_mechanism", "type": "short_text"},
+      {"field": "enable_partner_accounting", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "formatted address"}
+    ]
+  },
+  {
+    "entity": "lending.loan_partner_address",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "address_identifier", "type": "entity_reference", "target": "contacts.address", "required": true},
+      {"field": "primary", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "lending.loan_partner_adhoc_charges_shared",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "charge_type_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "sharing_parameter", "type": "enumeration", "values": ["", "Ratio", "Percentage"]},
+      {"field": "partner_ratio", "type": "percentage"},
+      {"field": "own_ratio", "type": "percentage"},
+      {"field": "partner_percentage", "type": "percentage"}
+    ]
+  },
+  {
+    "entity": "lending.loan_partner_shareable",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "partner_collection_percentage", "type": "percentage"},
+      {"field": "partner_loan_amount_percentage", "type": "percentage"},
+      {"field": "minimum_partner_loan_amount_percentage", "type": "percentage"},
+      {"field": "shareable_type_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "sharing_parameter", "type": "enumeration", "required": true, "values": ["", "Collection Percentage", "Loan Amount Percentage"]},
+      {"field": "company_collection_percentage", "type": "percentage"}
+    ]
+  },
+  {
+    "entity": "lending.loan_product",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "maximum_loan_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "rate_of_interest", "type": "percentage", "required": true},
+      {"field": "disabled", "type": "boolean", "editable_after_posting": true, "default": "0"},
+      {"field": "payment_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "loan_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "interest_income_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "penalty_income_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "is_term_loan", "type": "boolean", "default": "0"},
+      {"field": "penalty_interest_rate", "type": "percentage"},
+      {"field": "grace_period_in_days", "type": "integer"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_product", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "write_off_amount", "type": "monetary_amount", "editable_after_posting": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "disbursement_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "repayment_schedule_type", "type": "enumeration", "values": ["", "Monthly as per repayment start date", "Pro-rated calendar months", "Monthly as per cycle date", "Line of Credit", "Flat Interest Rate"]},
+      {"field": "no_interest_till_month_end", "type": "boolean", "default": "0"},
+      {"field": "repayment_date_on", "type": "enumeration", "values": ["", "Start of the next month", "End of the current month"]},
+      {"field": "advance_payment_handling", "type": "enumeration", "values": ["Reduce Tenure", "Reduce EMI"], "default": "Reduce Tenure"},
+      {"field": "days_past_due_threshold_for_nonperforming_asset", "type": "integer"},
+      {"field": "interest_waiver_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "penalty_waiver_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "suspense_interest_income_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "suspense_collection_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "interest_receivable_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "penalty_receivable_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "loan_charges_rows", "type": "owned_collection", "target": "lending.loan_charges", "editable_after_posting": true},
+      {"field": "security_deposit_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "cyclic_day_of_the_month", "type": "integer"},
+      {"field": "loan_partners_rows", "type": "owned_selection", "target": "lending.loan_product_loan_partner"},
+      {"field": "product_code", "type": "short_text", "required": true, "unique": true},
+      {"field": "product_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "minimum_days_bw_disbursement_first_repayment", "type": "integer", "default": "0"},
+      {"field": "interest_accrued_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "same_as_regular_interest_accounts", "type": "boolean", "default": "0"},
+      {"field": "broken_period_interest_recovery_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "additional_interest_income_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "additional_interest_accrued_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "additional_interest_receivable_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "additional_interest_suspense_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "additional_interest_waiver_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "penalty_accrued_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "penalty_suspense_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "write_off_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "write_off_recovery_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "loan_category_identifier", "type": "entity_reference", "target": "lending.loan_category"},
+      {"field": "subsidy_adjustment_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "excess_amount_acceptance_limit", "type": "decimal"},
+      {"field": "sanctioned_amount_tolerance_percentage", "type": "percentage", "default": "0"},
+      {"field": "customer_refund_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "validate_normal_repayment", "type": "boolean", "default": "0"},
+      {"field": "collection_offset_sequence_for_standard_asset_identifier", "type": "entity_reference", "target": "lending.loan_demand_offset_order"},
+      {"field": "collection_offset_sequence_for_sub_standard_asset_identifier", "type": "entity_reference", "target": "lending.loan_demand_offset_order"},
+      {"field": "collection_offset_sequence_for_written_off_asset_identifier", "type": "entity_reference", "target": "lending.loan_demand_offset_order"},
+      {"field": "collection_offset_sequence_for_settlement_collection_identifier", "type": "entity_reference", "target": "lending.loan_demand_offset_order"},
+      {"field": "broken_period_interest_recovery_method", "type": "enumeration", "values": ["", "Upfront Deduction", "Amortized Over Tenure", "Add to First EMI", "Add to Last EMI"], "default": "Upfront Deduction"},
+      {"field": "broken_period_interest_treatment", "type": "enumeration", "values": ["On top of first EMI", "Adjust within the EMI amount"]},
+      {"field": "equated_monthly_installment_rounding_method", "type": "enumeration", "values": ["Round to Nearest", "Round Up", "No Rounding"], "default": "Round to Nearest"},
+      {"field": "installment_skip_needs_approval", "type": "boolean", "default": "1"}
+    ]
+  },
+  {
+    "entity": "lending.loan_product_loan_partner",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "loan_partner_identifier", "type": "entity_reference", "target": "lending.loan_partner", "required": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_purpose",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "loan_purpose", "type": "short_text", "unique": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_refund",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true},
+      {"field": "applicant_type", "type": "enumeration", "form_read_only": true, "values": ["Employee", "Member", "Customer"]},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true, "form_read_only": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "refund_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "refund_amount", "type": "monetary_amount", "required": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_refund", "form_read_only": true},
+      {"field": "reference_number", "type": "short_text"},
+      {"field": "is_excess_amount_refund", "type": "boolean", "default": "0"},
+      {"field": "is_security_amount_refund", "type": "boolean", "default": "0"},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product", "form_read_only": true},
+      {"field": "value_date", "type": "calendar_date", "required": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_repayment",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "against_loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true},
+      {"field": "posting_date", "type": "date_and_time", "required": true, "default": {"context_default": "current_instant"}},
+      {"field": "penalty_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "interest_payable", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type", "required": true, "form_read_only": true},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product", "form_read_only": true},
+      {"field": "payable_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "amount_paid", "type": "monetary_amount", "required": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_repayment", "form_read_only": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "form_read_only": true},
+      {"field": "pending_principal_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "is_term_loan", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "payable_principal_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "reference_number", "type": "short_text"},
+      {"field": "reference_date", "type": "calendar_date"},
+      {"field": "principal_amount_paid", "type": "monetary_amount", "form_read_only": true, "default": "0.0", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "applicant_type", "type": "enumeration", "form_read_only": true, "values": ["Employee", "Member", "Customer"]},
+      {"field": "due_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "repayment_details_rows", "type": "owned_collection", "target": "lending.loan_repayment_detail", "form_read_only": true},
+      {"field": "total_interest_paid", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "rate_of_interest", "type": "percentage", "form_read_only": true},
+      {"field": "shortfall_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_penalty_paid", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "clearance_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "payment_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "loan_account_identifier", "type": "entity_reference", "target": "accounting.account", "form_read_only": true},
+      {"field": "penalty_income_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "is_nonperforming_asset", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "days_past_due", "type": "integer", "form_read_only": true},
+      {"field": "total_charges_payable", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "repayment_type", "type": "enumeration", "required": true, "values": ["Normal Repayment", "Interest Waiver", "Penalty Waiver", "Charges Waiver", "Principal Adjustment", "Interest Carry Forward", "Write Off Recovery", "Security Deposit Adjustment", "Advance Payment", "Pre Payment", "Subsidy Adjustments", "Loan Closure", "Partial Settlement", "Full Settlement", "Write Off Settlement", "Charge Payment", "Penalty Capitalization", "Interest Capitalization", "Charges Capitalization", "Principal Capitalization"], "default": "Normal Repayment"},
+      {"field": "loan_restructure_identifier", "type": "entity_reference", "target": "lending.loan_restructure", "form_read_only": true},
+      {"field": "repayment_schedule_type", "type": "short_text"},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement"},
+      {"field": "total_charges_paid", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment"},
+      {"field": "bank_account_identifier", "type": "entity_reference", "target": "accounting.bank_account"},
+      {"field": "prepayment_charges_rows", "type": "owned_collection", "target": "lending.prepayment_charges"},
+      {"field": "is_write_off_waiver", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "excess_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "loan_adjustment_identifier", "type": "entity_reference", "target": "lending.loan_adjustment"},
+      {"field": "payable_charges_rows", "type": "owned_collection", "target": "lending.loan_repayment_charges"},
+      {"field": "manual_remarks", "type": "text", "editable_after_posting": true},
+      {"field": "unbooked_interest_paid", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "unbooked_penalty_paid", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "loan_partner_identifier", "type": "entity_reference", "target": "lending.loan_partner"},
+      {"field": "loan_partner_payment_ratio", "type": "percentage", "form_read_only": true},
+      {"field": "total_partner_principal_share", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_partner_interest_share", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "loan_partner_share_percentage", "type": "percentage"},
+      {"field": "loan_partner_repayment_schedule_type", "type": "short_text"},
+      {"field": "loan_partner_interest_rate", "type": "percentage", "form_read_only": true},
+      {"field": "is_backdated", "type": "boolean", "default": "0"},
+      {"field": "value_date", "type": "date_and_time", "required": true},
+      {"field": "bulk_repayment_log_identifier", "type": "entity_reference", "target": "lending.bulk_repayment_log"},
+      {"field": "is_imported", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "full_settlement_job", "type": "short_text", "form_read_only": true},
+      {"field": "is_invoice_generated", "type": "boolean", "form_read_only": true, "default": "0"}
+    ]
+  },
+  {
+    "entity": "lending.loan_repayment_charges",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "charge_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "amount", "type": "monetary_amount"}
+    ]
+  },
+  {
+    "entity": "lending.loan_repayment_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "loan_demand_identifier", "type": "entity_reference", "target": "lending.loan_demand"},
+      {"field": "paid_amount", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "demand_type", "type": "short_text"},
+      {"field": "sales_invoice_identifier", "type": "entity_reference", "target": "accounting.sales_invoice"},
+      {"field": "demand_subtype", "type": "short_text"},
+      {"field": "partner_share", "type": "monetary_amount"}
+    ]
+  },
+  {
+    "entity": "lending.loan_repayment_repost",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Draft", "Queued", "In Process", "Completed", "Cancelled"], "default": "Draft"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_repayment_repost", "form_read_only": true},
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement"},
+      {"field": "repost_date", "type": "calendar_date", "required": true},
+      {"field": "repayment_entries_rows", "type": "owned_collection", "target": "lending.loan_repayment_repost_detail"},
+      {"field": "ignore_on_cancel_amount_update", "type": "boolean", "default": "0"},
+      {"field": "entries_to_cancel_rows", "type": "owned_collection", "target": "lending.loan_repayment_repost_cancel_detail"},
+      {"field": "clear_demand_allocation_before_repost", "type": "boolean", "default": "0"},
+      {"field": "cancel_future_equated_monthly_installment_demands", "type": "boolean", "default": "0"},
+      {"field": "delete_general_ledger_entries", "type": "boolean", "default": "0"},
+      {"field": "cancel_future_accruals_and_demands", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "lending.loan_repayment_repost_cancel_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "loan_repayment_identifier", "type": "entity_reference", "target": "lending.loan_repayment"}
+    ]
+  },
+  {
+    "entity": "lending.loan_repayment_repost_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "loan_repayment_identifier", "type": "entity_reference", "target": "lending.loan_repayment"},
+      {"field": "posting_date", "type": "calendar_date"}
+    ]
+  },
+  {
+    "entity": "lending.loan_repayment_schedule",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product"},
+      {"field": "repayment_schedule_type", "type": "short_text", "form_read_only": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_repayment_schedule", "form_read_only": true},
+      {"field": "loan_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "repayment_method", "type": "enumeration", "values": ["", "Repay Fixed Amount per Period", "Repay Over Number of Periods"]},
+      {"field": "monthly_repayment_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "status", "type": "enumeration", "values": ["Initiated", "Rejected", "Active", "Restructured", "Rescheduled", "Outdated", "Draft", "Cancelled", "Closed"]},
+      {"field": "repayment_start_date", "type": "calendar_date"},
+      {"field": "repayment_schedule_rows", "type": "owned_collection", "target": "lending.repayment_schedule", "form_read_only": true},
+      {"field": "repayment_periods", "type": "integer"},
+      {"field": "rate_of_interest", "type": "decimal"},
+      {"field": "posting_date", "type": "date_and_time"},
+      {"field": "loan_restructure_identifier", "type": "entity_reference", "target": "lending.loan_restructure", "form_read_only": true},
+      {"field": "adjusted_interest", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "repayment_frequency", "type": "enumeration", "values": ["Monthly", "Daily", "Weekly", "Bi-Weekly", "Quarterly", "One Time"]},
+      {"field": "treatment_of_interest", "type": "enumeration", "values": ["Capitalize", "Add to first repayment"]},
+      {"field": "repayment_date_on", "type": "enumeration", "values": ["Start of the next month", "End of the current month"]},
+      {"field": "moratorium_tenure", "type": "integer"},
+      {"field": "disbursed_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement", "form_read_only": true},
+      {"field": "broken_period_interest", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "moratorium_end_date", "type": "calendar_date"},
+      {"field": "current_principal_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "broken_period_interest_days", "type": "integer", "form_read_only": true},
+      {"field": "total_installments_paid", "type": "integer", "form_read_only": true},
+      {"field": "total_installments_overdue", "type": "integer", "form_read_only": true},
+      {"field": "total_installments_raised", "type": "integer", "form_read_only": true},
+      {"field": "moratorium_type", "type": "short_text"},
+      {"field": "restructure_type", "type": "enumeration", "values": ["", "Normal Restructure", "Advance Payment", "Pre Payment", "Installment Skip"]},
+      {"field": "colender_schedule_rows", "type": "owned_collection", "target": "lending.co_lender_schedule", "form_read_only": true},
+      {"field": "loan_partner_identifier", "type": "entity_reference", "target": "lending.loan_partner"},
+      {"field": "loan_partner_rate_of_interest", "type": "decimal"},
+      {"field": "partner_monthly_repayment_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "partner_loan_share_percentage", "type": "percentage"},
+      {"field": "partner_base_interest_rate", "type": "percentage"},
+      {"field": "partner_repayment_schedule_type", "type": "short_text"},
+      {"field": "maturity_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "disbursement_charges", "type": "monetary_amount"}
+    ]
+  },
+  {
+    "entity": "lending.loan_restructure",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true},
+      {"field": "applicant_type", "type": "enumeration", "form_read_only": true, "values": ["Employee", "Member", "Customer"]},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "form_read_only": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_restructure", "form_read_only": true},
+      {"field": "disbursed_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "reason_for_restructure", "type": "text"},
+      {"field": "new_repayment_method", "type": "enumeration", "values": ["", "Repay Fixed Amount per Period", "Repay Over Number of Periods"]},
+      {"field": "new_repayment_period_in_months", "type": "integer"},
+      {"field": "new_monthly_repayment_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "new_rate_of_interest", "type": "percentage"},
+      {"field": "interest_waiver_amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_overdue_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "principal_overdue", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "interest_overdue", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "restructure_date", "type": "date_and_time", "required": true},
+      {"field": "new_loan_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "pre_restructure_days_past_due", "type": "integer", "form_read_only": true},
+      {"field": "repayment_start_date", "type": "calendar_date"},
+      {"field": "pending_principal_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "old_rate_of_interest", "type": "percentage", "form_read_only": true},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product"},
+      {"field": "penal_interest_waiver", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "restructure_type", "type": "enumeration", "values": ["Normal Restructure", "Pre Payment", "Advance Payment", "Installment Skip"]},
+      {"field": "penalty_overdue", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "repayment_method", "type": "short_text"},
+      {"field": "status", "type": "enumeration", "editable_after_posting": true, "values": ["", "Initiated", "Approved", "Rejected"]},
+      {"field": "current_restructure_count", "type": "integer", "form_read_only": true},
+      {"field": "unaccrued_interest", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "old_tenure", "type": "integer", "form_read_only": true},
+      {"field": "old_equated_monthly_installment", "type": "monetary_amount", "form_read_only": true},
+      {"field": "treatment_of_penal_interest", "type": "enumeration", "values": ["Capitalize", "Carry Forward"], "default": "Capitalize"},
+      {"field": "treatment_of_normal_interest", "type": "enumeration", "values": ["Capitalize", "Add To First EMI"], "default": "Add To First EMI"},
+      {"field": "adjusted_interest_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "balance_interest_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "balance_penalty_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "available_security_deposit", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "principal_adjusted", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "balance_principal", "type": "monetary_amount", "form_read_only": true},
+      {"field": "restructure_charges", "type": "monetary_amount", "form_read_only": true},
+      {"field": "completed_tenure", "type": "integer"},
+      {"field": "waive_off_restructure_charges", "type": "boolean", "default": "0"},
+      {"field": "adjusted_unaccrued_interest", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "unaccrued_interest_waiver", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "balance_unaccrued_interest", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "unaccrued_interest_treatment", "type": "enumeration", "values": ["Capitalize", "Add To First EMI"], "default": "Add To First EMI"},
+      {"field": "total_amount_paid", "type": "monetary_amount"},
+      {"field": "total_principal_paid", "type": "monetary_amount"},
+      {"field": "old_loan_amount", "type": "monetary_amount"},
+      {"field": "loan_repayment_identifier", "type": "entity_reference", "target": "lending.loan_repayment", "form_read_only": true},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement"},
+      {"field": "old_repayment_frequency", "type": "short_text"},
+      {"field": "moratorium_end_date", "type": "calendar_date"},
+      {"field": "is_nonperforming_asset", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "loan_restructure_charges_rows", "type": "owned_collection", "target": "lending.loan_restructure_charges"},
+      {"field": "skipped_installments_rows", "type": "owned_collection", "target": "lending.loan_skipped_installment"},
+      {"field": "loan_installment_skip_request_identifier", "type": "entity_reference", "target": "lending.loan_installment_skip_request", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_restructure_charges",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "charge_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "is_post_restructure_charge", "type": "boolean", "default": "0"},
+      {"field": "charges_overdue", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "treatment_of_other_charges", "type": "enumeration", "values": ["Capitalize", "Carry Forward"], "default": "Capitalize"},
+      {"field": "balance_charges", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "capitalize_amount", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "charges_waiver_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "restructure_charge_amount", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}}
+    ]
+  },
+  {
+    "entity": "lending.loan_restructure_limit_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "branch_identifier", "type": "entity_reference", "target": "organization.branch"},
+      {"field": "date", "type": "calendar_date"},
+      {"field": "principal_outstanding", "type": "monetary_amount"},
+      {"field": "limit_percent", "type": "percentage"},
+      {"field": "limit_amount", "type": "monetary_amount"},
+      {"field": "utilized_limit", "type": "monetary_amount"},
+      {"field": "in_process_limit", "type": "monetary_amount"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "available_limit", "type": "monetary_amount"},
+      {"field": "delinquent_principal_outstanding", "type": "monetary_amount"},
+      {"field": "delinquent_limit_percent", "type": "percentage"},
+      {"field": "delinquent_limit_amount", "type": "monetary_amount"},
+      {"field": "delinquent_utilized_limit", "type": "monetary_amount"},
+      {"field": "delinquent_in_process_limit", "type": "monetary_amount"},
+      {"field": "delinquent_available_limit", "type": "monetary_amount"}
+    ]
+  },
+  {
+    "entity": "lending.loan_security",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "loan_security_name", "type": "short_text", "required": true},
+      {"field": "haircut", "type": "percentage"},
+      {"field": "loan_security_type_identifier", "type": "entity_reference", "target": "lending.loan_security_type", "required": true},
+      {"field": "loan_security_code", "type": "short_text", "required": true, "unique": true},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "utilized_security_value", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "available_security_value", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "original_security_value", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "loan_to_value_ratio", "type": "percentage"}
+    ]
+  },
+  {
+    "entity": "lending.loan_security_assignment",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_security_assignment", "form_read_only": true},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type", "required": true},
+      {"field": "total_security_value", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "maximum_loan_value", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "editable_after_posting": true, "values": ["Pledge Requested", "Unpledged", "Pledged", "Release Requested", "Released", "Repossessed", "Cancelled"], "default": "Pledge Requested"},
+      {"field": "pledge_time", "type": "date_and_time", "form_read_only": true, "editable_after_posting": true},
+      {"field": "securities_rows", "type": "owned_collection", "target": "lending.pledge", "required": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "applicant_type", "type": "enumeration", "required": true, "values": ["Employee", "Member", "Customer"]},
+      {"field": "reference_number", "type": "short_text", "editable_after_posting": true},
+      {"field": "description", "type": "text", "editable_after_posting": true},
+      {"field": "release_time", "type": "date_and_time", "form_read_only": true, "editable_after_posting": true},
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"},
+      {"field": "loan_application_identifier", "type": "entity_reference", "target": "lending.loan_application"}
+    ]
+  },
+  {
+    "entity": "lending.loan_security_deposit",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "form_read_only": true},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement", "form_read_only": true},
+      {"field": "deposit_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "allocated_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_security_deposit", "form_read_only": true},
+      {"field": "deposit_date", "type": "calendar_date"},
+      {"field": "allocated_date", "type": "calendar_date"},
+      {"field": "refund_amount", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "refund_date", "type": "calendar_date"},
+      {"field": "available_amount", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}}
+    ]
+  },
+  {
+    "entity": "lending.loan_security_price",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "loan_security_identifier", "type": "entity_reference", "target": "lending.loan_security", "required": true},
+      {"field": "loan_security_price", "type": "monetary_amount", "required": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "valid_from", "type": "date_and_time", "required": true},
+      {"field": "valid_upto", "type": "date_and_time", "required": true},
+      {"field": "loan_security_type_identifier", "type": "entity_reference", "target": "lending.loan_security_type", "form_read_only": true},
+      {"field": "loan_security_name", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_security_release",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]},
+      {"role": "loan_manager", "level": 1, "allows": ["read", "write", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 1, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type", "required": true},
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"},
+      {"field": "status", "type": "enumeration", "editable_after_posting": true, "access_level": 1, "values": ["Requested", "Approved"], "default": "Requested"},
+      {"field": "unpledge_time", "type": "date_and_time", "form_read_only": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_security_release", "form_read_only": true},
+      {"field": "securities_rows", "type": "owned_collection", "target": "lending.unpledge", "required": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "applicant_type", "type": "enumeration", "required": true, "values": ["Employee", "Member", "Customer"]},
+      {"field": "reference_number", "type": "short_text", "editable_after_posting": true},
+      {"field": "description", "type": "text", "editable_after_posting": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_security_shortfall",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "form_read_only": true},
+      {"field": "loan_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "security_value", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "shortfall_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "shortfall_time", "type": "date_and_time", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["", "Pending", "Completed"], "default": "Pending"},
+      {"field": "process_loan_security_shortfall_identifier", "type": "entity_reference", "target": "lending.process_loan_security_shortfall", "form_read_only": true},
+      {"field": "shortfall_percentage", "type": "percentage", "form_read_only": true},
+      {"field": "applicant_type", "type": "enumeration", "values": ["Employee", "Member", "Customer"]},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type"}
+    ]
+  },
+  {
+    "entity": "lending.loan_security_type",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "loan_security_type", "type": "short_text", "required": true, "unique": true},
+      {"field": "haircut", "type": "percentage", "default": "0"},
+      {"field": "loan_to_value_ratio", "type": "percentage"}
+    ]
+  },
+  {
+    "entity": "lending.loan_skipped_installment",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "payment_date", "type": "calendar_date", "required": true},
+      {"field": "principal_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "interest_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "total_payment", "type": "monetary_amount", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_transfer",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "loans_rows", "type": "owned_collection", "target": "lending.loan_transfer_detail"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_transfer", "form_read_only": true},
+      {"field": "applicant_identifier", "type": "entity_reference", "target": "sales.customer"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "transfer_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "from_branch_identifier", "type": "entity_reference", "target": "organization.branch", "required": true},
+      {"field": "to_branch_identifier", "type": "entity_reference", "target": "organization.branch", "required": true}
+    ]
+  },
+  {
+    "entity": "lending.loan_transfer_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"}
+    ]
+  },
+  {
+    "entity": "lending.loan_write_off",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true, "form_read_only": true},
+      {"field": "applicant_type", "type": "enumeration", "form_read_only": true, "values": ["Employee", "Member", "Customer"]},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type", "form_read_only": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "write_off_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "write_off_amount", "type": "monetary_amount", "required": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.loan_write_off", "form_read_only": true},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product"},
+      {"field": "is_nonperforming_asset", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "is_settlement_write_off", "type": "boolean", "default": "0"},
+      {"field": "value_date", "type": "calendar_date", "required": true},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement"}
+    ]
+  },
+  {
+    "entity": "lending.pledge",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "loan_security_identifier", "type": "entity_reference", "target": "lending.loan_security", "required": true},
+      {"field": "loan_security_type_identifier", "type": "entity_reference", "target": "lending.loan_security_type", "form_read_only": true},
+      {"field": "loan_security_code", "type": "short_text"},
+      {"field": "quantity", "type": "decimal"},
+      {"field": "loan_security_price", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "haircut", "type": "percentage", "form_read_only": true},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "post_haircut_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "loan_security_name", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.prepayment_charges",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "charge_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "amount", "type": "monetary_amount"}
+    ]
+  },
+  {
+    "entity": "lending.process_collection_dunning",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "loan_officer", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "posting_date", "type": "calendar_date", "required": true},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product"},
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.process_collection_dunning", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.process_loan_accounting",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan", "required": true},
+      {"field": "month_end_date", "type": "calendar_date", "required": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true},
+      {"field": "period_start_date", "type": "calendar_date"},
+      {"field": "period_end_date", "type": "calendar_date"},
+      {"field": "is_adjustment", "type": "boolean", "default": "0"},
+      {"field": "consolidation_details_rows", "type": "owned_collection", "target": "lending.process_loan_accounting_detail", "form_read_only": true},
+      {"field": "reversed_source_records", "type": "text", "form_read_only": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.process_loan_accounting", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.process_loan_accounting_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "source_type", "type": "enumeration", "form_read_only": true, "values": ["Loan Interest Accrual", "Loan Demand"]},
+      {"field": "source_document_identifier", "type": "selected_entity_reference", "target_selected_by": "source_type", "form_read_only": true},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement", "form_read_only": true},
+      {"field": "account_identifier", "type": "entity_reference", "target": "accounting.account", "form_read_only": true},
+      {"field": "debit", "type": "monetary_amount", "form_read_only": true},
+      {"field": "credit", "type": "monetary_amount", "form_read_only": true},
+      {"field": "source_record_count", "type": "integer", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.process_loan_classification",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "posting_date", "type": "calendar_date", "required": true},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product"},
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.process_loan_classification", "form_read_only": true},
+      {"field": "payment_reference_identifier", "type": "entity_reference", "target": "lending.loan_repayment", "form_read_only": true},
+      {"field": "is_backdated", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "force_update_days_past_due_in_loan", "type": "boolean", "default": "0"},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement"}
+    ]
+  },
+  {
+    "entity": "lending.process_loan_demand",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.process_loan_demand", "form_read_only": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product"},
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement"}
+    ]
+  },
+  {
+    "entity": "lending.process_loan_interest_accrual",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "posting_date", "type": "calendar_date", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.process_loan_interest_accrual", "form_read_only": true},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product"},
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"},
+      {"field": "accrual_type", "type": "enumeration", "form_read_only": true, "values": ["Regular", "Repayment", "Disbursement", "Credit Adjustment", "Debit Adjustment", "Refund"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "loan_disbursement_identifier", "type": "entity_reference", "target": "lending.loan_disbursement"}
+    ]
+  },
+  {
+    "entity": "lending.process_loan_restructure_limit",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "posting_date", "type": "calendar_date"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.process_loan_restructure_limit", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.process_loan_security_shortfall",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "loan_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lending.process_loan_security_shortfall", "form_read_only": true},
+      {"field": "update_time", "type": "date_and_time", "required": true, "form_read_only": true},
+      {"field": "applicant_borrower_identifier", "type": "entity_reference", "target": "sales.customer"},
+      {"field": "loan_identifier", "type": "entity_reference", "target": "lending.loan"}
+    ]
+  },
+  {
+    "entity": "lending.process_loan_statement_of_accounts",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "loan_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "loan_reporter", "level": 0, "allows": ["read", "report", "export", "print", "email"]},
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "report", "type": "enumeration", "required": true, "form_read_only": true, "values": ["Loan Statement of Account"], "default": "Loan Statement of Account"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "from_date", "type": "calendar_date"},
+      {"field": "loan_product_identifier", "type": "entity_reference", "target": "lending.loan_product"},
+      {"field": "to_date", "type": "calendar_date"},
+      {"field": "group_by", "type": "enumeration", "values": ["Detailed", "Grouped"], "default": "Detailed"},
+      {"field": "applicant_type", "type": "enumeration", "required": true, "values": ["Customer", "Employee"], "default": "Customer"},
+      {"field": "collection_based_on", "type": "enumeration", "values": ["", "Loan Product", "All Loans"]},
+      {"field": "applicants_rows", "type": "owned_collection", "target": "lending.process_loan_statement_of_accounts_applicant", "required": true},
+      {"field": "letter_head_identifier", "type": "entity_reference", "target": "document_output.letter_head"},
+      {"field": "orientation", "type": "enumeration", "values": ["Portrait", "Landscape"], "default": "Portrait"},
+      {"field": "terms_and_conditions_identifier", "type": "entity_reference", "target": "organization.terms_and_conditions"},
+      {"field": "include_break", "type": "boolean", "default": "1"},
+      {"field": "enable_auto_email", "type": "boolean", "default": "0"},
+      {"field": "sender_identifier", "type": "entity_reference", "target": "mail.email_account"},
+      {"field": "cc_to_rows", "type": "owned_selection", "target": "accounting.process_statement_of_accounts_cc"},
+      {"field": "frequency", "type": "enumeration", "values": ["Daily", "Weekly", "Biweekly", "Monthly", "Quarterly"], "default": "Monthly"},
+      {"field": "filter_duration", "type": "integer", "default": "12"},
+      {"field": "start_date", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "portable_document_name", "type": "short_text"},
+      {"field": "subject", "type": "short_text"},
+      {"field": "body", "type": "formatted_text"}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "fetch applicants"},
+      {"control": "formatted_information", "purpose": "help text"}
+    ]
+  },
+  {
+    "entity": "lending.process_loan_statement_of_accounts_applicant",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "applicant_type", "type": "enumeration", "required": true, "values": ["Customer", "Employee"]},
+      {"field": "applicant_identifier", "type": "selected_entity_reference", "target_selected_by": "applicant_type", "required": true},
+      {"field": "applicant_name", "type": "short_text", "form_read_only": true},
+      {"field": "email", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "lending.promise_to_pay",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "promised_date", "type": "calendar_date", "required": true},
+      {"field": "promised_amount", "type": "monetary_amount", "required": true},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Open", "Kept", "Broken", "Partial"], "default": "Open"},
+      {"field": "actual_paid_amount", "type": "monetary_amount"},
+      {"field": "captured_by_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "remarks", "type": "text"}
+    ]
+  },
+  {
+    "entity": "lending.proposed_pledge",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "loan_security_price", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "haircut", "type": "percentage", "form_read_only": true},
+      {"field": "quantity", "type": "decimal"},
+      {"field": "loan_security_identifier", "type": "entity_reference", "target": "lending.loan_security"},
+      {"field": "post_haircut_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "loan_security_name", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lending.repayment_schedule",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "payment_date", "type": "calendar_date"},
+      {"field": "principal_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "interest_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_payment", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "balance_loan_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "number_of_days", "type": "integer"},
+      {"field": "demand_generated", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "charges", "type": "monetary_amount"}
+    ]
+  }
+]

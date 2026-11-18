@@ -1,0 +1,112 @@
+[
+  {
+    "entity": "sales_tax_exchange.product_tax_category",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read"]},
+      {"role": "desk_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "product_tax_code", "type": "short_text", "required": true, "unique": true},
+      {"field": "description", "type": "text"},
+      {"field": "category_name", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "sales_tax_exchange.sales_tax_service_company_config",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "sales_tax_service_calculate_tax", "type": "boolean", "default": "0"},
+      {"field": "sales_tax_service_create_transactions", "type": "boolean", "default": "0"},
+      {"field": "sales_tax_service_include_exports", "type": "boolean", "default": "1"},
+      {"field": "tax_account_head_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "shipping_account_head_identifier", "type": "entity_reference", "target": "accounting.account", "required": true}
+    ]
+  },
+  {
+    "entity": "sales_tax_exchange.sales_tax_service_customer_exempt_region",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "country", "type": "enumeration", "required": true, "values": ["", "US", "CA"], "default": "US"},
+      {"field": "state", "type": "enumeration", "required": true, "values": ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY", "AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"]}
+    ]
+  },
+  {
+    "entity": "sales_tax_exchange.sales_tax_service_nexus",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "region", "type": "short_text"},
+      {"field": "region_code", "type": "short_text"},
+      {"field": "country", "type": "short_text"},
+      {"field": "country_code", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "sales_tax_exchange.sales_tax_service_service_interface_credential",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "live_token", "type": "protected_value"},
+      {"field": "sandbox_token", "type": "protected_value"}
+    ]
+  },
+  {
+    "entity": "sales_tax_exchange.sales_tax_service_service_interface_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "report"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "report"]}
+    ],
+    "fields": [
+      {"field": "action", "type": "short_text", "required": true},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["request", "success", "error", "skipped", "reused"]},
+      {"field": "reference_entity_type", "type": "short_text"},
+      {"field": "reference_name", "type": "short_text"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "payload", "type": "long_text", "form_read_only": true},
+      {"field": "response", "type": "long_text", "form_read_only": true},
+      {"field": "error", "type": "long_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "sales_tax_exchange.sales_tax_service_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "sales_tax_service_enabled", "type": "boolean", "default": "0"},
+      {"field": "setup_complete", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "enable_sales_tax_service_logging", "type": "boolean", "default": "1"},
+      {"field": "log_retention_days", "type": "integer", "default": "15"},
+      {"field": "company_config_rows", "type": "owned_collection", "target": "sales_tax_exchange.sales_tax_service_company_config"},
+      {"field": "service_interface_mode", "type": "enumeration", "values": ["", "Live", "Sandbox"], "default": "Live"},
+      {"field": "table_hvjw_rows", "type": "owned_collection", "target": "sales_tax_exchange.sales_tax_service_service_interface_credential"},
+      {"field": "nexus_last_synced", "type": "date_and_time", "form_read_only": true},
+      {"field": "product_tax_categories_last_synced", "type": "date_and_time", "form_read_only": true},
+      {"field": "nexus_rows", "type": "owned_collection", "target": "sales_tax_exchange.sales_tax_service_nexus", "form_read_only": true},
+      {"field": "legacy_cutoff_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "legacy_check_last_run", "type": "date_and_time", "form_read_only": true},
+      {"field": "legacy_check_status", "type": "enumeration", "form_read_only": true, "values": ["Pending", "Running", "Done", "Failed"], "default": "Pending"},
+      {"field": "legacy_check_summary", "type": "long_text", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "update nexus list btn"},
+      {"control": "formatted_information", "purpose": "nexus structured markup"},
+      {"control": "action", "purpose": "update product tax category btn"},
+      {"control": "formatted_information", "purpose": "product tax category structured markup"},
+      {"control": "formatted_information", "purpose": "legacy check structured markup"}
+    ]
+  }
+]

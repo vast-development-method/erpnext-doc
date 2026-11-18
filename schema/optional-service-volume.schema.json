@@ -1,0 +1,316 @@
+{
+  "title": "Optional capability service volume",
+  "description": "Structural contract for callable business operations, input modes, admission, record actions, report filters, report columns and reader roles. A declared interface alone does not establish effective authorization or a completed transaction.",
+  "type": "array",
+  "items": {
+    "$ref": "#/$defs/section"
+  },
+  "$defs": {
+    "input_mode": {
+      "enum": [
+        "required",
+        "optional",
+        "required_named",
+        "optional_named",
+        "additional_positional",
+        "additional_named",
+        "unspecified"
+      ],
+      "description": "Required and optional describe a declared input. Named modes require named binding. Additional modes collect surplus positional or named values. Unspecified leaves the requirement open."
+    },
+    "default_value": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "constant"
+          ],
+          "properties": {
+            "constant": {}
+          },
+          "additionalProperties": false,
+          "description": "Literal default, including an explicitly null value."
+        },
+        {
+          "type": "object",
+          "required": [
+            "named_choice"
+          ],
+          "properties": {
+            "named_choice": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false,
+          "description": "Default identified by the meaning of a named selection."
+        },
+        {
+          "type": "object",
+          "required": [
+            "contextual"
+          ],
+          "properties": {
+            "contextual": {
+              "const": true
+            }
+          },
+          "additionalProperties": false,
+          "description": "The operation resolves its default using the invocation context."
+        }
+      ]
+    },
+    "operation_input": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "$ref": "#/$defs/input_mode"
+        },
+        {
+          "$ref": "#/$defs/default_value"
+        }
+      ],
+      "minItems": 2,
+      "maxItems": 3,
+      "items": false,
+      "description": "Logical input name and binding requirement, followed by an optional default descriptor."
+    },
+    "record_operation": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        }
+      ],
+      "minItems": 2,
+      "maxItems": 2,
+      "items": false,
+      "description": "Record action followed by its affected entity. This pair describes a possible action within the operation."
+    },
+    "operation": {
+      "type": "object",
+      "required": [
+        "operation",
+        "configuration",
+        "inputs",
+        "caller"
+      ],
+      "properties": {
+        "configuration": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "operation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/operation_input"
+          }
+        },
+        "caller": {
+          "enum": [
+            "ordinary_admission",
+            "authenticated_admission",
+            "public_admission",
+            "configured_admission"
+          ],
+          "description": "Caller admission applies in addition to effective record, action and company permissions."
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_modes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "retrieve",
+              "submit",
+              "replace",
+              "remove"
+            ]
+          }
+        },
+        "record_operations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/record_operation"
+          }
+        },
+        "declarations": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "Count of equivalent declarations summarized by this entry."
+        }
+      },
+      "additionalProperties": false
+    },
+    "report_filter": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "enum": [
+            "required",
+            "optional"
+          ]
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        }
+      ],
+      "minItems": 3,
+      "maxItems": 4,
+      "items": false,
+      "description": "Filter name, value kind, requiredness and optional target entity for a reference."
+    },
+    "report_output": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        }
+      ],
+      "minItems": 2,
+      "maxItems": 3,
+      "items": false,
+      "description": "Output name, value kind and optional target entity for a reference."
+    },
+    "report": {
+      "type": "object",
+      "required": [
+        "report",
+        "configuration",
+        "subject"
+      ],
+      "properties": {
+        "configuration": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "report": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reader_roles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "total_row": {
+          "type": "boolean"
+        },
+        "background_preparation": {
+          "type": "boolean"
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report_filter"
+          },
+          "description": "Filters declared on the report."
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report_output"
+          },
+          "description": "Columns declared on the report."
+        },
+        "selectable_filters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report_filter"
+          },
+          "description": "Candidate filter rows used by a configuration or report interaction."
+        },
+        "selectable_outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report_output"
+          },
+          "description": "Candidate output columns whose applicability depends on the report selection."
+        },
+        "declarations": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "Count of equivalent declarations summarized by this entry."
+        }
+      },
+      "additionalProperties": false
+    },
+    "section": {
+      "type": "object",
+      "required": [
+        "capability"
+      ],
+      "properties": {
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/operation"
+          }
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/report"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "Operation and report descriptions grouped by business capability.",
+      "anyOf": [
+        {
+          "required": [
+            "operations"
+          ]
+        },
+        {
+          "required": [
+            "reports"
+          ]
+        }
+      ]
+    }
+  }
+}

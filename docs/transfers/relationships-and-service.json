@@ -1,0 +1,272 @@
+[
+  {
+    "name": "Register a customer from a sales lead",
+    "source": "sales_relationships.lead",
+    "destination": "sales.customer",
+    "decision": "Use a company customer when a company name exists. Otherwise use an individual customer and the lead's personal name. Resolve the default customer group and connect the primary address and contact. A disabled lead flag does not automatically disable its converted customer.",
+    "record_mappings": [
+      {
+        "source_entity": "sales_relationships.lead",
+        "target_entity": "sales.customer",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "lead_name_identifier"
+          ],
+          [
+            "company_name",
+            "customer_name"
+          ]
+        ],
+        "excluded_from_default_copy": [
+          "disabled"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Qualify a lead into a sales opportunity",
+    "source": "sales_relationships.lead",
+    "destination": "sales_relationships.opportunity",
+    "decision": "The new opportunity identifies the lead as its party and preserves the responsible owner and contact details. Contact display text and the customer company name remain separate.",
+    "record_mappings": [
+      {
+        "source_entity": "sales_relationships.lead",
+        "target_entity": "sales_relationships.opportunity",
+        "explicit_field_transfers": [
+          [
+            "entity_type",
+            "opportunity_from_identifier"
+          ],
+          [
+            "record_identifier",
+            "party_name_identifier"
+          ],
+          [
+            "lead_name",
+            "contact_display"
+          ],
+          [
+            "company_name",
+            "customer_name"
+          ],
+          [
+            "email_identifier",
+            "contact_email"
+          ],
+          [
+            "mobile_number",
+            "contact_mobile"
+          ],
+          [
+            "lead_owner_identifier",
+            "opportunity_owner_identifier"
+          ],
+          [
+            "notes_rows",
+            "notes_rows"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Prepare a quotation for a lead",
+    "source": "sales_relationships.lead",
+    "destination": "sales.quotation",
+    "decision": "Use the lead as the party and set the quotation recipient kind to lead. Preparing a quotation does not require creating a customer master first.",
+    "record_mappings": [
+      {
+        "source_entity": "sales_relationships.lead",
+        "target_entity": "sales.quotation",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "party_name_identifier"
+          ],
+          [
+            "entity_type",
+            "quotation_to_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Quote a sales opportunity",
+    "source": "sales_relationships.opportunity",
+    "destination": "sales.quotation",
+    "decision": "Use the opportunity's party kind for the quotation recipient. Retain the opportunity identity and set the exchange rate for the quotation context. Add opportunity item rows only when the receiving collection is empty.",
+    "record_mappings": [
+      {
+        "source_entity": "sales_relationships.opportunity",
+        "target_entity": "sales.quotation",
+        "explicit_field_transfers": [
+          [
+            "opportunity_from_identifier",
+            "quotation_to_identifier"
+          ],
+          [
+            "record_identifier",
+            "opportunity_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "sales_relationships.opportunity_item",
+        "target_entity": "sales.quotation_item",
+        "explicit_field_transfers": [
+          [
+            "owning_record_identifier",
+            "prevdoc_record_identifier"
+          ],
+          [
+            "owning_entity_type",
+            "prevdoc_entity_type_identifier"
+          ],
+          [
+            "unit_of_measure_identifier",
+            "stock_unit_of_measure_identifier"
+          ]
+        ],
+        "collection_policy": "Only add rows when the destination collection is empty."
+      }
+    ]
+  },
+  {
+    "name": "Register the customer represented by an opportunity",
+    "source": "sales_relationships.opportunity",
+    "destination": "sales.customer",
+    "decision": "Carry the opportunity currency into the customer's default currency and retain the originating opportunity. When the party is a lead, connect the new customer with that lead. The customer receives its own identity.",
+    "record_mappings": [
+      {
+        "source_entity": "sales_relationships.opportunity",
+        "target_entity": "sales.customer",
+        "explicit_field_transfers": [
+          [
+            "currency_identifier",
+            "default_currency_identifier"
+          ],
+          [
+            "customer_name",
+            "customer_name"
+          ],
+          [
+            "record_identifier",
+            "opportunity_name_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Register a company customer from a prospect",
+    "source": "sales_relationships.prospect",
+    "destination": "sales.customer",
+    "decision": "Require access to read the prospect and create customers. Block a second conversion of the same prospect. Classify the customer as a company, use the prospect company name and take the prospect group or the default customer group. Associate the lead only when exactly one lead belongs to the prospect and no customer already uses that lead.",
+    "record_mappings": [
+      {
+        "source_entity": "sales_relationships.prospect",
+        "target_entity": "sales.customer",
+        "explicit_field_transfers": [
+          [
+            "company_name",
+            "customer_name"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Open an opportunity for a prospect",
+    "source": "sales_relationships.prospect",
+    "destination": "sales_relationships.opportunity",
+    "decision": "Select prospect as party kind. Preserve its owner as opportunity owner, its company name and its customer group or the default group.",
+    "record_mappings": [
+      {
+        "source_entity": "sales_relationships.prospect",
+        "target_entity": "sales_relationships.opportunity",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "party_name_identifier"
+          ],
+          [
+            "prospect_owner_identifier",
+            "opportunity_owner_identifier"
+          ],
+          [
+            "company_name",
+            "customer_name"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Prepare a quotation for an existing customer",
+    "source": "sales.customer",
+    "destination": "sales.quotation",
+    "decision": "Use customer as the party kind, select its selling price list and currency, and retain the customer identity as the quotation party.",
+    "record_mappings": [
+      {
+        "source_entity": "sales.customer",
+        "target_entity": "sales.quotation",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "party_name_identifier"
+          ],
+          [
+            "entity_type",
+            "quotation_to_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Open a sales opportunity for a customer",
+    "source": "sales.customer",
+    "destination": "sales_relationships.opportunity",
+    "decision": "Use a customer party with its persistent identifier. Opportunity stage and closure remain separate from the customer's standing.",
+    "record_mappings": [
+      {
+        "source_entity": "sales.customer",
+        "target_entity": "sales_relationships.opportunity",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "party_name_identifier"
+          ],
+          [
+            "entity_type",
+            "opportunity_from_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Raise a support case from a message",
+    "source": "information_management.communication",
+    "destination": "customer_support.issue",
+    "decision": "Check read access on the specific message. Create the case with subject, message body, medium and reporting party details, then associate the message with the case. Copying its text is distinct from sharing every related private record.",
+    "record_mappings": [
+      {
+        "source_entity": "information_management.communication",
+        "target_entity": "customer_support.issue",
+        "explicit_field_transfers": [
+          [
+            "subject",
+            "subject"
+          ],
+          [
+            "content",
+            "description"
+          ]
+        ]
+      }
+    ]
+  }
+]

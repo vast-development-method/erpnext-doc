@@ -1,0 +1,1137 @@
+[
+  {
+    "capability": "Delivery charges and mobile money at tills",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "delivery_charges",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "disabled", "value_kind": "boolean"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "default_rate", "value_kind": "money", "rules": ["required", "nonnegative"]},
+          {"purpose": "shipping_account", "value_kind": "reference", "rules": ["required"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "cost_center", "value_kind": "reference", "rules": ["required"], "target": "accounting.cost_center", "binding": "shared_model"},
+          {"purpose": "label", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "profiles", "value_kind": "owned_rows", "target": "delivery_charges_point_of_sale_profile"},
+          {"purpose": "profiles_list", "value_kind": "expression_or_structured_text", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "delivery_charges_point_of_sale_profile",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "rules": ["required"], "target": "accounting.point_of_sale_profile", "binding": "shared_model"},
+          {"purpose": "rate", "value_kind": "money"}
+        ]
+      },
+      {
+        "concept": "mobile_money_c2_b_register_resource_address",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "mobile_money_settings", "value_kind": "reference", "rules": ["required", "unique"], "target": "payment_services.mobile_money_settings", "binding": "shared_model"},
+          {"purpose": "till_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "business_shortcode", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "mode_of_payment", "value_kind": "reference", "rules": ["required"], "target": "accounting.mode_of_payment", "binding": "shared_model"},
+          {"purpose": "register_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["pending", "success", "failed"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "mobile_money_payment_register",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "transactiontype", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "transid", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "transtime", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "transamount", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "businessshortcode", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "billrefnumber", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invoicenumber", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "orgaccountbalance", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "thirdpartytransid", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "msisdn", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "firstname", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "middlename", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "lastname", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "payment_entry", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.payment_entry", "binding": "shared_model"},
+          {"purpose": "default_currency", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "mobile_money_payment_register"},
+          {"purpose": "mode_of_payment", "value_kind": "reference", "target": "accounting.mode_of_payment", "binding": "shared_model"},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["read_only"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "full_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "submit_payment", "value_kind": "boolean"},
+          {"purpose": "posting_time", "value_kind": "time_of_day", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["read", "write", "submit", "report", "export", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["read", "write", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["read", "write", "submit", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "point_of_sale_closing_shift",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "period_start_date", "value_kind": "date_and_time", "rules": ["required", "read_only"]},
+          {"purpose": "period_end_date", "value_kind": "date_and_time", "rules": ["required", "read_only"]},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "rules": ["required"], "target": "accounting.point_of_sale_profile", "binding": "shared_model"},
+          {"purpose": "user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "point_of_sale_transactions", "value_kind": "owned_rows", "target": "customer_invoice_reference"},
+          {"purpose": "payment_reconciliation", "value_kind": "owned_rows", "target": "point_of_sale_closing_shift_detail"},
+          {"purpose": "grand_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "net_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_quantity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "taxes", "value_kind": "owned_rows", "rules": ["read_only"], "target": "point_of_sale_closing_shift_taxes"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "point_of_sale_closing_shift"},
+          {"purpose": "point_of_sale_opening_shift", "value_kind": "reference", "rules": ["required"], "target": "point_of_sale_opening_shift"},
+          {"purpose": "point_of_sale_payments", "value_kind": "owned_rows", "target": "point_of_sale_payment_entry_reference"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["sales_manager", 0, ["read", "write", "create", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["administrator", 0, ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "point_of_sale_closing_shift_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "mode_of_payment", "value_kind": "reference", "rules": ["required"], "target": "accounting.mode_of_payment", "binding": "shared_model"},
+          {"purpose": "opening_amount", "value_kind": "money", "rules": ["required", "read_only"]},
+          {"purpose": "closing_amount", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "expected_amount", "value_kind": "money", "rules": ["required", "read_only"]},
+          {"purpose": "difference", "value_kind": "money", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "point_of_sale_closing_shift_taxes",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "account_head", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "rate", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "amount", "value_kind": "money", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "point_of_sale_coupon",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "coupon_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "coupon_type", "value_kind": "choice", "rules": ["required"], "choices": ["promotional", "gift_card"]},
+          {"purpose": "customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "coupon_code", "value_kind": "text", "rules": ["unique", "write_once"]},
+          {"purpose": "point_of_sale_offer", "value_kind": "reference", "rules": ["required"], "target": "point_of_sale_offer"},
+          {"purpose": "valid_from", "value_kind": "civil_day"},
+          {"purpose": "valid_upto", "value_kind": "civil_day"},
+          {"purpose": "maximum_use", "value_kind": "whole_number"},
+          {"purpose": "used", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "description", "value_kind": "formatted_text"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "campaign", "value_kind": "reference", "target": "sales_relationships.campaign", "binding": "shared_model"},
+          {"purpose": "oneuse", "value_kind": "boolean"},
+          {"purpose": "customer_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "mobile_number", "value_kind": "text"},
+          {"purpose": "email_identifier", "value_kind": "text"},
+          {"purpose": "referral_code", "value_kind": "reference", "rules": ["read_only"], "target": "referral_code"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["website_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "point_of_sale_coupon_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "coupon", "value_kind": "reference", "rules": ["required", "read_only"], "target": "point_of_sale_coupon"},
+          {"purpose": "applied", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "point_of_sale_offer", "value_kind": "reference", "rules": ["required", "read_only"], "target": "point_of_sale_offer"},
+          {"purpose": "point_of_sale_coupon_detail_classification", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "customer", "value_kind": "reference", "rules": ["read_only"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "coupon_code", "value_kind": "text", "rules": ["required", "read_only"]}
+        ]
+      },
+      {
+        "concept": "point_of_sale_hardware_service_interface",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "service_interface_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "service_interface_endpoint", "value_kind": "text", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "point_of_sale_hardware_manager_setting",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "hardware_resource_address", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "port", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "service_interface_details", "value_kind": "owned_rows", "target": "point_of_sale_hardware_service_interface"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "point_of_sale_offer",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "disable", "value_kind": "boolean"},
+          {"purpose": "apply_on", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "product_identifier", "item_group", "brand", "transaction"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "target": "accounting.point_of_sale_profile", "binding": "shared_model"},
+          {"purpose": "warehouse", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "item", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_group", "value_kind": "reference", "target": "organization.item_group", "binding": "shared_model"},
+          {"purpose": "brand", "value_kind": "reference", "target": "organization.brand", "binding": "shared_model"},
+          {"purpose": "minimum_quantity", "value_kind": "decimal"},
+          {"purpose": "maximum_quantity", "value_kind": "decimal"},
+          {"purpose": "minimum_amount", "value_kind": "decimal"},
+          {"purpose": "maximum_amount", "value_kind": "decimal"},
+          {"purpose": "valid_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "valid_upto", "value_kind": "civil_day"},
+          {"purpose": "apply_type", "value_kind": "choice", "choices": ["unselected", "product_identifier", "item_group"]},
+          {"purpose": "apply_product_identifier", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "apply_item_group", "value_kind": "reference", "target": "organization.item_group", "binding": "shared_model"},
+          {"purpose": "discount_type", "value_kind": "choice", "choices": ["unselected", "rate", "discount_percentage", "discount_amount"]},
+          {"purpose": "rate", "value_kind": "decimal"},
+          {"purpose": "discount_amount", "value_kind": "decimal"},
+          {"purpose": "discount_percentage", "value_kind": "decimal"},
+          {"purpose": "loyalty_program", "value_kind": "reference", "target": "accounting.loyalty_program", "binding": "shared_model"},
+          {"purpose": "loyalty_points", "value_kind": "whole_number"},
+          {"purpose": "given_quantity", "value_kind": "decimal"},
+          {"purpose": "offer", "value_kind": "choice", "rules": ["required"], "choices": ["item_price", "give_product", "grand_total", "loyalty_point"]},
+          {"purpose": "auto", "value_kind": "boolean"},
+          {"purpose": "description", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "replace_item", "value_kind": "boolean"},
+          {"purpose": "replace_cheapest_item", "value_kind": "boolean"},
+          {"purpose": "less_then", "value_kind": "decimal"},
+          {"purpose": "coupon_based", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_user", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["sales_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_master_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "point_of_sale_offer_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "offer_name", "value_kind": "reference", "rules": ["read_only"], "target": "point_of_sale_offer"},
+          {"purpose": "apply_on", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "offer", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "offer_applied", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "row_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "items", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "give_item", "value_kind": "reference", "rules": ["read_only"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "give_item_row_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "coupon", "value_kind": "reference", "rules": ["read_only"], "target": "point_of_sale_coupon"},
+          {"purpose": "coupon_based", "value_kind": "boolean", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "point_of_sale_opening_shift",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "period_start_date", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "period_end_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only", "hidden_from_form", "editable_after_submission"], "choices": ["draft", "open", "closed", "cancelled"]},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "set_posting_date", "value_kind": "boolean"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "rules": ["required"], "target": "accounting.point_of_sale_profile", "binding": "shared_model"},
+          {"purpose": "user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "balance_details", "value_kind": "owned_rows", "rules": ["required"], "target": "point_of_sale_opening_shift_detail"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "point_of_sale_opening_shift"},
+          {"purpose": "point_of_sale_closing_shift", "value_kind": "text", "rules": ["read_only", "editable_after_submission"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["sales_manager", 0, ["read", "write", "create", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["administrator", 0, ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "point_of_sale_opening_shift_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "mode_of_payment", "value_kind": "reference", "rules": ["required"], "target": "accounting.mode_of_payment", "binding": "shared_model"},
+          {"purpose": "amount", "value_kind": "money", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "point_of_sale_payment_entry_reference",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "payment_entry", "value_kind": "reference", "rules": ["required"], "target": "accounting.payment_entry", "binding": "shared_model"},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "customer", "value_kind": "reference", "rules": ["required", "read_only"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "paid_amount", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "mode_of_payment", "value_kind": "text", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "point_of_sale_structured_exchange_print_designer",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "structured_exchange_template", "value_kind": "expression_or_structured_text"},
+          {"purpose": "print_format", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "reference_record_identifier", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "reference_record_class"},
+          {"purpose": "is_default", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "referral_code",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "campaign", "value_kind": "reference", "target": "sales_relationships.campaign", "binding": "shared_model"},
+          {"purpose": "referral_name", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "referral_code", "value_kind": "text", "rules": ["unique", "write_once"]},
+          {"purpose": "disabled", "value_kind": "boolean"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "customer_offer", "value_kind": "reference", "rules": ["required"], "target": "point_of_sale_offer"},
+          {"purpose": "primary_offer", "value_kind": "reference", "target": "point_of_sale_offer"},
+          {"purpose": "customer", "value_kind": "reference", "rules": ["required"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "customer_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "mobile_number", "value_kind": "text"},
+          {"purpose": "email_identifier", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["website_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "customer_invoice_reference",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "customer_invoice", "value_kind": "reference", "rules": ["required"], "target": "accounting.sales_invoice", "binding": "shared_model"},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "customer", "value_kind": "reference", "rules": ["required", "read_only"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "grand_total", "value_kind": "money", "rules": ["required"]}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Delivery charges and mobile money at tills",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "item_barcode", "purpose": "point_of_sale_unit_of_measure", "value_kind": "reference", "placement": "barcode_type"},
+      {"on": "customer_invoice_item", "purpose": "point_of_sale_notes", "value_kind": "text", "placement": "product_identifier", "rules": ["translatable"]},
+      {"on": "customer_invoice_item", "purpose": "point_of_sale_row_identifier", "value_kind": "text", "placement": "item_name", "rules": ["read_only", "translatable"]},
+      {"on": "customer_invoice_item", "purpose": "point_of_sale_delivery_date", "value_kind": "civil_day", "placement": "point_of_sale_row_identifier"},
+      {"on": "customer_invoice_item", "purpose": "sales_person", "value_kind": "reference", "placement": "point_of_sale_delivery_date"},
+      {"on": "customer_invoice_item", "purpose": "point_of_sale_offers", "value_kind": "text", "placement": "pricing_rules", "rules": ["read_only", "translatable"]},
+      {"on": "customer_invoice_item", "purpose": "point_of_sale_offer_applied", "value_kind": "boolean", "placement": "point_of_sale_offers", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "point_of_sale_is_offer", "value_kind": "boolean", "placement": "point_of_sale_offer_applied", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "point_of_sale_is_replace", "value_kind": "text", "placement": "point_of_sale_is_offer", "rules": ["read_only", "translatable"]},
+      {"on": "customer_order_item", "purpose": "point_of_sale_notes", "value_kind": "text", "placement": "ensure_delivery_based_on_produced_serial_number", "rules": ["translatable"]},
+      {"on": "customer_order_item", "purpose": "point_of_sale_row_identifier", "value_kind": "text", "placement": "item_name", "rules": ["read_only", "translatable"]},
+      {"on": "customer_invoice", "purpose": "delivery_charge_rate", "value_kind": "text", "placement": "title", "rules": ["hidden_from_form", "translatable"]},
+      {"on": "customer_invoice", "purpose": "point_of_sale_point_of_sale_opening_shift", "value_kind": "text", "placement": "point_of_sale_profile", "rules": ["read_only", "translatable"]},
+      {"on": "customer_invoice", "purpose": "point_of_sale_is_printed", "value_kind": "boolean", "placement": "point_of_sale_point_of_sale_opening_shift", "rules": ["read_only"]},
+      {"on": "customer_invoice", "purpose": "point_of_sale_delivery_charges", "value_kind": "reference", "placement": "taxes_and_charges"},
+      {"on": "customer_invoice", "purpose": "point_of_sale_offers", "value_kind": "owned_rows", "placement": "pricing_rules", "rules": ["read_only"]},
+      {"on": "customer_invoice", "purpose": "point_of_sale_coupons", "value_kind": "owned_rows", "placement": "point_of_sale_offers", "rules": ["read_only"]},
+      {"on": "customer_invoice", "purpose": "field_group_for_point_of_sale_notes", "value_kind": "field_group", "placement": "against_income_account"},
+      {"on": "customer_invoice", "purpose": "point_of_sale_notes", "value_kind": "text", "placement": "field_group_for_point_of_sale_notes", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "field_column_for_point_of_sale_delivery_date", "value_kind": "field_column", "placement": "point_of_sale_notes"},
+      {"on": "customer_invoice", "purpose": "point_of_sale_delivery_date", "value_kind": "civil_day", "placement": "field_column_for_point_of_sale_delivery_date"},
+      {"on": "customer_invoice", "purpose": "point_of_sale_delivery_charges_rate", "value_kind": "money", "placement": "connections_tab", "rules": ["read_only", "hidden_from_form"]},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_point_of_sale_awesome_settings_field_group", "value_kind": "field_group", "placement": "company_address"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_cash_mode_of_payment", "value_kind": "reference", "placement": "point_of_sale_point_of_sale_awesome_settings_field_group"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_delete", "value_kind": "boolean", "placement": "point_of_sale_cash_mode_of_payment"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_user_to_edit_rate", "value_kind": "boolean", "placement": "point_of_sale_allow_delete"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_user_to_edit_additional_discount", "value_kind": "boolean", "placement": "point_of_sale_allow_user_to_edit_rate"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_use_percentage_discount", "value_kind": "boolean", "placement": "point_of_sale_allow_user_to_edit_additional_discount"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_maximum_discount_allowed", "value_kind": "decimal", "placement": "point_of_sale_use_percentage_discount"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_scale_barcode_start", "value_kind": "whole_number", "placement": "point_of_sale_maximum_discount_allowed"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_change_posting_date", "value_kind": "boolean", "placement": "point_of_sale_scale_barcode_start"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_default_card_view", "value_kind": "boolean", "placement": "point_of_sale_allow_change_posting_date"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_default_customer_order", "value_kind": "boolean", "placement": "point_of_sale_default_card_view"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_col_1_field_column", "value_kind": "field_column", "placement": "point_of_sale_default_customer_order"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_user_to_edit_item_discount", "value_kind": "boolean", "placement": "point_of_sale_col_1_field_column"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_display_items_in_stock", "value_kind": "boolean", "placement": "point_of_sale_allow_user_to_edit_item_discount"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_partial_payment", "value_kind": "boolean", "placement": "point_of_sale_display_items_in_stock"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_credit_sale", "value_kind": "boolean", "placement": "point_of_sale_allow_partial_payment"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_return", "value_kind": "boolean", "placement": "point_of_sale_allow_credit_sale"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_apply_customer_discount", "value_kind": "boolean", "placement": "point_of_sale_allow_return"},
+      {"on": "point_of_sale_profile", "purpose": "use_cashback", "value_kind": "boolean", "placement": "point_of_sale_apply_customer_discount"},
+      {"on": "point_of_sale_profile", "purpose": "use_customer_credit", "value_kind": "boolean", "placement": "use_cashback"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_hide_closing_shift", "value_kind": "boolean", "placement": "use_customer_credit"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_auto_set_batch", "value_kind": "boolean", "placement": "point_of_sale_hide_closing_shift"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_display_product_identifier", "value_kind": "boolean", "placement": "point_of_sale_auto_set_batch"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_zero_rated_items", "value_kind": "boolean", "placement": "point_of_sale_display_product_identifier"},
+      {"on": "point_of_sale_profile", "purpose": "hide_expected_amount", "value_kind": "boolean", "placement": "point_of_sale_allow_zero_rated_items"},
+      {"on": "point_of_sale_profile", "purpose": "allow_user_to_edit_item_total", "value_kind": "boolean", "placement": "hide_expected_amount"},
+      {"on": "point_of_sale_profile", "purpose": "field_column_for_point_of_sale_allow_customer_order", "value_kind": "field_column", "placement": "hide_expected_amount"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_customer_order", "value_kind": "boolean", "placement": "field_column_for_point_of_sale_allow_customer_order"},
+      {"on": "point_of_sale_profile", "purpose": "allow_select_customer_order", "value_kind": "boolean", "placement": "point_of_sale_allow_customer_order"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_show_template_items", "value_kind": "boolean", "placement": "point_of_sale_allow_customer_order"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_hide_variants_items", "value_kind": "boolean", "placement": "point_of_sale_show_template_items"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_fetch_coupon", "value_kind": "boolean", "placement": "point_of_sale_hide_variants_items"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_customer_purchase_order", "value_kind": "boolean", "placement": "point_of_sale_fetch_coupon"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_print_last_invoice", "value_kind": "boolean", "placement": "point_of_sale_allow_customer_purchase_order"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_display_additional_notes", "value_kind": "boolean", "placement": "point_of_sale_allow_print_last_invoice"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_write_off_change", "value_kind": "boolean", "placement": "point_of_sale_display_additional_notes"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_new_line", "value_kind": "boolean", "placement": "point_of_sale_allow_write_off_change"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_input_quantity", "value_kind": "boolean", "placement": "point_of_sale_new_line"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_print_draft_invoices", "value_kind": "boolean", "placement": "point_of_sale_input_quantity"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_use_delivery_charges", "value_kind": "boolean", "placement": "point_of_sale_allow_print_draft_invoices"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_auto_set_delivery_charges", "value_kind": "boolean", "placement": "point_of_sale_use_delivery_charges"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_duplicate_customer_names", "value_kind": "boolean", "placement": "point_of_sale_auto_set_delivery_charges"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_awesome_payments_field_group", "value_kind": "field_group", "placement": "point_of_sale_allow_duplicate_customer_names"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_use_point_of_sale_awesome_payments", "value_kind": "boolean", "placement": "point_of_sale_awesome_payments_field_group"},
+      {"on": "point_of_sale_profile", "purpose": "field_column_for_point_of_sale_allow_make_new_payments", "value_kind": "field_column", "placement": "point_of_sale_use_point_of_sale_awesome_payments"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_make_new_payments", "value_kind": "boolean", "placement": "field_column_for_point_of_sale_allow_make_new_payments"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_reconcile_payments", "value_kind": "boolean", "placement": "point_of_sale_allow_make_new_payments"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_mobile_money_reconcile_payments", "value_kind": "boolean", "placement": "point_of_sale_allow_reconcile_payments"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_point_of_sale_awesome_advance_settings_field_group", "value_kind": "field_group", "placement": "point_of_sale_allow_mobile_money_reconcile_payments"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_allow_submissions_in_background_job", "value_kind": "boolean", "placement": "point_of_sale_point_of_sale_awesome_advance_settings_field_group"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_search_serial_number", "value_kind": "boolean", "placement": "point_of_sale_allow_submissions_in_background_job"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_search_batch_number", "value_kind": "boolean", "placement": "point_of_sale_search_serial_number"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_tax_inclusive", "value_kind": "boolean", "placement": "point_of_sale_search_batch_number"},
+      {"on": "point_of_sale_profile", "purpose": "field_column_for_point_of_sale_local_storage", "value_kind": "field_column", "placement": "point_of_sale_tax_inclusive"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_local_storage", "value_kind": "boolean", "placement": "field_column_for_point_of_sale_local_storage"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_use_server_cache", "value_kind": "boolean", "placement": "point_of_sale_local_storage"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_server_cache_duration", "value_kind": "whole_number", "placement": "point_of_sale_use_server_cache", "rules": ["nonnegative"]},
+      {"on": "point_of_sale_profile", "purpose": "field_column_for_pose_use_limit_search", "value_kind": "field_column", "placement": "point_of_sale_server_cache_duration"},
+      {"on": "point_of_sale_profile", "purpose": "pose_use_limit_search", "value_kind": "boolean", "placement": "field_column_for_pose_use_limit_search"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_search_limit", "value_kind": "whole_number", "placement": "pose_use_limit_search", "rules": ["nonnegative"]},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_hardware_manager_setting_field_group", "value_kind": "field_group", "placement": "apply_discount_on"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_hardware_manager", "value_kind": "boolean", "placement": "point_of_sale_hardware_manager_setting_field_group"},
+      {"on": "customer", "purpose": "point_of_sale_discount", "value_kind": "decimal", "placement": "lead_name", "rules": ["nonnegative"]},
+      {"on": "customer", "purpose": "point_of_sale_birthday", "value_kind": "civil_day", "placement": "formatted_contact_details"},
+      {"on": "customer", "purpose": "field_group_for_point_of_sale_referral_code", "value_kind": "field_group", "placement": "point_of_sale_birthday"},
+      {"on": "customer", "purpose": "point_of_sale_referral_code", "value_kind": "text", "placement": "field_group_for_point_of_sale_referral_code", "rules": ["available_in_short_form", "translatable"]},
+      {"on": "customer", "purpose": "point_of_sale_referral_company", "value_kind": "reference", "placement": "point_of_sale_referral_code", "rules": ["available_in_short_form"]},
+      {"on": "batch", "purpose": "point_of_sale_batch_price", "value_kind": "decimal", "placement": "manufacturing_date"},
+      {"on": "address", "purpose": "point_of_sale_delivery_charges", "value_kind": "reference", "placement": "is_shipping_address"},
+      {"on": "customer_order", "purpose": "field_group_for_point_of_sale_notes", "value_kind": "field_group", "placement": "items"},
+      {"on": "customer_order", "purpose": "point_of_sale_notes", "value_kind": "text", "placement": "field_group_for_point_of_sale_notes", "rules": ["translatable"]},
+      {"on": "customer_order", "purpose": "point_of_sale_offers", "value_kind": "owned_rows", "placement": "pricing_rules", "rules": ["read_only"]},
+      {"on": "customer_order", "purpose": "point_of_sale_coupons", "value_kind": "owned_rows", "placement": "point_of_sale_offers", "rules": ["read_only"]},
+      {"on": "company", "purpose": "field_group_for_point_of_sale_auto_referral", "value_kind": "field_group", "placement": "total_monthly_sales"},
+      {"on": "company", "purpose": "point_of_sale_auto_referral", "value_kind": "boolean", "placement": "field_group_for_point_of_sale_auto_referral"},
+      {"on": "company", "purpose": "field_column_for_point_of_sale_customer_offer", "value_kind": "field_column", "placement": "point_of_sale_auto_referral"},
+      {"on": "company", "purpose": "point_of_sale_customer_offer", "value_kind": "reference", "placement": "field_column_for_point_of_sale_customer_offer"},
+      {"on": "company", "purpose": "point_of_sale_primary_offer", "value_kind": "reference", "placement": "point_of_sale_customer_offer"},
+      {"on": "company", "purpose": "point_of_sale_referral_campaign", "value_kind": "reference", "placement": "point_of_sale_primary_offer"}
+    ]
+  },
+  {
+    "capability": "Delivery charges and mobile money at tills",
+    "configuration": 1,
+    "rule_addresses": [
+      ["customer_invoice", "point_of_sale_point_of_sale_opening_shift", "number_copy", "boolean"],
+      ["point_of_sale_profile", "point_of_sale_tax_inclusive", "hidden", "boolean"]
+    ]
+  },
+  {
+    "capability": "Device-bound authentication",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "passkey_enforcement_role",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "role", "value_kind": "reference", "rules": ["required"], "target": "information_management.role", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "passkey_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "login_with_passkey", "value_kind": "boolean"},
+          {"purpose": "passkey_as_second_factor", "value_kind": "boolean"},
+          {"purpose": "passkey_two_factor_authentication_allow_one_time_password_fallback", "value_kind": "boolean"},
+          {"purpose": "passkey_rp_identifier", "value_kind": "text"},
+          {"purpose": "passkey_origins", "value_kind": "text"},
+          {"purpose": "passkey_application_origins", "value_kind": "text"},
+          {"purpose": "passkey_mobile_device_platform_package_name", "value_kind": "text"},
+          {"purpose": "passkey_mobile_device_platform_cert_fingerprints", "value_kind": "text"},
+          {"purpose": "passkey_mobile_device_platform_team_identifier", "value_kind": "text"},
+          {"purpose": "passkey_mobile_device_platform_bundle_identifier", "value_kind": "text"},
+          {"purpose": "passkey_enforce_scope", "value_kind": "choice", "choices": ["number_one", "selected_roles", "all_users"]},
+          {"purpose": "passkey_enforce_roles", "value_kind": "owned_selection_rows", "target": "passkey_enforcement_role"},
+          {"purpose": "passkey_enforce_privileged_always", "value_kind": "boolean"},
+          {"purpose": "passkey_enforce_after", "value_kind": "civil_day"},
+          {"purpose": "passkey_everyone_else", "value_kind": "choice", "choices": ["nudge", "off"]},
+          {"purpose": "passkey_enforce_grace_logins", "value_kind": "whole_number"},
+          {"purpose": "passkey_enforce_incapable", "value_kind": "choice", "choices": ["degrade_to_nudge", "block_notify_administrator"]},
+          {"purpose": "passkey_nudge_maximum_prompts", "value_kind": "whole_number"},
+          {"purpose": "passkey_nudge_cooldown_days", "value_kind": "whole_number"},
+          {"purpose": "passkey_conditional_create", "value_kind": "boolean"},
+          {"purpose": "passkey_sign_count_hard_fail", "value_kind": "boolean"},
+          {"purpose": "passkey_maximum_per_user", "value_kind": "whole_number"},
+          {"purpose": "passkey_reauth_window", "value_kind": "whole_number"},
+          {"purpose": "passkey_allow_first_enrollment_on_external_login", "value_kind": "boolean"},
+          {"purpose": "passkey_notify_on_change", "value_kind": "boolean"},
+          {"purpose": "passkey_notify_password_fallback", "value_kind": "boolean"},
+          {"purpose": "passkey_notify_password_login", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "web_authn_credential",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "read_only", "indexed_for_search"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "label", "value_kind": "text"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "credential_identifier", "value_kind": "long_text", "rules": ["required", "read_only"]},
+          {"purpose": "credential_identifier_sha256", "value_kind": "text", "rules": ["required", "unique", "read_only", "hidden_from_form"]},
+          {"purpose": "public_key", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "sign_count", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "transports", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "aaguid", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "attestation_format", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "attestation_object", "value_kind": "long_text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "client_data_structured_data", "value_kind": "long_text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "backup_eligible", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "backup_state", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "uv_initialized", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "discoverable", "value_kind": "choice", "rules": ["read_only"], "choices": ["unknown", "yes", "number"]},
+          {"purpose": "authenticator_attachment", "value_kind": "choice", "rules": ["read_only", "hidden_from_form"], "choices": ["unselected", "platform", "cross_platform"]},
+          {"purpose": "rp_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "flagged", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "flagged_reason", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "last_used_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "last_used_network_address", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "web_authn_user_handle",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique", "read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "handle", "value_kind": "text", "rules": ["required", "unique", "read_only"]},
+          {"purpose": "passkey_only_login", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Digital signage content",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "signage",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "published", "value_kind": "boolean"},
+          {"purpose": "show_title", "value_kind": "boolean"},
+          {"purpose": "description", "value_kind": "formatted_text"},
+          {"purpose": "display_image", "value_kind": "image_reference"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["guest", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "signage_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "display_name", "value_kind": "text"},
+          {"purpose": "display_duration", "value_kind": "whole_number"},
+          {"purpose": "row_count", "value_kind": "whole_number"},
+          {"purpose": "column_count", "value_kind": "whole_number"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["guest", 0, ["read", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Document clauses and templates",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "document_design_document_version",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["required", "read_only"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "reference_name", "value_kind": "variable_record_reference", "rules": ["required", "read_only"], "record_class_field": "reference_record_class"},
+          {"purpose": "version_number", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "template", "value_kind": "reference", "rules": ["read_only"], "target": "document_design_template"},
+          {"purpose": "theme", "value_kind": "reference", "rules": ["read_only"], "target": "document_design_theme"},
+          {"purpose": "docx_file", "value_kind": "file_reference", "rules": ["read_only"]},
+          {"purpose": "content", "value_kind": "structured_value", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "delete", "report", "export"], false]
+        ]
+      },
+      {
+        "concept": "document_design_excluded_record_class",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document_type", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "document_design_field_mapping",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "slot", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "field_name", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "document_design_role",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "role", "value_kind": "reference", "rules": ["required"], "target": "information_management.role", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "document_design_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "default_theme", "value_kind": "reference", "target": "document_design_theme"},
+          {"purpose": "default_save_mode", "value_kind": "choice", "choices": ["save_to_form", "save_as_document_only"]},
+          {"purpose": "attach_on_download", "value_kind": "boolean"},
+          {"purpose": "allowed_roles", "value_kind": "owned_selection_rows", "target": "document_design_role"},
+          {"purpose": "excluded_record_classes", "value_kind": "owned_selection_rows", "target": "document_design_excluded_record_class"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "document_design_template",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "template_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "template_type", "value_kind": "choice", "choices": ["auto", "built_in", "custom"]},
+          {"purpose": "builtin_key", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "builder", "value_kind": "text"},
+          {"purpose": "theme", "value_kind": "reference", "target": "document_design_theme"},
+          {"purpose": "is_default", "value_kind": "boolean"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "is_standard", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "title_field", "value_kind": "choice"},
+          {"purpose": "party_field", "value_kind": "choice"},
+          {"purpose": "date_field", "value_kind": "choice"},
+          {"purpose": "total_field", "value_kind": "choice"},
+          {"purpose": "company_field", "value_kind": "choice"},
+          {"purpose": "default_terms", "value_kind": "reference", "target": "document_design_terms_block"},
+          {"purpose": "layout_structured_data", "value_kind": "structured_value"},
+          {"purpose": "field_mapping", "value_kind": "owned_rows", "target": "document_design_field_mapping"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "document_design_terms_block",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "applicable_record_classes", "value_kind": "owned_selection_rows", "target": "document_design_terms_record_class"},
+          {"purpose": "content", "value_kind": "formatted_text", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "document_design_terms_record_class",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document_type", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "document_design_theme",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "theme_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "is_standard", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "font_family", "value_kind": "choice", "choices": ["configured_typeface"]},
+          {"purpose": "base_font_size", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "heading_font_size", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "line_spacing", "value_kind": "decimal"},
+          {"purpose": "primary_color", "value_kind": "colour"},
+          {"purpose": "text_color", "value_kind": "colour"},
+          {"purpose": "heading_align", "value_kind": "choice", "choices": ["center", "left", "right"]},
+          {"purpose": "table_style", "value_kind": "choice", "choices": ["bordered", "minimal"]},
+          {"purpose": "header_shading", "value_kind": "colour"},
+          {"purpose": "border_color", "value_kind": "colour"},
+          {"purpose": "page_size", "value_kind": "choice", "choices": ["a4", "letter"]},
+          {"purpose": "margin_top", "value_kind": "decimal"},
+          {"purpose": "margin_bottom", "value_kind": "decimal"},
+          {"purpose": "margin_left", "value_kind": "decimal"},
+          {"purpose": "margin_right", "value_kind": "decimal"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Document email reminders",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "recipients",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "email", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "reminder",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "reminder", "value_kind": "text"},
+          {"purpose": "document_type", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "document_number", "value_kind": "variable_record_reference", "record_class_field": "document_type"},
+          {"purpose": "posting_date", "value_kind": "civil_day"},
+          {"purpose": "emails", "value_kind": "owned_rows", "target": "recipients"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "reminder"},
+          {"purpose": "reminder_schedule_date", "value_kind": "date_and_time"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "reminder_record_classes",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document_type", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "reminder_recipients",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "email", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "reminder_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "record_classes", "value_kind": "owned_rows", "target": "reminder_record_classes"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Document email reminders",
+    "configuration": 2,
+    "entity_contracts": [
+      {
+        "concept": "mail_reminder_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "mail_model", "value_kind": "reference", "rules": ["required"], "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "time_between_reminders", "value_kind": "elapsed_time", "rules": ["required"]},
+          {"purpose": "mail_account_sender", "value_kind": "reference", "rules": ["required"], "target": "mail.email_account", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "mail_reminder_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "mail_reminder", "value_kind": "owned_rows", "target": "mail_reminder_item"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Document email reminders",
+    "configuration": 2,
+    "additional_fields": [
+      {"on": "supplier", "purpose": "automatic_mail_reminder", "value_kind": "boolean", "placement": "language"},
+      {"on": "customer", "purpose": "automatic_mail_reminder", "value_kind": "boolean", "placement": "language"},
+      {"on": "supplier_quotation", "purpose": "field_group_for_automatic_mail_dunning", "value_kind": "field_group", "placement": "terms"},
+      {"on": "supplier_quotation", "purpose": "automatic_mail_dunning", "value_kind": "boolean", "placement": "field_group_for_automatic_mail_dunning", "rules": ["editable_after_submission"]},
+      {"on": "supplier_quotation", "purpose": "last_automatic_mail_dunning_date", "value_kind": "date_and_time", "placement": "automatic_mail_dunning", "rules": ["read_only"]},
+      {"on": "customer_order", "purpose": "field_group_for_automatic_mail_dunning", "value_kind": "field_group", "placement": "terms"},
+      {"on": "customer_order", "purpose": "automatic_mail_dunning", "value_kind": "boolean", "placement": "field_group_for_automatic_mail_dunning", "rules": ["editable_after_submission"]},
+      {"on": "customer_order", "purpose": "last_automatic_mail_dunning_date", "value_kind": "date_and_time", "placement": "automatic_mail_dunning", "rules": ["read_only"]},
+      {"on": "purchase_order", "purpose": "field_group_for_automatic_mail_dunning", "value_kind": "field_group", "placement": "terms"},
+      {"on": "purchase_order", "purpose": "automatic_mail_dunning", "value_kind": "boolean", "placement": "field_group_for_automatic_mail_dunning", "rules": ["editable_after_submission"]},
+      {"on": "purchase_order", "purpose": "last_automatic_mail_dunning_date", "value_kind": "date_and_time", "placement": "automatic_mail_dunning", "rules": ["read_only"]},
+      {"on": "customer_invoice", "purpose": "field_group_for_automatic_mail_dunning", "value_kind": "field_group", "placement": "terms"},
+      {"on": "customer_invoice", "purpose": "automatic_mail_dunning", "value_kind": "boolean", "placement": "field_group_for_automatic_mail_dunning", "rules": ["editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "last_automatic_mail_dunning_date", "value_kind": "date_and_time", "placement": "automatic_mail_dunning", "rules": ["read_only"]}
+    ]
+  },
+  {
+    "capability": "Document event messaging",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "message_gateway_4_enterprise_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text"},
+          {"purpose": "message", "value_kind": "text"},
+          {"purpose": "to_number", "value_kind": "text"},
+          {"purpose": "time", "value_kind": "date_and_time"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_messaging_message",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "resource_address", "value_kind": "text"},
+          {"purpose": "token", "value_kind": "text"},
+          {"purpose": "from", "value_kind": "telephone_number"},
+          {"purpose": "to", "value_kind": "telephone_number"},
+          {"purpose": "message_resource_address", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Document event messaging",
+    "configuration": 1,
+    "rule_addresses": [
+      ["notification", "channel", "options", null]
+    ]
+  },
+  {
+    "capability": "Document intake and extraction",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "ai_document",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "file_attachment", "value_kind": "file_reference", "rules": ["required"]},
+          {"purpose": "document_type", "value_kind": "choice", "choices": ["unselected", "entities", "transactions"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["pending", "processing", "ready", "failed"]},
+          {"purpose": "processed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "token_count", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "provider_used", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "summary", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "key_entities", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "extracted_table", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "user_question", "value_kind": "text"},
+          {"purpose": "ai_answer", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "raw_text", "value_kind": "long_text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete"], false],
+          ["record_intelligence_user", 0, ["read", "write", "create"], false]
+        ]
+      },
+      {
+        "concept": "di_copilot_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "question", "value_kind": "text"},
+          {"purpose": "action", "value_kind": "text"},
+          {"purpose": "target_record_class", "value_kind": "text"},
+          {"purpose": "plan", "value_kind": "long_text"},
+          {"purpose": "result_count", "value_kind": "whole_number"},
+          {"purpose": "success", "value_kind": "boolean"},
+          {"purpose": "error", "value_kind": "text"},
+          {"purpose": "timestamp", "value_kind": "date_and_time"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create"], false]
+        ]
+      },
+      {
+        "concept": "di_provider_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "provider", "value_kind": "text"},
+          {"purpose": "timestamp", "value_kind": "date_and_time"},
+          {"purpose": "success", "value_kind": "boolean"},
+          {"purpose": "tokens", "value_kind": "whole_number"},
+          {"purpose": "error", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create"], false]
+        ]
+      },
+      {
+        "concept": "record_intelligence_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled_providers", "value_kind": "text"},
+          {"purpose": "accelerated_language_model_service_access_key", "value_kind": "protected_text"},
+          {"purpose": "accelerated_language_model_model", "value_kind": "text"},
+          {"purpose": "multimodal_language_model_service_access_key", "value_kind": "protected_text"},
+          {"purpose": "multimodal_language_model_model", "value_kind": "text"},
+          {"purpose": "cerebras_service_access_key", "value_kind": "protected_text"},
+          {"purpose": "cerebras_model", "value_kind": "text"},
+          {"purpose": "openrouter_service_access_key", "value_kind": "protected_text"},
+          {"purpose": "openrouter_model", "value_kind": "text"},
+          {"purpose": "multilingual_language_model_service_access_key", "value_kind": "protected_text"},
+          {"purpose": "multilingual_language_model_model", "value_kind": "text"},
+          {"purpose": "conversational_language_model_service_access_key", "value_kind": "protected_text"},
+          {"purpose": "conversational_language_model_model", "value_kind": "text"},
+          {"purpose": "hosted_language_model_service_access_key", "value_kind": "protected_text"},
+          {"purpose": "hosted_language_model_model", "value_kind": "text"},
+          {"purpose": "reasoning_language_model_service_access_key", "value_kind": "protected_text"},
+          {"purpose": "reasoning_language_model_model", "value_kind": "text"},
+          {"purpose": "platform_name", "value_kind": "text"},
+          {"purpose": "support_email", "value_kind": "text"},
+          {"purpose": "maximum_tokens_per_request", "value_kind": "whole_number"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Document limits and usage quotas",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "quota_document_limit_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document_type", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "limit", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "period", "value_kind": "choice", "rules": ["required"], "choices": ["daily", "weekly", "monthly"]},
+          {"purpose": "usage", "value_kind": "whole_number"},
+          {"purpose": "from_date", "value_kind": "civil_day"},
+          {"purpose": "to_date", "value_kind": "civil_day"}
+        ]
+      },
+      {
+        "concept": "usage_info",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "active_users", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "used_space", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "private_files_size", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "public_files_size", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "backup_files_size", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "database_space", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "used_database_space", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "users", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "space", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "company", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "used_company", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "document_limit", "value_kind": "owned_rows", "rules": ["read_only"], "target": "quota_document_limit_detail"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Document rendition on submission",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "enabled_record_class",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document_type", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "auto_name", "value_kind": "text"},
+          {"purpose": "print_format", "value_kind": "reference", "target": "document_output.print_format", "binding": "shared_model"},
+          {"purpose": "letter_head", "value_kind": "reference", "target": "document_output.letter_head", "binding": "shared_model"},
+          {"purpose": "filters", "value_kind": "expression_or_structured_text", "rules": ["read_only", "hidden_from_form"]}
+        ]
+      },
+      {
+        "concept": "portable_document_on_submit_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "create_portable_document_in_background", "value_kind": "boolean"},
+          {"purpose": "enabled_for", "value_kind": "owned_rows", "target": "enabled_record_class"},
+          {"purpose": "show_portable_document_button", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["read", "write", "create", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Document signing field mapping",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "e_signature_placeholder_mapping",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "business_application_field", "value_kind": "text"},
+          {"purpose": "esignature_placeholder", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "electronic_signatures_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "esignature_service_interface_token", "value_kind": "protected_text"},
+          {"purpose": "placeholder_mappings", "value_kind": "owned_rows", "target": "e_signature_placeholder_mapping"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Document signing field mapping",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "quotation", "purpose": "signature_date", "value_kind": "civil_day", "placement": "valid_till", "rules": ["read_only"]},
+      {"on": "quotation", "purpose": "esignature_template", "value_kind": "choice", "placement": "signature_date"},
+      {"on": "quotation", "purpose": "signed_portable_document_resource_address", "value_kind": "text", "placement": "esignature_template", "rules": ["read_only"]},
+      {"on": "quotation", "purpose": "signing_resource_address", "value_kind": "text", "placement": "amended_from"},
+      {"on": "quotation", "purpose": "contract_identifier", "value_kind": "text", "placement": "signing_resource_address", "rules": ["read_only"]},
+      {"on": "quotation", "purpose": "signature_sent", "value_kind": "boolean", "placement": "contract_identifier", "rules": ["read_only"]},
+      {"on": "quotation", "purpose": "document_signed", "value_kind": "boolean", "placement": "signature_sent", "rules": ["read_only"]}
+    ]
+  },
+  {
+    "capability": "Document signing field mapping",
+    "configuration": 1,
+    "rule_addresses": [
+      ["quotation", null, "field_order", "text"]
+    ]
+  },
+  {
+    "capability": "Earnest money deposit accounting",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "emd",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["emd"]},
+          {"purpose": "customer", "value_kind": "reference", "rules": ["required"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "customer_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "deposit_account", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "bank_account", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "amount", "value_kind": "money"},
+          {"purpose": "extra_charges", "value_kind": "money"},
+          {"purpose": "expense_account", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "reference_num", "value_kind": "text"},
+          {"purpose": "returned", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "return_account", "value_kind": "reference", "rules": ["editable_after_submission"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "interest_amount", "value_kind": "money", "rules": ["editable_after_submission"]},
+          {"purpose": "interest_account", "value_kind": "reference", "rules": ["editable_after_submission"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "posting_date", "value_kind": "civil_day"},
+          {"purpose": "due_date", "value_kind": "civil_day"},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "tender_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "tender_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "payment_mode", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "reference_date", "value_kind": "civil_day"},
+          {"purpose": "is_opening", "value_kind": "choice", "choices": ["yes", "number"]},
+          {"purpose": "return_date", "value_kind": "civil_day", "rules": ["editable_after_submission"]},
+          {"purpose": "address", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "address_display", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "journal_entry", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.journal_entry", "binding": "shared_model"},
+          {"purpose": "return_journal_entry", "value_kind": "reference", "rules": ["read_only", "editable_after_submission"], "target": "accounting.journal_entry", "binding": "shared_model"},
+          {"purpose": "contact_person", "value_kind": "reference", "target": "contacts.contact", "binding": "shared_model"},
+          {"purpose": "contact_display", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "contact_phone", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "contact_mobile", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "contact_email", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "cost_center", "value_kind": "reference", "target": "accounting.cost_center", "binding": "shared_model"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "emd"},
+          {"purpose": "forfeited", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "write_off_account", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "send_weekly_reminder", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "copy_recipients_to", "value_kind": "text", "rules": ["editable_after_submission"]},
+          {"purpose": "receipient", "value_kind": "text", "rules": ["editable_after_submission"]},
+          {"purpose": "invitation_message", "value_kind": "formatted_text", "rules": ["editable_after_submission"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only", "hidden_from_form", "editable_after_submission"], "choices": ["paid", "due", "refunded", "forfeited"]},
+          {"purpose": "return_forfeited_entry", "value_kind": "reference", "rules": ["read_only", "editable_after_submission"], "target": "accounting.journal_entry", "binding": "shared_model"},
+          {"purpose": "email_template", "value_kind": "reference", "rules": ["editable_after_submission"], "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["read_only"], "target": "geography.currency", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Earnest money deposit accounting",
+    "configuration": 1,
+    "rule_addresses": [
+      ["emd", "numbering_rule", "options", "text"],
+      ["journal_entry", "voucher_type", "options", "text"],
+      ["emd", "cost_center", "fetch_from", "text"],
+      ["emd", "write_off_account", "allow_on_submit", "boolean"],
+      ["emd", "bank_account", "depends_on", "text"],
+      ["emd", "cancel_forfeited", "depends_on", "text"],
+      ["emd", "cost_center", "fetch_if_empty", "boolean"],
+      ["emd", "reference_date", "default", "text"],
+      ["emd", "receipient", "fetch_from", "text"],
+      ["emd", "payment_mode", "required", "boolean"],
+      ["emd", "payment_mode", "hidden", "boolean"]
+    ]
+  }
+]

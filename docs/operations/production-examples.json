@@ -1,0 +1,486 @@
+[
+  {
+    "operation": "Measure occupied machine time",
+    "examples": [
+      {
+        "inputs": {
+          "logs": [
+            {
+              "start_minute": 480,
+              "end_minute": 540,
+              "duration_minutes": 0
+            },
+            {
+              "start_minute": 510,
+              "end_minute": 570,
+              "duration_minutes": 0
+            }
+          ]
+        },
+        "expected": {
+          "occupied_machine_minutes": 90
+        }
+      },
+      {
+        "inputs": {
+          "logs": [
+            {
+              "start_minute": 480,
+              "end_minute": null,
+              "duration_minutes": 15
+            },
+            {
+              "start_minute": 495,
+              "end_minute": 540,
+              "duration_minutes": 0
+            },
+            {
+              "start_minute": null,
+              "end_minute": null,
+              "duration_minutes": 10
+            }
+          ]
+        },
+        "expected": {
+          "occupied_machine_minutes": 70
+        }
+      },
+      {
+        "inputs": {
+          "logs": [
+            {
+              "start_minute": 480,
+              "end_minute": 495,
+              "duration_minutes": 0
+            },
+            {
+              "start_minute": 525,
+              "end_minute": 570,
+              "duration_minutes": 0
+            }
+          ]
+        },
+        "expected": {
+          "occupied_machine_minutes": 60
+        }
+      },
+      {
+        "inputs": {
+          "logs": []
+        },
+        "expected": {
+          "occupied_machine_minutes": 0
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Allocate component quantity to an operation card",
+    "examples": [
+      {
+        "inputs": {
+          "required_component_quantity": 1,
+          "operation_quantity": 3,
+          "assigned": 1,
+          "other_assigned": 0,
+          "other_material": 0,
+          "precision": 2
+        },
+        "expected": {
+          "quantity": 0.33
+        }
+      },
+      {
+        "inputs": {
+          "required_component_quantity": 1,
+          "operation_quantity": 3,
+          "assigned": 1,
+          "other_assigned": 1,
+          "other_material": 0.33,
+          "precision": 2
+        },
+        "expected": {
+          "quantity": 0.34
+        }
+      },
+      {
+        "inputs": {
+          "required_component_quantity": 1,
+          "operation_quantity": 3,
+          "assigned": 1,
+          "other_assigned": 2,
+          "other_material": 0.67,
+          "precision": 2
+        },
+        "expected": {
+          "quantity": 0.33
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Distribute material demand across substitutes",
+    "examples": [
+      {
+        "inputs": {
+          "demand": 3,
+          "materials": [
+            {
+              "available": 4,
+              "transferred": 8
+            },
+            {
+              "available": 2,
+              "transferred": 8
+            }
+          ],
+          "precision": 2
+        },
+        "expected": {
+          "row_quantities": [
+            2,
+            1
+          ]
+        }
+      },
+      {
+        "inputs": {
+          "demand": 10,
+          "materials": [
+            {
+              "available": 0,
+              "transferred": 1
+            },
+            {
+              "available": -1,
+              "transferred": 3
+            }
+          ],
+          "precision": 2
+        },
+        "expected": {
+          "row_quantities": [
+            2.5,
+            7.5
+          ]
+        }
+      },
+      {
+        "inputs": {
+          "demand": 1,
+          "materials": [
+            {
+              "available": 1,
+              "transferred": 1
+            },
+            {
+              "available": 1,
+              "transferred": 1
+            },
+            {
+              "available": 1,
+              "transferred": 1
+            }
+          ],
+          "precision": 2
+        },
+        "expected": {
+          "row_quantities": [
+            0.33,
+            0.33,
+            0.34
+          ]
+        }
+      },
+      {
+        "inputs": {
+          "demand": 2,
+          "materials": [
+            {
+              "available": 0,
+              "transferred": 0
+            },
+            {
+              "available": 0,
+              "transferred": 0
+            }
+          ],
+          "precision": 2
+        },
+        "expected": {
+          "row_quantities": [
+            0,
+            0
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Calculate cumulative component recovery",
+    "examples": [
+      {
+        "inputs": {
+          "original_component_quantity": 5,
+          "finished_to_date": 1,
+          "finished_total": 3,
+          "already_recovered": 0,
+          "whole_unit_step": 1,
+          "precision": 6
+        },
+        "expected": {
+          "recover": 1
+        }
+      },
+      {
+        "inputs": {
+          "original_component_quantity": 5,
+          "finished_to_date": 2,
+          "finished_total": 3,
+          "already_recovered": 1,
+          "whole_unit_step": 1,
+          "precision": 6
+        },
+        "expected": {
+          "recover": 2
+        }
+      },
+      {
+        "inputs": {
+          "original_component_quantity": 5,
+          "finished_to_date": 3,
+          "finished_total": 3,
+          "already_recovered": 3,
+          "whole_unit_step": 1,
+          "precision": 6
+        },
+        "expected": {
+          "recover": 2
+        }
+      },
+      {
+        "inputs": {
+          "original_component_quantity": 1,
+          "finished_to_date": 1,
+          "finished_total": 4,
+          "already_recovered": 0,
+          "whole_unit_step": null,
+          "precision": 3
+        },
+        "expected": {
+          "recover": 0.25
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Determine the lifecycle state of a material reservation",
+    "examples": [
+      {
+        "inputs": {
+          "reservation_document_state": "draft",
+          "document_demand_quantity": 10,
+          "reserved": 8,
+          "transferred": 0,
+          "delivered": 0,
+          "consumed": 0
+        },
+        "expected": {
+          "status": "Draft"
+        }
+      },
+      {
+        "inputs": {
+          "reservation_document_state": "cancelled",
+          "document_demand_quantity": 10,
+          "reserved": 8,
+          "transferred": 8,
+          "delivered": 0,
+          "consumed": 0
+        },
+        "expected": {
+          "status": "Cancelled"
+        }
+      },
+      {
+        "inputs": {
+          "reservation_document_state": "submitted",
+          "document_demand_quantity": 10,
+          "reserved": 8,
+          "transferred": 3,
+          "delivered": 7,
+          "consumed": 1
+        },
+        "expected": {
+          "status": "Partially Used"
+        }
+      },
+      {
+        "inputs": {
+          "reservation_document_state": "submitted",
+          "document_demand_quantity": 10,
+          "reserved": 8,
+          "transferred": 8,
+          "delivered": 0,
+          "consumed": 0
+        },
+        "expected": {
+          "status": "Closed"
+        }
+      },
+      {
+        "inputs": {
+          "reservation_document_state": "submitted",
+          "document_demand_quantity": 10,
+          "reserved": 8,
+          "transferred": 0,
+          "delivered": 5,
+          "consumed": 3
+        },
+        "expected": {
+          "status": "Delivered"
+        }
+      },
+      {
+        "inputs": {
+          "reservation_document_state": "submitted",
+          "document_demand_quantity": 10,
+          "reserved": 8,
+          "transferred": 0,
+          "delivered": 4,
+          "consumed": 2
+        },
+        "expected": {
+          "status": "Partially Delivered"
+        }
+      },
+      {
+        "inputs": {
+          "reservation_document_state": "submitted",
+          "document_demand_quantity": 10,
+          "reserved": 8,
+          "transferred": 0,
+          "delivered": 0,
+          "consumed": 3
+        },
+        "expected": {
+          "status": "Partially Used"
+        }
+      },
+      {
+        "inputs": {
+          "reservation_document_state": "submitted",
+          "document_demand_quantity": 10,
+          "reserved": 10,
+          "transferred": 0,
+          "delivered": 0,
+          "consumed": 0
+        },
+        "expected": {
+          "status": "Reserved"
+        }
+      },
+      {
+        "inputs": {
+          "reservation_document_state": "submitted",
+          "document_demand_quantity": 10,
+          "reserved": 8,
+          "transferred": 0,
+          "delivered": 0,
+          "consumed": 0
+        },
+        "expected": {
+          "status": "Partially Reserved"
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Convert operation loss to finished units",
+    "examples": [
+      {
+        "inputs": {
+          "work_order_quantity": 10,
+          "operation_quantity": 50,
+          "operation_loss": 5,
+          "precision": 3
+        },
+        "expected": {
+          "loss_in_finished_units": 1
+        }
+      },
+      {
+        "inputs": {
+          "work_order_quantity": 10,
+          "operation_quantity": 4,
+          "operation_loss": 1,
+          "precision": 3
+        },
+        "expected": {
+          "loss_in_finished_units": 2.5
+        }
+      },
+      {
+        "inputs": {
+          "work_order_quantity": 10,
+          "operation_quantity": 0,
+          "operation_loss": 2,
+          "precision": 3
+        },
+        "expected": {
+          "loss_in_finished_units": 0
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Accumulate planned, actual and corrective operation costs",
+    "examples": [
+      {
+        "inputs": {
+          "planned_operation_costs": [
+            100,
+            50
+          ],
+          "actual_operation_costs": [
+            72,
+            0
+          ],
+          "additional_cost": 5,
+          "corrective_cost": 10
+        },
+        "expected": {
+          "total_cost": 87
+        }
+      },
+      {
+        "inputs": {
+          "planned_operation_costs": [
+            100,
+            50
+          ],
+          "actual_operation_costs": [
+            0,
+            0
+          ],
+          "additional_cost": 5,
+          "corrective_cost": 10
+        },
+        "expected": {
+          "total_cost": 165
+        }
+      },
+      {
+        "inputs": {
+          "planned_operation_costs": [],
+          "actual_operation_costs": [],
+          "additional_cost": 5,
+          "corrective_cost": 10
+        },
+        "expected": {
+          "total_cost": 15
+        }
+      }
+    ]
+  }
+]

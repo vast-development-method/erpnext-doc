@@ -1,0 +1,1162 @@
+[
+  {
+    "capability": "Retail checkout",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "point_of_sale_closing_entry", "purpose": "customer_invoice", "value_kind": "owned_rows", "placement": "point_of_sale_transactions", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "roundoff_field_group", "value_kind": "field_group", "placement": "base_retention_amount"},
+      {"on": "customer_invoice", "purpose": "field_column_for_base_roundoff_amount", "value_kind": "field_column", "placement": "roundoff_amount"},
+      {"on": "customer_invoice", "purpose": "base_roundoff_amount", "value_kind": "money", "placement": "field_column_for_base_roundoff_amount"},
+      {"on": "customer_invoice", "purpose": "roundoff_account", "value_kind": "reference", "placement": "base_roundoff_amount"},
+      {"on": "customer_invoice", "purpose": "delivery_field_group", "value_kind": "field_group", "placement": "sales_team"},
+      {"on": "customer_invoice", "purpose": "delivery_personnel", "value_kind": "reference", "placement": "delivery_field_group", "rules": ["editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "field_column_for_delivery_personnel_name", "value_kind": "field_column", "placement": "delivery_personnel"},
+      {"on": "customer_invoice", "purpose": "delivery_personnel_name", "value_kind": "text", "placement": "field_column_for_delivery_personnel_name", "rules": ["read_only", "translatable"]},
+      {"on": "customer_invoice", "purpose": "point_of_sale_opening_entry", "value_kind": "reference", "placement": "customer_group"},
+      {"on": "customer_invoice", "purpose": "roundoff_amount", "value_kind": "money", "placement": "connections_tab"},
+      {"on": "point_of_sale_profile", "purpose": "delivery_required", "value_kind": "boolean", "placement": "validate_stock_on_save"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_point_of_sale_settings_field_group", "value_kind": "field_group", "placement": "select_print_heading"},
+      {"on": "point_of_sale_profile", "purpose": "business_type", "value_kind": "choice", "placement": "retail_checkout_point_of_sale_settings_field_group", "rules": ["translatable"]},
+      {"on": "point_of_sale_profile", "purpose": "email_template", "value_kind": "reference", "placement": "business_type"},
+      {"on": "point_of_sale_profile", "purpose": "default_view", "value_kind": "choice", "placement": "email_template", "rules": ["translatable"]},
+      {"on": "point_of_sale_profile", "purpose": "use_scanner_fully", "value_kind": "boolean", "placement": "default_view"},
+      {"on": "point_of_sale_profile", "purpose": "allow_return", "value_kind": "boolean", "placement": "use_scanner_fully", "rules": ["hidden_from_form"]},
+      {"on": "point_of_sale_profile", "purpose": "allow_write_off", "value_kind": "boolean", "placement": "allow_return"},
+      {"on": "point_of_sale_profile", "purpose": "ignore_write_off_on_partial_returns", "value_kind": "boolean", "placement": "allow_write_off", "rules": ["read_only"]},
+      {"on": "point_of_sale_profile", "purpose": "field_column_for_point_of_sale_printformat", "value_kind": "field_column", "placement": "ignore_write_off_on_partial_returns"},
+      {"on": "point_of_sale_profile", "purpose": "point_of_sale_printformat", "value_kind": "reference", "placement": "field_column_for_point_of_sale_printformat"},
+      {"on": "point_of_sale_profile", "purpose": "business_messaging_template", "value_kind": "reference", "placement": "point_of_sale_printformat"},
+      {"on": "point_of_sale_profile", "purpose": "scale_barcodes_start_with", "value_kind": "text", "placement": "business_messaging_template", "rules": ["translatable"]},
+      {"on": "point_of_sale_profile", "purpose": "allow_credit_sales", "value_kind": "boolean", "placement": "scale_barcodes_start_with", "rules": ["hidden_from_form"]},
+      {"on": "point_of_sale_profile", "purpose": "hide_expected_amount", "value_kind": "boolean", "placement": "allow_credit_sales"},
+      {"on": "point_of_sale_profile", "purpose": "enable_business_messaging", "value_kind": "boolean", "placement": "hide_expected_amount"},
+      {"on": "point_of_sale_profile", "purpose": "enable_text_message", "value_kind": "boolean", "placement": "enable_business_messaging"},
+      {"on": "point_of_sale_profile", "purpose": "autofetch_batchserial", "value_kind": "boolean", "placement": "enable_text_message"},
+      {"on": "point_of_sale_profile", "purpose": "clear_draft_invoices", "value_kind": "boolean", "placement": "autofetch_batchserial"}
+    ]
+  },
+  {
+    "capability": "Retail checkout permissions and payment links",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "retail_checkout_allowed_price_list",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "price_list", "value_kind": "reference", "rules": ["required"], "target": "inventory.price_list", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "retail_checkout_checkout_field",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "target_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "field_name", "value_kind": "suggested_text", "rules": ["required"]},
+          {"purpose": "label", "value_kind": "text"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "required", "value_kind": "boolean"},
+          {"purpose": "placeholder", "value_kind": "text"},
+          {"purpose": "help_text", "value_kind": "text"},
+          {"purpose": "order", "value_kind": "whole_number"}
+        ]
+      },
+      {
+        "concept": "retail_checkout_gateway_payment_link",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "source_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "source_name", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "source_record_class"},
+          {"purpose": "payment_gateway", "value_kind": "reference", "rules": ["required"], "target": "accounting.payment_gateway_account", "binding": "shared_model"},
+          {"purpose": "mode_of_payment", "value_kind": "reference", "rules": ["required"], "target": "accounting.mode_of_payment", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["draft", "pending", "authorized", "paid", "failed", "cancelled", "expired"]},
+          {"purpose": "transaction_reference", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "rules": ["required"], "target": "accounting.point_of_sale_profile", "binding": "shared_model"},
+          {"purpose": "opening_entry", "value_kind": "reference", "rules": ["required"], "target": "accounting.point_of_sale_opening_entry", "binding": "shared_model"},
+          {"purpose": "cashier", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "amount", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["required"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "consumed", "value_kind": "boolean"},
+          {"purpose": "consumed_by_record_class", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "consumed_by_name", "value_kind": "variable_record_reference", "rules": ["read_only"], "record_class_field": "consumed_by_record_class"},
+          {"purpose": "consumed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "consumed_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "idempotency_key", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "remarks", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["sales_user", 0, ["read"], false],
+          ["system_manager", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "retail_checkout_point_of_sale_pin_user",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "sales_person", "value_kind": "reference", "rules": ["required"], "target": "organization.sales_person", "binding": "shared_model"},
+          {"purpose": "display_name", "value_kind": "text"},
+          {"purpose": "role", "value_kind": "choice", "rules": ["required"], "choices": ["salesperson", "manager"]},
+          {"purpose": "pin", "value_kind": "protected_text", "rules": ["required"]},
+          {"purpose": "enabled", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "retail_checkout_workflow_configuration",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "transaction_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "apply_workflow", "value_kind": "boolean"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Retail checkout permissions and payment links",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "point_of_sale_invoice", "purpose": "retail_checkout_invoice", "value_kind": "boolean", "placement": "point_of_sale_profile", "rules": ["hidden_from_form", "editable_after_submission"]},
+      {"on": "point_of_sale_invoice", "purpose": "retail_checkout_held", "value_kind": "boolean", "placement": "retail_checkout_invoice", "rules": ["hidden_from_form", "editable_after_submission"]},
+      {"on": "point_of_sale_invoice", "purpose": "retail_checkout_idempotency_key", "value_kind": "text", "placement": "retail_checkout_held", "rules": ["unique", "hidden_from_form", "editable_after_submission", "indexed_for_search"]},
+      {"on": "point_of_sale_profile", "purpose": "field_column_after_retail_checkout_allow_payment_history", "value_kind": "field_column", "placement": "retail_checkout_allow_payment_history"},
+      {"on": "point_of_sale_profile", "purpose": "field_column_after_retail_checkout_delivery_charge_item", "value_kind": "field_column", "placement": "retail_checkout_delivery_charge_item"},
+      {"on": "point_of_sale_profile", "purpose": "field_column_after_retail_checkout_require_pin_before_every_sale", "value_kind": "field_column", "placement": "retail_checkout_require_pin_before_every_sale"},
+      {"on": "point_of_sale_profile", "purpose": "field_column_after_retail_checkout_item_prices_include_tax", "value_kind": "field_column", "placement": "retail_checkout_item_prices_include_tax"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_allow_credit_sales", "value_kind": "boolean", "placement": "retail_checkout_item_prices_include_tax"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_allow_customer_creation", "value_kind": "boolean", "placement": "retail_checkout_allow_customer_management"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_allow_customer_management", "value_kind": "boolean", "placement": "retail_checkout_allow_order_type_change"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_allow_customer_payments", "value_kind": "boolean", "placement": "field_column_for_retail_checkout_allow_customer_payments"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_allow_delivery_charge_change", "value_kind": "boolean", "placement": "retail_checkout_delivery_charge_item"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_allow_delivery_charges", "value_kind": "boolean", "placement": "retail_checkout_allow_service_items"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_allow_order_type_change", "value_kind": "boolean", "placement": "retail_checkout_default_order_type"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_allow_payment_history", "value_kind": "boolean", "placement": "retail_checkout_allow_payment_reconciliation"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_allow_payment_reconciliation", "value_kind": "boolean", "placement": "retail_checkout_allow_customer_payments"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_allow_price_list_switching", "value_kind": "boolean", "placement": "retail_checkout_default_sale_type"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_allow_customer_order_payments", "value_kind": "boolean", "placement": "retail_checkout_allow_customer_payments"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_allow_service_items", "value_kind": "boolean", "placement": "retail_checkout_default_order_type"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_allowed_price_lists", "value_kind": "owned_rows", "placement": "field_group_for_retail_checkout_allowed_price_lists"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_auto_allocate_payment_balance", "value_kind": "boolean", "placement": "retail_checkout_allow_credit_sales"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_checkout_fields", "value_kind": "owned_rows", "placement": "field_group_for_retail_checkout_checkout_fields"},
+      {"on": "point_of_sale_profile", "purpose": "field_group_for_retail_checkout_checkout_fields", "value_kind": "field_group", "placement": "retail_checkout_workflow_configuration"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_default_order_type", "value_kind": "choice", "placement": "field_group_for_retail_checkout_default_order_type"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_default_sale_type", "value_kind": "choice", "placement": "retail_checkout_allow_credit_sales"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_delivery_charge_item", "value_kind": "reference", "placement": "retail_checkout_allow_delivery_charges"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_enable_background_submission", "value_kind": "boolean", "placement": "field_column_for_retail_checkout_enable_background_submission"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_enable_salesperson_pin", "value_kind": "boolean", "placement": "field_group_for_retail_checkout_enable_salesperson_pin"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_item_prices_include_tax", "value_kind": "boolean", "placement": "field_group_for_retail_checkout_item_prices_include_tax"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_new_item_position", "value_kind": "choice", "placement": "retail_checkout_auto_allocate_payment_balance"},
+      {"on": "point_of_sale_profile", "purpose": "field_column_for_retail_checkout_allow_customer_payments", "value_kind": "field_column", "placement": "retail_checkout_allow_customer_creation"},
+      {"on": "point_of_sale_profile", "purpose": "field_group_for_retail_checkout_default_order_type", "value_kind": "field_group", "placement": "retail_checkout_queue_processing_timeout_minutes"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_pin_lockout_minutes", "value_kind": "whole_number", "placement": "retail_checkout_pin_maximum_attempts"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_pin_maximum_attempts", "value_kind": "whole_number", "placement": "retail_checkout_require_manager_pin_item_removal"},
+      {"on": "point_of_sale_profile", "purpose": "field_group_for_retail_checkout_enable_salesperson_pin", "value_kind": "field_group", "placement": "field_group_for_retail_checkout_default_order_type"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_pin_users", "value_kind": "owned_rows", "placement": "field_group_for_retail_checkout_pin_users"},
+      {"on": "point_of_sale_profile", "purpose": "field_group_for_retail_checkout_pin_users", "value_kind": "field_group", "placement": "retail_checkout_enable_salesperson_pin"},
+      {"on": "point_of_sale_profile", "purpose": "field_group_for_retail_checkout_allowed_price_lists", "value_kind": "field_group", "placement": "retail_checkout_allow_price_list_switching"},
+      {"on": "point_of_sale_profile", "purpose": "field_column_for_retail_checkout_enable_background_submission", "value_kind": "field_column", "placement": "retail_checkout_allowed_price_lists"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_queue_maximum_attempts", "value_kind": "whole_number", "placement": "retail_checkout_enable_background_submission"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_queue_processing_timeout_minutes", "value_kind": "whole_number", "placement": "retail_checkout_queue_maximum_attempts"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_require_manager_pin_item_removal", "value_kind": "boolean", "placement": "retail_checkout_pin_users"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_require_pin_before_every_sale", "value_kind": "boolean", "placement": "retail_checkout_pin_lockout_minutes"},
+      {"on": "point_of_sale_profile", "purpose": "field_group_for_retail_checkout_item_prices_include_tax", "value_kind": "field_group", "placement": "page_group_after_column_break_hwfg"},
+      {"on": "point_of_sale_profile", "purpose": "page_group_after_column_break_hwfg", "value_kind": "page_group", "placement": "preceding_field_column_in_point_of_sale_profile"},
+      {"on": "point_of_sale_profile", "purpose": "retail_checkout_workflow_configuration", "value_kind": "owned_rows", "placement": "field_group_for_retail_checkout_workflow_configuration"},
+      {"on": "point_of_sale_profile", "purpose": "field_group_for_retail_checkout_workflow_configuration", "value_kind": "field_group", "placement": "retail_checkout_require_pin_before_every_sale"},
+      {"on": "point_of_sale_settings", "purpose": "retail_checkout_layout_system_version", "value_kind": "whole_number", "placement": "invoice_type", "rules": ["nonnegative"]},
+      {"on": "customer_invoice", "purpose": "retail_checkout_held", "value_kind": "boolean", "placement": "retail_checkout_invoice", "rules": ["hidden_from_form", "editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "retail_checkout_idempotency_key", "value_kind": "text", "placement": "retail_checkout_held", "rules": ["unique", "hidden_from_form", "editable_after_submission", "indexed_for_search"]},
+      {"on": "customer_invoice", "purpose": "retail_checkout_invoice", "value_kind": "boolean", "placement": "is_point_of_sale", "rules": ["hidden_from_form", "editable_after_submission"]}
+    ]
+  },
+  {
+    "capability": "Reusable bulk import and export layouts",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "bulk_import_export_template",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "reference_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "template_data", "value_kind": "structured_value", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Reusable form presets",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "form_preset",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "target_record_class", "value_kind": "reference", "rules": ["required", "write_once"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "scope", "value_kind": "choice", "rules": ["required"], "choices": ["private", "shared", "everyone"]},
+          {"purpose": "disabled", "value_kind": "boolean"},
+          {"purpose": "field_count", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "use_count", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "last_used", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "shares", "value_kind": "owned_rows", "target": "form_preset_share"},
+          {"purpose": "values_structured_data", "value_kind": "expression_or_structured_text", "rules": ["hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["desk_user", 0, ["read", "write", "create", "delete"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "form_preset_excluded_record_class",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "excluded_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "form_preset_share",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "share_type", "value_kind": "choice", "rules": ["required"], "choices": ["user", "role"]},
+          {"purpose": "user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "can_edit", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "form_presets_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "allow_everyone_scope", "value_kind": "boolean"},
+          {"purpose": "maximum_presets_per_user", "value_kind": "whole_number"},
+          {"purpose": "maximum_values_kb", "value_kind": "whole_number"},
+          {"purpose": "excluded_record_classes", "value_kind": "owned_rows", "target": "form_preset_excluded_record_class"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Reusable letterhead design",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "letter_head", "purpose": "easy_mode", "value_kind": "boolean", "placement": "letter_head_name"},
+      {"on": "letter_head", "purpose": "field_column_after_disabled", "value_kind": "field_column", "placement": "disabled"},
+      {"on": "letter_head", "purpose": "field_column_for_logo_width", "value_kind": "field_column", "placement": "image"},
+      {"on": "letter_head", "purpose": "logo_width", "value_kind": "whole_number", "placement": "field_column_for_logo_width"},
+      {"on": "letter_head", "purpose": "col3_field_column", "value_kind": "field_column", "placement": "logo_width"},
+      {"on": "letter_head", "purpose": "title_size", "value_kind": "choice", "placement": "col3_field_column"},
+      {"on": "letter_head", "purpose": "123_field_column", "value_kind": "field_column", "placement": "title_size"},
+      {"on": "letter_head", "purpose": "text_size", "value_kind": "choice", "placement": "123_field_column"},
+      {"on": "letter_head", "purpose": "field_column_for_text_align", "value_kind": "field_column", "placement": "text_size"},
+      {"on": "letter_head", "purpose": "text_align", "value_kind": "choice", "placement": "field_column_for_text_align"},
+      {"on": "letter_head", "purpose": "field_group_for_business_name", "value_kind": "field_group", "placement": "content"},
+      {"on": "letter_head", "purpose": "business_name", "value_kind": "text", "placement": "field_group_for_business_name", "rules": ["translatable"]},
+      {"on": "letter_head", "purpose": "address", "value_kind": "text", "placement": "business_name", "rules": ["translatable"]},
+      {"on": "letter_head", "purpose": "city_and_country", "value_kind": "text", "placement": "address", "rules": ["translatable"]},
+      {"on": "letter_head", "purpose": "field_column_for_phone_number", "value_kind": "field_column", "placement": "city_and_country"},
+      {"on": "letter_head", "purpose": "phone_number", "value_kind": "text", "placement": "field_column_for_phone_number"},
+      {"on": "letter_head", "purpose": "email", "value_kind": "text", "placement": "phone_number"}
+    ]
+  },
+  {
+    "capability": "Role and grant duplication",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "role_duplicate",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required"], "choices": ["assigned_sequence_of_5_digits_with_year"]},
+          {"purpose": "source_role", "value_kind": "reference", "rules": ["required"], "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "new_role_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "role_permissions", "value_kind": "owned_rows", "target": "role_duplicate_permissions"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "role_duplicate_permissions",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document_type", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "read", "value_kind": "boolean"},
+          {"purpose": "write", "value_kind": "boolean"},
+          {"purpose": "create", "value_kind": "boolean"},
+          {"purpose": "delete", "value_kind": "boolean"},
+          {"purpose": "submit", "value_kind": "boolean"},
+          {"purpose": "cancel", "value_kind": "boolean"},
+          {"purpose": "amend", "value_kind": "boolean"},
+          {"purpose": "report", "value_kind": "boolean"},
+          {"purpose": "export", "value_kind": "boolean"},
+          {"purpose": "import", "value_kind": "boolean"},
+          {"purpose": "print", "value_kind": "boolean"},
+          {"purpose": "email", "value_kind": "boolean"},
+          {"purpose": "share", "value_kind": "boolean"},
+          {"purpose": "if_owner", "value_kind": "boolean"},
+          {"purpose": "set_user_permissions", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "user_permission_details",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "allow", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "for_value", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "allow"},
+          {"purpose": "applicable_for", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "apply_to_all_record_classes", "value_kind": "boolean"},
+          {"purpose": "is_default", "value_kind": "boolean"},
+          {"purpose": "hide_descendants", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "user_permission_manager",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required"], "choices": ["assigned_sequence_with_year"]},
+          {"purpose": "manager_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "user_field", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "user_permission_details", "value_kind": "owned_rows", "rules": ["required"], "target": "user_permission_details"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Role assignment administration",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "users_role",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "users_role_details", "value_kind": "owned_rows", "rules": ["required"], "target": "users_role_details"},
+          {"purpose": "document_name", "value_kind": "text", "rules": ["required", "unique"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "users_role_details",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "allow", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "for_value", "value_kind": "variable_record_reference", "rules": ["bypasses_value_selection_restrictions"], "record_class_field": "allow"},
+          {"purpose": "is_default", "value_kind": "boolean"},
+          {"purpose": "apply_to_all_document_types", "value_kind": "boolean"},
+          {"purpose": "applicable_for", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "hide_descendants", "value_kind": "boolean"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Role assignment administration",
+    "configuration": 1,
+    "rule_addresses": [
+      ["employee", "create_user_permission", "hidden", "boolean"],
+      ["employee", "create_user_permission", "default", null]
+    ]
+  },
+  {
+    "capability": "Role grant administration",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "document_type_permission",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document_type", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "email_perm", "value_kind": "boolean"},
+          {"purpose": "share_perm", "value_kind": "boolean"},
+          {"purpose": "print_perm", "value_kind": "boolean"},
+          {"purpose": "read_perm", "value_kind": "boolean"},
+          {"purpose": "write_perm", "value_kind": "boolean"},
+          {"purpose": "create_perm", "value_kind": "boolean"},
+          {"purpose": "submit_perm", "value_kind": "boolean"},
+          {"purpose": "cancel_perm", "value_kind": "boolean"},
+          {"purpose": "amend_perm", "value_kind": "boolean"},
+          {"purpose": "delete_perm", "value_kind": "boolean"},
+          {"purpose": "if_owner_perm", "value_kind": "boolean"},
+          {"purpose": "report_perm", "value_kind": "boolean"},
+          {"purpose": "export_perm", "value_kind": "boolean"},
+          {"purpose": "import_perm", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "document_type_select_permission",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document_type", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "permission_for_page_and_report",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "resource_type", "value_kind": "choice", "choices": ["unselected", "page", "report"]},
+          {"purpose": "resource_name", "value_kind": "variable_record_reference", "record_class_field": "resource_type"}
+        ]
+      },
+      {
+        "concept": "role_permission_manager",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "role", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "document_type_permissions", "value_kind": "owned_rows", "target": "document_type_permission"},
+          {"purpose": "document_type_select_permissions", "value_kind": "owned_rows", "rules": ["read_only"], "target": "document_type_select_permission"},
+          {"purpose": "page_and_report_permissions", "value_kind": "owned_rows", "target": "permission_for_page_and_report"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Role-restricted knowledge pages",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "knowledge_space_page",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "content", "value_kind": "formatted_text"},
+          {"purpose": "roles", "value_kind": "owned_selection_rows", "target": "knowledge_space_page_role"},
+          {"purpose": "order", "value_kind": "whole_number"},
+          {"purpose": "path", "value_kind": "text"},
+          {"purpose": "published", "value_kind": "boolean"},
+          {"purpose": "language", "value_kind": "reference", "rules": ["required"], "target": "information_management.language", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_space_contributor", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_space_page_role",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "role", "value_kind": "reference", "rules": ["required"], "target": "information_management.role", "binding": "shared_model"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Sales inquiry and contact synchronization",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "connector_lead_link",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "tax_administration_unique_identifier", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "lead", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "sales_relationships.lead", "binding": "shared_model"},
+          {"purpose": "business_identifier", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "last_request_identifier", "value_kind": "text"},
+          {"purpose": "seen_request_identifiers", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "payload_hash", "value_kind": "text"},
+          {"purpose": "last_synchronized_on", "value_kind": "date_and_time"},
+          {"purpose": "migrated_fields", "value_kind": "text"},
+          {"purpose": "client_held_contacts", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "last_response", "value_kind": "long_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "connector_legacy_field_archive",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "reference_record_class", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "reference_name", "value_kind": "text", "rules": ["required", "indexed_for_search"]},
+          {"purpose": "lookup_key", "value_kind": "text", "rules": ["unique", "read_only"]},
+          {"purpose": "migration_status", "value_kind": "choice", "choices": ["unselected", "migrated", "failed", "orphaned"]},
+          {"purpose": "migrated_on", "value_kind": "date_and_time"},
+          {"purpose": "archived_on", "value_kind": "date_and_time"},
+          {"purpose": "migration_notes", "value_kind": "long_text"},
+          {"purpose": "legacy_values", "value_kind": "long_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "connector_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "request_identifier", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "tax_administration_unique_identifier", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "outcome", "value_kind": "choice", "choices": ["unselected", "success", "skipped", "rejected", "error"]},
+          {"purpose": "error_code", "value_kind": "text"},
+          {"purpose": "duration_ms", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "message", "value_kind": "long_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "connector_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "business_identifier", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "central_site", "value_kind": "text"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "token_hash", "value_kind": "text"},
+          {"purpose": "reject_business_mismatch", "value_kind": "boolean"},
+          {"purpose": "last_request_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "legacy_migration_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "queued", "running", "complete", "failed"]},
+          {"purpose": "legacy_migration_cursor", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "legacy_migration_scanned", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "legacy_migration_migrated", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "legacy_migration_failed", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "legacy_migration_conflicts", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "legacy_fields_dropped", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "legacy_fields_dropped_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "legacy_migration_started_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "legacy_migration_completed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "legacy_migration_message", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "default_lead_owner", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "assign_new_leads", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "connector_source_link",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "tax_administration_unique_identifier", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "source", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "web_publishing.traffic_attribution_source", "binding": "shared_model"},
+          {"purpose": "business_identifier", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "last_request_identifier", "value_kind": "text"},
+          {"purpose": "payload_hash", "value_kind": "text"},
+          {"purpose": "last_synchronized_on", "value_kind": "date_and_time"},
+          {"purpose": "migrated_fields", "value_kind": "text"},
+          {"purpose": "last_response", "value_kind": "long_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "enterprise_lead_activity_log",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "source", "value_kind": "reference", "target": "web_publishing.traffic_attribution_source", "binding": "shared_model"},
+          {"purpose": "activity_date", "value_kind": "date_and_time"},
+          {"purpose": "user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "enterprise_lead_email",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "email_identifier", "value_kind": "text", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "enterprise_lead_mobile_number",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "mobile_number", "value_kind": "text", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "lead_source_email_message",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "subject", "value_kind": "text"},
+          {"purpose": "message", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "lead_source_text_message",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "subject", "value_kind": "text"},
+          {"purpose": "message", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "lead_source_business_messaging_message",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "subject", "value_kind": "text"},
+          {"purpose": "message", "value_kind": "text"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Saudi electronic invoicing",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "additional_buyer_i_ds",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "type_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "type_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "additional_buyer_i_ds_value", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "additional_seller_i_ds",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "type_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "type_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "additional_seller_i_ds_value", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "registration_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "type_name", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "type_code", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "customer_invoice_additional_fields",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "customer_invoice_additional_fields"},
+          {"purpose": "unique_identifier", "value_kind": "text", "rules": ["unique", "read_only"]},
+          {"purpose": "invoice_type_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invoice_type_transaction", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "tax_currency", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invoice_counter", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "previous_invoice_hash", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "machine_readable_code_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "buyer_street_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "buyer_additional_street_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "buyer_building_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "buyer_additional_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "buyer_city", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "buyer_postal_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "buyer_district", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "buyer_country_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "customer_invoice", "value_kind": "variable_record_reference", "rules": ["required", "read_only", "indexed_for_search"], "record_class_field": "invoice_record_class"},
+          {"purpose": "supply_end_date", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "allowance_value_added_tax_category_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "reason_for_allowance", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "code_for_allowance_reason", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "charge_value_added_tax_category_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "reason_for_charge", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "reason_for_charge_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "sum_of_charges", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "value_added_tax_exemption_reason_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "value_added_tax_exemption_reason_text", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "prepayment_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "prepayment_unique_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "prepayment_issue_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "prepayment_issue_time", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "prepayment_type_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invoice_line_allowance_reason", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invoice_line_allowance_reason_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invoice_line_charge_indicator", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invoice_line_charge_percentage", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "invoice_line_charge_amount", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "invoice_line_charge_base_amount", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "invoice_line_charge_base_amount_reason", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invoice_line_charge_base_amount_reason_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "prepayment_value_added_tax_category_taxable_amount", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "prepayment_value_added_tax_category_tax_amount", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "buyer_value_added_tax_registration_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "other_buyer_identifiers", "value_kind": "owned_rows", "target": "additional_seller_i_ds"},
+          {"purpose": "payment_means_type_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "allowance_indicator", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "charge_indicator", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "invoice_hash", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "validation_messages", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "validation_errors", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "integration_status", "value_kind": "choice", "rules": ["read_only", "editable_after_submission"], "choices": ["unselected", "ready_for_batch", "outbound_mail_service", "corrected", "accepted_with_warnings", "accepted", "rejected", "clearance_switched_off", "duplicate"]},
+          {"purpose": "invoice_structured_exchange", "value_kind": "long_text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "precomputed", "value_kind": "boolean"},
+          {"purpose": "precomputed_invoice", "value_kind": "reference", "target": "saudi_tax_authority_precomputed_invoice"},
+          {"purpose": "last_attempt", "value_kind": "date_and_time", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "buyer_province_state", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "machine_readable_code_image_source", "value_kind": "text", "rules": ["hidden_from_form", "computed_value"]},
+          {"purpose": "is_latest", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "tax_invoice_invoice_discount_amount", "value_kind": "decimal"},
+          {"purpose": "invoice_record_class", "value_kind": "choice", "rules": ["required", "read_only", "indexed_for_search"], "choices": ["customer_invoice", "point_of_sale_invoice", "payment_entry"]},
+          {"purpose": "branch_commercial_registration_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "branch", "value_kind": "reference", "rules": ["read_only"], "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "allow_submit", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "saudi_tax_authority_business_settings",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "enable_saudi_tax_authority_integration", "value_kind": "boolean"},
+          {"purpose": "company_address", "value_kind": "reference", "rules": ["required"], "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["required"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "seller_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "value_added_tax_registration_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "other_identifiers", "value_kind": "owned_rows", "target": "additional_seller_i_ds"},
+          {"purpose": "additional_street", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "postal_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "street", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "building_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "city", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "district", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "country", "value_kind": "reference", "rules": ["required", "read_only"], "target": "geography.country", "binding": "shared_model"},
+          {"purpose": "synchronization_with_saudi_tax_authority", "value_kind": "choice", "choices": ["live", "batches"]},
+          {"purpose": "country_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "type_of_business_transactions", "value_kind": "choice", "choices": ["let_the_system_decide_both", "simplified_tax_invoices", "standard_tax_invoices"]},
+          {"purpose": "compliance_request_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "company_unit", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "company_unit_serial", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "company_category", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "csr", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "security_token", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "secret", "value_kind": "protected_text", "rules": ["read_only"]},
+          {"purpose": "production_security_token", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "production_secret", "value_kind": "protected_text", "rules": ["read_only"]},
+          {"purpose": "production_request_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "validate_generated_structured_exchange", "value_kind": "boolean"},
+          {"purpose": "saudi_tax_authority_cli_path", "value_kind": "text"},
+          {"purpose": "cli_setup", "value_kind": "choice", "rules": ["required"], "choices": ["automatic", "manual"]},
+          {"purpose": "override_cli_download_resource_address", "value_kind": "text"},
+          {"purpose": "override_jre_download_resource_address", "value_kind": "text"},
+          {"purpose": "java_home", "value_kind": "text"},
+          {"purpose": "tax_invoice_server", "value_kind": "choice", "choices": ["sandbox", "simulation", "production"]},
+          {"purpose": "tax_rate", "value_kind": "percentage", "rules": ["write_once"]},
+          {"purpose": "saudi_tax_authority_tax_category", "value_kind": "choice", "rules": ["write_once"], "choices": ["unselected", "standard_rate", "services_outside_scope_of_tax_not_subject_to_value_added_tax_manual_entry", "exempt_from_tax_financial_services_mentioned_in_article_29_of_the_value_added_tax_regulations", "exempt_from_tax_life_insurance_services_mentioned_in_article_29_of_the_value_added_tax_regulations", "exempt_from_tax_real_estate_transactions_mentioned_in_article_30_of_the_value_added_tax_regulations", "exempt_from_tax_qualified_supply_of_goods_in_duty_free_area", "zero_rated_goods_export_of_goods", "zero_rated_goods_export_of_services", "zero_rated_goods_the_international_transport_of_goods", "zero_rated_goods_international_transport_of_passengers", "zero_rated_goods_services_directly_connected_and_incidental_to_a_supply_of_international_passenger_transport", "zero_rated_goods_supply_of_a_qualifying_means_of_transport", "zero_rated_goods_any_services_relating_to_goods_or_passenger_transportation_as_defined_in_article_twenty_five_of_these_regulations", "zero_rated_goods_medicines_and_medical_equipment", "zero_rated_goods_qualifying_metals", "zero_rated_goods_private_education_to_citizen", "zero_rated_goods_private_healthcare_to_citizen", "zero_rated_goods_supply_of_qualified_military_goods"]},
+          {"purpose": "linked_tax_account", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "account_name", "value_kind": "text", "rules": ["write_once"]},
+          {"purpose": "account_number", "value_kind": "text", "rules": ["write_once"]},
+          {"purpose": "block_invoice_on_invalid_structured_exchange", "value_kind": "boolean"},
+          {"purpose": "automatic_value_added_tax_account_configuration", "value_kind": "boolean", "rules": ["write_once"]},
+          {"purpose": "enable_branch_configuration", "value_kind": "boolean"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["active", "revoked"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "saudi_tax_authority_egs",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "enable_saudi_tax_authority_integration", "value_kind": "boolean"},
+          {"purpose": "synchronization_with_saudi_tax_authority", "value_kind": "choice", "choices": ["live", "batches"]},
+          {"purpose": "validate_generated_structured_exchange", "value_kind": "boolean"},
+          {"purpose": "csr", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "compliance_request_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "security_token", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "secret", "value_kind": "protected_text", "rules": ["read_only"]},
+          {"purpose": "production_request_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "production_security_token", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "production_secret", "value_kind": "protected_text", "rules": ["read_only"]},
+          {"purpose": "business_settings", "value_kind": "reference", "rules": ["required"], "target": "saudi_tax_authority_business_settings"},
+          {"purpose": "egs_type", "value_kind": "choice", "rules": ["required"], "choices": ["enterprise", "point_of_sale_device"]},
+          {"purpose": "unit_common_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "unit_serial", "value_kind": "text", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "saudi_tax_authority_integration_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "invoice_reference", "value_kind": "variable_record_reference", "rules": ["required", "read_only", "indexed_for_search"], "record_class_field": "invoice_record_class"},
+          {"purpose": "invoice_additional_fields_reference", "value_kind": "reference", "rules": ["required", "read_only", "indexed_for_search"], "target": "customer_invoice_additional_fields"},
+          {"purpose": "e_invoice_file", "value_kind": "file_reference", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "pending", "outbound_mail_service", "accepted_with_warnings", "accepted", "rejected", "clearance_switched_off", "duplicate"]},
+          {"purpose": "saudi_tax_authority_status", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "saudi_tax_authority_message", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "invoice_record_class", "value_kind": "choice", "rules": ["required", "read_only", "indexed_for_search"], "choices": ["customer_invoice", "point_of_sale_invoice", "payment_entry"]},
+          {"purpose": "saudi_tax_authority_service_transport_status_code", "value_kind": "whole_number", "rules": ["read_only", "indexed_for_search"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "saudi_tax_authority_invoice_counting_settings",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "business_settings_reference", "value_kind": "reference", "rules": ["unique", "write_once"], "target": "saudi_tax_authority_business_settings"},
+          {"purpose": "invoice_counter", "value_kind": "whole_number", "rules": ["read_only", "nonnegative"]},
+          {"purpose": "previous_invoice_hash", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "saudi_tax_authority_egs", "value_kind": "reference", "target": "saudi_tax_authority_egs"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "saudi_tax_authority_phase_1_business_settings",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "unique"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "value_added_tax_registration_number", "value_kind": "text"},
+          {"purpose": "type_of_transaction", "value_kind": "choice", "choices": ["simplified_tax_invoice", "standard_tax_invoice", "both"]},
+          {"purpose": "address", "value_kind": "reference", "rules": ["required"], "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["active", "disabled"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "saudi_tax_authority_precomputed_invoice",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "customer_invoice", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "accounting.sales_invoice", "binding": "shared_model"},
+          {"purpose": "invoice_counter", "value_kind": "text", "rules": ["read_only", "indexed_for_search"]},
+          {"purpose": "invoice_unique_identifier", "value_kind": "text", "rules": ["unique", "read_only"]},
+          {"purpose": "previous_invoice_hash", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invoice_hash", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invoice_machine_readable_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invoice_structured_exchange", "value_kind": "long_text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "device_identifier", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "saudi_tax_authority_return_against_reference",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "customer_invoice", "value_kind": "reference", "rules": ["required"], "target": "accounting.sales_invoice", "binding": "shared_model"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Saudi electronic invoicing",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "address", "purpose": "area", "value_kind": "text", "placement": "building_number", "rules": ["translatable"]},
+      {"on": "address", "purpose": "building_number", "value_kind": "text", "placement": "address_line2", "rules": ["translatable"]},
+      {"on": "branch", "purpose": "additional_street", "value_kind": "text", "placement": "street", "rules": ["read_only", "translatable"]},
+      {"on": "branch", "purpose": "branch_identifiers", "value_kind": "owned_rows", "placement": "field_group_for_branch_identifiers"},
+      {"on": "branch", "purpose": "building_number", "value_kind": "text", "placement": "additional_street", "rules": ["read_only", "translatable"]},
+      {"on": "branch", "purpose": "city", "value_kind": "text", "placement": "building_number", "rules": ["read_only", "translatable"]},
+      {"on": "branch", "purpose": "field_column_for_company_address", "value_kind": "field_column", "placement": "company"},
+      {"on": "branch", "purpose": "company", "value_kind": "reference", "placement": "saudi_tax_authority_branch_configuration_field_group"},
+      {"on": "branch", "purpose": "company_address", "value_kind": "reference", "placement": "field_column_for_company_address"},
+      {"on": "branch", "purpose": "district", "value_kind": "text", "placement": "postal_code", "rules": ["read_only", "translatable"]},
+      {"on": "branch", "purpose": "postal_code", "value_kind": "text", "placement": "city", "rules": ["read_only", "translatable"]},
+      {"on": "branch", "purpose": "field_group_for_branch_identifiers", "value_kind": "field_group", "placement": "district"},
+      {"on": "branch", "purpose": "street", "value_kind": "text", "placement": "company_address", "rules": ["read_only", "translatable"]},
+      {"on": "branch", "purpose": "saudi_tax_authority_branch_configuration_field_group", "value_kind": "field_group", "placement": "branch"},
+      {"on": "customer", "purpose": "field_group_for_value_added_tax_registration_number", "value_kind": "field_group", "placement": "companies"},
+      {"on": "customer", "purpose": "value_added_tax_registration_number", "value_kind": "text", "placement": "field_group_for_value_added_tax_registration_number", "rules": ["translatable"]},
+      {"on": "customer", "purpose": "additional_identifiers", "value_kind": "owned_rows", "placement": "value_added_tax_registration_number"},
+      {"on": "item_tax_template", "purpose": "saudi_tax_authority_item_tax_category", "value_kind": "choice", "placement": "disabled", "rules": ["translatable"]},
+      {"on": "item_tax_template", "purpose": "category_reason", "value_kind": "text", "placement": "saudi_tax_authority_item_tax_category", "rules": ["translatable"]},
+      {"on": "mode_of_payment", "purpose": "saudi_tax_authority_payment_means_code", "value_kind": "text", "placement": "accounts"},
+      {"on": "payment_entry", "purpose": "posting_time", "value_kind": "time_of_day", "placement": "posting_date"},
+      {"on": "payment_entry", "purpose": "prepayment_invoice", "value_kind": "boolean", "placement": "payment_order_status"},
+      {"on": "payment_entry", "purpose": "prepayment_invoice_description", "value_kind": "text", "placement": "prepayment_invoice"},
+      {"on": "point_of_sale_invoice_item", "purpose": "tax_amount", "value_kind": "money", "placement": "tax_rate", "rules": ["read_only"]},
+      {"on": "point_of_sale_invoice_item", "purpose": "tax_rate", "value_kind": "decimal", "placement": "saudi_tax_authority_item_tax_category", "rules": ["read_only"]},
+      {"on": "point_of_sale_invoice_item", "purpose": "total_amount", "value_kind": "money", "placement": "tax_amount", "rules": ["read_only"]},
+      {"on": "customer_invoice", "purpose": "return_against_additional_references", "value_kind": "owned_selection_rows", "placement": "return_against"},
+      {"on": "customer_invoice", "purpose": "return_reason", "value_kind": "text", "placement": "is_debit_note"},
+      {"on": "customer_invoice", "purpose": "field_group_after_total_billing_amount", "value_kind": "field_group", "placement": "total_billing_amount"},
+      {"on": "customer_invoice", "purpose": "saudi_tax_authority_discount_reason", "value_kind": "suggested_text", "placement": "discount_amount"},
+      {"on": "customer_invoice_item", "purpose": "saudi_tax_authority_discount_reason", "value_kind": "choice", "placement": "base_rate_with_margin", "rules": ["translatable"]},
+      {"on": "customer_invoice_item", "purpose": "saudi_tax_authority_item_tax_category", "value_kind": "choice", "placement": "item_tax_template", "rules": ["read_only", "translatable"]},
+      {"on": "customer_invoice_item", "purpose": "tax_amount", "value_kind": "money", "placement": "tax_rate", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "tax_rate", "value_kind": "decimal", "placement": "saudi_tax_authority_item_tax_category", "rules": ["read_only"]},
+      {"on": "customer_invoice_item", "purpose": "total_amount", "value_kind": "money", "placement": "tax_amount", "rules": ["read_only"]},
+      {"on": "tax_category", "purpose": "category_reason", "value_kind": "text", "placement": "saudi_tax_authority_category", "rules": ["translatable"]},
+      {"on": "tax_category", "purpose": "saudi_tax_authority_category", "value_kind": "choice", "placement": "field_column_for_saudi_tax_authority_category", "rules": ["translatable"]},
+      {"on": "tax_category", "purpose": "field_column_for_saudi_tax_authority_category", "value_kind": "field_column", "placement": "disabled"}
+    ]
+  },
+  {
+    "capability": "Saudi electronic invoicing",
+    "configuration": 1,
+    "rule_addresses": [
+      ["branch", "branch", "unique", "boolean"],
+      ["branch", null, "field_order", "text"],
+      ["item_tax_template", null, "field_order", "text"],
+      ["mode_of_payment", null, "field_order", "text"],
+      ["payment_entry", null, "field_order", "text"],
+      ["payment_entry", "sales_taxes_and_charges_template", "mandatory_depends_on", "text"],
+      ["customer_invoice_item", null, "field_order", "text"],
+      ["tax_category", null, "field_order", "text"]
+    ]
+  },
+  {
+    "capability": "Saudi electronic invoicing",
+    "configuration": 2,
+    "entity_contracts": [
+      {
+        "concept": "saudi_tax_authority_regional_tax_service_event_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "service_interface_response", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "invoice_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "time", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "saudi_tax_authority_er_pgulf_setting",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "saudi_tax_authority_invoice_enabled", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "send_invoice_to_saudi_tax_authority", "value_kind": "choice", "choices": ["live", "background"]},
+          {"purpose": "select", "value_kind": "choice", "rules": ["read_only"], "choices": ["simulation", "sandbox", "production"]},
+          {"purpose": "attach_structured_exchange_with_invoice", "value_kind": "boolean"},
+          {"purpose": "attach_structured_exchange_with_machine_readable_code_code", "value_kind": "boolean"},
+          {"purpose": "attach_machine_readable_code_code_record_class", "value_kind": "boolean"},
+          {"purpose": "attach_e_invoice_send_status_with_invoice", "value_kind": "boolean"},
+          {"purpose": "pih", "value_kind": "text"},
+          {"purpose": "sandbox_resource_address", "value_kind": "text"},
+          {"purpose": "simulation_resource_address", "value_kind": "text"},
+          {"purpose": "production_resource_address", "value_kind": "text"},
+          {"purpose": "one_time_password", "value_kind": "text"},
+          {"purpose": "basic_authentication", "value_kind": "long_text"},
+          {"purpose": "compliance_request_identifier", "value_kind": "text"},
+          {"purpose": "validation_type", "value_kind": "choice", "choices": ["simplified_invoice", "standard_invoice", "simplified_credit_note", "standard_credit_note", "simplified_debit_note", "standard_debit_note"]},
+          {"purpose": "basic_authentication_production", "value_kind": "long_text"},
+          {"purpose": "csr_data", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "sample_invoice_to_test", "value_kind": "text"},
+          {"purpose": "background", "value_kind": "boolean"},
+          {"purpose": "private_key", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "certificate", "value_kind": "long_text"},
+          {"purpose": "public_key", "value_kind": "text"},
+          {"purpose": "csr_configuration", "value_kind": "long_text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "saudi_tax_authority_regional_tax_service_success_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text"},
+          {"purpose": "message", "value_kind": "long_text"},
+          {"purpose": "saudi_tax_authority_response", "value_kind": "long_text"},
+          {"purpose": "invoice_number", "value_kind": "text"},
+          {"purpose": "time", "value_kind": "text"},
+          {"purpose": "unique_identifier", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "saudi_tax_authority_multiple_setting",
+        "characteristics": [],
+        "attributes": [
+
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "saudi_tax_authority_point_of_sale_table",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "saudi_tax_authority_multiple_setting", "value_kind": "reference", "target": "saudi_tax_authority_multiple_setting"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Saudi electronic invoicing",
+    "configuration": 2,
+    "additional_fields": [
+      {"on": "customer_invoice", "purpose": "ksa_einv_machine_readable_code", "value_kind": "image_reference", "rules": ["read_only", "hidden_from_form"]},
+      {"on": "customer_invoice", "purpose": "ksa_einvoicing_structured_exchange", "value_kind": "text", "placement": "ksa_einv_machine_readable_code", "rules": ["read_only", "hidden_from_form", "translatable"]},
+      {"on": "customer_invoice", "purpose": "business_to_consumer", "value_kind": "boolean", "placement": "customer", "rules": ["read_only"]},
+      {"on": "customer_invoice", "purpose": "company_country", "value_kind": "text", "placement": "test_journal_voucher", "rules": ["read_only", "hidden_from_form", "editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "unique_identifier", "value_kind": "text", "placement": "due_date", "rules": ["read_only", "editable_after_submission", "translatable"]},
+      {"on": "customer_invoice", "purpose": "saudi_tax_authority_status", "value_kind": "text", "placement": "unique_identifier", "rules": ["read_only", "editable_after_submission", "translatable"]},
+      {"on": "customer_invoice", "purpose": "saudi_tax_authority_status_notification", "value_kind": "presentation_content", "placement": "preceding_field_column_in_customer_invoice"},
+      {"on": "customer_invoice", "purpose": "credit_note_reasoninstruction_note", "value_kind": "text", "placement": "is_return", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "skip_validation_for_credit_note", "value_kind": "boolean", "placement": "credit_note_reasoninstruction_note"},
+      {"on": "customer_invoice", "purpose": "return_against_for_saudi_tax_authority", "value_kind": "text", "placement": "return_against", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "field_group_after_amended_from", "value_kind": "field_group", "placement": "amended_from"},
+      {"on": "customer_invoice", "purpose": "field_column_after_field_group_after_amended_from", "value_kind": "field_column", "placement": "field_group_after_amended_from"},
+      {"on": "customer_invoice", "purpose": "saudi_tax_authority_pmm_warning", "value_kind": "presentation_content", "placement": "field_column_after_field_group_after_amended_from"},
+      {"on": "customer_invoice", "purpose": "saudi_tax_authority_third_party_invoice", "value_kind": "boolean", "placement": "saudi_tax_authority_pmm_warning"},
+      {"on": "customer_invoice", "purpose": "saudi_tax_authority_nominal_invoice", "value_kind": "boolean", "placement": "saudi_tax_authority_third_party_invoice"},
+      {"on": "customer_invoice", "purpose": "saudi_tax_authority_export_invoice", "value_kind": "boolean", "placement": "saudi_tax_authority_nominal_invoice"},
+      {"on": "customer_invoice", "purpose": "summary_invoice", "value_kind": "boolean", "placement": "saudi_tax_authority_export_invoice"},
+      {"on": "customer_invoice", "purpose": "self_billed_invoice", "value_kind": "boolean", "placement": "summary_invoice"},
+      {"on": "customer_invoice", "purpose": "saudi_tax_authority_pmm", "value_kind": "boolean", "placement": "self_billed_invoice"},
+      {"on": "customer_invoice", "purpose": "user_invoice_number", "value_kind": "text", "placement": "saudi_tax_authority_pmm", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "field_column_for_saudi_tax_authority_tax_category", "value_kind": "field_column", "placement": "user_invoice_number"},
+      {"on": "customer_invoice", "purpose": "saudi_tax_authority_tax_category", "value_kind": "choice", "placement": "field_column_for_saudi_tax_authority_tax_category", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "exemption_reason_code", "value_kind": "choice", "placement": "saudi_tax_authority_tax_category", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "tax_exemption_reason", "value_kind": "text", "placement": "exemption_reason_code", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "saudi_tax_authority_discount_reason_code", "value_kind": "text", "placement": "tax_exemption_reason", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "saudi_tax_authority_discount_reason", "value_kind": "text", "placement": "saudi_tax_authority_discount_reason_code", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "submit_line_item_discount_to_saudi_tax_authority", "value_kind": "boolean", "placement": "saudi_tax_authority_discount_reason"},
+      {"on": "customer_invoice", "purpose": "field_column_after_submit_line_item_discount_to_saudi_tax_authority", "value_kind": "field_column", "placement": "submit_line_item_discount_to_saudi_tax_authority"},
+      {"on": "customer_invoice", "purpose": "saudi_tax_authority_full_response", "value_kind": "long_text", "placement": "customer_group", "rules": ["editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "integrations_page_group", "value_kind": "page_group", "placement": "connections_tab"},
+      {"on": "customer_invoice", "purpose": "saudi_tax_authority_point_of_sale_name", "value_kind": "reference", "placement": "integrations_page_group"},
+      {"on": "point_of_sale_invoice", "purpose": "ksa_einv_machine_readable_code", "value_kind": "image_reference", "rules": ["read_only"]},
+      {"on": "point_of_sale_invoice", "purpose": "saudi_tax_authority_field_group", "value_kind": "field_group"},
+      {"on": "point_of_sale_invoice", "purpose": "ksa_einvoicing_structured_exchange", "value_kind": "text", "placement": "ksa_einv_machine_readable_code", "rules": ["read_only", "hidden_from_form", "translatable"]},
+      {"on": "point_of_sale_invoice", "purpose": "saudi_tax_authority_tax_category", "value_kind": "choice", "placement": "ksa_einvoicing_structured_exchange", "rules": ["translatable"]},
+      {"on": "point_of_sale_invoice", "purpose": "exemption_reason_code", "value_kind": "choice", "placement": "saudi_tax_authority_tax_category", "rules": ["translatable"]},
+      {"on": "point_of_sale_invoice", "purpose": "tax_exemption_reason", "value_kind": "text", "placement": "exemption_reason_code", "rules": ["translatable"]},
+      {"on": "point_of_sale_invoice", "purpose": "field_column_after_tax_exemption_reason", "value_kind": "field_column", "placement": "tax_exemption_reason"},
+      {"on": "point_of_sale_invoice", "purpose": "saudi_tax_authority_status_notification", "value_kind": "presentation_content", "placement": "field_column_after_tax_exemption_reason"},
+      {"on": "point_of_sale_invoice", "purpose": "unique_identifier", "value_kind": "text", "placement": "saudi_tax_authority_status_notification", "rules": ["editable_after_submission", "translatable"]},
+      {"on": "point_of_sale_invoice", "purpose": "saudi_tax_authority_status", "value_kind": "text", "placement": "unique_identifier", "rules": ["read_only", "editable_after_submission", "translatable"]},
+      {"on": "point_of_sale_invoice", "purpose": "credit_note_reasoninstruction_note", "value_kind": "text", "placement": "is_return", "rules": ["translatable"]},
+      {"on": "point_of_sale_invoice", "purpose": "company_country", "value_kind": "text", "placement": "update_billed_amount_in_delivery_note", "rules": ["read_only", "hidden_from_form", "editable_after_submission", "translatable"]},
+      {"on": "point_of_sale_invoice", "purpose": "integrations_field_group", "value_kind": "field_group", "placement": "return_against"},
+      {"on": "point_of_sale_invoice", "purpose": "field_column_for_saudi_tax_authority_point_of_sale_name", "value_kind": "field_column", "placement": "integrations_field_group"},
+      {"on": "point_of_sale_invoice", "purpose": "saudi_tax_authority_point_of_sale_name", "value_kind": "reference", "placement": "field_column_for_saudi_tax_authority_point_of_sale_name"},
+      {"on": "point_of_sale_invoice", "purpose": "reponse_from_saudi_tax_authority_field_group", "value_kind": "field_group", "placement": "against_income_account", "rules": ["editable_after_submission"]},
+      {"on": "point_of_sale_invoice", "purpose": "saudi_tax_authority_full_response", "value_kind": "long_text", "placement": "reponse_from_saudi_tax_authority_field_group", "rules": ["editable_after_submission"]},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "linked_record_class", "value_kind": "reference", "placement": "field_group_for_linked_record_class", "rules": ["required"]},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "use_company_certificate_keys", "value_kind": "boolean", "placement": "linked_record_class"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "send_point_of_sale_invoices_to_saudi_tax_authority_on_background", "value_kind": "boolean", "placement": "use_company_certificate_keys"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "csr_configuration", "value_kind": "long_text", "placement": "send_point_of_sale_invoices_to_saudi_tax_authority_on_background"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "create_csr", "value_kind": "action_control", "placement": "csr_configuration"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "csr_data", "value_kind": "long_text", "placement": "create_csr"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "field_column_for_pih", "value_kind": "field_column", "placement": "csr_data"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "pih", "value_kind": "text", "placement": "field_column_for_pih", "rules": ["translatable"]},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "certficate", "value_kind": "long_text", "placement": "pih"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "private_key", "value_kind": "text", "placement": "certficate", "rules": ["translatable"]},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "public_key", "value_kind": "text", "placement": "private_key", "rules": ["translatable"]},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "field_group_for_one_time_password", "value_kind": "field_group", "placement": "public_key"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "field_group_for_linked_record_class", "value_kind": "field_group", "placement": "one_time_password"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "one_time_password", "value_kind": "text", "placement": "field_group_for_one_time_password", "rules": ["translatable"]},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "generate_compliance_cryptographic_stamp_identifier", "value_kind": "action_control", "placement": "one_time_password"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "compliance_request_identifier", "value_kind": "text", "placement": "generate_compliance_cryptographic_stamp_identifier", "rules": ["translatable"]},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "field_column_for_basic_authentication_from_cryptographic_stamp_identifier", "value_kind": "field_column", "placement": "compliance_request_identifier"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "basic_authentication_from_cryptographic_stamp_identifier", "value_kind": "text", "placement": "field_column_for_basic_authentication_from_cryptographic_stamp_identifier", "rules": ["translatable"]},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "sample_invoice_number_to_test", "value_kind": "text", "placement": "preceding_field_group_in_saudi_tax_authority_multiple_setting", "rules": ["translatable"]},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "validation_type", "value_kind": "choice", "placement": "sample_invoice_number_to_test", "rules": ["translatable"]},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "check_compliance", "value_kind": "action_control", "placement": "validation_type"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "field_column_after_check_compliance", "value_kind": "field_column", "placement": "check_compliance"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "generate_final_csids", "value_kind": "action_control", "placement": "field_column_after_check_compliance"},
+      {"on": "saudi_tax_authority_multiple_setting", "purpose": "final_authentication_cryptographic_stamp_identifier", "value_kind": "long_text", "placement": "generate_final_csids"},
+      {"on": "saudi_tax_authority_regional_tax_service_event_log", "purpose": "unique_identifier", "value_kind": "text", "placement": "invoice_number", "rules": ["read_only", "translatable"]},
+      {"on": "customer", "purpose": "saudi_tax_authority_customer_name_in_arabic", "value_kind": "text", "placement": "customer_name"},
+      {"on": "customer", "purpose": "business_to_consumer", "value_kind": "boolean", "placement": "saudi_tax_authority_customer_name_in_arabic"},
+      {"on": "customer", "purpose": "buyer_identifier_type", "value_kind": "choice", "placement": "business_to_consumer", "rules": ["translatable"]},
+      {"on": "customer", "purpose": "buyer_identifier", "value_kind": "text", "placement": "buyer_identifier_type", "rules": ["translatable"]},
+      {"on": "address", "purpose": "building_number", "value_kind": "text", "placement": "address_line2", "rules": ["translatable"]},
+      {"on": "cost_center", "purpose": "saudi_tax_authority_registration_type", "value_kind": "choice", "placement": "company", "rules": ["translatable"]},
+      {"on": "cost_center", "purpose": "saudi_tax_authority_registration_number", "value_kind": "text", "placement": "saudi_tax_authority_registration_type", "rules": ["translatable"]},
+      {"on": "cost_center", "purpose": "saudi_tax_authority_branch_address", "value_kind": "reference", "placement": "saudi_tax_authority_registration_number"},
+      {"on": "item_tax_template", "purpose": "exemption_reason_code", "value_kind": "choice", "placement": "taxes", "rules": ["translatable"]},
+      {"on": "item_tax_template", "purpose": "tax_exemption_reason", "value_kind": "text", "placement": "exemption_reason_code", "rules": ["translatable"]},
+      {"on": "item_tax_template", "purpose": "saudi_tax_authority_tax_category", "value_kind": "choice", "placement": "tax_exemption_reason", "rules": ["translatable"]},
+      {"on": "supplier_invoice", "purpose": "company_country", "value_kind": "text", "placement": "company", "rules": ["read_only", "hidden_from_form", "editable_after_submission"]},
+      {"on": "supplier_invoice", "purpose": "field_group_for_saudi_tax_authority_summary_invoice", "value_kind": "field_group", "placement": "amended_from"},
+      {"on": "supplier_invoice", "purpose": "saudi_tax_authority_summary_invoice", "value_kind": "boolean", "placement": "field_group_for_saudi_tax_authority_summary_invoice"},
+      {"on": "supplier_invoice", "purpose": "saudi_tax_authority_3rd_party_invoice", "value_kind": "boolean", "placement": "saudi_tax_authority_summary_invoice"},
+      {"on": "supplier_invoice", "purpose": "saudi_tax_authority_self_billed_invoice", "value_kind": "boolean", "placement": "saudi_tax_authority_3rd_party_invoice"},
+      {"on": "supplier_invoice", "purpose": "saudi_tax_authority_import_invoice", "value_kind": "boolean", "placement": "saudi_tax_authority_self_billed_invoice"},
+      {"on": "supplier_invoice", "purpose": "saudi_tax_authority_nominal_invoice", "value_kind": "boolean", "placement": "saudi_tax_authority_import_invoice"},
+      {"on": "supplier_invoice", "purpose": "field_column_for_saudi_tax_authority_tax_category", "value_kind": "field_column", "placement": "saudi_tax_authority_nominal_invoice"},
+      {"on": "supplier_invoice", "purpose": "saudi_tax_authority_tax_category", "value_kind": "choice", "placement": "field_column_for_saudi_tax_authority_tax_category", "rules": ["translatable"]},
+      {"on": "supplier_invoice", "purpose": "exemption_reason_code", "value_kind": "choice", "placement": "saudi_tax_authority_tax_category", "rules": ["translatable"]},
+      {"on": "company", "purpose": "company_name_in_arabic", "value_kind": "text", "placement": "default_holiday_list", "rules": ["translatable"]},
+      {"on": "company", "purpose": "registration_type", "value_kind": "choice", "placement": "cb0", "rules": ["translatable"]},
+      {"on": "company", "purpose": "company_registration", "value_kind": "text", "placement": "registration_type", "rules": ["translatable"]},
+      {"on": "company", "purpose": "saudi_tax_authority_location_for_csr_configuratoin", "value_kind": "text", "placement": "company_registration", "rules": ["translatable"]},
+      {"on": "company", "purpose": "saudi_tax_authority_company_category_for_csr_configuration", "value_kind": "text", "placement": "saudi_tax_authority_location_for_csr_configuratoin", "rules": ["translatable"]},
+      {"on": "company", "purpose": "saudi_tax_authority_setting_page_group", "value_kind": "page_group", "placement": "dashboard_tab"},
+      {"on": "company", "purpose": "details_and_one_time_password_field_group", "value_kind": "field_group", "placement": "saudi_tax_authority_setting_page_group"},
+      {"on": "company", "purpose": "saudi_tax_authority_invoice_enabled", "value_kind": "boolean", "placement": "details_and_one_time_password_field_group"},
+      {"on": "company", "purpose": "costcenter", "value_kind": "boolean", "placement": "saudi_tax_authority_invoice_enabled"},
+      {"on": "company", "purpose": "submit_line_item_discount_to_saudi_tax_authority", "value_kind": "boolean", "placement": "costcenter"},
+      {"on": "company", "purpose": "allow_creditnote_without_original_invoice_in_the_system", "value_kind": "boolean", "placement": "submit_line_item_discount_to_saudi_tax_authority"},
+      {"on": "company", "purpose": "phase_1_or_2", "value_kind": "choice", "placement": "allow_creditnote_without_original_invoice_in_the_system", "rules": ["translatable"]},
+      {"on": "company", "purpose": "send_einvoice_background", "value_kind": "boolean", "placement": "phase_1_or_2"},
+      {"on": "company", "purpose": "select", "value_kind": "choice", "placement": "send_einvoice_background", "rules": ["translatable"]},
+      {"on": "company", "purpose": "send_invoice_to_saudi_tax_authority", "value_kind": "choice", "placement": "select", "rules": ["translatable"]},
+      {"on": "company", "purpose": "submit_or_not", "value_kind": "boolean", "placement": "send_invoice_to_saudi_tax_authority"},
+      {"on": "company", "purpose": "start_time", "value_kind": "time_of_day", "placement": "submit_or_not"},
+      {"on": "company", "purpose": "end_time", "value_kind": "time_of_day", "placement": "start_time"},
+      {"on": "company", "purpose": "start_time_session", "value_kind": "time_of_day", "placement": "end_time"},
+      {"on": "company", "purpose": "end_time_session", "value_kind": "time_of_day", "placement": "start_time_session"},
+      {"on": "company", "purpose": "create_csr_configuration", "value_kind": "action_control", "placement": "end_time_session"},
+      {"on": "company", "purpose": "csr_configuration", "value_kind": "long_text", "placement": "create_csr_configuration"},
+      {"on": "company", "purpose": "create_csr", "value_kind": "action_control", "placement": "csr_configuration"},
+      {"on": "company", "purpose": "csr_data", "value_kind": "long_text", "placement": "create_csr"},
+      {"on": "company", "purpose": "attach_structured_exchange_with_invoice", "value_kind": "boolean", "placement": "csr_data"},
+      {"on": "company", "purpose": "attach_structured_exchange_with_machine_readable_code_code", "value_kind": "boolean", "placement": "attach_structured_exchange_with_invoice"},
+      {"on": "company", "purpose": "attach_machine_readable_code_code_record_class", "value_kind": "boolean", "placement": "attach_structured_exchange_with_machine_readable_code_code"},
+      {"on": "company", "purpose": "attach_e_invoice_send_status_with_invoice", "value_kind": "boolean", "placement": "attach_machine_readable_code_code_record_class"},
+      {"on": "company", "purpose": "pih", "value_kind": "text", "placement": "attach_e_invoice_send_status_with_invoice", "rules": ["translatable"]},
+      {"on": "company", "purpose": "field_group_for_auto_create_pdfa3", "value_kind": "field_group", "placement": "pih"},
+      {"on": "company", "purpose": "auto_create_pdfa3", "value_kind": "boolean", "placement": "field_group_for_auto_create_pdfa3"},
+      {"on": "company", "purpose": "print_format", "value_kind": "reference", "placement": "auto_create_pdfa3"},
+      {"on": "company", "purpose": "letterhead", "value_kind": "reference", "placement": "print_format"},
+      {"on": "company", "purpose": "language", "value_kind": "reference", "placement": "letterhead"},
+      {"on": "company", "purpose": "keys_certificate_for_saudi_tax_authority_field_group", "value_kind": "field_group", "placement": "language"},
+      {"on": "company", "purpose": "private_key", "value_kind": "text", "placement": "keys_certificate_for_saudi_tax_authority_field_group", "rules": ["translatable"]},
+      {"on": "company", "purpose": "public_key", "value_kind": "text", "placement": "private_key", "rules": ["translatable"]},
+      {"on": "company", "purpose": "certificate", "value_kind": "long_text", "placement": "public_key"},
+      {"on": "company", "purpose": "resource_addresses_service_interface_endpoints_field_group", "value_kind": "field_group", "placement": "certificate"},
+      {"on": "company", "purpose": "sandbox_resource_address", "value_kind": "text", "placement": "resource_addresses_service_interface_endpoints_field_group", "rules": ["translatable"]},
+      {"on": "company", "purpose": "simulation_resource_address", "value_kind": "text", "placement": "sandbox_resource_address", "rules": ["translatable"]},
+      {"on": "company", "purpose": "production_resource_address", "value_kind": "text", "placement": "simulation_resource_address", "rules": ["translatable"]},
+      {"on": "company", "purpose": "compliance_cryptographic_stamp_identifier_generation_field_group", "value_kind": "field_group", "placement": "production_resource_address"},
+      {"on": "company", "purpose": "one_time_password", "value_kind": "text", "placement": "compliance_cryptographic_stamp_identifier_generation_field_group", "rules": ["translatable"]},
+      {"on": "company", "purpose": "generate_compliance_cryptographic_stamp_identifier", "value_kind": "action_control", "placement": "one_time_password"},
+      {"on": "company", "purpose": "basic_authentication_from_cryptographic_stamp_identifier", "value_kind": "long_text", "placement": "generate_compliance_cryptographic_stamp_identifier"},
+      {"on": "company", "purpose": "compliance_request_identifier", "value_kind": "text", "placement": "basic_authentication_from_cryptographic_stamp_identifier", "rules": ["translatable"]},
+      {"on": "company", "purpose": "saudi_tax_authority_compliance_check_check_all_options_below_field_group", "value_kind": "field_group", "placement": "compliance_request_identifier"},
+      {"on": "company", "purpose": "validation_type", "value_kind": "choice", "placement": "saudi_tax_authority_compliance_check_check_all_options_below_field_group", "rules": ["translatable"]},
+      {"on": "company", "purpose": "sample_invoice_number_to_test", "value_kind": "text", "placement": "validation_type", "rules": ["translatable"]},
+      {"on": "company", "purpose": "check_compliance", "value_kind": "action_control", "placement": "sample_invoice_number_to_test"},
+      {"on": "company", "purpose": "production_cryptographic_stamp_identifier_generation_field_group", "value_kind": "field_group", "placement": "check_compliance"},
+      {"on": "company", "purpose": "generate_production_csids", "value_kind": "action_control", "placement": "production_cryptographic_stamp_identifier_generation_field_group"},
+      {"on": "company", "purpose": "basic_authentication_from_production", "value_kind": "long_text", "placement": "generate_production_csids"},
+      {"on": "company", "purpose": "saudi_tax_authority_offline_machines", "value_kind": "owned_rows", "placement": "preceding_field_group_in_company"},
+      {"on": "account", "purpose": "saudi_tax_authority_account_type", "value_kind": "choice", "placement": "account_type", "rules": ["translatable"]},
+      {"on": "account", "purpose": "tax_locker_adjustment_tax", "value_kind": "reference", "placement": "saudi_tax_authority_account_type"},
+      {"on": "point_of_sale_invoice_item", "purpose": "exemption_reason_code", "value_kind": "choice", "placement": "item_tax_template", "rules": ["read_only"]},
+      {"on": "point_of_sale_invoice_item", "purpose": "tax_exemption_reason", "value_kind": "text", "placement": "exemption_reason_code"},
+      {"on": "customer_invoice_item", "purpose": "exemption_reason_code", "value_kind": "choice", "placement": "item_tax_template", "rules": ["read_only", "translatable"]},
+      {"on": "customer_invoice_item", "purpose": "tax_exemption_reason", "value_kind": "text", "placement": "exemption_reason_code"}
+    ]
+  }
+]

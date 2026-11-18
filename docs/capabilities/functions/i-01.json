@@ -1,0 +1,162 @@
+[
+  {
+    "capability": "Image-to-address transcription",
+    "operations": [
+      {"operation": "create_address", "configuration": 1, "inputs": [["address", "required"]], "caller": "ordinary_admission", "record_operations": [["read_configuration", "image_text_capture_integration"]]},
+      {"operation": "extract_text_from_image", "configuration": 1, "inputs": [["image_resource_address", "required"]], "caller": "ordinary_admission", "record_operations": [["read_configuration", "image_text_capture_integration"]]}
+    ]
+  },
+  {
+    "capability": "Import letters of credit",
+    "operations": [
+      {"operation": "make_customer_invoice", "configuration": 1, "inputs": [["source_name", "required"], ["target_record", "optional", {"constant": null}]], "caller": "ordinary_admission"},
+      {"operation": "make_import_insurance", "configuration": 1, "inputs": [["source_name", "required"], ["target_record", "optional", {"constant": null}]], "caller": "ordinary_admission"},
+      {"operation": "make_import_letter_of_credit", "configuration": 1, "inputs": [["source_name", "required"], ["target_record", "optional", {"constant": null}]], "caller": "ordinary_admission"},
+      {"operation": "make_journal_entry", "configuration": 1, "inputs": [["source_name", "required"]], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "import_letter_of_credit"], ["prepare_record", "journal_entry"]]},
+      {"operation": "make_landed_cost_voucher", "configuration": 1, "inputs": [["source_name", "required"], ["source_record_class", "optional", {"named_choice": "import_letter_of_credit"}]], "caller": "ordinary_admission", "record_operations": [["list_records", "item"], ["list_records", "journal_entry"], ["list_records", "purchase_receipt"], ["prepare_record", "landed_cost_voucher"], ["read_value", "import_insurance"], ["read_value", "letter_of_credit_shipment"], ["read_value", "supplier_invoice"]]},
+      {"operation": "make_letter_of_credit_expense_journal_entry", "configuration": 1, "inputs": [["source_name", "required"]], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "import_letter_of_credit"], ["prepare_record", "journal_entry"]]},
+      {"operation": "make_proforma_invoice", "configuration": 1, "inputs": [["source_name", "required"], ["target_record", "optional", {"constant": null}]], "caller": "ordinary_admission"},
+      {"operation": "make_purchase_receipt", "configuration": 1, "inputs": [["source_name", "required"], ["target_record", "optional", {"constant": null}]], "caller": "ordinary_admission"},
+      {"operation": "make_supplier_invoice", "configuration": 1, "inputs": [["source_name", "required"], ["target_record", "optional", {"constant": null}]], "caller": "ordinary_admission", "declarations": 2},
+      {"operation": "retrieve_dashboard_data", "configuration": 1, "inputs": [["company", "optional", {"constant": null}], ["period", "optional", {"contextual": true}], ["from_date", "optional", {"constant": null}], ["to_date", "optional", {"constant": null}], ["start_offset", "optional", {"constant": 0}], ["page_length", "optional", {"constant": 20}]], "caller": "ordinary_admission", "record_operations": [["evaluate_permission", "import_letter_of_credit"]]},
+      {"operation": "retrieve_dashboard_data", "configuration": 1, "inputs": [["record_identifier", "required"]], "caller": "ordinary_admission", "record_operations": [["evaluate_permission", "import_letter_of_credit"], ["load_or_prepare_record", "import_letter_of_credit"]]}
+    ]
+  },
+  {
+    "capability": "Incoming material price controls",
+    "reports": [
+      {"report": "historical_anomaly_finder", "configuration": 1, "subject": "stock_ledger_entry", "reader_roles": ["system_manager", "stock_manager", "cost_manager", "cost_guard"], "selectable_outputs": [["posting_date", "date"], ["voucher_type", "text"], ["voucher_number", "selected_record_reference"], ["created_by", "record_reference", "user"], ["product_identifier", "record_reference", "item"], ["item_name", "text"], ["warehouse", "record_reference", "warehouse"], ["quantity", "decimal"], ["incoming_rate", "monetary_amount"], ["expected_rate", "monetary_amount"], ["variance_percentage", "percentage"], ["severity", "text"], ["rule_source", "text"]], "selectable_filters": [["from_date", "date", "required"], ["to_date", "date", "required"], ["product_identifier", "record_reference", "optional", "item"], ["item_group", "record_reference", "optional", "item_group"], ["warehouse", "record_reference", "optional", "warehouse"], ["voucher_type", "selection", "optional"], ["created_by", "record_reference", "optional", "user"], ["show_only_anomalies", "boolean", "optional"], ["only_with_rules", "boolean", "optional"]]},
+      {"report": "item_valuation_statistics", "configuration": 1, "subject": "item", "reader_roles": ["system_manager", "stock_manager", "cost_manager", "cost_guard"], "selectable_outputs": [["set_rule", "text"], ["product_identifier", "record_reference", "item"], ["item_name", "text"], ["item_group", "record_reference", "item_group"], ["data_points", "integer"], ["mean", "monetary_amount"], ["standard_development", "monetary_amount"], ["variance_percentage", "percentage"], ["ucl", "monetary_amount"], ["lcl", "monetary_amount"], ["rule_expected_rate", "monetary_amount"], ["variance_vs_mean", "percentage"], ["rule_name", "record_reference", "cost_valuation_rule"]], "selectable_filters": [["product_identifier", "record_reference", "optional", "item"], ["item_group", "record_reference", "optional", "item_group"], ["warehouse", "record_reference", "optional", "warehouse"], ["from_date", "date", "required"], ["to_date", "date", "required"]]}
+    ],
+    "operations": [
+      {"operation": "bulk_upsert_cost_valuation_rules", "configuration": 1, "inputs": [["rules", "required"], ["warehouse", "optional", {"constant": null}]], "caller": "ordinary_admission"},
+      {"operation": "can_override_cost_validation", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "retrieve_chart_data", "configuration": 1, "inputs": [["product_identifier", "required"], ["from_date", "optional", {"constant": null}], ["to_date", "optional", {"constant": null}], ["include_internal_suppliers", "optional", {"constant": 0}]], "caller": "ordinary_admission"},
+      {"operation": "retrieve_chart_settings", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "retrieve_dashboard_stats", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["count_records", "cost_anomaly_log"], ["count_records", "cost_valuation_rule"]]},
+      {"operation": "retrieve_item_statistics", "configuration": 1, "inputs": [["product_identifier", "required"], ["warehouse", "optional", {"constant": null}], ["from_date", "optional", {"constant": null}], ["to_date", "optional", {"constant": null}], ["months", "optional", {"constant": 6}]], "caller": "ordinary_admission", "record_operations": [["read_value", "item"]]},
+      {"operation": "retrieve_items_with_anomalies", "configuration": 1, "inputs": [["from_date", "optional", {"constant": null}], ["to_date", "optional", {"constant": null}], ["limit", "optional", {"constant": 20}]], "caller": "ordinary_admission"},
+      {"operation": "retrieve_items_without_rules_count", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["count_records", "item"], ["list_records", "cost_valuation_rule"]]},
+      {"operation": "retrieve_recent_anomalies", "configuration": 1, "inputs": [["limit", "optional", {"constant": 50}]], "caller": "ordinary_admission"},
+      {"operation": "retrieve_top_anomaly_items", "configuration": 1, "inputs": [["limit", "optional", {"constant": 10}]], "caller": "ordinary_admission"},
+      {"operation": "upsert_cost_valuation_rule", "configuration": 1, "inputs": [["product_identifier", "required"], ["expected_rate", "required"], ["minimum_rate", "optional", {"constant": null}], ["maximum_rate", "optional", {"constant": null}], ["warehouse", "optional", {"constant": null}], ["allowed_variance_percentage", "optional", {"constant": null}]], "caller": "ordinary_admission", "record_operations": [["check_record_exists", "item"], ["create_record", "cost_valuation_rule"], ["load_or_prepare_record", "cost_valuation_rule"], ["read_value", "cost_valuation_rule"], ["save_record", "cost_valuation_rule"]]}
+    ]
+  },
+  {
+    "capability": "Indian identity and signature verification",
+    "operations": [
+      {"operation": "acknowledge_kfs", "configuration": 1, "inputs": [["loan_application", "required"]], "caller": "ordinary_admission", "record_operations": [["evaluate_permission", "loan_application"], ["load_or_prepare_record", "loan_application"]]},
+      {"operation": "handle_inbound_event_notification", "configuration": 1, "inputs": [], "caller": "public_admission"}
+    ]
+  },
+  {
+    "capability": "Indian payroll",
+    "reports": [
+      {"report": "bank_mandate_report", "configuration": 1, "subject": "salary_slip", "reader_roles": ["human_resources_manager", "human_resources_user"], "selectable_outputs": [["employee", "record_reference", "employee"], ["employee_name", "text"], ["department", "record_reference", "department"], ["designation", "record_reference", "designation"], ["bank_name", "text"], ["bank_account_number", "text"], ["bank_branch_code_code", "text"], ["micr_code", "text"], ["account_type", "text"], ["payment_mode", "text"], ["net_pay", "monetary_amount"], ["currency", "text"]], "selectable_filters": [["company", "record_reference", "required", "company"], ["from_date", "date", "required"], ["to_date", "date", "required"], ["department", "record_reference", "optional", "department"]]},
+      {"report": "employee_provident_fund_register", "configuration": 1, "subject": "salary_slip", "reader_roles": ["human_resources_manager", "human_resources_user"], "selectable_outputs": [["employee", "record_reference", "employee"], ["uan_number", "text"], ["pf_name", "text"], ["gross_wages", "monetary_amount"], ["epf_wages", "monetary_amount"], ["eps_wages", "monetary_amount"], ["edli_wages", "monetary_amount"], ["employee_epf", "monetary_amount"], ["vpf", "monetary_amount"], ["eps_contribution", "monetary_amount"], ["employer_epf_diff", "monetary_amount"], ["ncp_days", "decimal"], ["refund_of_advances", "monetary_amount"], ["currency", "text"]], "selectable_filters": [["company", "record_reference", "required", "company"], ["year", "selection", "required"], ["month", "selection", "optional"], ["contribution_period", "selection", "optional"]], "total_row": true},
+      {"report": "esic_register", "configuration": 1, "subject": "salary_slip", "reader_roles": ["human_resources_manager", "human_resources_user"], "selectable_outputs": [["employee", "record_reference", "employee"], ["esic_card_number", "text"], ["department", "record_reference", "department"], ["designation", "record_reference", "designation"], ["gross_wages", "monetary_amount"], ["employee_esi", "monetary_amount"], ["employer_esi", "monetary_amount"], ["total_esi", "monetary_amount"], ["coverage_status", "text"], ["currency", "text"]], "selectable_filters": [["company", "record_reference", "required", "company"], ["year", "selection", "required"], ["month", "selection", "optional"], ["contribution_period", "selection", "optional"], ["coverage_status", "selection", "optional"]]},
+      {"report": "lwf_register", "configuration": 1, "subject": "salary_slip", "reader_roles": ["human_resources_manager", "human_resources_user"], "selectable_outputs": [["employee", "record_reference", "employee"], ["department", "record_reference", "department"], ["designation", "record_reference", "designation"], ["work_state", "text"], ["frequency", "text"], ["employee_lwf", "monetary_amount"], ["employer_lwf", "monetary_amount"], ["total_lwf", "monetary_amount"], ["deduction_status", "text"], ["currency", "text"]], "selectable_filters": [["company", "record_reference", "required", "company"], ["year", "selection", "required"], ["month", "selection", "optional"], ["work_state", "selection", "optional"], ["deduction_status", "selection", "optional"]]},
+      {"report": "professional_tax_deductions", "configuration": 1, "subject": "salary_slip", "reader_roles": ["human_resources_manager", "human_resources_user"], "selectable_outputs": [["employee", "record_reference", "employee"], ["employee_name", "value"], ["amount", "monetary_amount"]]},
+      {"report": "provident_fund_deductions", "configuration": 1, "subject": "salary_slip", "reader_roles": ["human_resources_manager", "human_resources_user"], "selectable_outputs": [["employee", "record_reference", "employee"], ["employee_name", "value"], ["pf_account", "text"], ["pf_amount", "monetary_amount"], ["additional_pf", "monetary_amount"], ["pf_loan", "monetary_amount"], ["total", "monetary_amount"]]}
+    ],
+    "operations": [
+      {"operation": "check_challans_on_traces", "subject": "tax_deducted_at_source_return", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["evaluate_permission", "tax_deducted_at_source_challan"], ["change_values", "tax_deducted_at_source_challan"]]},
+      {"operation": "check_on_traces", "subject": "tax_deducted_at_source_challan", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "compute_tax_comparison", "configuration": 1, "inputs": [["employee", "required"], ["declarations", "required"], ["rent_monthly", "optional", {"constant": 0}], ["city_type", "optional", {"named_choice": "non_metro"}], ["annual_gross", "optional", {"constant": 0}]], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "income_tax_slab"]]},
+      {"operation": "create_forms_for_return", "configuration": 1, "inputs": [["return_name", "required"]], "caller": "ordinary_admission", "record_operations": [["check_record_exists", "form_16"], ["evaluate_permission", "tax_deducted_at_source_return"], ["create_record", "form_16"], ["load_or_prepare_record", "form_16"], ["load_or_prepare_record", "tax_deducted_at_source_return"]]},
+      {"operation": "file_return", "subject": "tax_deducted_at_source_return", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "generate_fvu", "subject": "tax_deducted_at_source_return", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "generate_part_b", "subject": "form16", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "generate_search_text", "subject": "tax_deducted_at_source_return", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "import_traces_challans", "subject": "tax_deducted_at_source_return", "configuration": 1, "inputs": [["challans", "required"]], "caller": "ordinary_admission", "record_operations": [["evaluate_permission", "tax_deducted_at_source_challan"], ["create_record", "tax_deducted_at_source_challan"], ["prepare_record", "tax_deducted_at_source_challan"]]},
+      {"operation": "notify_employee_to_select_tax_regime", "configuration": 1, "inputs": [["assignment", "required"]], "caller": "ordinary_admission"},
+      {"operation": "notify_employees_to_select_tax_regime", "configuration": 1, "inputs": [["names", "required"]], "caller": "ordinary_admission", "record_operations": [["evaluate_permission", "salary_structure_assignment"], ["read_value", "salary_structure_assignment"]]},
+      {"operation": "request_csi_one_time_password", "subject": "tax_deducted_at_source_return", "configuration": 1, "inputs": [["mobile_number", "optional", {"constant": null}], ["reason", "optional", {"constant": null}]], "caller": "ordinary_admission", "record_operations": [["evaluate_permission", "tax_deducted_at_source_return"]]},
+      {"operation": "request_part_a", "subject": "form16", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "retrieve_current_payroll_period", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["read_value", "payroll_period"]]},
+      {"operation": "retrieve_ecr_file", "configuration": 1, "inputs": [["filters", "required"]], "caller": "ordinary_admission"},
+      {"operation": "retrieve_employee_details", "configuration": 1, "inputs": [["employee", "required"]], "caller": "ordinary_admission", "record_operations": [["list_records", "employee_tax_exemption_category"], ["list_records", "employee_tax_exemption_sub_category"], ["read_value", "employee"], ["read_value", "payroll_period"]]},
+      {"operation": "retrieve_from_payroll", "subject": "tax_deducted_at_source_return", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["save_record", "tax_deducted_at_source_return"]]},
+      {"operation": "retrieve_years", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "set_tax_regime", "configuration": 1, "inputs": [["employee", "required"], ["income_tax_slab", "required"]], "caller": "ordinary_admission", "record_operations": [["change_values", "salary_structure_assignment"]]},
+      {"operation": "set_traces_password", "configuration": 1, "inputs": [["company", "required"], ["password", "required"]], "caller": "ordinary_admission", "request_modes": ["submit"], "record_operations": [["evaluate_permission", "tax_deducted_at_source_challan"], ["load_or_prepare_record", "tax_deducted_at_source_challan"], ["read_value", "company"]]},
+      {"operation": "setup_if_missing", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "skip_validation", "subject": "tax_deducted_at_source_return", "configuration": 1, "inputs": [["reason", "required"]], "caller": "ordinary_admission"},
+      {"operation": "submit_csi_one_time_password", "subject": "tax_deducted_at_source_return", "configuration": 1, "inputs": [["one_time_password", "required"]], "caller": "ordinary_admission", "record_operations": [["evaluate_permission", "tax_deducted_at_source_return"]]},
+      {"operation": "validate_return", "subject": "tax_deducted_at_source_return", "configuration": 1, "inputs": [], "caller": "ordinary_admission"}
+    ]
+  },
+  {
+    "capability": "Indian postal addresses",
+    "operations": [
+      {"operation": "retrieve_latest_data", "subject": "indian_postal_code", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "retrieve_post_office", "configuration": 1, "inputs": [["record_identifier", "required"]], "caller": "ordinary_admission", "record_operations": [["check_record_exists", "indian_postal_code"], ["load_or_prepare_record", "indian_postal_code"]]},
+      {"operation": "retrieve_postal_details", "configuration": 1, "inputs": [["pincode", "required"], ["force_refresh", "optional", {"constant": 0}]], "caller": "ordinary_admission"},
+      {"operation": "search_post_office", "configuration": 1, "inputs": [["search_text", "optional", {"constant": ""}], ["pincode", "optional", {"constant": null}]], "caller": "ordinary_admission", "record_operations": [["list_records", "indian_postal_code"]]}
+    ]
+  },
+  {
+    "capability": "Indonesian tax invoice import and export",
+    "reports": [
+      {"report": "value_added_tax_keluaran", "configuration": 1, "subject": "customer_invoice", "reader_roles": ["accounts_manager", "accounts_user"]}
+    ],
+    "operations": [
+      {"operation": "convert_base64_to_portable_document", "configuration": 1, "inputs": [["record_identifier", "required"]], "caller": "public_admission", "record_operations": [["load_or_prepare_record", "value_added_tax_output_metadata"]]},
+      {"operation": "create_indonesia_localization_tax_template", "configuration": 1, "inputs": [["company", "required"]], "caller": "ordinary_admission", "record_operations": [["check_record_exists", "sales_taxes_and_charges_template"], ["read_value", "company"]]},
+      {"operation": "create_value_added_tax_output_client_interaction", "configuration": 1, "inputs": [["record_identifier", "required"]], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "value_added_tax_output_metadata"], ["read_configuration", "indonesia_localization_settings"]]},
+      {"operation": "create_value_added_tax_output_metadata", "configuration": 1, "inputs": [["record", "required"], ["indonesia_localization_settings", "required"]], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "address"], ["load_or_prepare_record", "customer"], ["prepare_record", "value_added_tax_output_metadata"], ["save_record", "value_added_tax_output_metadata"]]},
+      {"operation": "create_vom_via_button", "configuration": 1, "inputs": [["record_identifier", "required"], ["record_class", "required"]], "caller": "ordinary_admission"},
+      {"operation": "create_vom_via_cronjob", "configuration": 1, "inputs": [["record_identifier", "required"], ["record_class", "required"]], "caller": "ordinary_admission"},
+      {"operation": "enqueue_export_as_delimited_text", "subject": "tax_invoice_exporter", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["read_configuration", "indonesia_localization_settings"]]},
+      {"operation": "export_structured_exchange", "subject": "indonesian_tax_system_structured_exchange_exporter", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "fill_sales_invoices", "subject": "tax_invoice_exporter", "configuration": 1, "inputs": [["has_single_configuration_tax_invoice_number", "required"]], "caller": "ordinary_admission"},
+      {"operation": "generate_preview", "subject": "indonesian_tax_system_importer", "configuration": 1, "inputs": [["file", "required"]], "caller": "ordinary_admission"},
+      {"operation": "insert_tax_invoice_number", "subject": "tax_invoice_number_importer", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "link_tax_invoice_number", "configuration": 1, "inputs": [["record", "required"]], "caller": "ordinary_admission", "record_operations": [["list_records", "tax_invoice_number"], ["read_value", "tax_invoice_number"], ["change_values", "tax_invoice_number"]]},
+      {"operation": "procedure_to_create_vom", "configuration": 1, "inputs": [["record_identifier", "required"], ["record_class", "required"]], "caller": "ordinary_admission", "record_operations": [["read_configuration", "indonesia_localization_settings"]]},
+      {"operation": "retrieve_preview_customer_invoice", "configuration": 1, "inputs": [["company", "required"], ["start_invoice_date", "required"], ["end_invoice_date", "required"], ["branch", "optional", {"constant": null}]], "caller": "ordinary_admission", "record_operations": [["list_records", "customer_invoice"], ["read_value", "customer"]]},
+      {"operation": "retrieve_value_added_tax_output_detail", "configuration": 1, "inputs": [["record", "required"]], "caller": "ordinary_admission", "record_operations": [["read_configuration", "indonesia_localization_settings"]]},
+      {"operation": "start_import", "subject": "indonesian_tax_system_importer", "configuration": 1, "inputs": [["file", "required"]], "caller": "ordinary_admission"},
+      {"operation": "unlink_tax_invoice_number", "configuration": 1, "inputs": [["tax_invoice_number", "required"]], "caller": "ordinary_admission", "record_operations": [["check_record_exists", "tax_invoice_exporter_item"], ["load_or_prepare_record", "customer_invoice"], ["load_or_prepare_record", "tax_invoice_number"], ["change_values", "customer_invoice"], ["change_values", "tax_invoice_exporter_item"]]},
+      {"operation": "update_taxpayer_identification_number_with_sales_invoice", "subject": "tax_invoice_exporter", "configuration": 1, "inputs": [["event_trigger", "required"]], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "customer_invoice"], ["read_configuration", "indonesia_localization_settings"], ["change_values", "customer_invoice"]]},
+      {"operation": "upload_value_added_tax_output", "configuration": 1, "inputs": [["record", "required"]], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "value_added_tax_output_metadata"], ["read_configuration", "indonesia_localization_settings"], ["save_record", "value_added_tax_output_metadata"]]}
+    ]
+  },
+  {
+    "capability": "Installable mobile workspace",
+    "operations": [
+      {"operation": "configure_installed_web_application", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "website_settings"], ["save_record", "website_settings"]]},
+      {"operation": "generate_vapid_key", "subject": "service_worker", "configuration": 1, "inputs": [["event", "optional", {"named_choice": "vapid_progress_bar"}]], "caller": "ordinary_admission", "record_operations": [["save_record", "service_worker"]]},
+      {"operation": "retrieve_notification_gateway_configuration", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "subscribe", "configuration": 1, "inputs": [["notification_gateway_token", "required"]], "caller": "ordinary_admission", "record_operations": [["check_record_exists", "notification_gateway_user_token"], ["load_or_prepare_record", "notification_gateway_user_token"]]},
+      {"operation": "test_push_notification", "configuration": 1, "inputs": [["user", "optional", {"constant": null}]], "caller": "ordinary_admission", "record_operations": [["create_record", "notification_log"], ["load_or_prepare_record", "notification_log"]]},
+      {"operation": "unsubscribe", "configuration": 1, "inputs": [["notification_gateway_token", "required"]], "caller": "ordinary_admission"}
+    ]
+  },
+  {
+    "capability": "Invoice image and document extraction",
+    "operations": [
+      {"operation": "create_supplier_invoice", "configuration": 1, "inputs": [["record_identifier", "required"]], "caller": "ordinary_admission", "record_operations": [["check_record_exists", "supplier_invoice"], ["create_record", "supplier_invoice"], ["load_or_prepare_record", "invoice_ocr"], ["prepare_record", "supplier_invoice"], ["read_value", "account"], ["save_record", "invoice_ocr"], ["submit_record", "supplier_invoice"]]},
+      {"operation": "enqueue_ocr", "configuration": 1, "inputs": [["record_identifier", "required"]], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "invoice_ocr"], ["save_record", "invoice_ocr"]]},
+      {"operation": "run_ocr", "configuration": 1, "inputs": [["record_identifier", "required"]], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "invoice_ocr"], ["read_value", "account"], ["read_value", "supplier"], ["save_record", "invoice_ocr"]]}
+    ]
+  },
+  {
+    "capability": "Invoice payment links",
+    "operations": [
+      {"operation": "action_payment_link_synchronization_status", "configuration": 1, "inputs": [["invoice_names", "required"]], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "customer_invoice"], ["read_configuration_value", "payment_link_settings"]]}
+    ]
+  },
+  {
+    "capability": "Invoice signing",
+    "operations": [
+      {"operation": "generate_invoice_portable_document", "configuration": 1, "inputs": [["record_class", "required"], ["record_identifier", "required"]], "caller": "ordinary_admission"},
+      {"operation": "retrieve_portable_document_base64", "configuration": 1, "inputs": [["record_class", "required"], ["record_identifier", "required"], ["print_format_name", "required"]], "caller": "ordinary_admission"},
+      {"operation": "save_signed_portable_document", "configuration": 1, "inputs": [["record_class", "required"], ["record_identifier", "required"], ["signed_portable_document_base64", "required"]], "caller": "ordinary_admission", "record_operations": [["create_record", "file"], ["load_or_prepare_record", "file"]]},
+      {"operation": "sign_customer_invoice_pdfs", "configuration": 1, "inputs": [["record_class", "required"], ["customer_invoice_name", "required"], ["print_format_name", "optional", {"constant": null}], ["entered_password", "optional", {"constant": null}], ["multiple_page", "optional", {"constant": null}]], "caller": "ordinary_admission", "record_operations": [["create_record", "file"], ["load_or_prepare_record", "document_sign_setting"], ["load_or_prepare_record", "file"]]},
+      {"operation": "sign_customer_invoice_pdfs", "configuration": 1, "inputs": [["record_class", "required"], ["customer_invoice_name", "required"], ["print_format_name", "optional", {"constant": null}], ["entered_password", "optional", {"constant": null}], ["x", "optional", {"constant": 0}], ["y", "optional", {"constant": 0}], ["page_range", "optional", {"constant": null}]], "caller": "ordinary_admission", "record_operations": [["create_record", "file"], ["load_or_prepare_record", "document_sign_setting"], ["load_or_prepare_record", "file"]]},
+      {"operation": "sign_customer_invoice_portable_document", "configuration": 1, "inputs": [["record_class", "required"], ["customer_invoice_name", "required"], ["print_format_name", "optional", {"constant": null}], ["entered_password", "optional", {"constant": null}], ["coordinates_structured_data", "optional", {"constant": null}]], "caller": "ordinary_admission", "record_operations": [["create_record", "file"], ["load_or_prepare_record", "document_sign_setting"], ["load_or_prepare_record", "file"]]},
+      {"operation": "sign_customer_invoice_portable_document", "configuration": 1, "inputs": [["record_class", "required"], ["customer_invoice_name", "required"], ["print_format_name", "optional", {"constant": null}], ["entered_password", "optional", {"constant": null}], ["multiple_page", "optional", {"constant": null}], ["page_range", "optional", {"constant": null}]], "caller": "ordinary_admission", "record_operations": [["create_record", "file"], ["load_or_prepare_record", "document_sign_setting"], ["load_or_prepare_record", "file"]]}
+    ]
+  }
+]

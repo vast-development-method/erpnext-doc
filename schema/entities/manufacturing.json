@@ -1,0 +1,1479 @@
+[
+  {
+    "entity": "manufacturing.bill_of_materials",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "manufacturing_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["cancel", "create", "delete", "email", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["select"]},
+      {"role": "purchase_manager", "level": 0, "allows": ["read"]},
+      {"role": "purchase_user", "level": 0, "allows": ["read"]},
+      {"role": "sales_manager", "level": 0, "allows": ["select"]},
+      {"role": "sales_user", "level": 0, "allows": ["select"]},
+      {"role": "stock_manager", "level": 0, "allows": ["read"]},
+      {"role": "stock_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true, "searchable": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true, "copy_from": ["item_identifier", "item_name"]},
+      {"field": "image", "type": "image_file_reference", "form_read_only": true, "form_hidden": true, "copy_from": ["item_identifier", "image"]},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true, "copy_from": ["item_identifier", "stock_unit_of_measure_identifier"], "visible_when": ["field_has_value", "item_identifier"]},
+      {"field": "quantity", "type": "decimal", "required": true, "nonnegative": true, "default": "1", "visible_when": ["field_has_value", "item_identifier"]},
+      {"field": "is_active", "type": "boolean", "omit_on_copy": true, "editable_after_posting": true, "default": "1"},
+      {"field": "is_default", "type": "boolean", "omit_on_copy": true, "editable_after_posting": true, "default": "1"},
+      {"field": "with_operations", "type": "boolean", "omit_target_user_filter": true, "default": "0"},
+      {"field": "inspection_required", "type": "boolean", "default": "0"},
+      {"field": "allow_alternative_item", "type": "boolean", "default": "0"},
+      {"field": "set_rate_of_sub_assembly_item_based_on_bill_of_materials", "type": "boolean", "editable_after_posting": true, "default": "1"},
+      {"field": "quality_inspection_template_identifier", "type": "entity_reference", "target": "inventory.quality_inspection_template", "visible_when": ["field_has_value", "inspection_required"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "transfer_material_against", "type": "enumeration", "values": ["", "Work Order", "Job Card"], "default": "Work Order", "visible_when": ["and", ["strict_equal", ["current_field", "with_operations"], ["literal", 1]], ["strict_equal", ["current_field", "track_semi_finished_goods"], ["literal", 0]]]},
+      {"field": "conversion_rate", "type": "decimal", "required": true, "precision": "9", "default": "1"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "required": true},
+      {"field": "raw_material_cost_as_per", "type": "enumeration", "editable_after_posting": true, "values": ["Valuation Rate", "Last Purchase Rate", "Price List"], "default": "Valuation Rate"},
+      {"field": "buying_price_list_identifier", "type": "entity_reference", "target": "inventory.price_list", "editable_after_posting": true, "visible_when": ["strict_equal", ["current_field", "raw_material_cost_as_per"], ["literal", "Price List"]]},
+      {"field": "routing_identifier", "type": "entity_reference", "target": "manufacturing.routing", "visible_when": ["field_has_value", "with_operations"]},
+      {"field": "operations_rows", "type": "owned_collection", "target": "manufacturing.bill_of_materials_operation", "visible_when": ["field_has_value", "with_operations"]},
+      {"field": "items_rows", "type": "owned_collection", "target": "manufacturing.bill_of_materials_item", "required": true},
+      {"field": "operating_cost", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}, "visible_when": ["not", ["current_field", "is_phantom_bill_of_materials"]]},
+      {"field": "raw_material_cost", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "company_currency_operating_cost", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["not", ["current_field", "is_phantom_bill_of_materials"]]},
+      {"field": "company_currency_raw_material_cost", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_cost", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "company_currency_total_cost", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project", "visible_when": ["not", ["current_field", "is_phantom_bill_of_materials"]]},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials", "form_read_only": true, "omit_on_copy": true, "omit_target_user_filter": true},
+      {"field": "description", "type": "formatted_text", "form_read_only": true, "copy_from": ["item_identifier", "description"]},
+      {"field": "exploded_items_rows", "type": "owned_collection", "target": "manufacturing.bill_of_materials_explosion_item", "form_read_only": true, "omit_on_copy": true},
+      {"field": "show_in_website", "type": "boolean", "editable_after_posting": true, "default": "0"},
+      {"field": "route", "type": "text", "form_read_only": true, "editable_after_posting": true},
+      {"field": "website_image", "type": "image_file_reference", "editable_after_posting": true, "visible_when": ["field_has_value", "show_in_website"]},
+      {"field": "thumbnail", "type": "short_text", "form_read_only": true, "editable_after_posting": true},
+      {"field": "web_long_description", "type": "formatted_text", "editable_after_posting": true, "visible_when": ["field_has_value", "show_in_website"]},
+      {"field": "show_items", "type": "boolean", "editable_after_posting": true, "default": "0", "visible_when": ["field_has_value", "show_in_website"]},
+      {"field": "show_operations", "type": "boolean", "editable_after_posting": true, "default": "0", "visible_when": ["and", ["current_field", "show_in_website"], ["current_field", "with_operations"]]},
+      {"field": "price_list_exchange_rate", "type": "decimal", "editable_after_posting": true, "visible_when": ["coercive_equal", ["current_field", "raw_material_cost_as_per"], ["literal", "Price List"]]},
+      {"field": "price_list_currency_identifier", "type": "entity_reference", "target": "geography.currency", "form_read_only": true, "editable_after_posting": true, "visible_when": ["coercive_equal", ["current_field", "raw_material_cost_as_per"], ["literal", "Price List"]]},
+      {"field": "has_variants", "type": "boolean", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "default": "0", "copy_from": ["item_identifier", "has_variants"]},
+      {"field": "process_loss_percentage", "type": "percentage", "nonnegative": true},
+      {"field": "process_loss_quantity", "type": "decimal", "form_read_only": true, "nonnegative": true},
+      {"field": "finished_goods_based_operating_cost", "type": "boolean", "default": "0"},
+      {"field": "operating_cost_per_bill_of_materials_quantity", "type": "monetary_amount", "visible_when": ["field_has_value", "finished_goods_based_operating_cost"]},
+      {"field": "bill_of_materials_creator_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials_creator", "form_read_only": true, "omit_on_copy": true, "searchable": true},
+      {"field": "bill_of_materials_creator_item", "type": "short_text", "form_read_only": true, "omit_on_copy": true, "searchable": true},
+      {"field": "track_semi_finished_goods", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "with_operations"]},
+      {"field": "default_source_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "default_target_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "is_phantom_bill_of_materials", "type": "boolean", "default": "0"},
+      {"field": "secondary_items_rows", "type": "owned_collection", "target": "manufacturing.bill_of_materials_secondary_item"},
+      {"field": "secondary_items_cost", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}, "visible_when": ["not", ["current_field", "is_phantom_bill_of_materials"]]},
+      {"field": "company_currency_secondary_items_cost", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["not", ["current_field", "is_phantom_bill_of_materials"]]},
+      {"field": "cost_allocation", "type": "monetary_amount", "form_read_only": true, "nonnegative": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "cost_allocation_per", "type": "percentage", "nonnegative": true, "default": "100"},
+      {"field": "backflush_based_on", "type": "enumeration", "values": ["", "BOM", "Material Transferred for Manufacture"]},
+      {"field": "set_quantity_based_on_percentage", "type": "boolean", "configuration_variant": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Cost Configuration", "visible_when": ["not", ["current_field", "is_phantom_bill_of_materials"]]},
+      {"control": "section", "visible_when": ["field_has_value", "with_operations"]},
+      {"control": "section", "purpose": "Steps", "visible_when": ["and", ["current_field", "with_operations"], ["current_field", "track_semi_finished_goods"]], "expanded_when": ["strict_equal", ["current_field", "lifecycle_state"], ["literal", 0]]},
+      {"control": "formatted_information", "purpose": "Steps", "visible_when": ["and", ["current_field", "with_operations"], ["current_field", "track_semi_finished_goods"]]},
+      {"control": "tab", "purpose": "Costing"},
+      {"control": "tab", "purpose": "Exploded Items", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"control": "tab", "purpose": "Website", "visible_when": ["not", ["current_field", "is_phantom_bill_of_materials"]]},
+      {"control": "section", "purpose": "Website Specifications", "visible_when": ["field_has_value", "show_in_website"], "expanded_when": ["field_has_value", "website_items"]},
+      {"control": "tab", "purpose": "Connections"},
+      {"control": "section", "purpose": "Operations", "visible_when": ["not", ["current_field", "is_phantom_bill_of_materials"]], "expanded_when": ["current_field", "with_operations"]},
+      {"control": "tab", "purpose": "More Info"},
+      {"control": "section", "purpose": "Quality Inspection", "visible_when": ["not", ["current_field", "is_phantom_bill_of_materials"]]},
+      {"control": "tab", "purpose": "Production Item"},
+      {"control": "section", "purpose": "Finished Goods Based Operating Cost", "visible_when": ["and", ["not", ["current_field", "with_operations"]], ["not", ["current_field", "is_phantom_bill_of_materials"]]]},
+      {"control": "section", "purpose": "Reference"},
+      {"control": "section", "purpose": "Default Warehouse"},
+      {"control": "section", "purpose": "Production Item Info"},
+      {"control": "section", "purpose": "Cost Allocation / Process Loss"},
+      {"control": "tab", "purpose": "BOM Configuration"},
+      {"control": "section", "purpose": "Consume Components"}
+    ]
+  },
+  {
+    "entity": "manufacturing.bill_of_materials_creator",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "manufacturing_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["cancel", "create", "delete", "email", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "design_name", "type": "short_text"},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true, "editable_after_posting": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "design_file", "type": "file_reference"},
+      {"field": "track_semi_finished_goods", "type": "boolean", "editable_after_posting": true, "default": "0", "visible_when": ["not", ["current_field", "is_phantom"]]},
+      {"field": "quantity", "type": "decimal", "required": true, "nonnegative": true, "editable_after_posting": true, "default": "1", "visible_when": ["field_has_value", "track_semi_finished_goods"]},
+      {"field": "items_rows", "type": "owned_collection", "target": "manufacturing.bill_of_materials_creator_item", "form_hidden": true, "editable_after_posting": true},
+      {"field": "operations_rows", "type": "owned_collection", "target": "manufacturing.bill_of_materials_creator_operation", "form_hidden": true, "editable_after_posting": true},
+      {"field": "materials_rows", "type": "owned_collection", "target": "manufacturing.bill_of_materials_creator_material", "form_hidden": true, "editable_after_posting": true},
+      {"field": "raw_material_cost_as_per", "type": "enumeration", "required": true, "editable_after_posting": true, "values": ["Valuation Rate", "Last Purchase Rate", "Price List"], "default": "Valuation Rate"},
+      {"field": "buying_price_list_identifier", "type": "entity_reference", "target": "inventory.price_list", "editable_after_posting": true, "visible_when": ["strict_equal", ["current_field", "raw_material_cost_as_per"], ["literal", "Price List"]]},
+      {"field": "price_list_currency_identifier", "type": "entity_reference", "target": "geography.currency", "form_read_only": true, "editable_after_posting": true, "visible_when": ["coercive_equal", ["current_field", "raw_material_cost_as_per"], ["literal", "Price List"]]},
+      {"field": "price_list_exchange_rate", "type": "decimal", "editable_after_posting": true, "visible_when": ["coercive_equal", ["current_field", "raw_material_cost_as_per"], ["literal", "Price List"]]},
+      {"field": "set_rate_based_on_warehouse", "type": "boolean", "editable_after_posting": true, "default": "0", "visible_when": ["strict_equal", ["current_field", "raw_material_cost_as_per"], ["literal", "Valuation Rate"]]},
+      {"field": "default_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "editable_after_posting": true, "visible_when": ["strict_equal", ["current_field", "raw_material_cost_as_per"], ["literal", "Valuation Rate"]]},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "required": true},
+      {"field": "conversion_rate", "type": "decimal", "editable_after_posting": true, "precision": "9", "default": "1"},
+      {"field": "raw_material_cost", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "editable_after_posting": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "numbering_series", "type": "enumeration", "required": true, "form_hidden": true, "write_once": true, "omit_on_copy": true, "values": ["bill of materials creator numbering prefix + four-digit year + configured sequence"], "default": "bill of materials creator numbering prefix + four-digit year + configured sequence"},
+      {"field": "item_group_identifier", "type": "entity_reference", "target": "organization.item_group", "editable_after_posting": true},
+      {"field": "part_number", "type": "short_text", "visible_when": ["field_has_value", "design_file"]},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "is_phantom", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "track_semi_finished_goods"]]},
+      {"field": "routing_identifier", "type": "entity_reference", "target": "manufacturing.routing", "visible_when": ["and", ["not", ["current_field", "is_phantom"]], ["not", ["current_field", "track_semi_finished_goods"]]]},
+      {"field": "revision", "type": "integer", "form_read_only": true, "omit_on_copy": true, "default": "1"},
+      {"field": "previous_revision_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials_creator", "form_read_only": true, "omit_on_copy": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true, "form_hidden": true, "editable_after_posting": true, "copy_from": ["item_identifier", "item_name"]},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true, "form_hidden": true, "editable_after_posting": true, "copy_from": ["item_identifier", "stock_unit_of_measure_identifier"]},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "values": ["Draft", "Submitted", "In Progress", "Completed", "Failed", "Superseded", "Cancelled"], "default": "Draft"},
+      {"field": "remarks", "type": "formatted_text"},
+      {"field": "error_log", "type": "text", "form_read_only": true, "omit_on_copy": true, "visible_when": ["field_has_value", "error_log"]},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials_creator", "form_read_only": true, "omit_on_copy": true}
+    ],
+    "presentation": [
+      {"control": "tab", "purpose": "Design"},
+      {"control": "formatted_information", "purpose": "Design View"},
+      {"control": "tab", "purpose": "Costing", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"control": "tab", "purpose": "Details", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"control": "section", "purpose": "More Information", "expanded_when": ["field_has_value", "error_log"]},
+      {"control": "tab", "purpose": "Connections"}
+    ]
+  },
+  {
+    "entity": "manufacturing.bill_of_materials_creator_item",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "part_number", "type": "short_text"},
+      {"field": "part_name", "type": "short_text", "editable_after_posting": true},
+      {"field": "quantity", "type": "decimal", "nonnegative": true, "editable_after_posting": true, "default": "1"},
+      {"field": "design_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "node_identifier", "type": "integer", "form_read_only": true},
+      {"field": "parent_node_identifier", "type": "integer"},
+      {"field": "is_expandable", "type": "boolean", "form_read_only": true, "editable_after_posting": true, "default": "0"},
+      {"field": "source", "type": "enumeration", "form_read_only": true, "values": ["CAD File", "Manual"], "default": "Manual"},
+      {"field": "change_type", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "editable_after_posting": true, "values": ["", "Added", "Quantity Changed"]},
+      {"field": "exclude_from_bill_of_materials", "type": "boolean", "editable_after_posting": true, "default": "0"},
+      {"field": "description", "type": "text", "copy_from": ["item_identifier", "description"], "copy_only_when_empty": true},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "editable_after_posting": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true, "editable_after_posting": true, "copy_from": ["item_identifier", "item_name"]},
+      {"field": "item_group_identifier", "type": "entity_reference", "target": "organization.item_group", "form_read_only": true, "editable_after_posting": true, "copy_from": ["item_identifier", "item_group_identifier"]},
+      {"field": "is_phantom_item", "type": "boolean", "editable_after_posting": true, "default": "0", "visible_when": ["field_has_value", "is_expandable"]},
+      {"field": "sourced_by_supplier", "type": "boolean", "editable_after_posting": true, "default": "0"},
+      {"field": "bill_of_materials_created", "type": "boolean", "form_hidden": true, "omit_on_copy": true, "default": "0"},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "editable_after_posting": true},
+      {"field": "stock_quantity", "type": "decimal", "form_read_only": true, "editable_after_posting": true},
+      {"field": "unit_conversion_factor", "type": "decimal", "editable_after_posting": true, "precision": "9"},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true, "omit_on_copy": true, "editable_after_posting": true, "copy_from": ["item_identifier", "stock_unit_of_measure_identifier"]},
+      {"field": "rate", "type": "monetary_amount", "form_read_only": true, "editable_after_posting": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true, "editable_after_posting": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "company_currency_rate", "type": "monetary_amount", "form_hidden": true, "editable_after_posting": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "company_currency_amount", "type": "monetary_amount", "form_hidden": true, "editable_after_posting": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "do_not_explode", "type": "boolean", "editable_after_posting": true, "default": "1"},
+      {"field": "bill_of_materials_number_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials", "editable_after_posting": true, "visible_when": ["not", ["current_field", "do_not_explode"]]},
+      {"field": "operation_identifier", "type": "entity_reference", "target": "manufacturing.operation", "editable_after_posting": true, "visible_when": ["not", ["current_field", "is_phantom_item"]]},
+      {"field": "instruction", "type": "text", "editable_after_posting": true},
+      {"field": "model_file", "type": "file_reference", "editable_after_posting": true},
+      {"field": "placements", "type": "structured_value", "form_hidden": true, "editable_after_posting": true},
+      {"field": "finished_goods_item_identifier", "type": "entity_reference", "configuration_variant": true, "target": "inventory.item", "required": true},
+      {"field": "finished_goods_reference_identifier", "type": "short_text", "configuration_variant": true, "form_read_only": true},
+      {"field": "parent_row_number", "type": "short_text", "configuration_variant": true},
+      {"field": "is_subcontracted", "type": "boolean", "configuration_variant": true, "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Description"},
+      {"control": "section", "purpose": "Item"},
+      {"control": "section", "purpose": "Rate and Amount"},
+      {"control": "section", "purpose": "BOM"},
+      {"control": "section", "purpose": "3D Model"}
+    ]
+  },
+  {
+    "entity": "manufacturing.bill_of_materials_creator_material",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "bill_of_materials_node_identifier", "type": "integer", "editable_after_posting": true, "default": "0"},
+      {"field": "operation_identifier", "type": "integer", "editable_after_posting": true},
+      {"field": "from_operation_identifier", "type": "integer", "editable_after_posting": true},
+      {"field": "part_node_identifier", "type": "integer", "editable_after_posting": true},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "editable_after_posting": true},
+      {"field": "quantity", "type": "decimal", "required": true, "nonnegative": true, "editable_after_posting": true},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "editable_after_posting": true}
+    ]
+  },
+  {
+    "entity": "manufacturing.bill_of_materials_creator_operation",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "operation_identifier", "type": "integer", "form_read_only": true, "editable_after_posting": true},
+      {"field": "bill_of_materials_node_identifier", "type": "integer", "editable_after_posting": true, "default": "0"},
+      {"field": "operation_identifier_reference", "type": "entity_reference", "target": "manufacturing.operation", "required": true, "editable_after_posting": true},
+      {"field": "workstation_type_identifier", "type": "entity_reference", "target": "manufacturing.workstation_type", "editable_after_posting": true},
+      {"field": "time_in_minutes", "type": "decimal", "nonnegative": true, "editable_after_posting": true},
+      {"field": "output_node_identifier", "type": "integer", "editable_after_posting": true},
+      {"field": "output_item_identifier", "type": "entity_reference", "target": "inventory.item", "editable_after_posting": true},
+      {"field": "output_quantity", "type": "decimal", "nonnegative": true, "editable_after_posting": true, "default": "1"}
+    ]
+  },
+  {
+    "entity": "manufacturing.bill_of_materials_explosion_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true, "searchable": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true},
+      {"field": "source_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "form_read_only": true},
+      {"field": "operation_identifier", "type": "entity_reference", "target": "manufacturing.operation", "form_read_only": true},
+      {"field": "description", "type": "formatted_text", "form_read_only": true},
+      {"field": "image", "type": "file_reference", "form_hidden": true, "copy_from": ["item_identifier", "image"]},
+      {"field": "stock_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "rate", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "quantity_consumed_per_unit", "type": "decimal", "form_read_only": true},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "include_item_in_manufacturing", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "sourced_by_supplier", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "is_sub_assembly_item", "type": "boolean", "form_read_only": true, "omit_on_copy": true, "default": "0"}
+    ],
+    "presentation": [
+      {"control": "display_image", "purpose": "Image View"}
+    ]
+  },
+  {
+    "entity": "manufacturing.bill_of_materials_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true, "searchable": true},
+      {"field": "item_name", "type": "short_text"},
+      {"field": "operation_identifier", "type": "entity_reference", "target": "manufacturing.operation", "visible_when": ["coercive_equal", ["member", ["context", "owning_record"], "with_operations"], ["literal", 1]]},
+      {"field": "bill_of_materials_number_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials", "searchable": true, "visible_when": ["not", ["current_field", "do_not_explode"]], "required_when": ["current_field", "is_phantom_item"]},
+      {"field": "source_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "image", "type": "file_reference", "form_hidden": true, "copy_from": ["item_identifier", "image"]},
+      {"field": "quantity", "type": "decimal", "required": true},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "required": true},
+      {"field": "stock_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true},
+      {"field": "unit_conversion_factor", "type": "decimal", "precision": "9"},
+      {"field": "rate", "type": "monetary_amount", "required": true, "currency": {"record_or_parent_field": "currency"}, "read_only_when": ["coercive_equal", ["current_field", "is_stock_item"], ["literal", 1]]},
+      {"field": "company_currency_rate", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "company_currency_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "quantity_consumed_per_unit", "type": "decimal", "form_read_only": true, "form_hidden": true},
+      {"field": "allow_alternative_item", "type": "boolean", "default": "0"},
+      {"field": "include_item_in_manufacturing", "type": "boolean", "default": "0", "copy_from": ["item_identifier", "include_item_in_manufacturing"]},
+      {"field": "original_item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true, "form_hidden": true},
+      {"field": "has_variants", "type": "boolean", "form_read_only": true, "omit_on_copy": true, "default": "0", "copy_from": ["item_identifier", "has_variants"]},
+      {"field": "sourced_by_supplier", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "is_phantom_item"]]},
+      {"field": "do_not_explode", "type": "boolean", "default": "0", "read_only_when": ["current_field", "is_phantom_item"]},
+      {"field": "is_stock_item", "type": "boolean", "form_read_only": true, "default": "0", "copy_from": ["item_identifier", "is_stock_item"]},
+      {"field": "operation_row_identifier", "type": "integer", "visible_when": ["coercive_equal", ["member", ["context", "owning_record"], "track_semi_finished_goods"], ["literal", 1]]},
+      {"field": "is_sub_assembly_item", "type": "boolean", "form_read_only": true, "omit_on_copy": true, "default": "0", "visible_when": ["not", ["current_field", "is_phantom_item"]]},
+      {"field": "is_phantom_item", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "percentage", "type": "percentage", "configuration_variant": true},
+      {"field": "is_balance_item", "type": "boolean", "configuration_variant": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Description"},
+      {"control": "display_image", "purpose": "Image View"},
+      {"control": "section", "purpose": "Quantity and Rate"},
+      {"control": "section", "purpose": "Rate & Amount"}
+    ]
+  },
+  {
+    "entity": "manufacturing.bill_of_materials_operation",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "operation_identifier", "type": "entity_reference", "target": "manufacturing.operation", "required": true},
+      {"field": "workstation_identifier", "type": "entity_reference", "target": "manufacturing.workstation"},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "hour_rate", "type": "monetary_amount", "nonnegative": true, "precision": "2", "currency": {"record_or_parent_field": "currency"}},
+      {"field": "time_in_minutes", "type": "decimal", "required": true, "nonnegative": true, "copy_from": ["operation_identifier", "total_operation_time"], "copy_only_when_empty": true},
+      {"field": "fixed_time", "type": "boolean", "default": "0"},
+      {"field": "operating_cost", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "company_currency_hour_rate", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["coercive_equal", ["member", ["context", "owning_record"], "entity_type"], ["literal", "BOM"]]},
+      {"field": "company_currency_operating_cost", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["coercive_equal", ["member", ["context", "owning_record"], "entity_type"], ["literal", "BOM"]]},
+      {"field": "image", "type": "file_reference"},
+      {"field": "batch_size", "type": "decimal", "nonnegative": true, "default": "1", "copy_from": ["operation_identifier", "batch_size"], "copy_only_when_empty": true},
+      {"field": "sequence_identifier", "type": "integer", "visible_when": ["or", ["coercive_equal", ["current_field", "owning_entity_type"], ["literal", "Routing"]], ["not", ["member", ["context", "owning_record"], "routing"]]]},
+      {"field": "cost_per_unit", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "visible_when": ["and", ["greater", ["current_field", "batch_size"], ["literal", 0]], ["current_field", "set_cost_based_on_bill_of_materials_quantity"]]},
+      {"field": "base_cost_per_unit", "type": "decimal", "form_read_only": true, "form_hidden": true, "omit_on_copy": true},
+      {"field": "set_cost_based_on_bill_of_materials_quantity", "type": "boolean", "default": "0"},
+      {"field": "workstation_type_identifier", "type": "entity_reference", "target": "manufacturing.workstation_type"},
+      {"field": "finished_good_identifier", "type": "entity_reference", "target": "inventory.item", "visible_when": ["strict_equal", ["member", ["context", "owning_record"], "track_semi_finished_goods"], ["literal", 1]], "required_when": ["strict_equal", ["member", ["context", "owning_record"], "track_semi_finished_goods"], ["literal", 1]]},
+      {"field": "bill_of_materials_number_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials", "visible_when": ["strict_equal", ["member", ["context", "owning_record"], "track_semi_finished_goods"], ["literal", 1]]},
+      {"field": "finished_good_quantity", "type": "decimal", "default": "1", "visible_when": ["strict_equal", ["member", ["context", "owning_record"], "track_semi_finished_goods"], ["literal", 1]]},
+      {"field": "is_final_finished_good", "type": "boolean", "default": "0"},
+      {"field": "work_in_progress_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "visible_when": ["or", ["not", ["current_field", "skip_material_transfer"]], ["current_field", "backflush_from_work_in_progress_warehouse"]]},
+      {"field": "finished_goods_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "source_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "visible_when": ["and", ["current_field", "skip_material_transfer"], ["not", ["current_field", "backflush_from_work_in_progress_warehouse"]]]},
+      {"field": "is_subcontracted", "type": "boolean", "default": "0"},
+      {"field": "skip_material_transfer", "type": "boolean", "default": "0"},
+      {"field": "backflush_from_work_in_progress_warehouse", "type": "boolean", "default": "0", "visible_when": ["current_field", "skip_material_transfer"]},
+      {"field": "quality_inspection_required", "type": "boolean", "default": "0", "visible_when": ["member", ["context", "owning_record"], "inspection_required"]},
+      {"field": "batch_split", "type": "boolean", "configuration_variant": true},
+      {"field": "weight_per_piece", "type": "decimal", "configuration_variant": true, "nonnegative": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Costing"},
+      {"control": "section", "purpose": "More Information"},
+      {"control": "section", "purpose": "Warehouse"},
+      {"control": "action", "purpose": "Add Raw Materials", "visible_when": ["and", ["not", ["current_field", "bill_of_materials_number_identifier"]], ["strict_equal", ["member", ["context", "owning_record"], "track_semi_finished_goods"], ["literal", 1]]]}
+    ]
+  },
+  {
+    "entity": "manufacturing.bill_of_materials_secondary_item",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "secondary_item_type", "type": "enumeration", "required": true, "values": ["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true, "copy_from": ["item_identifier", "item_name"]},
+      {"field": "cost", "type": "monetary_amount", "required": true, "nonnegative": true, "default": "0", "currency": {"record_or_parent_field": "currency"}, "read_only_when": ["coercive_unequal", ["current_field", "valuation_type"], ["literal", "Manual"]]},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true, "copy_from": ["item_identifier", "stock_unit_of_measure_identifier"]},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "required": true},
+      {"field": "unit_conversion_factor", "type": "decimal", "required": true, "nonnegative": true, "precision": "9", "default": "1"},
+      {"field": "image", "type": "image_file_reference", "form_read_only": true, "form_hidden": true, "copy_from": ["item_identifier", "image"]},
+      {"field": "stock_quantity", "type": "decimal", "form_read_only": true, "nonnegative": true},
+      {"field": "quantity", "type": "decimal", "nonnegative": true},
+      {"field": "cost_allocation_per", "type": "percentage", "required": true, "nonnegative": true, "default": "0", "visible_when": ["coercive_equal", ["current_field", "valuation_type"], ["literal", "% of Component Cost"]]},
+      {"field": "process_loss_per", "type": "percentage", "required": true, "nonnegative": true, "default": "0"},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "company_currency_cost", "type": "monetary_amount", "required": true, "form_read_only": true, "form_hidden": true, "nonnegative": true, "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "valuation_type", "type": "enumeration", "required": true, "values": ["Valuation Rate", "% of Component Cost", "Manual"], "default": "Valuation Rate"},
+      {"field": "process_loss_quantity", "type": "decimal", "required": true, "form_read_only": true, "nonnegative": true, "omit_on_copy": true, "default": "0"}
+    ],
+    "presentation": [
+      {"control": "display_image", "purpose": "image nygv", "visible_when": ["field_has_value", "image"]}
+    ]
+  },
+  {
+    "entity": "manufacturing.bill_of_materials_update_batch",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "level", "type": "integer"},
+      {"field": "batch_number", "type": "integer"},
+      {"field": "bills_of_materials_updated", "type": "long_text", "form_hidden": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Pending", "Completed"]}
+    ]
+  },
+  {
+    "entity": "manufacturing.bill_of_materials_update_log",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "manufacturing_manager", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "current_bill_of_materials_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials"},
+      {"field": "new_bill_of_materials_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials"},
+      {"field": "update_type", "type": "enumeration", "values": ["Replace BOM", "Update Cost"]},
+      {"field": "status", "type": "enumeration", "values": ["Queued", "In Progress", "Completed", "Failed", "Cancelled"]},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials_update_log", "form_read_only": true, "omit_on_copy": true},
+      {"field": "error_log_identifier", "type": "entity_reference", "target": "information_management.error_log"},
+      {"field": "processed_bills_of_materials", "type": "long_text", "form_hidden": true},
+      {"field": "bill_of_materials_batches_rows", "type": "owned_collection", "target": "manufacturing.bill_of_materials_update_batch"},
+      {"field": "current_level", "type": "integer", "visible_when": ["strict_unequal", ["current_field", "status"], ["literal", "Completed"]]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Progress", "visible_when": ["coercive_equal", ["current_field", "update_type"], ["literal", "Update Cost"]]}
+    ]
+  },
+  {
+    "entity": "manufacturing.bill_of_materials_update_tool",
+    "kind": "singleton_settings",
+    "form_read_only": true,
+    "grants": [
+      {"role": "manufacturing_manager", "level": 0, "allows": ["create", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "current_bill_of_materials_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials", "required": true},
+      {"field": "new_bill_of_materials_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials", "required": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Replace BOM"},
+      {"control": "action", "purpose": "Replace"},
+      {"control": "section", "purpose": "Update Cost"},
+      {"control": "action", "purpose": "Update latest price in all BOMs"}
+    ]
+  },
+  {
+    "entity": "manufacturing.bill_of_materials_website_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "searchable": true},
+      {"field": "item_name", "type": "short_text"},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "quantity", "type": "decimal"},
+      {"field": "website_image", "type": "file_reference"}
+    ]
+  },
+  {
+    "entity": "manufacturing.bill_of_materials_website_operation",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "operation_identifier", "type": "entity_reference", "target": "manufacturing.operation", "required": true},
+      {"field": "workstation_identifier", "type": "entity_reference", "target": "manufacturing.workstation"},
+      {"field": "time_in_minutes", "type": "decimal", "required": true},
+      {"field": "website_image", "type": "file_reference"},
+      {"field": "thumbnail", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "manufacturing.blanket_order",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "maintenance_manager", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["select"]},
+      {"role": "purchase_manager", "level": 0, "allows": ["select"]},
+      {"role": "purchase_user", "level": 0, "allows": ["select"]},
+      {"role": "sales_manager", "level": 0, "allows": ["select"]},
+      {"role": "sales_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["blanket order numbering prefix + four-digit year + configured sequence"]},
+      {"field": "blanket_order_type", "type": "enumeration", "required": true, "values": ["", "Selling", "Purchasing"]},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "visible_when": ["coercive_equal", ["current_field", "blanket_order_type"], ["literal", "Selling"]]},
+      {"field": "customer_name", "type": "short_text", "form_read_only": true, "copy_from": ["customer_identifier", "customer_name"], "visible_when": ["coercive_equal", ["current_field", "blanket_order_type"], ["literal", "Selling"]]},
+      {"field": "supplier_identifier", "type": "entity_reference", "target": "procurement.supplier", "visible_when": ["coercive_equal", ["current_field", "blanket_order_type"], ["literal", "Purchasing"]]},
+      {"field": "supplier_name", "type": "short_text", "form_read_only": true, "copy_from": ["supplier_identifier", "supplier_name"], "visible_when": ["coercive_equal", ["current_field", "blanket_order_type"], ["literal", "Purchasing"]]},
+      {"field": "from_date", "type": "calendar_date", "required": true},
+      {"field": "to_date", "type": "calendar_date", "required": true, "editable_after_posting": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true, "searchable": true},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "required": true},
+      {"field": "conversion_rate", "type": "decimal", "required": true, "precision": "9"},
+      {"field": "selling_price_list_identifier", "type": "entity_reference", "target": "inventory.price_list", "visible_when": ["coercive_equal", ["current_field", "blanket_order_type"], ["literal", "Selling"]]},
+      {"field": "buying_price_list_identifier", "type": "entity_reference", "target": "inventory.price_list", "visible_when": ["coercive_equal", ["current_field", "blanket_order_type"], ["literal", "Purchasing"]]},
+      {"field": "price_list_currency_identifier", "type": "entity_reference", "target": "geography.currency", "form_read_only": true},
+      {"field": "price_list_exchange_rate", "type": "decimal", "precision": "9"},
+      {"field": "items_rows", "type": "owned_collection", "target": "manufacturing.blanket_order_item", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "manufacturing.blanket_order", "form_read_only": true, "omit_on_copy": true},
+      {"field": "terms_and_conditions_identifier", "type": "entity_reference", "target": "organization.terms_and_conditions"},
+      {"field": "terms", "type": "formatted_text"},
+      {"field": "order_number", "type": "short_text"},
+      {"field": "order_date", "type": "calendar_date", "visible_when": ["current_field", "order_number"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Currency and Price List", "expanded_when": ["and", ["current_field", "currency_identifier"], ["coercive_unequal", ["current_field", "currency_identifier"], ["call", ["context", "company_default_currency"], ["current_field", "company_identifier"]]]]},
+      {"control": "section", "purpose": "Terms and Conditions"}
+    ]
+  },
+  {
+    "entity": "manufacturing.blanket_order_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true, "searchable": true},
+      {"field": "item_name", "type": "short_text", "copy_from": ["item_identifier", "item_name"]},
+      {"field": "quantity", "type": "decimal"},
+      {"field": "price_list_rate", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "company_currency_price_list_rate", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "rate", "type": "monetary_amount", "required": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "company_currency_rate", "type": "monetary_amount", "required": true, "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "ordered_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "terms_and_conditions", "type": "text"},
+      {"field": "party_item_code", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "manufacturing.downtime_entry",
+    "kind": "independent_record",
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "manufacturing_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "workstation_identifier", "type": "entity_reference", "target": "manufacturing.workstation", "required": true, "searchable": true},
+      {"field": "from_time", "type": "date_and_time", "required": true},
+      {"field": "to_time", "type": "date_and_time", "required": true},
+      {"field": "operator_identifier", "type": "entity_reference", "target": "organization.employee", "required": true},
+      {"field": "downtime", "type": "decimal", "form_read_only": true},
+      {"field": "stop_reason", "type": "enumeration", "required": true, "values": ["", "Excessive machine set up time", "Unplanned machine maintenance", "On-machine press checks", "Machine operator errors", "Machine malfunction", "Electricity down", "Other"]},
+      {"field": "remarks", "type": "text"},
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["downtime entry numbering prefix + configured sequence"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Downtime Reason"}
+    ]
+  },
+  {
+    "entity": "manufacturing.item_lead_time_supplier",
+    "kind": "owned_row",
+    "configuration_variant": true,
+    "grants": [],
+    "fields": [
+      {"field": "supplier_identifier", "type": "entity_reference", "target": "procurement.supplier", "required": true},
+      {"field": "purchase_time", "type": "integer"},
+      {"field": "buffer_time", "type": "integer"},
+      {"field": "is_default", "type": "boolean"}
+    ]
+  },
+  {
+    "entity": "manufacturing.item_standard_cost",
+    "kind": "independent_record",
+    "configuration_variant": true,
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "stock_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "standard_rate", "type": "monetary_amount", "required": true},
+      {"field": "effective_date", "type": "calendar_date", "required": true},
+      {"field": "revaluation_entry_identifier", "type": "entity_reference", "target": "inventory.stock_reconciliation", "form_read_only": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "manufacturing.item_standard_cost", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "manufacturing.job_card",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "manufacturing_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "work_order_identifier", "type": "entity_reference", "target": "manufacturing.work_order", "required": true, "searchable": true},
+      {"field": "bill_of_materials_number_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials", "form_read_only": true, "copy_from": ["work_order_identifier", "bill_of_materials_number_identifier"], "visible_when": ["not", ["current_field", "finished_good_identifier"]]},
+      {"field": "workstation_identifier", "type": "entity_reference", "target": "manufacturing.workstation", "required": true},
+      {"field": "operation_identifier", "type": "entity_reference", "target": "manufacturing.operation", "required": true},
+      {"field": "posting_date", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "for_quantity", "type": "decimal"},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true},
+      {"field": "work_in_progress_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "required_when": ["or", ["or", ["not", ["current_field", "finished_good_identifier"]], ["strict_equal", ["current_field", "skip_material_transfer"], ["literal", 0]]], ["and", ["current_field", "skip_material_transfer"], ["current_field", "backflush_from_work_in_progress_warehouse"]]], "selection_filter": [["inventory.warehouse", "disabled", "=", 0], ["inventory.warehouse", "is_group", "=", 0]]},
+      {"field": "time_logs_rows", "type": "owned_collection", "target": "manufacturing.job_card_time_log"},
+      {"field": "total_completed_quantity", "type": "decimal", "form_read_only": true, "nonnegative": true, "editable_after_posting": true, "default": "0", "visible_when": ["strict_equal", ["current_field", "is_subcontracted"], ["literal", 0]]},
+      {"field": "total_time_in_minutes", "type": "decimal", "form_read_only": true},
+      {"field": "items_rows", "type": "owned_collection", "target": "manufacturing.job_card_item"},
+      {"field": "operation_identifier_text", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "transferred_quantity", "type": "decimal", "form_read_only": true, "default": "0", "visible_when": ["field_has_value", "items_rows"]},
+      {"field": "requested_quantity", "type": "decimal", "form_read_only": true, "default": "0", "visible_when": ["not", ["current_field", "is_corrective_job_card"]]},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "remarks", "type": "text"},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "editable_after_posting": true, "values": ["Open", "Work In Progress", "Partially Transferred", "Material Transferred", "On Hold", "Submitted", "To Manufacture", "Cancelled", "Completed"], "default": "Open"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "manufacturing.job_card", "form_read_only": true, "omit_on_copy": true},
+      {"field": "numbering_series", "type": "enumeration", "required": true, "omit_on_copy": true, "values": ["job card numbering prefix + 5-digit sequence"], "default": "job card numbering prefix + 5-digit sequence"},
+      {"field": "production_item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true, "copy_from": ["work_order_identifier", "production_item_identifier"], "visible_when": ["not", ["current_field", "finished_good_identifier"]]},
+      {"field": "barcode", "type": "barcode", "form_read_only": true},
+      {"field": "item_name", "type": "display_value", "form_read_only": true, "copy_from": ["production_item_identifier", "item_name"], "copy_only_when_empty": true},
+      {"field": "sequence_identifier", "type": "integer", "form_read_only": true},
+      {"field": "quality_inspection_identifier", "type": "entity_reference", "target": "inventory.quality_inspection", "omit_on_copy": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "sub_operations_rows", "type": "owned_collection", "target": "manufacturing.job_card_operation", "form_read_only": true},
+      {"field": "hour_rate", "type": "monetary_amount", "visible_when": ["field_has_value", "is_corrective_job_card"]},
+      {"field": "is_corrective_job_card", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "for_job_card_identifier", "type": "entity_reference", "target": "manufacturing.job_card", "form_read_only": true},
+      {"field": "for_operation_identifier", "type": "entity_reference", "target": "manufacturing.operation", "copy_from": ["for_job_card_identifier", "operation_identifier"], "copy_only_when_empty": true},
+      {"field": "employee_rows", "type": "owned_selection", "target": "manufacturing.job_card_time_log", "form_read_only": true, "editable_after_posting": true},
+      {"field": "serial_number", "type": "text", "form_read_only": true, "form_hidden": true},
+      {"field": "batch_number_identifier", "type": "entity_reference", "target": "inventory.batch", "form_read_only": true, "form_hidden": true},
+      {"field": "quality_inspection_template_identifier", "type": "entity_reference", "target": "inventory.quality_inspection_template", "copy_from": ["operation_identifier", "quality_inspection_template_identifier"]},
+      {"field": "workstation_type_identifier", "type": "entity_reference", "target": "manufacturing.workstation_type"},
+      {"field": "expected_start_date", "type": "date_and_time"},
+      {"field": "expected_end_date", "type": "date_and_time"},
+      {"field": "serial_and_batch_bundle_identifier", "type": "entity_reference", "target": "inventory.serial_and_batch_bundle", "form_read_only": true, "omit_on_copy": true},
+      {"field": "process_loss_quantity", "type": "decimal", "form_read_only": true, "visible_when": ["field_has_value", "process_loss_quantity"]},
+      {"field": "time_required", "type": "decimal"},
+      {"field": "scheduled_time_logs_rows", "type": "owned_collection", "target": "manufacturing.job_card_scheduled_time", "form_read_only": true},
+      {"field": "actual_start_date", "type": "date_and_time", "form_read_only": true},
+      {"field": "actual_end_date", "type": "date_and_time", "form_read_only": true},
+      {"field": "finished_good_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true},
+      {"field": "target_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "visible_when": ["current_field", "track_semi_finished_goods"], "required_when": ["current_field", "track_semi_finished_goods"], "selection_filter": [["inventory.warehouse", "disabled", "=", 0], ["inventory.warehouse", "is_group", "=", 0]]},
+      {"field": "operation_row_identifier", "type": "integer"},
+      {"field": "source_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "selection_filter": [["inventory.warehouse", "disabled", "=", 0], ["inventory.warehouse", "is_group", "=", 0]]},
+      {"field": "semi_finished_goods_bill_of_materials_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials", "form_read_only": true},
+      {"field": "is_subcontracted", "type": "boolean", "form_read_only": true, "default": "0", "visible_when": ["not", ["current_field", "is_corrective_job_card"]]},
+      {"field": "manufactured_quantity", "type": "decimal", "form_read_only": true, "visible_when": ["field_has_value", "finished_good_identifier"]},
+      {"field": "skip_material_transfer", "type": "boolean", "default": "0", "visible_when": ["current_field", "finished_good_identifier"]},
+      {"field": "backflush_from_work_in_progress_warehouse", "type": "boolean", "default": "0", "visible_when": ["and", ["current_field", "finished_good_identifier"], ["strict_equal", ["current_field", "skip_material_transfer"], ["literal", 1]]]},
+      {"field": "is_paused", "type": "boolean", "form_read_only": true, "form_hidden": true, "default": "0"},
+      {"field": "track_semi_finished_goods", "type": "boolean", "form_read_only": true, "form_hidden": true, "default": "0", "copy_from": ["work_order_identifier", "track_semi_finished_goods"], "visible_when": ["not", ["current_field", "is_corrective_job_card"]]},
+      {"field": "secondary_items_rows", "type": "owned_collection", "target": "manufacturing.job_card_secondary_item", "omit_on_copy": true},
+      {"field": "pending_quantity", "type": "decimal"},
+      {"field": "batch_split", "type": "boolean", "configuration_variant": true, "form_read_only": true},
+      {"field": "weight_per_piece", "type": "decimal", "configuration_variant": true, "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Actual Time"},
+      {"control": "tab", "purpose": "More Info"},
+      {"control": "section", "purpose": "Warehouse"},
+      {"control": "tab", "purpose": "Sub Operations"},
+      {"control": "tab", "purpose": "Corrective Operation", "visible_when": ["field_has_value", "is_corrective_job_card"]},
+      {"control": "tab", "purpose": "Connections"},
+      {"control": "section", "purpose": "Scheduled Time"},
+      {"control": "section", "purpose": "Quality Inspection"},
+      {"control": "section", "purpose": "Semi Finished Good / Finished Good"},
+      {"control": "tab", "purpose": "Time logs"},
+      {"control": "section", "purpose": "Serial / Batch"},
+      {"control": "section", "purpose": "Status and Reference"},
+      {"control": "tab", "purpose": "Secondary Items"},
+      {"control": "section", "purpose": "Progress"},
+      {"control": "formatted_information", "purpose": "job card dashboard"},
+      {"control": "tab", "purpose": "Raw Materials"}
+    ]
+  },
+  {
+    "entity": "manufacturing.job_card_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "source_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "omit_target_user_filter": true, "selection_filter": [["inventory.warehouse", "disabled", "=", 0], ["inventory.warehouse", "is_group", "=", 0]]},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure"},
+      {"field": "item_name", "type": "short_text", "form_read_only": true},
+      {"field": "description", "type": "text", "form_read_only": true},
+      {"field": "required_quantity", "type": "decimal"},
+      {"field": "allow_alternative_item", "type": "boolean", "default": "0"},
+      {"field": "item_group_identifier", "type": "entity_reference", "target": "organization.item_group", "form_read_only": true, "copy_from": ["item_identifier", "item_group_identifier"]},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "copy_from": ["item_identifier", "stock_unit_of_measure_identifier"]},
+      {"field": "transferred_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "consumed_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Qty"}
+    ]
+  },
+  {
+    "entity": "manufacturing.job_card_operation",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Complete", "Pause", "Pending", "Work In Progress"], "default": "Pending"},
+      {"field": "completed_time", "type": "short_text", "form_read_only": true},
+      {"field": "sub_operation_identifier", "type": "entity_reference", "target": "manufacturing.operation", "form_read_only": true},
+      {"field": "completed_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "process_loss_quantity", "type": "decimal", "form_read_only": true, "nonnegative": true}
+    ]
+  },
+  {
+    "entity": "manufacturing.job_card_scheduled_time",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "from_time", "type": "date_and_time"},
+      {"field": "to_time", "type": "date_and_time"},
+      {"field": "time_in_minutes", "type": "decimal"}
+    ]
+  },
+  {
+    "entity": "manufacturing.job_card_secondary_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "item_name", "type": "short_text", "copy_from": ["item_identifier", "item_name"]},
+      {"field": "description", "type": "text", "form_read_only": true, "copy_from": ["item_identifier", "description"]},
+      {"field": "stock_quantity", "type": "decimal", "required": true, "nonnegative": true},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true, "copy_from": ["item_identifier", "stock_unit_of_measure_identifier"]},
+      {"field": "secondary_item_type", "type": "enumeration", "required": true, "values": ["Co-Product", "By-Product", "Scrap", "Additional Finished Good"]},
+      {"field": "bill_of_materials_secondary_item", "type": "short_text", "form_read_only": true, "form_hidden": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Quantity and Rate"}
+    ]
+  },
+  {
+    "entity": "manufacturing.job_card_time_log",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "from_time", "type": "date_and_time"},
+      {"field": "to_time", "type": "date_and_time"},
+      {"field": "time_in_minutes", "type": "decimal"},
+      {"field": "completed_quantity", "type": "decimal", "nonnegative": true, "default": "0"},
+      {"field": "process_loss_quantity", "type": "decimal", "form_read_only": true, "nonnegative": true, "default": "0"},
+      {"field": "employee_identifier", "type": "entity_reference", "target": "organization.employee", "searchable": true, "selection_filter": [["organization.employee", "status", "=", "Active"]]},
+      {"field": "operation_identifier", "type": "entity_reference", "target": "manufacturing.operation", "omit_on_copy": true}
+    ]
+  },
+  {
+    "entity": "manufacturing.manufacturing_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "manufacturing_manager", "level": 0, "allows": ["create", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "allow_overtime", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "disable_capacity_planning"]]},
+      {"field": "allow_production_on_holidays", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "disable_capacity_planning"]]},
+      {"field": "capacity_planning_for_days", "type": "integer", "default": "30", "visible_when": ["not", ["current_field", "disable_capacity_planning"]]},
+      {"field": "minutes_between_operations", "type": "integer", "default": "10", "visible_when": ["not", ["current_field", "disable_capacity_planning"]]},
+      {"field": "overproduction_percentage_for_sales_order", "type": "percentage"},
+      {"field": "overproduction_percentage_for_work_order", "type": "percentage"},
+      {"field": "backflush_raw_materials_based_on", "type": "enumeration", "values": ["BOM", "Material Transferred for Manufacture"], "default": "BOM"},
+      {"field": "material_consumption", "type": "boolean", "default": "0"},
+      {"field": "update_bill_of_materials_costs_automatically", "type": "boolean", "default": "0"},
+      {"field": "disable_capacity_planning", "type": "boolean", "default": "0"},
+      {"field": "make_serial_no_batch_from_work_order", "type": "boolean", "default": "0"},
+      {"field": "add_corrective_operation_cost_in_finished_good_valuation", "type": "boolean", "default": "0"},
+      {"field": "job_card_excess_transfer", "type": "boolean", "default": "0"},
+      {"field": "get_raw_material_cost_from_consumption_entry", "type": "boolean", "default": "0", "visible_when": ["current_field", "material_consumption"]},
+      {"field": "validate_components_quantities_per_bill_of_materials", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "backflush_raw_materials_based_on"], ["literal", "BOM"]]},
+      {"field": "enforce_time_logs", "type": "boolean", "default": "0"},
+      {"field": "transfer_extra_materials_percentage", "type": "percentage"},
+      {"field": "allow_editing_of_items_and_quantities_in_work_order", "type": "boolean", "default": "0"},
+      {"field": "set_op_cost_and_secondary_items_from_sub_assemblies", "type": "boolean", "default": "0"},
+      {"field": "allow_alternative_finished_goods", "type": "boolean", "configuration_variant": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Capacity Planning"},
+      {"control": "section", "purpose": "Overproduction for Sales and Work Order"},
+      {"control": "section", "purpose": "Raw Materials Consumption"},
+      {"control": "section", "purpose": "Other Settings"},
+      {"control": "tab", "purpose": "Job Card and Capacity Planning"},
+      {"control": "tab", "purpose": "BOM and Production"},
+      {"control": "section", "purpose": "BOM"},
+      {"control": "section", "purpose": "Extra Material Transfer"}
+    ]
+  },
+  {
+    "entity": "manufacturing.master_production_schedule",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "manufacturing_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "stock_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "stock_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "items_rows", "type": "owned_collection", "target": "manufacturing.master_production_schedule_item"},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["master production schedule numbering prefix + two-digit year + 6-digit sequence"], "default": "master production schedule numbering prefix + two-digit year + 6-digit sequence"},
+      {"field": "parent_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "from_date", "type": "calendar_date", "required": true},
+      {"field": "to_date", "type": "calendar_date"},
+      {"field": "sales_orders_rows", "type": "owned_collection", "target": "manufacturing.production_plan_sales_order"},
+      {"field": "material_requests_rows", "type": "owned_collection", "target": "manufacturing.production_plan_material_request"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "manufacturing.master_production_schedule", "form_read_only": true, "omit_on_copy": true, "searchable": true},
+      {"field": "sales_forecast_identifier", "type": "entity_reference", "target": "manufacturing.sales_forecast"},
+      {"field": "select_items_rows", "type": "owned_selection", "target": "manufacturing.master_production_schedule_item"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Actual Demand"},
+      {"control": "tab", "purpose": "Demand"},
+      {"control": "tab", "purpose": "Planning"},
+      {"control": "section", "purpose": "Open Orders"},
+      {"control": "action", "purpose": "Get Sales Orders"},
+      {"control": "action", "purpose": "Get Material Requests"},
+      {"control": "action", "purpose": "Get Actual Demand"},
+      {"control": "section", "purpose": "Forecast Demand"}
+    ]
+  },
+  {
+    "entity": "manufacturing.master_production_schedule_item",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true},
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "form_read_only": true},
+      {"field": "delivery_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "planned_quantity", "type": "decimal"},
+      {"field": "order_release_date", "type": "calendar_date"},
+      {"field": "item_name", "type": "short_text", "form_read_only": true},
+      {"field": "bill_of_materials_number_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials"},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure"},
+      {"field": "cumulative_lead_time", "type": "integer", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "manufacturing.material_request_plan_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true, "searchable": true},
+      {"field": "item_name", "type": "short_text"},
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "required": true, "searchable": true},
+      {"field": "material_request_type", "type": "enumeration", "values": ["", "Purchase", "Material Transfer", "Material Issue", "Manufacture", "Subcontracting", "Customer Provided"]},
+      {"field": "quantity", "type": "decimal", "required": true, "omit_on_copy": true},
+      {"field": "projected_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "actual_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "default": "0"},
+      {"field": "minimum_order_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "sales_order_identifier", "type": "entity_reference", "target": "sales.sales_order", "form_read_only": true},
+      {"field": "requested_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "editable_after_posting": true, "default": "0"},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true},
+      {"field": "from_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "searchable": true, "visible_when": ["coercive_equal", ["current_field", "material_request_type"], ["literal", "Material Transfer"]]},
+      {"field": "safety_stock", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "copy_from": ["item_identifier", "safety_stock"]},
+      {"field": "ordered_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "reserved_quantity_for_production", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "required_bill_of_materials_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "unit_conversion_factor", "type": "decimal", "form_read_only": true, "precision": "9"},
+      {"field": "schedule_date", "type": "calendar_date"},
+      {"field": "stock_reserved_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "from_bill_of_materials_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials", "form_read_only": true, "omit_on_copy": true, "visible_when": ["field_has_value", "from_bill_of_materials_identifier"], "required_when": ["member", ["context", "owning_record"], "reserve_stock"]},
+      {"field": "sub_assembly_item_reference", "type": "short_text", "form_read_only": true, "form_hidden": true, "omit_on_copy": true},
+      {"field": "main_item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true, "omit_on_copy": true, "visible_when": ["field_has_value", "main_item_identifier"], "required_when": ["member", ["context", "owning_record"], "reserve_stock"]},
+      {"field": "supplier_identifier", "type": "entity_reference", "configuration_variant": true, "target": "procurement.supplier"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Reference"},
+      {"control": "section", "purpose": "Item Description"},
+      {"control": "section", "purpose": "BIN Qty"}
+    ]
+  },
+  {
+    "entity": "manufacturing.operation",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "manufacturing_user", "level": 0, "allows": ["create", "delete", "export", "import", "read", "share", "write"]},
+      {"role": "manufacturing_manager", "level": 0, "allows": ["create", "delete", "export", "import", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "workstation_identifier", "type": "entity_reference", "target": "manufacturing.workstation"},
+      {"field": "description", "type": "text"},
+      {"field": "sub_operations_rows", "type": "owned_collection", "target": "manufacturing.sub_operation"},
+      {"field": "total_operation_time", "type": "decimal", "form_read_only": true},
+      {"field": "batch_size", "type": "integer", "nonnegative": true, "default": "1", "visible_when": ["field_has_value", "create_job_card_based_on_batch_size"], "required_when": ["field_has_value", "create_job_card_based_on_batch_size"]},
+      {"field": "create_job_card_based_on_batch_size", "type": "boolean", "default": "0"},
+      {"field": "is_corrective_operation", "type": "boolean", "default": "0"},
+      {"field": "quality_inspection_template_identifier", "type": "entity_reference", "target": "inventory.quality_inspection_template"},
+      {"field": "work_instruction", "type": "formatted_text", "configuration_variant": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Operation Description"},
+      {"control": "section", "purpose": "Sub Operations"},
+      {"control": "section", "purpose": "Job Card"}
+    ]
+  },
+  {
+    "entity": "manufacturing.plant_floor",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "floor_name", "type": "short_text", "unique": true},
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "write_once": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "write_once": true}
+    ],
+    "presentation": [
+      {"control": "tab", "purpose": "Workstations", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"control": "formatted_information", "purpose": "Plant Dashboard"},
+      {"control": "tab", "purpose": "Floor"},
+      {"control": "tab", "purpose": "Stock Summary", "visible_when": ["and", ["not", ["current_field", "is_new_record"]], ["current_field", "warehouse_identifier"]]},
+      {"control": "formatted_information", "purpose": "Stock Summary"}
+    ]
+  },
+  {
+    "entity": "manufacturing.production_plan",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "manufacturing_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "print", "read", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["production plan numbering prefix + four-digit year + configured sequence"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "get_items_from", "type": "enumeration", "values": ["", "Sales Order", "Material Request"]},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "visible_when": ["coercive_equal", ["current_field", "get_items_from"], ["literal", "Sales Order"]]},
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "visible_when": ["coercive_equal", ["current_field", "get_items_from"], ["literal", "Material Request"]]},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project", "visible_when": ["coercive_equal", ["current_field", "get_items_from"], ["literal", "Sales Order"]]},
+      {"field": "from_date", "type": "calendar_date"},
+      {"field": "to_date", "type": "calendar_date"},
+      {"field": "sales_orders_rows", "type": "owned_collection", "target": "manufacturing.production_plan_sales_order", "omit_on_copy": true},
+      {"field": "material_requests_rows", "type": "owned_collection", "target": "manufacturing.production_plan_material_request", "omit_on_copy": true},
+      {"field": "purchase_order_items_rows", "type": "owned_collection", "target": "manufacturing.production_plan_item", "required": true, "omit_on_copy": true},
+      {"field": "include_non_stock_items", "type": "boolean", "default": "1"},
+      {"field": "include_subcontracted_items", "type": "boolean", "default": "1"},
+      {"field": "ignore_existing_ordered_quantity", "type": "boolean", "default": "1"},
+      {"field": "mr_items_rows", "type": "owned_collection", "target": "manufacturing.material_request_plan_item", "omit_on_copy": true},
+      {"field": "total_planned_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "default": "0"},
+      {"field": "total_produced_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "default": "0"},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "searchable": true, "values": ["", "Draft", "Submitted", "Not Started", "In Process", "Completed", "Closed", "Cancelled", "Material Requested"], "default": "Draft"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "manufacturing.production_plan", "form_read_only": true, "omit_on_copy": true},
+      {"field": "for_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "raw_material_group_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "warehouses_rows", "type": "owned_selection", "target": "manufacturing.production_plan_material_request_warehouse", "form_read_only": true, "form_hidden": true},
+      {"field": "sales_order_status", "type": "enumeration", "values": ["", "To Deliver and Bill", "To Bill", "To Deliver"], "visible_when": ["coercive_equal", ["current_field", "get_items_from"], ["literal", "Sales Order"]]},
+      {"field": "include_safety_stock", "type": "boolean", "default": "0"},
+      {"field": "combine_items", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "get_items_from"], ["literal", "Sales Order"]]},
+      {"field": "prod_plan_references_rows", "type": "owned_collection", "target": "manufacturing.production_plan_item_reference", "form_hidden": true},
+      {"field": "sub_assembly_items_rows", "type": "owned_collection", "target": "manufacturing.production_plan_sub_assembly_item", "omit_on_copy": true},
+      {"field": "from_delivery_date", "type": "calendar_date", "visible_when": ["coercive_equal", ["current_field", "get_items_from"], ["literal", "Sales Order"]]},
+      {"field": "to_delivery_date", "type": "calendar_date", "visible_when": ["coercive_equal", ["current_field", "get_items_from"], ["literal", "Sales Order"]]},
+      {"field": "combine_sub_items", "type": "boolean", "default": "0"},
+      {"field": "skip_available_sub_assembly_item", "type": "boolean", "default": "1"},
+      {"field": "sub_assembly_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "consider_minimum_order_quantity", "type": "boolean", "default": "0"},
+      {"field": "reserve_stock", "type": "boolean", "default": "0"},
+      {"field": "consider_process_loss", "type": "boolean", "default": "0"},
+      {"field": "number_of_shifts", "type": "integer", "configuration_variant": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Filters", "visible_when": ["current_field", "get_items_from"], "expanded_when": ["current_field", "is_new_record"]},
+      {"control": "section", "purpose": "Sales Orders", "visible_when": ["coercive_equal", ["current_field", "get_items_from"], ["literal", "Sales Order"]], "expanded_when": ["current_field", "is_new_record"]},
+      {"control": "action", "purpose": "Get Sales Orders"},
+      {"control": "section", "purpose": "Material Request Detail", "visible_when": ["coercive_equal", ["current_field", "get_items_from"], ["literal", "Material Request"]], "expanded_when": ["current_field", "is_new_record"]},
+      {"control": "action", "purpose": "Get Material Request"},
+      {"control": "section", "purpose": "Select Items to Manufacture"},
+      {"control": "action", "purpose": "Get Finished Goods", "visible_when": ["and", ["current_field", "get_items_from"], ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 0]]]},
+      {"control": "section", "purpose": "For Raw Materials"},
+      {"control": "action", "purpose": "Download Required Materials", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"control": "action", "purpose": "Get Items for Purchase Only"},
+      {"control": "section", "purpose": "Other Details"},
+      {"control": "section", "purpose": "Sub Assembly Items"},
+      {"control": "action", "purpose": "Get Sub Assembly Items", "visible_when": ["and", ["and", ["current_field", "purchase_order_items_rows"], ["member", ["current_field", "purchase_order_items_rows"], "length"]], ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 0]]]},
+      {"control": "action", "purpose": "Get Items for Purchase / Transfer"},
+      {"control": "section", "purpose": "Preview Required Materials"}
+    ]
+  },
+  {
+    "entity": "manufacturing.production_plan_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "include_exploded_items", "type": "boolean", "default": "1"},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "bill_of_materials_number_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials", "required": true},
+      {"field": "planned_quantity", "type": "decimal", "required": true, "nonnegative": true},
+      {"field": "process_loss_percentage", "type": "percentage", "form_read_only": true},
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "planned_start_date", "type": "date_and_time", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "pending_quantity", "type": "decimal", "form_read_only": true, "default": "0"},
+      {"field": "ordered_quantity", "type": "decimal", "form_read_only": true, "default": "0"},
+      {"field": "produced_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "default": "0"},
+      {"field": "description", "type": "formatted_text", "form_read_only": true},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "required": true, "form_read_only": true},
+      {"field": "sales_order_identifier", "type": "entity_reference", "target": "sales.sales_order", "form_read_only": true},
+      {"field": "sales_order_item", "type": "short_text", "line_identity_in": "sales.sales_order_item", "form_hidden": true, "omit_on_copy": true},
+      {"field": "material_request_identifier", "type": "entity_reference", "target": "inventory.material_request", "form_read_only": true},
+      {"field": "material_request_item", "type": "short_text", "form_hidden": true, "searchable": true},
+      {"field": "product_bundle_item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true, "omit_on_copy": true},
+      {"field": "item_reference", "type": "short_text", "form_hidden": true},
+      {"field": "temporary_name", "type": "short_text", "form_hidden": true},
+      {"field": "planned_end_date", "type": "date_and_time", "configuration_variant": true, "form_read_only": true, "editable_after_posting": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Quantity and Description"},
+      {"control": "section", "purpose": "Reference"}
+    ]
+  },
+  {
+    "entity": "manufacturing.production_plan_item_reference",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "sales_order_identifier", "type": "entity_reference", "target": "sales.sales_order"},
+      {"field": "sales_order_item", "type": "short_text", "line_identity_in": "sales.sales_order_item"},
+      {"field": "quantity", "type": "decimal"},
+      {"field": "item_reference", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "manufacturing.production_plan_material_request",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "material_request_identifier", "type": "entity_reference", "target": "inventory.material_request", "required": true},
+      {"field": "material_request_date", "type": "calendar_date", "form_read_only": true, "copy_from": ["material_request_identifier", "transaction_date"]}
+    ]
+  },
+  {
+    "entity": "manufacturing.production_plan_material_request_warehouse",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"}
+    ]
+  },
+  {
+    "entity": "manufacturing.production_plan_sales_order",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "sales_order_identifier", "type": "entity_reference", "target": "sales.sales_order", "required": true},
+      {"field": "sales_order_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "form_read_only": true},
+      {"field": "grand_total", "type": "monetary_amount", "form_read_only": true},
+      {"field": "status", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "manufacturing.production_plan_schedule",
+    "kind": "independent_record",
+    "configuration_variant": true,
+    "grants": [
+      {"role": "manufacturing_user", "level": 0, "allows": ["delete", "email", "export", "print", "read", "report", "share"]},
+      {"role": "manufacturing_manager", "level": 0, "allows": ["delete", "email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "subject", "type": "short_text", "form_read_only": true},
+      {"field": "production_plan_identifier", "type": "entity_reference", "target": "manufacturing.production_plan", "required": true, "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "form_read_only": true},
+      {"field": "row_type", "type": "enumeration", "form_read_only": true, "values": ["finished_good", "subordinate_assembly", "raw_material"]},
+      {"field": "plan_row", "type": "short_text", "form_read_only": true},
+      {"field": "task_key", "type": "short_text", "form_read_only": true},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true},
+      {"field": "operation_identifier", "type": "entity_reference", "target": "manufacturing.operation", "form_read_only": true},
+      {"field": "workstation_identifier", "type": "entity_reference", "target": "manufacturing.workstation", "form_read_only": true},
+      {"field": "supplier_identifier", "type": "entity_reference", "target": "procurement.supplier", "form_read_only": true},
+      {"field": "from_time", "type": "date_and_time", "required": true, "form_read_only": true},
+      {"field": "to_time", "type": "date_and_time", "required": true, "form_read_only": true},
+      {"field": "duration_minutes", "type": "decimal", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "manufacturing.production_plan_sub_assembly_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_name", "type": "short_text", "form_read_only": true, "copy_from": ["sub_assembly_item_code", "item_name"]},
+      {"field": "quantity", "type": "decimal", "form_read_only": true},
+      {"field": "purchase_order_identifier", "type": "entity_reference", "target": "procurement.purchase_order", "form_read_only": true},
+      {"field": "received_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "editable_after_posting": true},
+      {"field": "bill_of_materials_number_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials"},
+      {"field": "production_plan_item", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "parent_item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true},
+      {"field": "bill_of_materials_level", "type": "integer", "form_read_only": true},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true},
+      {"field": "description", "type": "text", "form_read_only": true},
+      {"field": "production_item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true},
+      {"field": "indent", "type": "integer"},
+      {"field": "finished_goods_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "type_of_manufacturing", "type": "enumeration", "values": ["In House", "Subcontract", "Material Request"], "default": "In House"},
+      {"field": "supplier_identifier", "type": "entity_reference", "target": "procurement.supplier", "required_when": ["and", ["coercive_equal", ["current_field", "type_of_manufacturing"], ["literal", "Subcontract"]], ["greater", ["current_field", "quantity"], ["literal", 0]]]},
+      {"field": "schedule_date", "type": "date_and_time"},
+      {"field": "actual_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "projected_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "work_order_produced_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "required_quantity", "type": "decimal"},
+      {"field": "process_loss_percentage", "type": "percentage", "form_read_only": true},
+      {"field": "stock_reserved_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "ordered_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "sales_order_identifier", "type": "entity_reference", "target": "sales.sales_order", "form_read_only": true},
+      {"field": "sales_order_item", "type": "short_text", "line_identity_in": "sales.sales_order_item", "form_hidden": true, "omit_on_copy": true},
+      {"field": "schedule_end_date", "type": "date_and_time", "configuration_variant": true, "form_read_only": true, "editable_after_posting": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Manufacturing", "visible_when": ["coercive_equal", ["current_field", "type_of_manufacturing"], ["literal", "In House"]]},
+      {"control": "section", "purpose": "Item Details"},
+      {"control": "section", "purpose": "Quantity"},
+      {"control": "section", "purpose": "Subcontracting"}
+    ]
+  },
+  {
+    "entity": "manufacturing.routing",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "manufacturing_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "routing_name", "type": "short_text", "unique": true},
+      {"field": "disabled", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "operations_rows", "type": "owned_collection", "target": "manufacturing.bill_of_materials_operation"}
+    ]
+  },
+  {
+    "entity": "manufacturing.sales_forecast",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "sales_user", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "sales_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "manufacturing_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "stock_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["sales forecast numbering prefix + two-digit year + 6-digit sequence"], "default": "sales forecast numbering prefix + two-digit year + 6-digit sequence"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "posting_date", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "selected_items_rows", "type": "owned_selection", "target": "manufacturing.sales_forecast_item", "required": true},
+      {"field": "parent_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "required": true},
+      {"field": "items_rows", "type": "owned_collection", "target": "manufacturing.sales_forecast_item"},
+      {"field": "from_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "manufacturing.sales_forecast", "form_read_only": true, "omit_on_copy": true, "searchable": true},
+      {"field": "demand_number", "type": "integer", "required": true, "default": "6"},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Planned", "MPS Generated", "Cancelled"]},
+      {"field": "frequency", "type": "enumeration", "required": true, "values": ["Weekly", "Monthly"], "default": "Monthly"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Item and Warehouse"},
+      {"control": "action", "purpose": "Generate Demand"},
+      {"control": "tab", "purpose": "Connections"}
+    ]
+  },
+  {
+    "entity": "manufacturing.sales_forecast_item",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true, "form_read_only": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true, "copy_from": ["item_identifier", "item_name"], "copy_only_when_empty": true},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true, "copy_from": ["item_identifier", "sales_unit_of_measure_identifier"], "copy_only_when_empty": true},
+      {"field": "delivery_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "demand_quantity", "type": "decimal", "nonnegative": true},
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "manufacturing.sub_operation",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "operation_identifier", "type": "entity_reference", "target": "manufacturing.operation", "required": true},
+      {"field": "time_in_minutes", "type": "decimal", "nonnegative": true, "default": "0"},
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "manufacturing.work_order",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "hierarchy_parent": "parent_work_order",
+    "grants": [
+      {"role": "manufacturing_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "import", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "stock_user", "level": 0, "allows": ["read", "report"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "write_once": true, "omit_on_copy": true, "values": ["work order numbering prefix + four-digit year + configured sequence"]},
+      {"field": "status", "type": "enumeration", "required": true, "form_read_only": true, "omit_on_copy": true, "searchable": true, "values": ["", "Draft", "Submitted", "Not Started", "In Process", "Stock Reserved", "Stock Partially Reserved", "Completed", "Stopped", "Closed", "Cancelled"], "default": "Draft", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "production_item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true, "copy_from": ["production_item_identifier", "item_name"], "copy_only_when_empty": true, "visible_when": ["current_field", "production_item_identifier"]},
+      {"field": "image", "type": "image_file_reference", "form_read_only": true, "form_hidden": true, "copy_from": ["production_item_identifier", "image"]},
+      {"field": "bill_of_materials_number_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials", "required": true},
+      {"field": "allow_alternative_item", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "subcontracting_inward_order_identifier"]]},
+      {"field": "use_multi_level_bill_of_materials", "type": "boolean", "default": "1", "read_only_when": ["current_field", "subcontracting_inward_order_identifier"]},
+      {"field": "skip_transfer", "type": "boolean", "default": "0"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "quantity", "type": "decimal", "required": true, "default": "1.0"},
+      {"field": "material_transferred_for_manufacturing", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "default": "0", "visible_when": ["and", ["and", ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 1]], ["coercive_equal", ["current_field", "skip_transfer"], ["literal", 0]]], ["strict_equal", ["current_field", "track_semi_finished_goods"], ["literal", 0]]]},
+      {"field": "produced_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "default": "0", "visible_when": ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 1]]},
+      {"field": "sales_order_identifier", "type": "entity_reference", "target": "sales.sales_order", "visible_when": ["not", ["current_field", "subcontracting_inward_order_identifier"]]},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "from_work_in_progress_warehouse", "type": "boolean", "default": "0", "visible_when": ["and", ["current_field", "skip_transfer"], ["not", ["current_field", "subcontracting_inward_order_identifier"]]]},
+      {"field": "work_in_progress_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "visible_when": ["not", ["and", ["current_field", "skip_transfer"], ["current_field", "subcontracting_inward_order_identifier"]]], "required_when": ["or", ["not", ["current_field", "skip_transfer"]], ["current_field", "from_work_in_progress_warehouse"]], "selection_filter": [["inventory.warehouse", "disabled", "=", 0], ["inventory.warehouse", "is_group", "=", 0]]},
+      {"field": "finished_goods_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "read_only_when": ["field_has_value", "subcontracting_inward_order_identifier"], "selection_filter": [["inventory.warehouse", "disabled", "=", 0], ["inventory.warehouse", "is_group", "=", 0]]},
+      {"field": "scrap_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "selection_filter": [["inventory.warehouse", "disabled", "=", 0], ["inventory.warehouse", "is_group", "=", 0]]},
+      {"field": "required_items_rows", "type": "owned_collection", "target": "manufacturing.work_order_item", "omit_on_copy": true},
+      {"field": "planned_start_date", "type": "date_and_time", "required": true, "editable_after_posting": true, "default": "now"},
+      {"field": "actual_start_date", "type": "date_and_time", "editable_after_posting": true, "read_only_when": ["and", ["current_field", "operations_rows"], ["greater", ["member", ["current_field", "operations_rows"], "length"], ["literal", 0]]]},
+      {"field": "planned_end_date", "type": "date_and_time", "omit_on_copy": true, "editable_after_posting": true, "read_only_when": ["and", ["current_field", "operations_rows"], ["greater", ["member", ["current_field", "operations_rows"], "length"], ["literal", 0]]]},
+      {"field": "actual_end_date", "type": "date_and_time", "editable_after_posting": true, "read_only_when": ["and", ["current_field", "operations_rows"], ["greater", ["member", ["current_field", "operations_rows"], "length"], ["literal", 0]]]},
+      {"field": "expected_delivery_date", "type": "calendar_date", "editable_after_posting": true},
+      {"field": "transfer_material_against", "type": "enumeration", "values": ["", "Work Order", "Job Card"], "copy_from": ["bill_of_materials_number_identifier", "transfer_material_against"], "copy_only_when_empty": true, "visible_when": ["and", ["optional_member", ["current_field", "operations_rows"], "length"], ["strict_equal", ["current_field", "track_semi_finished_goods"], ["literal", 0]]]},
+      {"field": "operations_rows", "type": "owned_collection", "target": "manufacturing.work_order_operation"},
+      {"field": "planned_operating_cost", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "actual_operating_cost", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "additional_operating_cost", "type": "monetary_amount", "omit_on_copy": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_operating_cost", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "description", "type": "text", "form_read_only": true},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true, "copy_from": ["production_item_identifier", "stock_unit_of_measure_identifier"], "copy_only_when_empty": true},
+      {"field": "material_request_identifier", "type": "entity_reference", "target": "inventory.material_request", "form_read_only": true, "visible_when": ["not", ["current_field", "subcontracting_inward_order_identifier"]]},
+      {"field": "material_request_item", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "sales_order_item", "type": "short_text", "line_identity_in": "sales.sales_order_item", "form_read_only": true, "form_hidden": true},
+      {"field": "production_plan_identifier", "type": "entity_reference", "target": "manufacturing.production_plan", "form_read_only": true, "omit_on_copy": true, "searchable": true},
+      {"field": "production_plan_item", "type": "short_text", "form_read_only": true, "omit_on_copy": true},
+      {"field": "product_bundle_item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true, "omit_on_copy": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "manufacturing.work_order", "form_read_only": true, "omit_on_copy": true, "omit_target_user_filter": true},
+      {"field": "update_consumed_material_cost_in_project", "type": "boolean", "default": "1"},
+      {"field": "source_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "read_only_when": ["current_field", "subcontracting_inward_order_identifier"], "selection_filter": [["inventory.warehouse", "disabled", "=", 0], ["inventory.warehouse", "is_group", "=", 0]]},
+      {"field": "lead_time", "type": "decimal", "form_read_only": true},
+      {"field": "has_serial_number", "type": "boolean", "form_read_only": true, "default": "0", "copy_from": ["production_item_identifier", "has_serial_number"]},
+      {"field": "has_batch_number", "type": "boolean", "form_read_only": true, "default": "0", "copy_from": ["production_item_identifier", "has_batch_number"]},
+      {"field": "batch_size", "type": "decimal", "default": "0", "visible_when": ["field_has_value", "has_batch_number"]},
+      {"field": "corrective_operation_cost", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "editable_after_posting": true},
+      {"field": "production_plan_sub_assembly_item", "type": "short_text", "form_read_only": true, "form_hidden": true, "omit_on_copy": true},
+      {"field": "process_loss_quantity", "type": "decimal", "form_read_only": true, "nonnegative": true, "omit_on_copy": true, "visible_when": ["current_field", "process_loss_quantity"]},
+      {"field": "track_semi_finished_goods", "type": "boolean", "form_read_only": true, "form_hidden": true, "default": "0", "copy_from": ["bill_of_materials_number_identifier", "track_semi_finished_goods"]},
+      {"field": "reserve_stock", "type": "boolean", "default": "0", "read_only_when": ["field_has_value", "subcontracting_inward_order_identifier"]},
+      {"field": "disassembled_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "visible_when": ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 1]]},
+      {"field": "master_production_schedule_identifier", "type": "entity_reference", "target": "manufacturing.master_production_schedule", "form_read_only": true},
+      {"field": "additional_transferred_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "default": "0", "visible_when": ["and", ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 1]], ["coercive_equal", ["current_field", "skip_transfer"], ["literal", 0]]]},
+      {"field": "subcontracting_inward_order_identifier", "type": "entity_reference", "target": "subcontracting.subcontracting_inward_order", "form_read_only": true, "visible_when": ["field_has_value", "subcontracting_inward_order_identifier"]},
+      {"field": "subcontracting_inward_order_item", "type": "short_text", "form_read_only": true, "form_hidden": true, "omit_on_copy": true},
+      {"field": "maximum_producible_quantity", "type": "decimal", "form_read_only": true, "form_hidden": true, "nonnegative": true, "omit_on_copy": true},
+      {"field": "non_stock_items_rows", "type": "owned_collection", "computed": true, "target": "manufacturing.work_order_additional_item", "form_read_only": true},
+      {"field": "secondary_items_rows", "type": "owned_collection", "computed": true, "target": "manufacturing.work_order_additional_item", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "tab", "purpose": "Production Item"},
+      {"control": "section", "purpose": "Warehouse"},
+      {"control": "section", "purpose": "Time"},
+      {"control": "section", "purpose": "Operations", "expanded_when": ["not", ["current_field", "operations_rows"]]},
+      {"control": "section", "purpose": "Operation Cost", "visible_when": ["field_has_value", "operations_rows"]},
+      {"control": "tab", "purpose": "More Info"},
+      {"control": "section", "purpose": "Finished Good Serial / Batch", "visible_when": ["and", ["and", ["not", ["current_field", "is_new_record"]], ["strict_equal", ["current_field", "track_semi_finished_goods"], ["literal", 0]]], ["or", ["strict_equal", ["current_field", "has_serial_number"], ["literal", 1]], ["strict_equal", ["current_field", "has_batch_number"], ["literal", 1]]]]},
+      {"control": "tab", "purpose": "Connections"},
+      {"control": "tab", "purpose": "Scheduling & Costing"},
+      {"control": "section", "purpose": "Required Items", "expanded_when": ["not", ["optional_member", ["current_field", "operations_rows"], "length"]]},
+      {"control": "section", "purpose": "Reference"},
+      {"control": "section", "purpose": "Production Item Info"},
+      {"control": "tab", "purpose": "Job Cards"},
+      {"control": "formatted_information", "purpose": "Job Cards"},
+      {"control": "tab", "purpose": "Material Requests"},
+      {"control": "formatted_information", "purpose": "Material Requests"},
+      {"control": "tab", "purpose": "Stock Entries"},
+      {"control": "formatted_information", "purpose": "Stock Entries"}
+    ]
+  },
+  {
+    "entity": "manufacturing.work_order_additional_item",
+    "kind": "computed_record",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "type", "type": "short_text"},
+      {"field": "quantity", "type": "decimal"},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure"},
+      {"field": "amount", "type": "monetary_amount"},
+      {"field": "rate", "type": "monetary_amount"},
+      {"field": "secondary_item_type", "type": "short_text", "configuration_variant": true}
+    ]
+  },
+  {
+    "entity": "manufacturing.work_order_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "operation_identifier", "type": "entity_reference", "target": "manufacturing.operation"},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "searchable": true},
+      {"field": "source_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "omit_target_user_filter": true, "read_only_when": ["and", ["member", ["context", "owning_record"], "subcontracting_inward_order"], ["current_field", "is_customer_provided_item"]], "selection_filter": [["inventory.warehouse", "disabled", "=", 0], ["inventory.warehouse", "is_group", "=", 0]]},
+      {"field": "item_name", "type": "short_text", "form_read_only": true},
+      {"field": "description", "type": "text", "form_read_only": true},
+      {"field": "required_quantity", "type": "decimal"},
+      {"field": "transferred_quantity", "type": "decimal", "form_read_only": true, "visible_when": ["not", ["member", ["context", "owning_record"], "skip_transfer"]]},
+      {"field": "requested_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "visible_when": ["not", ["member", ["context", "owning_record"], "skip_transfer"]]},
+      {"field": "picked_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "visible_when": ["not", ["member", ["context", "owning_record"], "skip_transfer"]]},
+      {"field": "allow_alternative_item", "type": "boolean", "default": "0", "visible_when": ["not", ["member", ["context", "owning_record"], "subcontracting_inward_order"]]},
+      {"field": "include_item_in_manufacturing", "type": "boolean", "default": "0"},
+      {"field": "consumed_quantity", "type": "decimal", "form_read_only": true, "visible_when": ["not", ["member", ["context", "owning_record"], "skip_transfer"]]},
+      {"field": "available_quantity_at_source_warehouse", "type": "decimal", "form_read_only": true},
+      {"field": "available_quantity_at_work_in_progress_warehouse", "type": "decimal", "form_read_only": true},
+      {"field": "rate", "type": "monetary_amount", "form_read_only": true},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "returned_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "subcontracted_quantity", "type": "decimal", "form_read_only": true, "nonnegative": true, "omit_on_copy": true},
+      {"field": "operation_row_identifier", "type": "integer", "form_read_only": true},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true, "copy_from": ["item_identifier", "stock_unit_of_measure_identifier"]},
+      {"field": "stock_reserved_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "is_additional_item", "type": "boolean", "form_read_only": true, "omit_on_copy": true, "default": "0"},
+      {"field": "voucher_detail_reference", "type": "short_text", "form_read_only": true, "omit_on_copy": true, "visible_when": ["field_has_value", "is_additional_item"]},
+      {"field": "is_customer_provided_item", "type": "boolean", "form_read_only": true, "default": "0", "copy_from": ["item_identifier", "is_customer_provided_item"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Qty"}
+    ]
+  },
+  {
+    "entity": "manufacturing.work_order_operation",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "operation_identifier", "type": "entity_reference", "target": "manufacturing.operation", "required": true},
+      {"field": "bill_of_materials_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials", "omit_on_copy": true},
+      {"field": "bill_of_materials_operation", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "completed_quantity", "type": "decimal", "omit_on_copy": true},
+      {"field": "status", "type": "enumeration", "omit_on_copy": true, "values": ["Pending", "Work in Progress", "Completed"], "default": "Pending"},
+      {"field": "workstation_identifier", "type": "entity_reference", "target": "manufacturing.workstation"},
+      {"field": "planned_start_time", "type": "date_and_time", "form_read_only": true, "omit_on_copy": true},
+      {"field": "planned_end_time", "type": "date_and_time", "form_read_only": true, "omit_on_copy": true},
+      {"field": "time_in_minutes", "type": "decimal", "required": true},
+      {"field": "hour_rate", "type": "decimal", "form_read_only": true},
+      {"field": "planned_operating_cost", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "actual_start_time", "type": "date_and_time", "form_read_only": true, "omit_on_copy": true},
+      {"field": "actual_end_time", "type": "date_and_time", "form_read_only": true, "omit_on_copy": true},
+      {"field": "actual_operation_time", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "actual_operating_cost", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "batch_size", "type": "decimal", "nonnegative": true, "default": "1"},
+      {"field": "sequence_identifier", "type": "integer", "nonnegative": true},
+      {"field": "workstation_type_identifier", "type": "entity_reference", "target": "manufacturing.workstation_type"},
+      {"field": "process_loss_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "bill_of_materials_number_identifier", "type": "entity_reference", "target": "manufacturing.bill_of_materials", "form_read_only": true},
+      {"field": "finished_good_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true},
+      {"field": "output_quantity", "type": "decimal", "form_read_only": true, "nonnegative": true},
+      {"field": "work_in_progress_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "finished_goods_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "source_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "is_subcontracted", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "skip_material_transfer", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "backflush_from_work_in_progress_warehouse", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "quality_inspection_required", "type": "boolean", "default": "0"},
+      {"field": "pending_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "batch_split", "type": "boolean", "configuration_variant": true, "form_read_only": true},
+      {"field": "weight_per_piece", "type": "decimal", "configuration_variant": true, "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Estimated Time and Cost"},
+      {"control": "section", "purpose": "Actual Time and Cost"},
+      {"control": "section", "visible_when": ["strict_equal", ["member", ["context", "owning_record"], "track_semi_finished_goods"], ["literal", 1]]}
+    ]
+  },
+  {
+    "entity": "manufacturing.workstation",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "manufacturing_user", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "workstation_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "description", "type": "text"},
+      {"field": "hour_rate", "type": "monetary_amount", "form_read_only": true},
+      {"field": "working_hours_rows", "type": "owned_collection", "target": "manufacturing.workstation_working_hour"},
+      {"field": "holiday_list_identifier", "type": "entity_reference", "target": "organization.holiday_list"},
+      {"field": "production_capacity", "type": "integer", "required": true, "nonnegative": true, "default": "1"},
+      {"field": "workstation_type_identifier", "type": "entity_reference", "target": "manufacturing.workstation_type"},
+      {"field": "plant_floor_identifier", "type": "entity_reference", "target": "manufacturing.plant_floor"},
+      {"field": "status", "type": "enumeration", "values": ["Production", "Off", "Idle", "Problem", "Maintenance", "Setup"]},
+      {"field": "on_status_image", "type": "image_file_reference"},
+      {"field": "off_status_image", "type": "image_file_reference"},
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "total_working_hours", "type": "decimal"},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "workstation_costs_rows", "type": "owned_collection", "target": "manufacturing.workstation_cost"}
+    ],
+    "presentation": [
+      {"control": "tab", "purpose": "Operating Costs"},
+      {"control": "tab", "purpose": "Working Hours"},
+      {"control": "tab", "purpose": "Description"},
+      {"control": "tab", "purpose": "Workstation Status"},
+      {"control": "section", "purpose": "Status Illustration"},
+      {"control": "tab", "purpose": "Job Cards", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"control": "tab", "purpose": "Details"},
+      {"control": "tab", "purpose": "Connections"},
+      {"control": "formatted_information", "purpose": "Workstation Dashboard"},
+      {"control": "section", "purpose": "Operating Costs (Per Hour)"}
+    ]
+  },
+  {
+    "entity": "manufacturing.workstation_cost",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "operating_cost", "type": "monetary_amount", "required": true},
+      {"field": "operating_component_identifier", "type": "entity_reference", "target": "manufacturing.workstation_operating_component", "required": true}
+    ]
+  },
+  {
+    "entity": "manufacturing.workstation_operating_component",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "manufacturing_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "component_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "accounts_rows", "type": "owned_collection", "target": "manufacturing.workstation_operating_component_account"}
+    ]
+  },
+  {
+    "entity": "manufacturing.workstation_operating_component_account",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "expense_account_identifier", "type": "entity_reference", "target": "accounting.account"}
+    ]
+  },
+  {
+    "entity": "manufacturing.workstation_type",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "manufacturing_user", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "workstation_type", "type": "short_text", "required": true, "unique": true},
+      {"field": "hour_rate", "type": "monetary_amount", "form_read_only": true},
+      {"field": "description", "type": "text"},
+      {"field": "workstation_costs_rows", "type": "owned_collection", "target": "manufacturing.workstation_cost"}
+    ],
+    "presentation": [
+      {"control": "tab", "purpose": "Description"},
+      {"control": "section", "purpose": "Operating Costs (Per Hour)"}
+    ]
+  },
+  {
+    "entity": "manufacturing.workstation_working_hour",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "start_time", "type": "time_of_day", "required": true},
+      {"field": "end_time", "type": "time_of_day", "required": true},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "hours", "type": "decimal", "form_read_only": true}
+    ]
+  }
+]

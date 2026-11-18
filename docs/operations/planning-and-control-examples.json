@@ -1,0 +1,769 @@
+[
+  {
+    "operation": "Split a whole-unit forecast among actual demands",
+    "examples": [
+      {
+        "inputs": {
+          "actual": [
+            3,
+            2
+          ],
+          "forecast": 7
+        },
+        "expected": {
+          "shares": [
+            4,
+            3
+          ],
+          "demand": [
+            4,
+            3
+          ]
+        }
+      },
+      {
+        "inputs": {
+          "actual": [
+            1,
+            1,
+            1
+          ],
+          "forecast": 2
+        },
+        "expected": {
+          "shares": [
+            1,
+            1,
+            0
+          ],
+          "demand": [
+            1,
+            1,
+            1
+          ]
+        }
+      },
+      {
+        "inputs": {
+          "actual": [
+            0,
+            0
+          ],
+          "forecast": 4
+        },
+        "expected": {
+          "shares": [
+            4,
+            0
+          ],
+          "demand": [
+            4,
+            0
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Apply delivered stock to dated order commitments",
+    "examples": [
+      {
+        "inputs": {
+          "slices": [
+            6,
+            9
+          ],
+          "delivered": 8
+        },
+        "expected": {
+          "pending": [
+            0,
+            7
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Calculate the critical material release date",
+    "examples": [
+      {
+        "inputs": {
+          "quantity": 30,
+          "capacity_per_day": 12,
+          "buffer_days": 0.5,
+          "child_path_days": [
+            4.25,
+            2
+          ],
+          "due": "2026-05-20"
+        },
+        "expected": {
+          "rounded_days": 8,
+          "release": "2026-05-12"
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Score one supplier assessment period",
+    "examples": [
+      {
+        "inputs": {
+          "criteria": [
+            {
+              "measure": 92,
+              "maximum": 100,
+              "weight": 60
+            },
+            {
+              "measure": 115,
+              "maximum": 100,
+              "weight": 40
+            }
+          ]
+        },
+        "expected": {
+          "score": 95.2
+        }
+      },
+      {
+        "inputs": {
+          "criteria": [
+            {
+              "measure": -20,
+              "maximum": 100,
+              "weight": 30
+            },
+            {
+              "measure": 15,
+              "maximum": 0,
+              "weight": 20
+            },
+            {
+              "measure": 20,
+              "maximum": 40,
+              "weight": 50
+            }
+          ]
+        },
+        "expected": {
+          "score": 25
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Calculate the recency-weighted supplier score",
+    "examples": [
+      {
+        "inputs": {
+          "periods_newest_first": [
+            95.2,
+            80
+          ]
+        },
+        "expected": {
+          "score": 90.1
+        }
+      },
+      {
+        "inputs": {
+          "periods_newest_first": []
+        },
+        "expected": {
+          "score": 100
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Admit a supplier response to a quotation request",
+    "examples": [
+      {
+        "inputs": {
+          "member": true,
+          "invited": true,
+          "request_submitted": true,
+          "existing": "none",
+          "row_owned": true,
+          "quoted_rate": 0,
+          "list_rate": 30
+        },
+        "expected": {
+          "result": "created",
+          "rate": 0,
+          "new_drafts": 1
+        }
+      },
+      {
+        "inputs": {
+          "member": true,
+          "invited": true,
+          "request_submitted": true,
+          "existing": "none",
+          "row_owned": true,
+          "quoted_rate": null,
+          "list_rate": 30
+        },
+        "expected": {
+          "result": "created",
+          "rate": 30,
+          "new_drafts": 1
+        }
+      },
+      {
+        "inputs": {
+          "member": true,
+          "invited": true,
+          "request_submitted": true,
+          "existing": "draft",
+          "row_owned": true,
+          "quoted_rate": 0,
+          "list_rate": 30
+        },
+        "expected": {
+          "result": "duplicate",
+          "rate": null,
+          "new_drafts": 0
+        }
+      },
+      {
+        "inputs": {
+          "member": true,
+          "invited": false,
+          "request_submitted": true,
+          "existing": "none",
+          "row_owned": true,
+          "quoted_rate": 0,
+          "list_rate": 30
+        },
+        "expected": {
+          "result": "permission_denied",
+          "rate": null,
+          "new_drafts": 0
+        }
+      },
+      {
+        "inputs": {
+          "member": true,
+          "invited": true,
+          "request_submitted": true,
+          "existing": "cancelled",
+          "row_owned": false,
+          "quoted_rate": 0,
+          "list_rate": 30
+        },
+        "expected": {
+          "result": "unrelated_row",
+          "rate": null,
+          "new_drafts": 0
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Post a physical stock count and valuation change",
+    "examples": [
+      {
+        "inputs": {
+          "quantity_before_count": 10,
+          "before_rate": 12.5,
+          "count": 7,
+          "entered_rate": 14,
+          "zero_allowed": false,
+          "reserved": 0
+        },
+        "expected": {
+          "result": "posted",
+          "quantity_change": -3,
+          "value_effect": -27
+        }
+      },
+      {
+        "inputs": {
+          "quantity_before_count": 10,
+          "before_rate": 12.5,
+          "count": 10,
+          "entered_rate": null,
+          "zero_allowed": false,
+          "reserved": 0
+        },
+        "expected": {
+          "result": "unchanged",
+          "quantity_change": 0,
+          "value_effect": 0
+        }
+      },
+      {
+        "inputs": {
+          "quantity_before_count": 10,
+          "before_rate": 12.5,
+          "count": 10,
+          "entered_rate": 0,
+          "zero_allowed": true,
+          "reserved": 1
+        },
+        "expected": {
+          "result": "posted",
+          "quantity_change": 0,
+          "value_effect": -125
+        }
+      },
+      {
+        "inputs": {
+          "quantity_before_count": 10,
+          "before_rate": 12.5,
+          "count": 7,
+          "entered_rate": 14,
+          "zero_allowed": false,
+          "reserved": 1
+        },
+        "expected": {
+          "result": "reserved",
+          "quantity_change": 0,
+          "value_effect": 0
+        }
+      },
+      {
+        "inputs": {
+          "quantity_before_count": 10,
+          "before_rate": 12.5,
+          "count": 10,
+          "entered_rate": 0,
+          "zero_allowed": false,
+          "reserved": 0
+        },
+        "expected": {
+          "result": "zero_disallowed",
+          "quantity_change": 0,
+          "value_effect": 0
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Publish or discard a provisional inventory closing",
+    "examples": [
+      {
+        "inputs": {
+          "submitted_at_start": true,
+          "pending_at_start": false,
+          "submitted_at_finish": true,
+          "changed_since_start": false,
+          "pending_at_finish": false
+        },
+        "expected": {
+          "result": "completed"
+        }
+      },
+      {
+        "inputs": {
+          "submitted_at_start": true,
+          "pending_at_start": true,
+          "submitted_at_finish": true,
+          "changed_since_start": false,
+          "pending_at_finish": false
+        },
+        "expected": {
+          "result": "failed"
+        }
+      },
+      {
+        "inputs": {
+          "submitted_at_start": true,
+          "pending_at_start": false,
+          "submitted_at_finish": false,
+          "changed_since_start": false,
+          "pending_at_finish": false
+        },
+        "expected": {
+          "result": "cancelled"
+        }
+      },
+      {
+        "inputs": {
+          "submitted_at_start": true,
+          "pending_at_start": false,
+          "submitted_at_finish": true,
+          "changed_since_start": true,
+          "pending_at_finish": false
+        },
+        "expected": {
+          "result": "outdated"
+        }
+      },
+      {
+        "inputs": {
+          "submitted_at_start": true,
+          "pending_at_start": false,
+          "submitted_at_finish": true,
+          "changed_since_start": false,
+          "pending_at_finish": true
+        },
+        "expected": {
+          "result": "outdated"
+        }
+      },
+      {
+        "inputs": {
+          "submitted_at_start": false,
+          "pending_at_start": false,
+          "submitted_at_finish": true,
+          "changed_since_start": false,
+          "pending_at_finish": false
+        },
+        "expected": {
+          "result": "skipped"
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Value primary and secondary subcontracted goods",
+    "examples": [
+      {
+        "inputs": {
+          "material": 70,
+          "service": 20,
+          "additional_cost": 10,
+          "separately_valued_secondary_output": 20,
+          "secondary_percent": 25,
+          "accepted": 10
+        },
+        "expected": {
+          "gross": 100,
+          "secondary_percentage_value": 20,
+          "finished_value": 60,
+          "finished_rate": 6
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Reverse charges on accepted and rejected subcontract returns",
+    "examples": [
+      {
+        "inputs": {
+          "original_charges": [
+            100
+          ],
+          "original_accepted": 8,
+          "accepted_return": -4,
+          "rejected_return": 0
+        },
+        "expected": {
+          "signed_charge_rows": [
+            -50
+          ]
+        }
+      },
+      {
+        "inputs": {
+          "original_charges": [
+            100
+          ],
+          "original_accepted": 8,
+          "accepted_return": -8,
+          "rejected_return": 0
+        },
+        "expected": {
+          "signed_charge_rows": [
+            -100
+          ]
+        }
+      },
+      {
+        "inputs": {
+          "original_charges": [
+            100,
+            -100
+          ],
+          "original_accepted": 8,
+          "accepted_return": -8,
+          "rejected_return": 0
+        },
+        "expected": {
+          "signed_charge_rows": [
+            -100,
+            100
+          ]
+        }
+      },
+      {
+        "inputs": {
+          "original_charges": [
+            100
+          ],
+          "original_accepted": 8,
+          "accepted_return": 0,
+          "rejected_return": -2
+        },
+        "expected": {
+          "signed_charge_rows": [
+            0
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Determine the state of a quality objective review",
+    "examples": [
+      {
+        "inputs": {
+          "objectives": []
+        },
+        "expected": {
+          "status": "Open"
+        }
+      },
+      {
+        "inputs": {
+          "objectives": [
+            "Open",
+            "Failed"
+          ]
+        },
+        "expected": {
+          "status": "Open"
+        }
+      },
+      {
+        "inputs": {
+          "objectives": [
+            "Passed",
+            "Failed"
+          ]
+        },
+        "expected": {
+          "status": "Failed"
+        }
+      },
+      {
+        "inputs": {
+          "objectives": [
+            "Passed",
+            "Passed"
+          ]
+        },
+        "expected": {
+          "status": "Passed"
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Capitalise services, stock and an existing asset",
+    "examples": [
+      {
+        "inputs": {
+          "layers": [
+            {
+              "quantity": 3,
+              "rate": 10
+            },
+            {
+              "quantity": 4,
+              "rate": 14
+            }
+          ],
+          "issue_quantities": [
+            2,
+            4
+          ],
+          "service": 30,
+          "asset_gross": 100,
+          "booked_depreciation": 25
+        },
+        "expected": {
+          "row_values": [
+            20,
+            52
+          ],
+          "target_debit": 177,
+          "legs": [
+            {
+              "account": "capital_work_in_progress",
+              "debit": 177,
+              "credit": 0
+            },
+            {
+              "account": "accumulated_depreciation",
+              "debit": 25,
+              "credit": 0
+            },
+            {
+              "account": "inventory",
+              "debit": 0,
+              "credit": 72
+            },
+            {
+              "account": "source_asset",
+              "debit": 0,
+              "credit": 100
+            },
+            {
+              "account": "service_expense",
+              "debit": 0,
+              "credit": 30
+            }
+          ]
+        }
+      },
+      {
+        "inputs": {
+          "layers": [
+            {
+              "quantity": 3,
+              "rate": 10
+            },
+            {
+              "quantity": 4,
+              "rate": 16
+            }
+          ],
+          "issue_quantities": [
+            2,
+            4
+          ],
+          "service": 30,
+          "asset_gross": 100,
+          "booked_depreciation": 25
+        },
+        "expected": {
+          "row_values": [
+            20,
+            58
+          ],
+          "target_debit": 183,
+          "legs": [
+            {
+              "account": "capital_work_in_progress",
+              "debit": 183,
+              "credit": 0
+            },
+            {
+              "account": "accumulated_depreciation",
+              "debit": 25,
+              "credit": 0
+            },
+            {
+              "account": "inventory",
+              "debit": 0,
+              "credit": 78
+            },
+            {
+              "account": "source_asset",
+              "debit": 0,
+              "credit": 100
+            },
+            {
+              "account": "service_expense",
+              "debit": 0,
+              "credit": 30
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Generate a replenishment quantity at the threshold",
+    "examples": [
+      {
+        "inputs": {
+          "projected": 11,
+          "threshold": 10,
+          "lot": 4,
+          "factor": 1,
+          "requires_whole_transaction_units": false
+        },
+        "expected": {
+          "required_quantity_in_stock_units": 0,
+          "request_quantity": 0
+        }
+      },
+      {
+        "inputs": {
+          "projected": 10,
+          "threshold": 10,
+          "lot": 4,
+          "factor": 1,
+          "requires_whole_transaction_units": false
+        },
+        "expected": {
+          "required_quantity_in_stock_units": 4,
+          "request_quantity": 4
+        }
+      },
+      {
+        "inputs": {
+          "projected": 6,
+          "threshold": 10,
+          "lot": 4,
+          "factor": 1,
+          "requires_whole_transaction_units": false
+        },
+        "expected": {
+          "required_quantity_in_stock_units": 8,
+          "request_quantity": 8
+        }
+      },
+      {
+        "inputs": {
+          "projected": -5,
+          "threshold": 10,
+          "lot": 4,
+          "factor": 6,
+          "requires_whole_transaction_units": true
+        },
+        "expected": {
+          "required_quantity_in_stock_units": 19,
+          "request_quantity": 4
+        }
+      }
+    ]
+  },
+  {
+    "operation": "Calculate material request quantity after prior drafts",
+    "examples": [
+      {
+        "inputs": {
+          "planned": 10,
+          "submitted": 3,
+          "draft_stock": 24,
+          "factor": 6,
+          "requires_whole_transaction_units": true
+        },
+        "expected": {
+          "new_request": 3
+        }
+      },
+      {
+        "inputs": {
+          "planned": 10,
+          "submitted": 3,
+          "draft_stock": 42,
+          "factor": 6,
+          "requires_whole_transaction_units": true
+        },
+        "expected": {
+          "new_request": 0
+        }
+      },
+      {
+        "inputs": {
+          "planned": 10,
+          "submitted": 3,
+          "draft_stock": 21,
+          "factor": 6,
+          "requires_whole_transaction_units": true
+        },
+        "expected": {
+          "new_request": 4
+        }
+      }
+    ]
+  }
+]

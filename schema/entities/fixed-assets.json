@@ -1,0 +1,653 @@
+[
+  {
+    "entity": "fixed_assets.asset",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "accounts_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "import", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "manufacturing_manager", "level": 0, "allows": ["select"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["select"]},
+      {"role": "purchase_manager", "level": 0, "allows": ["select"]},
+      {"role": "purchase_user", "level": 0, "allows": ["select"]},
+      {"role": "stock_manager", "level": 0, "allows": ["select"]},
+      {"role": "stock_user", "level": 0, "allows": ["select"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["select"]},
+      {"role": "system_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "values": ["asset numbering prefix + four-digit year + configured sequence"]},
+      {"field": "asset_name", "type": "short_text", "required": true, "editable_after_posting": true, "copy_from": ["item_identifier", "item_name"], "copy_only_when_empty": true, "visible_when": ["field_has_value", "item_identifier"]},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "asset_category_identifier", "type": "entity_reference", "target": "fixed_assets.asset_category", "form_read_only": true, "copy_from": ["item_identifier", "asset_category_identifier"], "visible_when": ["field_has_value", "item_identifier"]},
+      {"field": "asset_owner", "type": "enumeration", "values": ["", "Company", "Supplier", "Customer"], "default": "Company"},
+      {"field": "asset_owner_company_identifier", "type": "entity_reference", "target": "organization.company", "visible_when": ["coercive_equal", ["current_field", "asset_owner"], ["literal", "Company"]]},
+      {"field": "supplier_identifier", "type": "entity_reference", "target": "procurement.supplier", "visible_when": ["coercive_equal", ["current_field", "asset_owner"], ["literal", "Supplier"]]},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "visible_when": ["coercive_equal", ["current_field", "asset_owner"], ["literal", "Customer"]]},
+      {"field": "image", "type": "image_file_reference", "form_hidden": true, "omit_on_copy": true, "editable_after_posting": true, "copy_from": ["item_identifier", "image"], "copy_only_when_empty": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "location_identifier", "type": "entity_reference", "target": "fixed_assets.location", "required": true},
+      {"field": "custodian_identifier", "type": "entity_reference", "target": "organization.employee", "omit_target_user_filter": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "department_identifier", "type": "entity_reference", "target": "organization.department"},
+      {"field": "purchase_date", "type": "calendar_date", "required": true, "read_only_when": ["and", ["coercive_unequal", ["current_field", "asset_type"], ["literal", "Existing Asset"]], ["coercive_unequal", ["current_field", "asset_type"], ["literal", "Composite Asset"]]]},
+      {"field": "disposal_date", "type": "calendar_date", "form_read_only": true, "omit_on_copy": true},
+      {"field": "journal_entry_for_scrap_identifier", "type": "entity_reference", "target": "accounting.journal_entry", "form_read_only": true, "omit_on_copy": true},
+      {"field": "available_for_use_date", "type": "calendar_date", "required_when": ["or", ["not", ["or", ["coercive_equal", ["current_field", "asset_type"], ["literal", "Composite Component"]], ["coercive_equal", ["current_field", "asset_type"], ["literal", "Composite Asset"]]]], ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 1]]]},
+      {"field": "calculate_depreciation", "type": "boolean", "default": "0", "read_only_when": ["or", ["and", ["coercive_equal", ["current_field", "asset_type"], ["literal", "Composite Asset"]], ["not", ["current_field", "net_purchase_amount"]]], ["coercive_equal", ["current_field", "asset_type"], ["literal", "Composite Component"]]]},
+      {"field": "opening_accumulated_depreciation", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["coercive_equal", ["current_field", "asset_type"], ["literal", "Existing Asset"]]},
+      {"field": "finance_books_rows", "type": "owned_collection", "target": "fixed_assets.asset_finance_book"},
+      {"field": "depreciation_method", "type": "enumeration", "values": ["", "Straight Line", "Double Declining Balance", "Written Down Value", "Manual"]},
+      {"field": "value_after_depreciation", "type": "monetary_amount", "form_read_only": true, "form_hidden": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_number_of_depreciations", "type": "integer"},
+      {"field": "frequency_of_depreciation", "type": "integer"},
+      {"field": "next_depreciation_date", "type": "calendar_date", "form_hidden": true, "omit_on_copy": true},
+      {"field": "policy_number", "type": "short_text"},
+      {"field": "insurer", "type": "short_text"},
+      {"field": "insured_value", "type": "short_text"},
+      {"field": "insurance_start_date", "type": "calendar_date"},
+      {"field": "insurance_end_date", "type": "calendar_date"},
+      {"field": "comprehensive_insurance", "type": "short_text"},
+      {"field": "maintenance_required", "type": "boolean", "editable_after_posting": true, "default": "0"},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "values": ["Draft", "Submitted", "Cancelled", "Partially Depreciated", "Fully Depreciated", "Sold", "Scrapped", "In Maintenance", "Out of Order", "Issue", "Receipt", "Capitalized", "Work In Progress"], "default": "Draft"},
+      {"field": "booked_fixed_asset", "type": "boolean", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "default": "0"},
+      {"field": "purchase_receipt_identifier", "type": "entity_reference", "target": "inventory.purchase_receipt", "omit_on_copy": true, "visible_when": ["and", ["coercive_unequal", ["current_field", "asset_type"], ["literal", "Composite Asset"]], ["coercive_unequal", ["current_field", "asset_type"], ["literal", "Existing Asset"]]]},
+      {"field": "purchase_invoice_identifier", "type": "entity_reference", "target": "accounting.purchase_invoice", "omit_on_copy": true, "visible_when": ["and", ["coercive_unequal", ["current_field", "asset_type"], ["literal", "Composite Asset"]], ["coercive_unequal", ["current_field", "asset_type"], ["literal", "Existing Asset"]]]},
+      {"field": "default_finance_book_identifier", "type": "entity_reference", "target": "accounting.finance_book", "form_read_only": true, "form_hidden": true, "copy_from": ["company_identifier", "default_finance_book_identifier"]},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "fixed_assets.asset", "form_read_only": true, "omit_on_copy": true},
+      {"field": "split_from_identifier", "type": "entity_reference", "target": "fixed_assets.asset", "form_read_only": true, "omit_on_copy": true},
+      {"field": "asset_quantity", "type": "integer", "default": "1"},
+      {"field": "depr_entry_posting_status", "type": "enumeration", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "values": ["", "Successful", "Failed"]},
+      {"field": "is_fully_depreciated", "type": "boolean", "default": "0", "visible_when": ["or", ["and", ["coercive_equal", ["current_field", "asset_type"], ["literal", "Existing Asset"]], ["not", ["current_field", "calculate_depreciation"]]], ["current_field", "calculate_depreciation"]], "read_only_when": ["current_field", "calculate_depreciation"]},
+      {"field": "total_asset_cost", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["greater", ["current_field", "lifecycle_state"], ["literal", 0]]},
+      {"field": "additional_asset_cost", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "default": "0", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["greater", ["current_field", "lifecycle_state"], ["literal", 0]]},
+      {"field": "value_adjustment_amount", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["field_has_value", "value_adjustment_amount"]},
+      {"field": "purchase_amount", "type": "monetary_amount", "form_read_only": true, "form_hidden": true, "omit_on_copy": true},
+      {"field": "opening_number_of_booked_depreciations", "type": "integer", "visible_when": ["coercive_equal", ["current_field", "asset_type"], ["literal", "Existing Asset"]]},
+      {"field": "purchase_receipt_item", "type": "short_text", "form_hidden": true},
+      {"field": "purchase_invoice_item", "type": "short_text", "form_hidden": true},
+      {"field": "net_purchase_amount", "type": "monetary_amount", "currency": {"record_or_parent_field": "currency"}, "read_only_when": ["coercive_equal", ["current_field", "asset_type"], ["literal", "Composite Asset"]], "required_when": ["or", ["coercive_unequal", ["current_field", "asset_type"], ["literal", "Composite Asset"]], ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 1]]]},
+      {"field": "asset_type", "type": "enumeration", "values": ["", "Existing Asset", "Composite Asset", "Composite Component"]},
+      {"field": "item_name", "type": "display_value", "form_hidden": true, "copy_from": ["item_identifier", "item_name"], "copy_only_when_empty": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Depreciation Details"},
+      {"control": "section", "purpose": "Purchase Details", "expanded_when": ["coercive_equal", ["current_field", "asset_type"], ["literal", "Existing Asset"]]},
+      {"control": "section", "visible_when": ["current_field", "calculate_depreciation"]},
+      {"control": "section", "purpose": "Depreciation Schedule"},
+      {"control": "formatted_information", "purpose": "Depreciation Schedule View"},
+      {"control": "tab", "purpose": "More Info"},
+      {"control": "tab", "purpose": "Connections"},
+      {"control": "tab", "purpose": "Depreciation", "visible_when": ["or", ["current_field", "calculate_depreciation"], ["coercive_equal", ["current_field", "asset_type"], ["literal", "Existing Asset"]]]},
+      {"control": "section", "purpose": "Accounting Dimensions"},
+      {"control": "section", "purpose": "Additional Info"},
+      {"control": "section", "purpose": "Insurance"},
+      {"control": "section", "purpose": "Ownership"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_activity",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "email", "read", "report", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["email", "read", "report", "share"]},
+      {"role": "quality_manager", "level": 0, "allows": ["email", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "asset_identifier", "type": "entity_reference", "target": "fixed_assets.asset", "required": true, "form_read_only": true},
+      {"field": "subject", "type": "text", "required": true, "form_read_only": true},
+      {"field": "date", "type": "date_and_time", "required": true, "form_read_only": true, "default": "now"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true, "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_capitalization",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "manufacturing_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "form_hidden": true},
+      {"field": "target_item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true, "form_hidden": true, "visible_when": ["and", ["current_field", "target_item_identifier"], ["not", ["current_field", "is_new_record"]]]},
+      {"field": "target_asset_identifier", "type": "entity_reference", "target": "fixed_assets.asset", "required": true, "omit_on_copy": true},
+      {"field": "target_asset_name", "type": "short_text", "form_read_only": true, "omit_on_copy": true, "copy_from": ["target_asset_identifier", "asset_name"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "omit_on_copy": true, "searchable": true, "default": {"context_default": "effective_date"}},
+      {"field": "posting_time", "type": "time_of_day", "required": true, "omit_on_copy": true, "default": {"context_default": "current_instant"}},
+      {"field": "set_posting_time", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 0]]},
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["asset capitalization numbering prefix + four-digit year + configured sequence"]},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "fixed_assets.asset_capitalization", "form_read_only": true, "omit_on_copy": true},
+      {"field": "stock_items_rows", "type": "owned_collection", "target": "fixed_assets.asset_capitalization_stock_item"},
+      {"field": "asset_items_rows", "type": "owned_collection", "target": "fixed_assets.asset_capitalization_asset_item"},
+      {"field": "stock_items_total", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["current_field", "stock_items_total"]},
+      {"field": "asset_items_total", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["current_field", "asset_items_total"]},
+      {"field": "finance_book_identifier", "type": "entity_reference", "target": "accounting.finance_book"},
+      {"field": "service_items_rows", "type": "owned_collection", "target": "fixed_assets.asset_capitalization_service_item"},
+      {"field": "service_items_total", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["current_field", "service_items_total"]},
+      {"field": "total_value", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "target_incoming_rate", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "target_fixed_asset_account_identifier", "type": "entity_reference", "target": "accounting.account", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Consumed Stock Items", "visible_when": ["or", ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 0]], ["and", ["current_field", "stock_items_rows"], ["member", ["current_field", "stock_items_rows"], "length"]]]},
+      {"control": "section", "purpose": "Consumed Assets", "visible_when": ["or", ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 0]], ["and", ["current_field", "asset_items_rows"], ["member", ["current_field", "asset_items_rows"], "length"]]]},
+      {"control": "section", "purpose": "Service Expenses", "visible_when": ["or", ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 0]], ["and", ["current_field", "service_items_rows"], ["member", ["current_field", "service_items_rows"], "length"]]]},
+      {"control": "section", "purpose": "Totals"},
+      {"control": "section", "purpose": "Accounting Dimensions"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_capitalization_asset_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "asset_identifier", "type": "entity_reference", "target": "fixed_assets.asset", "required": true},
+      {"field": "asset_name", "type": "short_text", "form_read_only": true, "copy_from": ["asset_identifier", "asset_name"]},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true, "form_read_only": true, "copy_from": ["asset_identifier", "item_identifier"]},
+      {"field": "item_name", "type": "short_text", "form_read_only": true},
+      {"field": "asset_value", "type": "monetary_amount", "form_read_only": true, "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "fixed_asset_account_identifier", "type": "entity_reference", "target": "accounting.account", "form_read_only": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project", "editable_after_posting": true},
+      {"field": "finance_book_identifier", "type": "entity_reference", "target": "accounting.finance_book"},
+      {"field": "current_asset_value", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Value"},
+      {"control": "section", "purpose": "Accounting Dimensions"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_capitalization_service_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "item_name", "type": "short_text", "form_read_only": true, "copy_from": ["item_identifier", "item_name"]},
+      {"field": "expense_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "quantity", "type": "decimal", "nonnegative": true, "default": "1"},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "copy_from": ["item_identifier", "stock_unit_of_measure_identifier"]},
+      {"field": "rate", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true, "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Qty and Rate"},
+      {"control": "section", "purpose": "Accounting Dimensions"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_capitalization_stock_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "required": true},
+      {"field": "batch_number_identifier", "type": "entity_reference", "target": "inventory.batch", "omit_on_copy": true, "visible_when": ["strict_equal", ["current_field", "use_serial_batch_fields"], ["literal", 1]]},
+      {"field": "stock_quantity", "type": "decimal", "nonnegative": true},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "required": true, "form_read_only": true, "copy_from": ["item_identifier", "stock_unit_of_measure_identifier"]},
+      {"field": "valuation_rate", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true, "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "serial_number", "type": "text", "visible_when": ["strict_equal", ["current_field", "use_serial_batch_fields"], ["literal", 1]]},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true, "copy_from": ["item_identifier", "item_name"]},
+      {"field": "actual_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "serial_and_batch_bundle_identifier", "type": "entity_reference", "target": "inventory.serial_and_batch_bundle", "omit_on_copy": true, "visible_when": ["or", ["strict_equal", ["current_field", "use_serial_batch_fields"], ["literal", 0]], ["strict_equal", ["current_field", "lifecycle_state"], ["literal", 1]]]},
+      {"field": "use_serial_batch_fields", "type": "boolean", "default": "0"},
+      {"field": "purchase_receipt_item", "type": "short_text", "form_hidden": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Purchase Details"},
+      {"control": "section", "purpose": "Batch and Serial No"},
+      {"control": "section", "purpose": "Accounting Dimensions"},
+      {"control": "section", "visible_when": ["strict_equal", ["current_field", "use_serial_batch_fields"], ["literal", 1]]}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_category",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "accounts_user", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "item_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "asset_category_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "finance_books_rows", "type": "owned_collection", "target": "fixed_assets.asset_finance_book"},
+      {"field": "accounts_rows", "type": "owned_collection", "target": "fixed_assets.asset_category_account", "required": true},
+      {"field": "enable_cwip_accounting", "type": "boolean", "default": "0"},
+      {"field": "non_depreciable_category", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Finance Book Detail"},
+      {"control": "section", "purpose": "Accounts"},
+      {"control": "section", "purpose": "Depreciation Options"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_category_account",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "company_name_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "fixed_asset_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "accumulated_depreciation_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "depreciation_expense_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "capital_work_in_progress_account_identifier", "type": "entity_reference", "target": "accounting.account"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_depreciation_schedule",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "accounts_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "asset_identifier", "type": "entity_reference", "target": "fixed_assets.asset", "required": true, "selection_filter": [["fixed_assets.asset", "lifecycle_state", "<", "2"]]},
+      {"field": "numbering_series", "type": "enumeration", "values": ["asset depreciation schedule numbering prefix + four-digit year + configured sequence"]},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "fixed_assets.asset_depreciation_schedule", "form_read_only": true, "omit_on_copy": true},
+      {"field": "finance_book_identifier", "type": "entity_reference", "target": "accounting.finance_book"},
+      {"field": "depreciation_method", "type": "enumeration", "form_read_only": true, "values": ["", "Straight Line", "Double Declining Balance", "Written Down Value", "Manual"]},
+      {"field": "rate_of_depreciation", "type": "percentage", "form_read_only": true, "visible_when": ["coercive_equal", ["current_field", "depreciation_method"], ["literal", "Written Down Value"]]},
+      {"field": "total_number_of_depreciations", "type": "integer", "form_read_only": true, "visible_when": ["field_has_value", "total_number_of_depreciations"]},
+      {"field": "depreciation_schedule_rows", "type": "owned_collection", "target": "fixed_assets.depreciation_schedule"},
+      {"field": "notes", "type": "text", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "form_hidden": true, "values": ["Draft", "Active", "Cancelled"]},
+      {"field": "frequency_of_depreciation", "type": "integer", "form_read_only": true, "visible_when": ["field_has_value", "frequency_of_depreciation"]},
+      {"field": "expected_value_after_useful_life", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "finance_book_identifier_count", "type": "integer", "form_read_only": true, "form_hidden": true},
+      {"field": "opening_accumulated_depreciation", "type": "monetary_amount", "form_read_only": true, "form_hidden": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "opening_number_of_booked_depreciations", "type": "integer", "form_read_only": true, "form_hidden": true},
+      {"field": "daily_prorata_based", "type": "boolean", "form_read_only": true, "default": "0", "visible_when": ["or", ["coercive_equal", ["current_field", "depreciation_method"], ["literal", "Straight Line"]], ["coercive_equal", ["current_field", "depreciation_method"], ["literal", "Manual"]]]},
+      {"field": "shift_based", "type": "boolean", "form_read_only": true, "default": "0", "visible_when": ["coercive_equal", ["current_field", "depreciation_method"], ["literal", "Straight Line"]]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "form_read_only": true, "copy_from": ["asset_identifier", "company_identifier"]},
+      {"field": "value_after_depreciation", "type": "monetary_amount", "form_read_only": true},
+      {"field": "net_purchase_amount", "type": "monetary_amount", "form_read_only": true, "form_hidden": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Depreciation Details"},
+      {"control": "section", "purpose": "Depreciation Schedule"},
+      {"control": "section", "purpose": "Details", "expanded_when": ["field_has_value", "notes"]}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_finance_book",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "finance_book_identifier", "type": "entity_reference", "target": "accounting.finance_book"},
+      {"field": "depreciation_method", "type": "enumeration", "required": true, "values": ["", "Straight Line", "Double Declining Balance", "Written Down Value", "Manual"]},
+      {"field": "total_number_of_depreciations", "type": "integer", "required": true},
+      {"field": "frequency_of_depreciation", "type": "integer", "required": true},
+      {"field": "depreciation_start_date", "type": "calendar_date", "required_when": ["coercive_equal", ["member", ["context", "owning_record"], "entity_type"], ["literal", "Asset"]]},
+      {"field": "expected_value_after_useful_life", "type": "monetary_amount", "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["coercive_equal", ["member", ["context", "owning_record"], "entity_type"], ["literal", "Asset"]]},
+      {"field": "value_after_depreciation", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "value_adjustment_amount", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["field_has_value", "value_adjustment_amount"]},
+      {"field": "rate_of_depreciation", "type": "percentage", "omit_on_copy": true, "visible_when": ["coercive_equal", ["current_field", "depreciation_method"], ["literal", "Written Down Value"]], "required_when": ["coercive_equal", ["current_field", "depreciation_method"], ["literal", "Written Down Value"]]},
+      {"field": "is_rate_of_depreciation_entered", "type": "boolean", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "default": "0"},
+      {"field": "salvage_value_percentage", "type": "percentage"},
+      {"field": "daily_prorata_based", "type": "boolean", "default": "0"},
+      {"field": "shift_based", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "depreciation_method"], ["literal", "Straight Line"]]},
+      {"field": "total_number_of_booked_depreciations", "type": "integer", "form_read_only": true, "omit_on_copy": true, "default": "0", "visible_when": ["field_has_value", "total_number_of_booked_depreciations"]},
+      {"field": "increase_in_asset_life", "type": "integer", "form_read_only": true, "omit_on_copy": true}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_maintenance",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "quality_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "asset_name_identifier", "type": "entity_reference", "target": "fixed_assets.asset", "required": true, "unique": true},
+      {"field": "asset_category_identifier", "type": "entity_reference", "target": "fixed_assets.asset_category", "form_read_only": true, "copy_from": ["asset_name_identifier", "asset_category_identifier"]},
+      {"field": "item_code", "type": "display_value", "copy_from": ["asset_name_identifier", "item_identifier"]},
+      {"field": "item_name", "type": "display_value", "copy_from": ["asset_name_identifier", "item_name"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "maintenance_team_identifier", "type": "entity_reference", "target": "fixed_assets.asset_maintenance_team", "required": true},
+      {"field": "maintenance_manager", "type": "short_text", "form_read_only": true, "form_hidden": true, "copy_from": ["maintenance_team_identifier", "maintenance_manager_identifier"]},
+      {"field": "maintenance_manager_name", "type": "display_value", "copy_from": ["maintenance_team_identifier", "maintenance_manager_name"]},
+      {"field": "asset_maintenance_tasks_rows", "type": "owned_collection", "target": "fixed_assets.asset_maintenance_task", "required": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Tasks"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_maintenance_log",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "manufacturing_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "asset_maintenance_identifier", "type": "entity_reference", "target": "fixed_assets.asset_maintenance"},
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["asset maintenance log numbering prefix + four-digit year + configured sequence"]},
+      {"field": "asset_name", "type": "display_value", "copy_from": ["asset_maintenance_identifier", "asset_name_identifier"]},
+      {"field": "item_code", "type": "display_value", "copy_from": ["asset_maintenance_identifier", "item_code"]},
+      {"field": "item_name", "type": "display_value", "copy_from": ["asset_maintenance_identifier", "item_name"]},
+      {"field": "task_identifier", "type": "entity_reference", "target": "fixed_assets.asset_maintenance_task"},
+      {"field": "maintenance_type", "type": "display_value", "copy_from": ["task_identifier", "maintenance_type"]},
+      {"field": "periodicity", "type": "short_text", "form_read_only": true, "copy_from": ["task_identifier", "periodicity"]},
+      {"field": "assign_to_name", "type": "display_value", "copy_from": ["task_identifier", "assign_to_name"]},
+      {"field": "due_date", "type": "calendar_date", "form_read_only": true, "copy_from": ["task_identifier", "next_due_date"]},
+      {"field": "completion_date", "type": "calendar_date"},
+      {"field": "maintenance_status", "type": "enumeration", "required": true, "values": ["Planned", "Completed", "Cancelled", "Overdue"]},
+      {"field": "has_certificate", "type": "boolean", "default": "0", "copy_from": ["task_identifier", "certificate_required"]},
+      {"field": "certificate_attachement", "type": "file_reference", "visible_when": ["current_field", "has_certificate"]},
+      {"field": "description", "type": "display_value", "form_read_only": true, "copy_from": ["task_identifier", "description"]},
+      {"field": "actions_performed", "type": "formatted_text", "editable_after_posting": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "fixed_assets.asset_maintenance_log", "form_read_only": true, "omit_on_copy": true},
+      {"field": "task_name", "type": "short_text", "form_read_only": true, "copy_from": ["task_identifier", "maintenance_task"]},
+      {"field": "task_assignee_email", "type": "short_text", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Maintenance Details"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_maintenance_task",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "maintenance_task", "type": "short_text", "required": true},
+      {"field": "maintenance_type", "type": "enumeration", "values": ["Preventive Maintenance", "Calibration"]},
+      {"field": "maintenance_status", "type": "enumeration", "required": true, "values": ["Planned", "Overdue", "Cancelled"]},
+      {"field": "start_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "periodicity", "type": "enumeration", "required": true, "values": ["", "Daily", "Weekly", "Monthly", "Quarterly", "Half-yearly", "Yearly", "2 Yearly", "3 Yearly"]},
+      {"field": "end_date", "type": "calendar_date"},
+      {"field": "certificate_required", "type": "boolean", "write_once": true, "searchable": true, "default": "0"},
+      {"field": "assign_to_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "assign_to_name", "type": "display_value", "copy_from": ["assign_to_identifier", "full_name"]},
+      {"field": "next_due_date", "type": "calendar_date"},
+      {"field": "last_completion_date", "type": "calendar_date"},
+      {"field": "description", "type": "formatted_text"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_maintenance_team",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "manufacturing_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "maintenance_team_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "maintenance_manager_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "maintenance_manager_name", "type": "display_value", "copy_from": ["maintenance_manager_identifier", "full_name"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "maintenance_team_members_rows", "type": "owned_collection", "target": "fixed_assets.maintenance_team_member", "required": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Team"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_movement",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "import_supported": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "stock_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "purpose", "type": "enumeration", "required": true, "values": ["", "Issue", "Receipt", "Transfer", "Transfer and Issue"]},
+      {"field": "transaction_date", "type": "date_and_time", "required": true, "default": {"context_default": "current_instant"}},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "omit_on_copy": true},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "omit_on_copy": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "fixed_assets.asset_movement", "form_read_only": true, "omit_on_copy": true},
+      {"field": "assets_rows", "type": "owned_collection", "target": "fixed_assets.asset_movement_item", "required": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Reference"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_movement_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "asset_identifier", "type": "entity_reference", "target": "fixed_assets.asset", "required": true},
+      {"field": "asset_name", "type": "short_text", "form_read_only": true, "copy_from": ["asset_identifier", "asset_name"]},
+      {"field": "source_location_identifier", "type": "entity_reference", "target": "fixed_assets.location"},
+      {"field": "target_location_identifier", "type": "entity_reference", "target": "fixed_assets.location"},
+      {"field": "from_employee_identifier", "type": "entity_reference", "target": "organization.employee", "omit_target_user_filter": true},
+      {"field": "to_employee_identifier", "type": "entity_reference", "target": "organization.employee", "omit_target_user_filter": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "form_read_only": true, "form_hidden": true}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_repair",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "manufacturing_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "import", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "import", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["asset repair numbering prefix + four-digit year + configured sequence"]},
+      {"field": "failure_date", "type": "date_and_time", "required": true},
+      {"field": "completion_date", "type": "date_and_time", "omit_on_copy": true, "visible_when": ["coercive_equal", ["current_field", "repair_status"], ["literal", "Completed"]], "required_when": ["coercive_equal", ["current_field", "repair_status"], ["literal", "Completed"]]},
+      {"field": "repair_status", "type": "enumeration", "omit_on_copy": true, "values": ["Pending", "Completed", "Cancelled"], "default": "Pending"},
+      {"field": "description", "type": "long_text"},
+      {"field": "actions_performed", "type": "long_text"},
+      {"field": "downtime", "type": "short_text", "form_read_only": true},
+      {"field": "repair_cost", "type": "monetary_amount", "form_read_only": true, "default": "0"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "fixed_assets.asset_repair", "form_read_only": true, "omit_on_copy": true},
+      {"field": "asset_identifier", "type": "entity_reference", "target": "fixed_assets.asset", "required": true, "selection_filter": [["fixed_assets.asset", "status", "not in", ["Work In Progress", "Capitalized", "Sold", "Scrapped", "Cancelled"]]]},
+      {"field": "asset_name", "type": "display_value", "copy_from": ["asset_identifier", "asset_name"]},
+      {"field": "capitalize_repair_cost", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "stock_items_rows", "type": "owned_collection", "target": "fixed_assets.asset_repair_consumed_item", "required_when": ["field_has_value", "stock_consumption"]},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center", "copy_from": ["company_identifier", "cost_center_identifier"]},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "total_repair_cost", "type": "monetary_amount", "form_read_only": true},
+      {"field": "increase_in_asset_life", "type": "integer", "omit_on_copy": true, "visible_when": ["field_has_value", "capitalize_repair_cost"]},
+      {"field": "asset_value_updated", "type": "boolean", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "default": "0"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "copy_from": ["asset_identifier", "company_identifier"]},
+      {"field": "invoices_rows", "type": "owned_collection", "target": "fixed_assets.asset_repair_purchase_invoice", "omit_on_copy": true, "required_when": ["and", ["coercive_equal", ["current_field", "repair_status"], ["literal", "Completed"]], ["greater", ["current_field", "repair_cost"], ["literal", 0]]]},
+      {"field": "consumed_items_cost", "type": "monetary_amount", "visible_when": ["current_field", "consumed_items_cost"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Description"},
+      {"control": "section", "purpose": "Consumed Stock Items", "expanded_when": ["field_has_value", "stock_items_rows"]},
+      {"control": "section", "purpose": "Totals"},
+      {"control": "section", "purpose": "Accounting Dimension", "visible_when": ["field_has_value", "capitalize_repair_cost"]},
+      {"control": "tab", "purpose": "Connection"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_repair_consumed_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "valuation_rate", "type": "monetary_amount"},
+      {"field": "consumed_quantity", "type": "short_text"},
+      {"field": "total_value", "type": "monetary_amount", "form_read_only": true},
+      {"field": "serial_number", "type": "text", "form_hidden": true},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "serial_and_batch_bundle_identifier", "type": "entity_reference", "target": "inventory.serial_and_batch_bundle"},
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "required": true}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "Pick Serial / Batch"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_repair_purchase_invoice",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "purchase_invoice_identifier", "type": "entity_reference", "target": "accounting.purchase_invoice"},
+      {"field": "expense_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "repair_cost", "type": "monetary_amount", "required": true, "nonnegative": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_shift_allocation",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "fixed_assets.asset_shift_allocation", "form_read_only": true, "omit_on_copy": true, "searchable": true},
+      {"field": "asset_identifier", "type": "entity_reference", "target": "fixed_assets.asset", "required": true},
+      {"field": "finance_book_identifier", "type": "entity_reference", "target": "accounting.finance_book"},
+      {"field": "previous_depreciation_schedule_identifier", "type": "entity_reference", "target": "fixed_assets.asset_depreciation_schedule", "form_read_only": true, "omit_on_copy": true},
+      {"field": "depreciation_schedule_rows", "type": "owned_collection", "target": "fixed_assets.depreciation_schedule", "form_read_only": true, "omit_on_copy": true},
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["asset shift allocation numbering prefix + four-digit year + configured sequence"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Depreciation Schedule", "visible_when": ["not", ["current_field", "is_new_record"]]}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_shift_factor",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "shift_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "shift_factor", "type": "decimal", "required": true},
+      {"field": "default", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.asset_value_adjustment",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "asset_identifier", "type": "entity_reference", "target": "fixed_assets.asset", "required": true},
+      {"field": "asset_category", "type": "display_value", "copy_from": ["asset_identifier", "asset_category_identifier"]},
+      {"field": "finance_book_identifier", "type": "entity_reference", "target": "accounting.finance_book"},
+      {"field": "journal_entry_identifier", "type": "entity_reference", "target": "accounting.journal_entry", "form_read_only": true, "omit_on_copy": true},
+      {"field": "date", "type": "calendar_date", "required": true},
+      {"field": "current_asset_value", "type": "monetary_amount", "required": true, "form_read_only": true},
+      {"field": "new_asset_value", "type": "monetary_amount", "required": true, "omit_on_copy": true},
+      {"field": "difference_amount", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "fixed_assets.asset_value_adjustment", "form_read_only": true, "omit_on_copy": true},
+      {"field": "difference_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true, "omit_on_copy": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Accounting Dimensions"},
+      {"control": "section", "purpose": "Value Details"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.depreciation_schedule",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "schedule_date", "type": "calendar_date", "required": true},
+      {"field": "depreciation_amount", "type": "monetary_amount", "required": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "accumulated_depreciation_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "journal_entry_identifier", "type": "entity_reference", "target": "accounting.journal_entry", "form_read_only": true, "visible_when": ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 1]]},
+      {"field": "shift_identifier", "type": "entity_reference", "target": "fixed_assets.asset_shift_factor"}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "Make Depreciation Entry", "visible_when": ["and", ["and", ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 1]], ["not", ["current_field", "journal_entry_identifier"]]], ["at_most", ["current_field", "schedule_date"], ["call", ["context", "effective_date"]]]]}
+    ]
+  },
+  {
+    "entity": "fixed_assets.linked_location",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "location_identifier", "type": "entity_reference", "target": "fixed_assets.location", "required": true}
+    ]
+  },
+  {
+    "entity": "fixed_assets.location",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "hierarchy_parent": "parent_location_identifier",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "stock_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "stock_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "location_name", "type": "short_text", "required": true, "unique": true, "omit_on_copy": true},
+      {"field": "parent_location_identifier", "type": "entity_reference", "target": "fixed_assets.location", "searchable": true, "omit_target_user_filter": true},
+      {"field": "is_container", "type": "boolean", "default": "0"},
+      {"field": "is_group", "type": "boolean", "default": "0"},
+      {"field": "latitude", "type": "decimal", "copy_from": ["parent_location_identifier", "latitude"]},
+      {"field": "longitude", "type": "decimal", "copy_from": ["parent_location_identifier", "longitude"]},
+      {"field": "area", "type": "decimal", "form_read_only": true},
+      {"field": "area_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "visible_when": ["current_field", "area"]},
+      {"field": "location", "type": "geographic_geometry"},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_read_only": true, "form_hidden": true, "omit_on_copy": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_read_only": true, "form_hidden": true, "omit_on_copy": true},
+      {"field": "previous_parent_identifier", "type": "short_text", "form_read_only": true, "form_hidden": true, "omit_on_copy": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Location Details"},
+      {"control": "section", "purpose": "Tree Details"}
+    ]
+  },
+  {
+    "entity": "fixed_assets.maintenance_team_member",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "team_member_identifier", "type": "entity_reference", "target": "information_management.user", "required": true},
+      {"field": "full_name", "type": "short_text", "form_read_only": true, "copy_from": ["team_member_identifier", "full_name"]},
+      {"field": "maintenance_role_identifier", "type": "entity_reference", "target": "information_management.role", "required": true}
+    ]
+  }
+]

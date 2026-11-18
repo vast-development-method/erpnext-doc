@@ -1,0 +1,498 @@
+[
+  {
+    "entity": "service_integrations.connected_application",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "all", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "provider_name", "type": "short_text", "required": true},
+      {"field": "openid_configuration", "type": "short_text"},
+      {"field": "client_identifier", "type": "short_text", "required_when": ["current_field", "redirect_resource_identifier"]},
+      {"field": "redirect_resource_identifier", "type": "short_text", "form_read_only": true},
+      {"field": "client_secret", "type": "protected_value"},
+      {"field": "scopes_rows", "type": "owned_collection", "target": "service_integrations.delegated_authorization_scope"},
+      {"field": "authorization_resource_identifier", "type": "text", "required_when": ["current_field", "redirect_resource_identifier"]},
+      {"field": "token_resource_identifier", "type": "short_text", "required_when": ["current_field", "redirect_resource_identifier"]},
+      {"field": "revocation_resource_identifier", "type": "short_text"},
+      {"field": "userinfo_resource_identifier", "type": "short_text"},
+      {"field": "introspection_resource_identifier", "type": "short_text"},
+      {"field": "query_parameters_rows", "type": "owned_collection", "target": "service_integrations.query_parameters"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Client Credentials"},
+      {"control": "section", "purpose": "Scopes"},
+      {"control": "section", "purpose": "Endpoints"},
+      {"control": "section", "purpose": "Extra Parameters"}
+    ]
+  },
+  {
+    "entity": "service_integrations.delegated_authorization_authorization_code",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "client_identifier", "type": "entity_reference", "target": "service_integrations.delegated_authorization_client", "form_read_only": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "scopes", "type": "text", "form_read_only": true},
+      {"field": "authorization_code", "type": "short_text", "form_read_only": true, "unique": true},
+      {"field": "expiration_time", "type": "date_and_time", "form_read_only": true},
+      {"field": "redirect_resource_identifier_bound_to_authorization_code", "type": "short_text", "form_read_only": true},
+      {"field": "validity", "type": "enumeration", "form_read_only": true, "values": ["Valid", "Invalid"]},
+      {"field": "nonce", "type": "short_text", "form_read_only": true},
+      {"field": "code_challenge", "type": "short_text", "form_read_only": true},
+      {"field": "code_challenge_method", "type": "enumeration", "form_read_only": true, "values": ["", "s256", "plain"]}
+    ]
+  },
+  {
+    "entity": "service_integrations.delegated_authorization_bearer_token",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "client_identifier", "type": "entity_reference", "target": "service_integrations.delegated_authorization_client", "form_read_only": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true, "nonnullable": true, "searchable": true},
+      {"field": "scopes", "type": "text", "form_read_only": true},
+      {"field": "access_token", "type": "short_text", "form_read_only": true, "unique": true},
+      {"field": "refresh_token", "type": "short_text", "form_read_only": true},
+      {"field": "expiration_time", "type": "date_and_time", "form_read_only": true, "searchable": true},
+      {"field": "expires_in", "type": "integer", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Active", "Revoked"]}
+    ]
+  },
+  {
+    "entity": "service_integrations.delegated_authorization_client",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "client_identifier", "type": "short_text", "form_read_only": true},
+      {"field": "application_name", "type": "short_text", "required": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_hidden": true},
+      {"field": "client_secret", "type": "short_text", "form_read_only": true},
+      {"field": "skip_authorization", "type": "boolean", "default": "0"},
+      {"field": "scopes", "type": "text", "required": true, "default": "all openid"},
+      {"field": "redirect_uris", "type": "text"},
+      {"field": "default_redirect_resource_identifier", "type": "short_text", "required": true},
+      {"field": "grant_type", "type": "enumeration", "values": ["Authorization Code", "Implicit"]},
+      {"field": "response_type", "type": "enumeration", "values": ["Code", "Token"], "default": "Code"},
+      {"field": "allowed_roles_rows", "type": "owned_selection", "target": "service_integrations.delegated_authorization_client_role"},
+      {"field": "client_resource_identifier", "type": "short_text", "visible_when": ["current_field", "client_resource_identifier"]},
+      {"field": "logo_resource_identifier", "type": "short_text", "visible_when": ["current_field", "client_resource_identifier"]},
+      {"field": "software_identifier", "type": "short_text", "visible_when": ["current_field", "software_identifier"]},
+      {"field": "software_version", "type": "short_text", "visible_when": ["current_field", "software_version"]},
+      {"field": "tos_resource_identifier", "type": "short_text", "visible_when": ["current_field", "tos_resource_identifier"]},
+      {"field": "policy_resource_identifier", "type": "short_text", "visible_when": ["current_field", "policy_resource_identifier"]},
+      {"field": "contacts", "type": "text", "visible_when": ["current_field", "contacts"]},
+      {"field": "token_endpoint_authentication_method", "type": "enumeration", "values": ["Client Secret Basic", "Client Secret Post", "None"], "default": "Client Secret Basic"},
+      {"field": "is_dynamic_client", "type": "boolean", "configuration_variant": true, "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Advanced Settings", "expanded_when": ["field_has_value", "1"]},
+      {"control": "section", "purpose": "Client Metadata"}
+    ]
+  },
+  {
+    "entity": "service_integrations.delegated_authorization_client_role",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "role_identifier", "type": "entity_reference", "target": "information_management.role"}
+    ]
+  },
+  {
+    "entity": "service_integrations.delegated_authorization_provider_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "skip_authorization", "type": "enumeration", "values": ["Force", "Auto"]}
+    ]
+  },
+  {
+    "entity": "service_integrations.delegated_authorization_scope",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "scope", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "service_integrations.delegated_authorization_settings",
+    "kind": "singleton_settings",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "resource_name", "type": "short_text", "default": "Application Application"},
+      {"field": "resource_documentation", "type": "short_text", "default": "configured service address"},
+      {"field": "resource_policy_resource_identifier", "type": "short_text"},
+      {"field": "resource_tos_resource_identifier", "type": "short_text"},
+      {"field": "show_authentication_server_metadata", "type": "boolean", "default": "1"},
+      {"field": "show_protected_resource_metadata", "type": "boolean", "default": "1"},
+      {"field": "scopes_supported", "type": "text"},
+      {"field": "enable_dynamic_client_registration", "type": "boolean", "default": "1"},
+      {"field": "skip_authorization", "type": "boolean", "default": "0"},
+      {"field": "show_social_login_key_as_authorization_server", "type": "boolean", "default": "0"},
+      {"field": "allowed_public_client_origins", "type": "text"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Metadata"},
+      {"control": "tab", "purpose": "Authorization"},
+      {"control": "tab", "purpose": "Resource"},
+      {"control": "section", "purpose": "Config"}
+    ]
+  },
+  {
+    "entity": "service_integrations.directory_authentication_group_mapping",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "directory_authentication_group", "type": "short_text", "required": true},
+      {"field": "enterprise_role_identifier", "type": "entity_reference", "target": "information_management.role", "required": true}
+    ]
+  },
+  {
+    "entity": "service_integrations.directory_authentication_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "form_read_only": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "enabled", "type": "boolean", "default": "0"},
+      {"field": "directory_authentication_server_resource_address", "type": "short_text", "required": true},
+      {"field": "base_delivery_note", "type": "short_text", "required": true},
+      {"field": "password", "type": "protected_value", "required": true},
+      {"field": "default_role_identifier", "type": "entity_reference", "target": "information_management.role", "visible_when": ["coercive_equal", ["current_field", "default_user_type_identifier"], ["literal", "System User"]], "required_when": ["coercive_equal", ["current_field", "default_user_type_identifier"], ["literal", "System User"]]},
+      {"field": "directory_authentication_search_string", "type": "short_text", "required": true},
+      {"field": "directory_authentication_email_field", "type": "short_text", "required": true},
+      {"field": "directory_authentication_username_field", "type": "short_text", "required": true},
+      {"field": "directory_authentication_first_name_field", "type": "short_text", "required": true},
+      {"field": "directory_authentication_middle_name_field", "type": "short_text"},
+      {"field": "directory_authentication_last_name_field", "type": "short_text"},
+      {"field": "directory_authentication_phone_field", "type": "short_text"},
+      {"field": "directory_authentication_mobile_field", "type": "short_text"},
+      {"field": "secure_sockets_layer_transport_layer_security_mode", "type": "enumeration", "values": ["Off", "StartTLS"], "default": "Off"},
+      {"field": "require_trusted_certificate", "type": "enumeration", "required": true, "values": ["No", "Yes"], "default": "No"},
+      {"field": "local_private_key_file", "type": "short_text"},
+      {"field": "local_server_certificate_file", "type": "short_text"},
+      {"field": "local_ca_certs_file", "type": "short_text"},
+      {"field": "directory_authentication_group_field", "type": "short_text"},
+      {"field": "directory_authentication_groups_rows", "type": "owned_collection", "target": "service_integrations.directory_authentication_group_mapping"},
+      {"field": "directory_authentication_group_member_attribute", "type": "short_text"},
+      {"field": "directory_authentication_directory_server", "type": "enumeration", "required": true, "values": ["", "Active Directory", "OpenLDAP", "Custom"]},
+      {"field": "directory_authentication_group_objectclass", "type": "short_text"},
+      {"field": "directory_authentication_custom_group_search", "type": "short_text"},
+      {"field": "directory_authentication_search_path_user", "type": "short_text", "required": true},
+      {"field": "directory_authentication_search_path_group", "type": "short_text", "required": true},
+      {"field": "default_user_type_identifier", "type": "entity_reference", "target": "information_management.user_type", "required": true},
+      {"field": "do_not_create_new_user", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "LDAP Security"},
+      {"control": "section", "purpose": "LDAP Group Mappings"},
+      {"control": "section", "purpose": "LDAP Server Settings"},
+      {"control": "section", "purpose": "LDAP Auth"},
+      {"control": "section", "purpose": "LDAP Search and Paths"},
+      {"control": "section", "purpose": "LDAP User Creation and Mapping"},
+      {"control": "section", "purpose": "LDAP Custom Settings"}
+    ]
+  },
+  {
+    "entity": "service_integrations.geolocation_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "provider", "type": "enumeration", "values": ["Geoapify", "Nomatim", "HERE"], "required_when": ["field_has_value", "enable_address_autocompletion"]},
+      {"field": "service_interface_key", "type": "protected_value", "visible_when": ["call", ["member", ["list", ["literal", "Geoapify"], ["literal", "HERE"]], "includes"], ["current_field", "provider"]], "required_when": ["and", ["current_field", "enable_address_autocompletion"], ["call", ["member", ["list", ["literal", "Geoapify"], ["literal", "HERE"]], "includes"], ["current_field", "provider"]]]},
+      {"field": "enable_address_autocompletion", "type": "boolean", "default": "0"},
+      {"field": "service_base_address", "type": "short_text", "visible_when": ["strict_equal", ["current_field", "provider"], ["literal", "Nomatim"]], "required_when": ["and", ["strict_equal", ["current_field", "provider"], ["literal", "Nomatim"]], ["current_field", "enable_address_autocompletion"]]}
+    ]
+  },
+  {
+    "entity": "service_integrations.hosted_personal_productivity_calendar",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "owner_only": true, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "enable", "type": "boolean", "default": "1"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true},
+      {"field": "calendar_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "refresh_token", "type": "protected_value", "form_hidden": true},
+      {"field": "authorization_code", "type": "protected_value", "form_hidden": true},
+      {"field": "next_sync_token", "type": "protected_value", "form_hidden": true},
+      {"field": "hosted_personal_productivity_calendar_identifier", "type": "short_text", "form_read_only": true},
+      {"field": "pull_from_hosted_personal_productivity_calendar", "type": "boolean", "default": "1"},
+      {"field": "sync_as_public", "type": "boolean", "default": "0"},
+      {"field": "push_to_hosted_personal_productivity_calendar", "type": "boolean", "default": "1"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "hosted productivity service Calendar", "visible_when": ["current_field", "enable"]},
+      {"control": "section", "visible_when": ["current_field", "enable"]},
+      {"control": "action", "purpose": "Authorize hosted productivity service Calendar Access", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"control": "section", "purpose": "Sync", "visible_when": ["current_field", "enable"]}
+    ]
+  },
+  {
+    "entity": "service_integrations.hosted_personal_productivity_contacts",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]},
+      {"role": "desk_user", "level": 0, "owner_only": true, "allows": ["create", "delete", "read", "write"]}
+    ],
+    "fields": [
+      {"field": "enable", "type": "boolean", "default": "0"},
+      {"field": "authorization_code", "type": "protected_value", "form_hidden": true},
+      {"field": "refresh_token", "type": "protected_value", "form_hidden": true},
+      {"field": "last_sync_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "email_identifier", "type": "short_text", "required": true},
+      {"field": "next_sync_token", "type": "protected_value", "form_hidden": true},
+      {"field": "pull_from_hosted_personal_productivity_contacts", "type": "boolean", "default": "0"},
+      {"field": "push_to_hosted_personal_productivity_contacts", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "hosted productivity service Contacts", "visible_when": ["field_has_value", "enable"]},
+      {"control": "action", "purpose": "Authorize hosted productivity service Contacts Access", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"control": "section", "purpose": "Sync", "visible_when": ["field_has_value", "enable"]}
+    ]
+  },
+  {
+    "entity": "service_integrations.hosted_personal_productivity_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "enable", "type": "boolean", "default": "0"},
+      {"field": "client_identifier", "type": "short_text", "required_when": ["field_has_value", "hosted_personal_productivity_drive_picker_enabled"]},
+      {"field": "client_secret", "type": "protected_value"},
+      {"field": "service_interface_key", "type": "short_text"},
+      {"field": "application_identifier", "type": "short_text", "visible_when": ["field_has_value", "hosted_personal_productivity_drive_picker_enabled"], "required_when": ["field_has_value", "hosted_personal_productivity_drive_picker_enabled"]},
+      {"field": "hosted_personal_productivity_drive_picker_enabled", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "OAuth Client ID", "visible_when": ["field_has_value", "enable"]},
+      {"control": "section", "purpose": "API Key", "visible_when": ["field_has_value", "enable"]},
+      {"control": "section", "purpose": "hosted productivity service Drive Picker"}
+    ]
+  },
+  {
+    "entity": "service_integrations.integration_request",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "integration_request_service", "type": "short_text", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["", "Queued", "Authorized", "Completed", "Cancelled", "Failed"], "default": "Queued"},
+      {"field": "request_payload", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "output", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "error", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_record_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "form_read_only": true},
+      {"field": "is_remote_request", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "request_description", "type": "short_text", "form_read_only": true},
+      {"field": "request_identifier", "type": "short_text", "form_read_only": true},
+      {"field": "resource_address", "type": "text", "form_read_only": true},
+      {"field": "request_headers", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "response_headers", "type": "expression_or_structured_text", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Response"},
+      {"control": "section", "purpose": "Reference", "visible_when": ["current_field", "reference_entity_type_identifier"]}
+    ]
+  },
+  {
+    "entity": "service_integrations.push_notification_settings",
+    "kind": "singleton_settings",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "enable_push_notification_relay", "type": "boolean", "default": "0"},
+      {"field": "service_interface_key", "type": "short_text"},
+      {"field": "service_interface_secret", "type": "protected_value"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Authentication"},
+      {"control": "section", "purpose": "Relay Settings"}
+    ]
+  },
+  {
+    "entity": "service_integrations.query_parameters",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "parameter_name", "type": "short_text", "required": true},
+      {"field": "value", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "service_integrations.social_login_key",
+    "kind": "independent_record",
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "enable_social_login", "type": "boolean", "default": "0"},
+      {"field": "social_login_provider", "type": "enumeration", "write_once": true, "values": ["Custom", "social network", "Application", "repository host", "hosted productivity service", "office identity provider", "sales automation provider", "federation provider", "identity broker"], "default": "Custom", "visible_when": ["coercive_unequal", ["current_field", "custom"], ["literal", 1]]},
+      {"field": "client_identifier", "type": "short_text"},
+      {"field": "provider_name", "type": "short_text", "required": true, "write_once": true},
+      {"field": "client_secret", "type": "protected_value"},
+      {"field": "icon", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "social_login_provider"], ["literal", "Custom"]]},
+      {"field": "service_base_address", "type": "short_text"},
+      {"field": "authorize_resource_address", "type": "short_text"},
+      {"field": "access_token_resource_address", "type": "short_text"},
+      {"field": "redirect_resource_address", "type": "short_text"},
+      {"field": "service_interface_endpoint", "type": "short_text"},
+      {"field": "custom_base_resource_address", "type": "boolean", "form_hidden": true, "default": "0"},
+      {"field": "service_interface_endpoint_args", "type": "expression_or_structured_text"},
+      {"field": "authentication_resource_address_data", "type": "expression_or_structured_text"},
+      {"field": "user_identifier_property", "type": "short_text", "visible_when": ["strict_equal", ["current_field", "social_login_provider"], ["literal", "Custom"]]},
+      {"field": "sign_ups", "type": "enumeration", "values": ["", "Allow", "Deny"]},
+      {"field": "show_in_resource_metadata", "type": "boolean", "default": "1"},
+      {"field": "trust_email_without_verified_claim", "type": "boolean", "configuration_variant": true},
+      {"field": "tenant_identifier", "type": "short_text", "configuration_variant": true},
+      {"field": "trust_any_tenant", "type": "boolean", "configuration_variant": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Client Credentials", "expanded_when": ["current_field", "enable_social_login"]},
+      {"control": "section", "purpose": "Identity Details", "expanded_when": ["current_field", "custom_base_resource_address"]},
+      {"control": "section", "purpose": "Client URLs", "expanded_when": ["strict_equal", ["current_field", "social_login_provider"], ["literal", "Custom"]]},
+      {"control": "section", "purpose": "Client Information", "expanded_when": ["strict_equal", ["current_field", "social_login_provider"], ["literal", "Custom"]]},
+      {"control": "section", "purpose": "Configuration"}
+    ]
+  },
+  {
+    "entity": "service_integrations.team_messaging_webhook_resource_address",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "webhook_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "webhook_resource_address", "type": "short_text", "required": true},
+      {"field": "show_document_link", "type": "boolean", "default": "1"}
+    ]
+  },
+  {
+    "entity": "service_integrations.token_cache",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "read"]},
+      {"role": "all", "level": 0, "owner_only": true, "allows": ["delete", "read"]}
+    ],
+    "fields": [
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "connected_application_identifier", "type": "entity_reference", "target": "service_integrations.connected_application", "form_read_only": true},
+      {"field": "access_token", "type": "protected_value", "form_read_only": true},
+      {"field": "refresh_token", "type": "protected_value", "form_read_only": true},
+      {"field": "expires_in", "type": "integer", "form_read_only": true},
+      {"field": "state", "type": "short_text", "form_read_only": true},
+      {"field": "scopes_rows", "type": "owned_collection", "target": "service_integrations.delegated_authorization_scope", "form_read_only": true},
+      {"field": "success_resource_identifier", "type": "short_text", "form_read_only": true},
+      {"field": "token_type", "type": "short_text", "form_read_only": true},
+      {"field": "provider_name", "type": "short_text", "form_read_only": true, "copy_from": ["connected_application_identifier", "provider_name"]}
+    ]
+  },
+  {
+    "entity": "service_integrations.webhook",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "webhook_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "write_once": true},
+      {"field": "webhook_docevent", "type": "enumeration", "write_once": true, "values": ["after_insert", "on_update", "on_submit", "on_cancel", "on_trash", "on_update_after_submit", "on_change", "workflow_transition"]},
+      {"field": "condition", "type": "text"},
+      {"field": "request_resource_address", "type": "text", "required": true},
+      {"field": "webhook_headers_rows", "type": "owned_collection", "target": "service_integrations.webhook_header"},
+      {"field": "webhook_data_rows", "type": "owned_collection", "target": "service_integrations.webhook_data", "visible_when": ["or", ["not", ["current_field", "request_structure"]], ["coercive_equal", ["current_field", "request_structure"], ["literal", "Form URL-Encoded"]]]},
+      {"field": "request_structure", "type": "enumeration", "values": ["", "Form URL-Encoded", "JSON"]},
+      {"field": "webhook_structured_data", "type": "expression_or_structured_text", "visible_when": ["coercive_equal", ["current_field", "request_structure"], ["literal", "JSON"]]},
+      {"field": "enable_security", "type": "boolean", "default": "0"},
+      {"field": "webhook_secret", "type": "protected_value", "visible_when": ["coercive_equal", ["current_field", "enable_security"], ["literal", 1]]},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "request_method", "type": "enumeration", "required": true, "values": ["POST", "PUT", "DELETE"], "default": "POST"},
+      {"field": "is_dynamic_resource_address", "type": "boolean", "default": "0"},
+      {"field": "timeout", "type": "integer", "default": "5"},
+      {"field": "background_jobs_queue", "type": "suggested_text"},
+      {"field": "maximum_retries", "type": "integer", "configuration_variant": true, "nonnegative": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Doc Events"},
+      {"control": "section", "purpose": "Webhook Trigger"},
+      {"control": "formatted_information", "purpose": "structured markup condition"},
+      {"control": "section", "purpose": "Webhook Request"},
+      {"control": "section", "purpose": "Webhook Headers"},
+      {"control": "section", "purpose": "Webhook Data"},
+      {"control": "section", "purpose": "Webhook Security"}
+    ]
+  },
+  {
+    "entity": "service_integrations.webhook_data",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "field_name", "type": "enumeration", "required": true},
+      {"field": "payload_field_name", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "service_integrations.webhook_header",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "header_name", "type": "text"},
+      {"field": "value", "type": "text"}
+    ]
+  },
+  {
+    "entity": "service_integrations.webhook_request_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "resource_address", "type": "text", "form_read_only": true},
+      {"field": "headers", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "response", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "delivery_payload", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "reference_document", "type": "short_text", "form_read_only": true},
+      {"field": "error", "type": "text", "form_read_only": true},
+      {"field": "webhook_identifier", "type": "entity_reference", "target": "service_integrations.webhook", "searchable": true},
+      {"field": "reference_entity_type", "type": "short_text", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "configuration_variant": true, "form_read_only": true, "values": ["", "delivered", "failed", "exhausted"]},
+      {"field": "attempt", "type": "integer", "configuration_variant": true, "form_read_only": true},
+      {"field": "next_retry", "type": "date_and_time", "configuration_variant": true, "form_read_only": true}
+    ]
+  }
+]

@@ -1,0 +1,140 @@
+[
+  {
+    "capability": "Storefront availability synchronization",
+    "reports": [
+      {"report": "external_storefront_duplicate_customers", "configuration": 1, "subject": "customer", "reader_roles": ["sales_manager", "sales_user", "system_manager"], "selectable_outputs": [["reason", "text"], ["group", "text"], ["customer", "record_reference", "customer"], ["customer_name", "text"], ["customer_type", "text"], ["identifier", "text"], ["is_guest", "boolean"], ["orders", "integer"], ["ordered", "monetary_amount"], ["creation", "timestamp"]], "filters": [["grouped_by", "selection", "optional"], ["external_storefront_only", "boolean", "optional"], ["ignore_email_domains", "text", "optional"]]}
+    ],
+    "operations": [
+      {"operation": "check_and_flush_all_servers", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["list_records", "external_storefront_server"]]},
+      {"operation": "execute", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["prepare_record", "external_storefront_server"], ["read_configuration", "external_storefront_additional_settings"], ["save_record", "external_storefront_additional_settings"], ["save_record", "external_storefront_server"]]},
+      {"operation": "execute", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["list_records", "customer_order"], ["load_or_prepare_record", "customer_order"], ["load_or_prepare_record", "external_storefront_order"], ["save_record", "customer_order"]]},
+      {"operation": "execute", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["list_records", "customer"], ["change_setting", "customer"]]},
+      {"operation": "execute", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["check_record_exists", "additional_field"], ["list_records", "customer"], ["change_values", "customer"]]},
+      {"operation": "manual_flush", "configuration": 1, "inputs": [["server_name", "required"]], "caller": "ordinary_admission"},
+      {"operation": "order_created", "configuration": 1, "inputs": [["additional_arguments", "additional_positional"], ["additional_named_arguments", "additional_named"]], "caller": "public_admission", "request_modes": ["submit"], "record_operations": [["read_record", "external_storefront_server"]]},
+      {"operation": "retrieve_dashboard_data", "configuration": 1, "inputs": [["server_name", "optional", {"constant": null}], ["direction", "optional", {"constant": null}], ["pending_start", "optional", {"constant": 0}], ["failed_start", "optional", {"constant": 0}], ["page_length", "optional", {"constant": 20}]], "caller": "ordinary_admission", "record_operations": [["count_records", "external_storefront_synchronization_queue"], ["list_records", "external_storefront_batch_log"], ["list_records", "external_storefront_server"], ["list_records", "external_storefront_synchronization_queue"]]},
+      {"operation": "retrieve_external_storefront_order_shipment_trackings", "configuration": 1, "inputs": [["record", "required"]], "caller": "ordinary_admission"},
+      {"operation": "retrieve_external_storefront_order_status_list", "subject": "external_storefront_server", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "retrieve_external_storefront_shipment_providers", "configuration": 1, "inputs": [["external_storefront_server", "required"]], "caller": "ordinary_admission", "record_operations": [["read_record", "external_storefront_server"]]},
+      {"operation": "retrieve_item_docfields", "subject": "external_storefront_server", "configuration": 1, "inputs": [["record_class", "required"], ["include_table_fields", "optional", {"constant": false}]], "caller": "ordinary_admission", "record_operations": [["list_records", "additional_field"], ["list_records", "entity_field_definition"]]},
+      {"operation": "retrieve_item_field_transforms", "subject": "external_storefront_server", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "retry_all_failed", "configuration": 1, "inputs": [["server_name", "optional", {"constant": null}]], "caller": "ordinary_admission", "record_operations": [["change_values", "external_storefront_synchronization_queue"]]},
+      {"operation": "retry_failed", "configuration": 1, "inputs": [["queue_entry_name", "required"]], "caller": "ordinary_admission", "record_operations": [["read_value", "external_storefront_synchronization_queue"], ["change_values", "external_storefront_synchronization_queue"]]},
+      {"operation": "run_customer_order_synchronization", "configuration": 1, "inputs": [["customer_order_name", "optional", {"constant": null}], ["customer_order", "optional", {"constant": null}], ["external_storefront_order_name", "optional", {"constant": null}], ["external_storefront_order", "optional", {"constant": null}], ["enqueue", "optional", {"constant": false}]], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "customer_order"], ["load_or_prepare_record", "external_storefront_order"]]},
+      {"operation": "run_item_price_synchronization", "configuration": 1, "inputs": [["product_identifier", "optional", {"constant": null}], ["item_price_record", "optional", {"constant": null}]], "caller": "ordinary_admission"},
+      {"operation": "run_item_price_synchronization_in_background", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "run_item_synchronization", "configuration": 1, "inputs": [["product_identifier", "optional", {"constant": null}], ["item", "optional", {"constant": null}], ["external_storefront_product_name", "optional", {"constant": null}], ["external_storefront_product", "optional", {"constant": null}], ["enqueue", "optional", {"constant": false}]], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "item"], ["load_or_prepare_record", "external_storefront_product"]]},
+      {"operation": "update_external_storefront_order_shipment_trackings", "configuration": 1, "inputs": [["record", "required"], ["shipment_trackings", "required"]], "caller": "ordinary_admission"},
+      {"operation": "update_stock_levels_on_external_storefront_site", "configuration": 1, "inputs": [["product_identifier", "required"]], "caller": "ordinary_admission", "record_operations": [["list_records", "bin"], ["load_or_prepare_record", "item"], ["read_record", "external_storefront_server"]]}
+    ]
+  },
+  {
+    "capability": "Storefront order synchronization",
+    "operations": [
+      {"operation": "batch_synchronization_order", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "batch_synchronization_stock", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["list_records", "bin"], ["read_value", "item"]]},
+      {"operation": "create_order", "configuration": 1, "inputs": [], "caller": "public_admission", "request_modes": ["submit"]},
+      {"operation": "delete_order", "configuration": 1, "inputs": [], "caller": "public_admission"},
+      {"operation": "generate_secret", "subject": "external_storefront_setup", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "synchronization_orders", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "synchronization_stock", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "update_customer", "configuration": 1, "inputs": [], "caller": "public_admission"},
+      {"operation": "update_order", "configuration": 1, "inputs": [], "caller": "public_admission"}
+    ]
+  },
+  {
+    "capability": "Storefront presentation",
+    "operations": [
+      {"operation": "login_via_key", "configuration": 1, "inputs": [["key", "required"]], "caller": "public_admission", "request_modes": ["retrieve"], "record_operations": [["read_value", "user"]]},
+      {"operation": "login_via_token", "configuration": 1, "inputs": [["login_token", "required"]], "caller": "public_admission", "record_operations": [["read_value", "user"]]},
+      {"operation": "retrieve_product_filter_data", "configuration": 1, "inputs": [["query_additional_arguments", "optional", {"constant": null}]], "caller": "public_admission"},
+      {"operation": "retrieve_product_reviews", "configuration": 1, "inputs": [["web_item", "required"]], "caller": "public_admission"},
+      {"operation": "send_login_link", "configuration": 1, "inputs": [["email", "required"]], "caller": "public_admission"},
+      {"operation": "send_message", "configuration": 1, "inputs": [["sender", "required"], ["message", "required"], ["subject", "optional", {"named_choice": "website_query"}]], "caller": "public_admission", "record_operations": [["load_or_prepare_record", "communication"], ["read_configuration_value", "contact_us_settings"], ["read_configuration_value", "system_settings"]]}
+    ]
+  },
+  {
+    "capability": "Storefront tax and warehouse mapping",
+    "operations": [
+      {"operation": "check_hourly_synchronization", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "external_storefront_configuration"]]},
+      {"operation": "inbound_event_notification_handler", "configuration": 1, "inputs": [], "caller": "public_admission"},
+      {"operation": "retrieve_log_status", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "retrieve_series", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "synchronization_external_storefront", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "external_storefront_configuration"], ["save_record", "external_storefront_configuration"]]},
+      {"operation": "synchronization_external_storefront_identifiers", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "synchronization_external_storefront_resources", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "external_storefront_configuration"], ["change_values", "external_storefront_configuration"]]}
+    ]
+  },
+  {
+    "capability": "Structured trade invoice generation",
+    "operations": [
+      {"operation": "create_and_save_document", "subject": "electronic_document", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["save_record", "electronic_document"]]},
+      {"operation": "create_document", "configuration": 1, "inputs": [["source_name", "required"], ["target_record", "optional", {"constant": null}]], "caller": "ordinary_admission", "record_operations": [["evaluate_permission", "electronic_document"], ["load_or_prepare_record", "electronic_document"], ["load_or_prepare_record", "electronic_document_profile"]]},
+      {"operation": "generate_preview", "subject": "electronic_document", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "generate_structured_exchange", "subject": "electronic_document", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["save_record", "electronic_document"]]},
+      {"operation": "has_structured_exchange_file", "subject": "electronic_document", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["list_records", "file"]]},
+      {"operation": "retrieve_matching_status", "subject": "electronic_document", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "electronic_document_profile"]]},
+      {"operation": "save_matching_data", "subject": "electronic_document", "configuration": 1, "inputs": [["matching_data", "required"]], "caller": "ordinary_admission", "record_operations": [["load_or_prepare_record", "electronic_document_profile"], ["change_values", "electronic_document"]]},
+      {"operation": "setup_electronic_procurement_network_codes", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["count_records", "common_code"], ["list_records", "code_list"]]},
+      {"operation": "validate_structured_exchange", "subject": "electronic_document", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["save_record", "electronic_document"]]}
+    ]
+  },
+  {
+    "capability": "Support portal and party address capture",
+    "operations": [
+      {"operation": "create_ticket", "configuration": 1, "inputs": [["title", "required"], ["description", "required"], ["screen_recording", "optional", {"constant": null}]], "caller": "ordinary_admission", "record_operations": [["read_record", "service_portal_settings"]]},
+      {"operation": "generate_impersonation_resource_address", "configuration": 1, "inputs": [["user", "required"]], "caller": "ordinary_admission", "record_operations": [["read_configuration_value", "service_portal_settings"]]},
+      {"operation": "init_address_creation", "subject": "address_fetcher", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "retrieve_parties", "subject": "address_fetcher", "configuration": 1, "inputs": [["party_type", "required"]], "caller": "ordinary_admission"},
+      {"operation": "retrieve_portal_resource_address", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "record_operations": [["read_record", "service_portal_settings"]]}
+    ]
+  },
+  {
+    "capability": "Support ticket and engineering issue synchronization",
+    "reports": [
+      {"report": "bugs_opened_vs_closed", "configuration": 1, "subject": "engineering_ticket_engineering_repository_work_item", "reader_roles": ["engineering_repository_integration_manager", "engineering_repository_integration_user", "engineering_repository_integration_viewer"], "selectable_outputs": [["repository", "record_reference", "engineering_ticket_engineering_repository_repository"], ["repository_full_name", "text"], ["open_bugs", "integer"], ["closed_bugs", "integer"]], "selectable_filters": [["from_date", "date", "optional"], ["to_date", "date", "optional"], ["repository", "record_reference", "optional", "engineering_ticket_engineering_repository_repository"], ["user", "record_reference", "optional", "user"], ["branch", "text", "optional"]]},
+      {"report": "daily_developer_activity", "configuration": 1, "subject": "engineering_ticket_engineering_repository_daily_activity", "reader_roles": ["engineering_repository_integration_manager", "engineering_repository_integration_user", "engineering_repository_integration_viewer"], "selectable_outputs": [["activity_date", "date"], ["mapped_user", "record_reference", "user"], ["engineering_repository_login", "text"], ["repository", "record_reference", "engineering_ticket_engineering_repository_repository"], ["repository_full_name", "text"], ["engineering_revision_count", "integer"], ["prs_opened", "integer"], ["prs_merged", "integer"], ["issues_closed", "integer"], ["files_changed", "integer"], ["additions", "integer"], ["deletions", "integer"], ["last_activity_at", "timestamp"]], "selectable_filters": [["from_date", "date", "optional"], ["to_date", "date", "optional"], ["repository", "record_reference", "optional", "engineering_ticket_engineering_repository_repository"], ["user", "record_reference", "optional", "user"], ["engineering_repository_login", "text", "optional"]]},
+      {"report": "p_rs_waiting_for_review", "configuration": 1, "subject": "engineering_ticket_engineering_repository_work_item", "reader_roles": ["engineering_repository_integration_manager", "engineering_repository_integration_user", "engineering_repository_integration_viewer"], "selectable_outputs": [["repository", "record_reference", "engineering_ticket_engineering_repository_repository"], ["repository_full_name", "text"], ["purchase_receipt_number", "integer"], ["title", "text"], ["author_login", "text"], ["formatted_markup_resource_address", "text"], ["engineering_repository_updated_at", "timestamp"]], "selectable_filters": [["from_date", "date", "optional"], ["to_date", "date", "optional"], ["repository", "record_reference", "optional", "engineering_ticket_engineering_repository_repository"], ["user", "record_reference", "optional", "user"], ["branch", "text", "optional"]]},
+      {"report": "release_activity_history", "configuration": 1, "subject": "engineering_ticket_engineering_repository_inbound_event_notification_event", "reader_roles": ["engineering_repository_integration_manager", "engineering_repository_integration_user", "engineering_repository_integration_viewer"], "selectable_outputs": [["received_at", "timestamp"], ["repository", "record_reference", "engineering_ticket_engineering_repository_repository"], ["repository_full_name", "text"], ["action", "text"], ["sender", "text"], ["status", "text"]], "selectable_filters": [["from_date", "date", "optional"], ["to_date", "date", "optional"], ["repository", "record_reference", "optional", "engineering_ticket_engineering_repository_repository"], ["user", "record_reference", "optional", "user"], ["branch", "text", "optional"]]},
+      {"report": "repository_activity_timeline", "configuration": 1, "subject": "engineering_ticket_engineering_repository_engineering_change", "reader_roles": ["engineering_repository_integration_manager", "engineering_repository_integration_user", "engineering_repository_integration_viewer"], "selectable_outputs": [["engineering_change_date", "timestamp"], ["repository", "record_reference", "engineering_ticket_engineering_repository_repository"], ["repository_full_name", "text"], ["sha", "text"], ["author_login", "text"], ["mapped_user", "record_reference", "user"], ["branch", "text"], ["message", "text"]], "selectable_filters": [["from_date", "date", "optional"], ["to_date", "date", "optional"], ["repository", "record_reference", "optional", "engineering_ticket_engineering_repository_repository"], ["user", "record_reference", "optional", "user"], ["branch", "text", "optional"]]},
+      {"report": "stale_engineering_repository_tickets", "configuration": 1, "subject": "engineering_ticket_engineering_repository_work_item", "reader_roles": ["engineering_repository_integration_manager", "engineering_repository_integration_user", "engineering_repository_integration_viewer"], "selectable_outputs": [["name", "record_reference", "service_ticket"], ["subject", "text"], ["status", "record_reference", "service_ticket_status"], ["custom_engineering_repository_repository", "record_reference", "engineering_ticket_engineering_repository_repository"], ["repository_full_name", "text"], ["custom_engineering_repository_last_synchronized_at", "timestamp"], ["custom_engineering_repository_resource_address", "text"]], "selectable_filters": [["from_date", "date", "optional"], ["to_date", "date", "optional"], ["repository", "record_reference", "optional", "engineering_ticket_engineering_repository_repository"], ["user", "record_reference", "optional", "user"], ["branch", "text", "optional"]]},
+      {"report": "tickets_linked_to_commits_p_rs", "configuration": 1, "subject": "engineering_ticket_engineering_repository_work_item", "reader_roles": ["engineering_repository_integration_manager", "engineering_repository_integration_user", "engineering_repository_integration_viewer"], "selectable_outputs": [["ticket", "record_reference", "service_ticket"], ["repository", "record_reference", "engineering_ticket_engineering_repository_repository"], ["repository_full_name", "text"], ["issue_number", "integer"], ["purchase_receipt_number", "integer"], ["title", "text"], ["state", "text"], ["formatted_markup_resource_address", "text"]], "selectable_filters": [["from_date", "date", "optional"], ["to_date", "date", "optional"], ["repository", "record_reference", "optional", "engineering_ticket_engineering_repository_repository"], ["user", "record_reference", "optional", "user"], ["branch", "text", "optional"]]}
+    ],
+    "operations": [
+      {"operation": "auto_configure_from_engineering_repository", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "request_modes": ["submit"]},
+      {"operation": "create_or_activate_helpdesk_agent", "configuration": 1, "inputs": [["mapping", "required"]], "caller": "ordinary_admission", "request_modes": ["submit"]},
+      {"operation": "delegated_authorization_callback", "configuration": 1, "inputs": [["code", "optional", {"constant": null}], ["state", "optional", {"constant": null}]], "caller": "ordinary_admission", "request_modes": ["retrieve", "submit"]},
+      {"operation": "engineering_repository_inbound_event_notification", "configuration": 1, "inputs": [], "caller": "public_admission", "request_modes": ["submit"], "record_operations": [["load_or_prepare_record", "engineering_ticket_engineering_repository_inbound_event_notification_event"], ["read_value", "engineering_ticket_engineering_repository_inbound_event_notification_event"]]},
+      {"operation": "engineering_repository_installation_callback", "configuration": 1, "inputs": [["installation_identifier", "optional", {"constant": null}], ["setup_action", "optional", {"constant": null}], ["state", "optional", {"constant": null}]], "caller": "ordinary_admission", "request_modes": ["retrieve", "submit"]},
+      {"operation": "health_summary", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "request_modes": ["retrieve"]},
+      {"operation": "preview_agent_provisioning", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "request_modes": ["submit"]},
+      {"operation": "provision_approved_agents", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "request_modes": ["submit"]},
+      {"operation": "rebuild_webhooks", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "request_modes": ["submit"]},
+      {"operation": "retry_event", "configuration": 1, "inputs": [["event", "required"]], "caller": "ordinary_admission", "request_modes": ["submit"], "record_operations": [["change_values", "engineering_ticket_engineering_repository_inbound_event_notification_event"]]},
+      {"operation": "retry_event", "subject": "engineering_ticket_engineering_repository_inbound_event_notification_event", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "retry_outbox", "configuration": 1, "inputs": [["outbox", "required"]], "caller": "ordinary_admission", "request_modes": ["submit"], "record_operations": [["change_values", "engineering_ticket_engineering_repository_outbox"]]},
+      {"operation": "retry_outbox", "subject": "engineering_ticket_engineering_repository_outbox", "configuration": 1, "inputs": [], "caller": "ordinary_admission"},
+      {"operation": "synchronization_activity_now", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "request_modes": ["submit"]},
+      {"operation": "synchronization_organization_members_now", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "request_modes": ["submit"]},
+      {"operation": "synchronization_repositories_now", "configuration": 1, "inputs": [["installation", "optional", {"constant": null}]], "caller": "ordinary_admission", "request_modes": ["submit"], "record_operations": [["list_records", "engineering_ticket_engineering_repository_installation"], ["read_value", "engineering_ticket_engineering_repository_installation"]]},
+      {"operation": "test_connection", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "request_modes": ["submit"]},
+      {"operation": "validate_webhooks", "configuration": 1, "inputs": [], "caller": "ordinary_admission", "request_modes": ["submit"]}
+    ]
+  },
+  {
+    "capability": "Swiss accounting export",
+    "operations": [
+      {"operation": "attach_portable_document", "configuration": 1, "inputs": [["additional_named_arguments", "additional_named"]], "caller": "ordinary_admission"},
+      {"operation": "reset_account", "configuration": 1, "inputs": [["company", "required"], ["start_date", "required"], ["end_date", "required"], ["record_class", "required"], ["record_identifier", "required"]], "caller": "ordinary_admission"}
+    ]
+  },
+  {
+    "capability": "Swiss hours and tax reporting",
+    "operations": [
+      {"operation": "attach_portable_document", "configuration": 1, "inputs": [["record_identifier", "optional", {"constant": null}], ["additional_named_arguments", "additional_named"]], "caller": "ordinary_admission", "request_modes": ["submit"]},
+      {"operation": "bank_transaction_auto_match", "configuration": 1, "inputs": [["record", "required"], ["event", "optional", {"constant": null}]], "caller": "ordinary_admission"},
+      {"operation": "convert_structured_exchange_to_delimited_text", "configuration": 1, "inputs": [["file", "required"], ["data_import", "required"]], "caller": "ordinary_admission", "request_modes": ["submit"], "record_operations": [["evaluate_permission", "bank_statement_import"], ["load_or_prepare_record", "bank_statement_import"]]},
+      {"operation": "reset_account", "configuration": 1, "inputs": [["company", "required"], ["start_date", "required"], ["end_date", "required"], ["record_class", "required"], ["record_identifier", "required"]], "caller": "ordinary_admission"}
+    ]
+  }
+]

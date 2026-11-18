@@ -1,0 +1,19 @@
+# Purchase tax and stock acquisition cost
+
+A tax rate and a ledger-account label alone cannot establish recoverability. Model each charge's account, calculation type, `Add` or `Deduct`, category, allocated portions and source item identity. The caller supplies the applicable treatment. This profile tests configured accounting behavior and supplies no tax-law determination.
+
+| Configured category | Amount payable on this document | Acquisition cost |
+|---|---|---|
+| Total | Includes the signed charge | Excludes the row from stock valuation. For a recoverable tax use the corresponding input tax account. |
+| Valuation | Omits the row from the commercial total | Includes the eligible capitalizable portion. A separate freight supplier can bill the charge. |
+| Valuation and Total | Includes the signed charge | Includes the eligible capitalizable portion. For stock-updating invoices with perpetual accounting the posting credits capitalized charge to its charge account, offsetting that share of the invoice tax debit. |
+
+Consider a fully accepted, stock-updating purchase invoice in company currency. Goods net 100.00, recoverable input tax 9.00 (`Total`), unrecoverable acquisition charge 6.00 (`Valuation and Total`), perpetual inventory and no other charges. Supplier payable is 115.00. Tax rows debit recoverable tax 9.00 and acquisition charge 6.00. Valuation credits the latter charge account 6.00 while inventory gains 106.00. The net journal is inventory debit 106.00, recoverable tax debit 9.00 and supplier credit 115.00. Preserve the tax row and valuation lineage even when debit and credit on the acquisition-charge account cancel in a net account view. A single tax amount of 15.00 cannot specify this split without a supplied allocation policy.
+
+## Which rows carry the charge?
+
+For each fixed valuation charge independently choose its denominator. With full allocation enabled, distribute it only among stock and fixed-asset rows. Otherwise allocate across all item rows by base net amount, then capitalize only the stock and asset shares. When the base sums to zero the controller falls back to chargeable quantity. With no nonzero basis it returns no split. Round all eligible shares except the last at row tax precision and give the final row with nonzero basis the remaining amount. On-quantity valuation uses the charge shares of the item-wise details. On-net valuation follows item tax mapping and has its own last-row remainder path. Grouping the fixed charges before distributing changes cents and no longer reproduces the reference.
+
+With line amounts 100.00 stock, 100.00 service and 100.00 stock, and an actual `Valuation and Total` charge of 30.00, spreading across all gives capitalized amounts `[10, 0, 10]`. The receipt debits inventory 220.00, credits stock received but not billed 200.00 and credits the charge clearing account 20.00. Choosing full allocation changes the shares to `[15, 0, 15]`, inventory to 230.00, and clearing credit to 30.00. These are receipt postings for stock recognition. Supplier invoicing is a subsequent event. A second example uses two stock lines of 100.00 and 200.00 with separate fixed charges of 10.00 freight and 10.00 duty. The two rows capitalize 6.66 and 13.34. The general ledger debits inventory 320.00 and credits receipt clearing 300.00, freight 10.00 and duty 10.00.
+
+With rejected-material valuation enabled, a receipt of eight accepted and two rejected units at 100.00 plus 100.00 valuation-only freight puts 900.00 in the accepted warehouse and 200.00 in the rejected warehouse. Its stock receipt clearing credit is 1,000.00. The accepted units carry the freight. A separate return case with three accepted units plus two rejected and 30.00 freight reverses zero freight on a rejected-stock return and 10.00 when one accepted unit is returned. Store the originating receipt row, the warehouse disposition and the allocated acquisition cost for return/reposting.

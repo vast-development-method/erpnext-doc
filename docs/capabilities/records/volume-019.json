@@ -1,0 +1,1326 @@
+[
+  {
+    "capability": "Course delivery and learning assessment",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "job_opportunity",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "job_title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "location", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "job_opportunity_classification", "value_kind": "choice", "rules": ["required"], "choices": ["full_time", "part_time", "freelance", "contract"]},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["open", "closed"]},
+          {"purpose": "description", "value_kind": "formatted_text", "rules": ["required"]},
+          {"purpose": "company_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "company_website", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "company_logo", "value_kind": "image_reference", "rules": ["required"]},
+          {"purpose": "company_email_address", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "country", "value_kind": "reference", "rules": ["required"], "target": "geography.country", "binding": "shared_model"},
+          {"purpose": "work_mode", "value_kind": "choice", "choices": ["unselected", "remote", "hybrid", "on_site"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["select", "read", "write", "create", "report", "export", "share", "print", "email"], true]
+        ]
+      },
+      {
+        "concept": "learning_management_job_application",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "resume", "value_kind": "file_reference", "rules": ["required"]},
+          {"purpose": "job", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "job_opportunity"},
+          {"purpose": "job_title", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "company", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], true]
+        ]
+      },
+      {
+        "concept": "batch_course",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "course", "value_kind": "reference", "rules": ["required"], "target": "learning_management_course"},
+          {"purpose": "title", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "evaluator", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "course_evaluator"}
+        ]
+      },
+      {
+        "concept": "certification",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "certification_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "organization", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "issue_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "expiration_date", "value_kind": "text"},
+          {"purpose": "expire", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "chapter_reference",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "chapter", "value_kind": "reference", "rules": ["required"], "target": "course_chapter"}
+        ]
+      },
+      {
+        "concept": "course_chapter",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "course", "value_kind": "reference", "rules": ["required"], "target": "learning_management_course"},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "lessons", "value_kind": "owned_rows", "target": "lesson_reference"},
+          {"purpose": "is_scorm_package", "value_kind": "boolean"},
+          {"purpose": "manifest_file", "value_kind": "expression_or_structured_text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "launch_file", "value_kind": "expression_or_structured_text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "scorm_package", "value_kind": "reference", "rules": ["read_only"], "access_level": 1, "target": "information_management.file", "binding": "shared_model"},
+          {"purpose": "scorm_package_path", "value_kind": "expression_or_structured_text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "course_title", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["select", "read", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 1, ["read", "write"], false],
+          ["course_creator", 1, ["read", "write"], false],
+          ["moderator", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "course_evaluator",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "evaluator", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "schedule", "value_kind": "owned_rows", "target": "evaluator_schedule"},
+          {"purpose": "unavailable_from", "value_kind": "civil_day"},
+          {"purpose": "unavailable_to", "value_kind": "civil_day"},
+          {"purpose": "full_name", "value_kind": "text"},
+          {"purpose": "user_image", "value_kind": "image_reference"},
+          {"purpose": "username", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "report", "export", "print", "email"], false],
+          ["course_creator", 0, ["read", "report", "export", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "course_instructor",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "instructor", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "information_management.user", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "course_lesson",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "chapter", "value_kind": "reference", "rules": ["required"], "target": "course_chapter"},
+          {"purpose": "include_in_preview", "value_kind": "boolean"},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "body", "value_kind": "formatted_text"},
+          {"purpose": "course", "value_kind": "reference", "rules": ["read_only"], "target": "learning_management_course"},
+          {"purpose": "quiz_identifier", "value_kind": "text"},
+          {"purpose": "video_channel", "value_kind": "text"},
+          {"purpose": "question", "value_kind": "text"},
+          {"purpose": "file_type", "value_kind": "choice", "choices": ["unselected", "image", "document", "portable_document"]},
+          {"purpose": "instructor_notes", "value_kind": "formatted_text"},
+          {"purpose": "content", "value_kind": "text"},
+          {"purpose": "instructor_content", "value_kind": "text"},
+          {"purpose": "is_scorm_package", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "assessments", "value_kind": "owned_rows", "rules": ["read_only", "hidden_from_form"], "target": "learning_management_lesson_assessment"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["select", "read", "write", "create", "report", "export", "share", "print", "email"], true],
+          ["moderator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "education_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "institution_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "location", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "degree_type", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "grade_type", "value_kind": "choice", "choices": ["percentage_e_g_70", "point_of_score_e_g_70", "letter_grade_e_g_a_b", "uk_grading_e_g_1st_2_2", "french_e_g_distinction", "cgpa_4"]},
+          {"purpose": "grade", "value_kind": "text"},
+          {"purpose": "major", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "start_date", "value_kind": "civil_day"},
+          {"purpose": "end_date", "value_kind": "civil_day"}
+        ]
+      },
+      {
+        "concept": "evaluator_schedule",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "day", "value_kind": "choice", "rules": ["required"], "choices": ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]},
+          {"purpose": "start_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "end_time", "value_kind": "time_of_day", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "function",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "function", "value_kind": "text", "rules": ["unique"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["select", "read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "industry",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "industry", "value_kind": "text", "rules": ["unique"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["select", "read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "lesson_reference",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "lesson", "value_kind": "reference", "rules": ["required"], "target": "course_lesson"}
+        ]
+      },
+      {
+        "concept": "learning_management_assessment",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "assessment_type", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "assessment_name", "value_kind": "variable_record_reference", "rules": ["required", "indexed_for_search"], "record_class_field": "assessment_type"}
+        ]
+      },
+      {
+        "concept": "learning_management_assignment",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "question", "value_kind": "formatted_text", "rules": ["required"]},
+          {"purpose": "learning_management_assignment_classification", "value_kind": "choice", "rules": ["required"], "choices": ["document", "portable_document", "resource_address", "image", "text", "audio"]},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "show_answer", "value_kind": "boolean"},
+          {"purpose": "answer", "value_kind": "formatted_text", "access_level": 1},
+          {"purpose": "grade_assignment", "value_kind": "boolean"},
+          {"purpose": "course", "value_kind": "reference", "target": "learning_management_course"},
+          {"purpose": "authors", "value_kind": "owned_selection_rows", "target": "learning_management_content_author"},
+          {"purpose": "enable_scheduling", "value_kind": "boolean"},
+          {"purpose": "schedule_start", "value_kind": "date_and_time"},
+          {"purpose": "schedule_end", "value_kind": "date_and_time"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["system_manager", 1, ["read", "write"], false],
+          ["moderator", 1, ["read", "write"], false],
+          ["course_creator", 1, ["read", "write"], false],
+          ["batch_evaluator", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_assignment_submission",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "lesson", "value_kind": "reference", "target": "course_lesson"},
+          {"purpose": "assignment", "value_kind": "reference", "rules": ["required"], "target": "learning_management_assignment"},
+          {"purpose": "member", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "member_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "course", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "learning_management_course"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["pass", "fail", "not_graded", "not_applicable"]},
+          {"purpose": "comments", "value_kind": "formatted_text"},
+          {"purpose": "evaluator", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "assignment_attachment", "value_kind": "file_reference"},
+          {"purpose": "learning_management_assignment_submission_classification", "value_kind": "choice", "choices": ["document", "portable_document", "resource_address", "image", "text", "audio"]},
+          {"purpose": "question", "value_kind": "formatted_text", "rules": ["read_only"]},
+          {"purpose": "assignment_title", "value_kind": "text"},
+          {"purpose": "answer", "value_kind": "formatted_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], true],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_badge",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "image", "value_kind": "image_reference", "rules": ["required"]},
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "event", "value_kind": "choice", "rules": ["required"], "choices": ["new", "value_change", "manual_assignment"]},
+          {"purpose": "condition", "value_kind": "expression_or_structured_text", "rules": ["required"]},
+          {"purpose": "field_to_check", "value_kind": "choice"},
+          {"purpose": "grant_only_once", "value_kind": "boolean"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "description", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "user_field", "value_kind": "choice", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_badge_assignment",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "member", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "badge", "value_kind": "reference", "rules": ["required"], "target": "learning_management_badge"},
+          {"purpose": "issued_on", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "badge_image", "value_kind": "file_reference", "rules": ["required", "read_only"]},
+          {"purpose": "badge_description", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "member_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "member_username", "value_kind": "text"},
+          {"purpose": "member_image", "value_kind": "image_reference"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read"], true],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_batch",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "end_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "description", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "courses", "value_kind": "owned_rows", "target": "batch_course"},
+          {"purpose": "start_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "component", "value_kind": "expression_or_structured_text"},
+          {"purpose": "paid_batch", "value_kind": "boolean"},
+          {"purpose": "seat_count", "value_kind": "whole_number"},
+          {"purpose": "start_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "end_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "assessment", "value_kind": "owned_rows", "target": "learning_management_assessment"},
+          {"purpose": "medium", "value_kind": "choice", "choices": ["online", "offline"]},
+          {"purpose": "category", "value_kind": "reference", "target": "learning_management_category"},
+          {"purpose": "amount", "value_kind": "money"},
+          {"purpose": "currency", "value_kind": "reference", "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "batch_details", "value_kind": "formatted_text", "rules": ["required"]},
+          {"purpose": "published", "value_kind": "boolean"},
+          {"purpose": "timetable", "value_kind": "owned_rows", "target": "learning_management_batch_timetable"},
+          {"purpose": "timetable_template", "value_kind": "reference", "target": "learning_management_timetable_template"},
+          {"purpose": "show_live_class", "value_kind": "boolean"},
+          {"purpose": "batch_details_raw", "value_kind": "formatted_text"},
+          {"purpose": "meta_image", "value_kind": "image_reference"},
+          {"purpose": "script", "value_kind": "expression_or_structured_text"},
+          {"purpose": "timetable_legends", "value_kind": "owned_rows", "target": "learning_management_timetable_legend"},
+          {"purpose": "allow_future", "value_kind": "boolean"},
+          {"purpose": "evaluation_end_date", "value_kind": "civil_day"},
+          {"purpose": "amount_usd", "value_kind": "money"},
+          {"purpose": "allow_self_enrollment", "value_kind": "boolean"},
+          {"purpose": "timezone", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "instructors", "value_kind": "owned_selection_rows", "rules": ["required"], "target": "course_instructor"},
+          {"purpose": "confirmation_email_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "certification", "value_kind": "boolean"},
+          {"purpose": "conferencing_provider", "value_kind": "choice", "choices": ["unselected", "video_conference", "workspace_service_meet"]},
+          {"purpose": "video_conference_account", "value_kind": "reference", "target": "learning_management_video_conference_settings"},
+          {"purpose": "workspace_service_meet_account", "value_kind": "reference", "target": "learning_management_workspace_service_meet_settings"},
+          {"purpose": "video_link", "value_kind": "file_reference"},
+          {"purpose": "notification_sent", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "evaluation", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_batch_enrollment",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "member", "value_kind": "reference", "rules": ["required", "write_once", "indexed_for_search"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "member_name", "value_kind": "text"},
+          {"purpose": "member_username", "value_kind": "text"},
+          {"purpose": "payment", "value_kind": "reference", "target": "learning_management_payment"},
+          {"purpose": "source", "value_kind": "reference", "target": "learning_management_source"},
+          {"purpose": "confirmation_email_sent", "value_kind": "boolean"},
+          {"purpose": "batch", "value_kind": "reference", "rules": ["required", "write_once"], "target": "learning_management_batch"},
+          {"purpose": "member_image", "value_kind": "image_reference"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "create"], true],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_batch_feedback",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "member", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "batch", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "learning_management_batch"},
+          {"purpose": "feedback", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "content", "value_kind": "rating"},
+          {"purpose": "instructors", "value_kind": "rating"},
+          {"purpose": "learning_management_batch_feedback_value", "value_kind": "rating"},
+          {"purpose": "member_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "member_image", "value_kind": "image_reference", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], true],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_batch_timetable",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "reference_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "reference_record_identifier", "value_kind": "variable_record_reference", "record_class_field": "reference_record_class"},
+          {"purpose": "applicable_date", "value_kind": "civil_day"},
+          {"purpose": "start_time", "value_kind": "time_of_day"},
+          {"purpose": "duration", "value_kind": "text"},
+          {"purpose": "end_time", "value_kind": "time_of_day"},
+          {"purpose": "day", "value_kind": "whole_number"},
+          {"purpose": "milestone", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "learning_management_category",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "category", "value_kind": "text", "rules": ["required", "unique"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["select", "read", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["select", "read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_certificate",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "issue_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "course", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "learning_management_course"},
+          {"purpose": "expiry_date", "value_kind": "civil_day"},
+          {"purpose": "member", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "member_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "batch_name", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "learning_management_batch"},
+          {"purpose": "published", "value_kind": "boolean"},
+          {"purpose": "template", "value_kind": "reference", "rules": ["required"], "target": "document_output.print_format", "binding": "shared_model"},
+          {"purpose": "course_title", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "evaluator", "value_kind": "reference", "target": "course_evaluator"},
+          {"purpose": "evaluator_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "batch_title", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_certificate_evaluation",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "course", "value_kind": "reference", "rules": ["required"], "target": "learning_management_course"},
+          {"purpose": "member", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "rating", "value_kind": "rating"},
+          {"purpose": "summary", "value_kind": "text"},
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "start_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "end_time", "value_kind": "time_of_day"},
+          {"purpose": "member_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["pending", "in_progress", "pass", "fail"]},
+          {"purpose": "batch_name", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "learning_management_batch"},
+          {"purpose": "evaluator", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "evaluator_name", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_certificate_request",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "course", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "learning_management_course"},
+          {"purpose": "member", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "evaluator", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "day", "value_kind": "choice", "choices": ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]},
+          {"purpose": "start_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "end_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "member_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "workspace_service_meet_link", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "event", "value_kind": "reference", "rules": ["read_only"], "target": "operator_workspace.event", "binding": "shared_model"},
+          {"purpose": "batch_name", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "learning_management_batch"},
+          {"purpose": "course_title", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "evaluator_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "timezone", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "batch_title", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["upcoming", "completed", "cancelled"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "create", "report", "export", "share", "print", "email"], true],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_content_author",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "author", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "information_management.user", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "learning_management_coupon",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "code", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "discount_type", "value_kind": "choice", "rules": ["required"], "choices": ["percentage", "fixed_amount"]},
+          {"purpose": "expires_on", "value_kind": "civil_day"},
+          {"purpose": "usage_limit", "value_kind": "whole_number"},
+          {"purpose": "applicable_items", "value_kind": "owned_rows", "rules": ["required"], "target": "learning_management_coupon_item"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "percentage_discount", "value_kind": "whole_number"},
+          {"purpose": "fixed_amount_discount", "value_kind": "whole_number"},
+          {"purpose": "redemption_count", "value_kind": "whole_number", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_coupon_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "reference_record_class", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "learning_management_course", "learning_management_batch"]},
+          {"purpose": "reference_name", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "reference_record_class"}
+        ]
+      },
+      {
+        "concept": "learning_management_course",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "description", "value_kind": "formatted_text", "rules": ["required"]},
+          {"purpose": "published", "value_kind": "boolean"},
+          {"purpose": "video_link", "value_kind": "text"},
+          {"purpose": "short_introduction", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "disable_self_learning", "value_kind": "boolean"},
+          {"purpose": "enforce_lesson_completion", "value_kind": "boolean"},
+          {"purpose": "image", "value_kind": "image_reference"},
+          {"purpose": "tags", "value_kind": "text"},
+          {"purpose": "upcoming", "value_kind": "boolean"},
+          {"purpose": "chapters", "value_kind": "owned_rows", "target": "chapter_reference"},
+          {"purpose": "instructors", "value_kind": "owned_selection_rows", "rules": ["required"], "target": "course_instructor"},
+          {"purpose": "enable_certification", "value_kind": "boolean"},
+          {"purpose": "related_courses", "value_kind": "owned_rows", "target": "related_courses"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only", "hidden_from_form"], "choices": ["in_progress", "under_review", "approved"]},
+          {"purpose": "currency", "value_kind": "reference", "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "paid_course", "value_kind": "boolean"},
+          {"purpose": "course_price", "value_kind": "money"},
+          {"purpose": "amount_usd", "value_kind": "money"},
+          {"purpose": "published_on", "value_kind": "civil_day"},
+          {"purpose": "featured", "value_kind": "boolean"},
+          {"purpose": "category", "value_kind": "reference", "target": "learning_management_category"},
+          {"purpose": "enrollments", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "lessons", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "rating", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "paid_certificate", "value_kind": "boolean"},
+          {"purpose": "evaluator", "value_kind": "reference", "target": "course_evaluator"},
+          {"purpose": "card_gradient", "value_kind": "choice", "choices": ["red", "blue", "green", "amber", "cyan", "orange", "pink", "purple", "teal", "violet", "yellow", "gray"]},
+          {"purpose": "timezone", "value_kind": "text"},
+          {"purpose": "notification_sent", "value_kind": "boolean", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_course_interest",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "course", "value_kind": "reference", "target": "learning_management_course"},
+          {"purpose": "user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "email_sent", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_course_mentor_mapping",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "course", "value_kind": "reference", "target": "learning_management_course"},
+          {"purpose": "mentor", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "mentor_name", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_course_progress",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "course", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "learning_management_course"},
+          {"purpose": "chapter", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "course_chapter"},
+          {"purpose": "lesson", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "course_lesson"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["indexed_for_search"], "choices": ["complete", "partially_complete", "incomplete"]},
+          {"purpose": "member", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "member_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "is_scorm_chapter", "value_kind": "boolean", "rules": ["read_only", "indexed_for_search"]},
+          {"purpose": "scorm_content", "value_kind": "long_text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "report", "export", "share", "print", "email"], true],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_course_review",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "review", "value_kind": "text"},
+          {"purpose": "rating", "value_kind": "rating", "rules": ["required"]},
+          {"purpose": "course", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "learning_management_course"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], true],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_enrollment",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "member", "value_kind": "reference", "rules": ["required", "write_once", "indexed_for_search"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "member_type", "value_kind": "choice", "choices": ["unselected", "student", "mentor", "staff"]},
+          {"purpose": "role", "value_kind": "choice", "choices": ["unselected", "member", "administrator"]},
+          {"purpose": "member_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "course", "value_kind": "reference", "rules": ["required", "write_once", "indexed_for_search"], "target": "learning_management_course"},
+          {"purpose": "current_lesson", "value_kind": "reference", "target": "course_lesson"},
+          {"purpose": "member_username", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "progress", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "payment", "value_kind": "reference", "target": "learning_management_payment"},
+          {"purpose": "purchased_certificate", "value_kind": "boolean"},
+          {"purpose": "certificate", "value_kind": "reference", "target": "learning_management_certificate"},
+          {"purpose": "member_image", "value_kind": "image_reference"},
+          {"purpose": "enrollment_from_batch", "value_kind": "reference", "rules": ["write_once"], "target": "learning_management_batch"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["select", "read", "write", "create", "report", "export", "share", "print", "email"], true],
+          ["moderator", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_workspace_service_meet_settings",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "account_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "member", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "member_name", "value_kind": "text"},
+          {"purpose": "member_image", "value_kind": "image_reference"},
+          {"purpose": "external_calendar", "value_kind": "reference", "rules": ["required"], "target": "service_integrations.hosted_personal_productivity_calendar", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], true]
+        ]
+      },
+      {
+        "concept": "learning_management_lesson_assessment",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "assessment_type", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "assessment_name", "value_kind": "variable_record_reference", "rules": ["required", "indexed_for_search"], "record_class_field": "assessment_type"},
+          {"purpose": "instructor_only", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "learning_management_lesson_note",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "lesson", "value_kind": "reference", "rules": ["required"], "target": "course_lesson"},
+          {"purpose": "course", "value_kind": "reference", "target": "learning_management_course"},
+          {"purpose": "member", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "color", "value_kind": "choice", "rules": ["required"], "choices": ["red", "blue", "green", "yellow", "purple"]},
+          {"purpose": "highlighted_text", "value_kind": "text"},
+          {"purpose": "note", "value_kind": "formatted_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], true],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_live_class",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "duration", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "timezone", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "host", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "start_resource_address", "value_kind": "text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "join_resource_address", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "password", "value_kind": "protected_text"},
+          {"purpose": "time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "batch_name", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "learning_management_batch"},
+          {"purpose": "auto_recording", "value_kind": "choice", "choices": ["number_recording", "local", "cloud"]},
+          {"purpose": "event", "value_kind": "reference", "rules": ["read_only"], "target": "operator_workspace.event", "binding": "shared_model"},
+          {"purpose": "conferencing_provider", "value_kind": "choice", "choices": ["video_conference", "workspace_service_meet"]},
+          {"purpose": "video_conference_account", "value_kind": "reference", "target": "learning_management_video_conference_settings"},
+          {"purpose": "workspace_service_meet_account", "value_kind": "reference", "target": "learning_management_workspace_service_meet_settings"},
+          {"purpose": "meeting_identifier", "value_kind": "text"},
+          {"purpose": "attendees", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "unique_identifier", "value_kind": "text"},
+          {"purpose": "invite_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "retrying", "failed"]},
+          {"purpose": "invite_attempts", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["system_manager", 1, ["read", "write"], false],
+          ["moderator", 1, ["read", "write"], false],
+          ["batch_evaluator", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_live_class_participant",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "live_class", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "learning_management_live_class"},
+          {"purpose": "member", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "member_name", "value_kind": "text"},
+          {"purpose": "duration", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "joined_at", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "left_at", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "member_image", "value_kind": "image_reference"},
+          {"purpose": "member_username", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_option",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "option", "value_kind": "text"},
+          {"purpose": "is_correct", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "learning_management_payment",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "order_identifier", "value_kind": "text"},
+          {"purpose": "payment_identifier", "value_kind": "text"},
+          {"purpose": "amount", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "coupon", "value_kind": "reference", "target": "learning_management_coupon"},
+          {"purpose": "discount_amount", "value_kind": "money"},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["required"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "goods_and_services_tax_registration_number", "value_kind": "text"},
+          {"purpose": "permanent_account_number", "value_kind": "text"},
+          {"purpose": "address", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "payment_received", "value_kind": "boolean"},
+          {"purpose": "billing_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "member", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "payment_for_document_type", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "learning_management_course", "learning_management_batch"]},
+          {"purpose": "payment_for_document", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "payment_for_document_type"},
+          {"purpose": "source", "value_kind": "reference", "target": "learning_management_source"},
+          {"purpose": "payment_for_certificate", "value_kind": "boolean"},
+          {"purpose": "coupon_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "amount_with_goods_and_services_tax", "value_kind": "money"},
+          {"purpose": "original_amount", "value_kind": "money"},
+          {"purpose": "member_consent", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_program",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "authors", "value_kind": "owned_selection_rows", "target": "learning_management_content_author"},
+          {"purpose": "program_courses", "value_kind": "owned_rows", "target": "learning_management_program_course"},
+          {"purpose": "program_members", "value_kind": "owned_rows", "target": "learning_management_program_member"},
+          {"purpose": "title", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "published", "value_kind": "boolean"},
+          {"purpose": "enforce_course_order", "value_kind": "boolean"},
+          {"purpose": "course_count", "value_kind": "whole_number"},
+          {"purpose": "member_count", "value_kind": "whole_number"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read"], false],
+          ["system_manager", 1, ["read", "write"], false],
+          ["moderator", 1, ["read", "write"], false],
+          ["course_creator", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_program_course",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "course", "value_kind": "reference", "rules": ["required"], "target": "learning_management_course"},
+          {"purpose": "course_title", "value_kind": "text", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "learning_management_program_member",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "member", "value_kind": "reference", "rules": ["required"], "access_level": 1, "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "full_name", "value_kind": "text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "progress", "value_kind": "whole_number"}
+        ]
+      },
+      {
+        "concept": "learning_management_programming_exercise",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "problem_statement", "value_kind": "formatted_text", "rules": ["required"]},
+          {"purpose": "starter_code", "value_kind": "expression_or_structured_text"},
+          {"purpose": "language", "value_kind": "choice", "rules": ["required"], "choices": ["expression", "rust", "go"]},
+          {"purpose": "test_cases", "value_kind": "owned_rows", "target": "learning_management_test_case"},
+          {"purpose": "authors", "value_kind": "owned_selection_rows", "target": "learning_management_content_author"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 1, ["read", "write"], false],
+          ["moderator", 1, ["read", "write"], false],
+          ["course_creator", 1, ["read", "write"], false],
+          ["batch_evaluator", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_programming_exercise_submission",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "exercise", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "learning_management_programming_exercise"},
+          {"purpose": "member", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "member_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["unselected", "passed", "failed"]},
+          {"purpose": "test_cases", "value_kind": "owned_rows", "target": "learning_management_test_case_submission"},
+          {"purpose": "code", "value_kind": "expression_or_structured_text", "rules": ["required"]},
+          {"purpose": "full_code", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "exercise_title", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "member_image", "value_kind": "file_reference"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], true]
+        ]
+      },
+      {
+        "concept": "learning_management_question",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "question", "value_kind": "formatted_text"},
+          {"purpose": "learning_management_question_classification", "value_kind": "choice", "choices": ["choices", "user_input", "open_ended"]},
+          {"purpose": "multiple", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "marks", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "option_1", "value_kind": "text"},
+          {"purpose": "is_correct_1", "value_kind": "boolean"},
+          {"purpose": "explanation_1", "value_kind": "text", "access_level": 1},
+          {"purpose": "option_2", "value_kind": "text"},
+          {"purpose": "is_correct_2", "value_kind": "boolean"},
+          {"purpose": "explanation_2", "value_kind": "text", "access_level": 1},
+          {"purpose": "option_3", "value_kind": "text"},
+          {"purpose": "is_correct_3", "value_kind": "boolean"},
+          {"purpose": "explanation_3", "value_kind": "text", "access_level": 1},
+          {"purpose": "option_4", "value_kind": "text"},
+          {"purpose": "is_correct_4", "value_kind": "boolean"},
+          {"purpose": "explanation_4", "value_kind": "text", "access_level": 1},
+          {"purpose": "option_5", "value_kind": "text"},
+          {"purpose": "is_correct_5", "value_kind": "boolean"},
+          {"purpose": "explanation_5", "value_kind": "text", "access_level": 1},
+          {"purpose": "option_6", "value_kind": "text"},
+          {"purpose": "is_correct_6", "value_kind": "boolean"},
+          {"purpose": "explanation_6", "value_kind": "text", "access_level": 1},
+          {"purpose": "option_7", "value_kind": "text"},
+          {"purpose": "is_correct_7", "value_kind": "boolean"},
+          {"purpose": "explanation_7", "value_kind": "text", "access_level": 1},
+          {"purpose": "option_8", "value_kind": "text"},
+          {"purpose": "is_correct_8", "value_kind": "boolean"},
+          {"purpose": "explanation_8", "value_kind": "text", "access_level": 1},
+          {"purpose": "option_9", "value_kind": "text"},
+          {"purpose": "is_correct_9", "value_kind": "boolean"},
+          {"purpose": "explanation_9", "value_kind": "text", "access_level": 1},
+          {"purpose": "option_10", "value_kind": "text"},
+          {"purpose": "is_correct_10", "value_kind": "boolean"},
+          {"purpose": "explanation_10", "value_kind": "text", "access_level": 1},
+          {"purpose": "possibility_1", "value_kind": "text"},
+          {"purpose": "possibility_3", "value_kind": "text"},
+          {"purpose": "possibility_2", "value_kind": "text"},
+          {"purpose": "possibility_4", "value_kind": "text"},
+          {"purpose": "possibility_5", "value_kind": "text"},
+          {"purpose": "possibility_6", "value_kind": "text"},
+          {"purpose": "possibility_7", "value_kind": "text"},
+          {"purpose": "possibility_8", "value_kind": "text"},
+          {"purpose": "possibility_9", "value_kind": "text"},
+          {"purpose": "possibility_10", "value_kind": "text"},
+          {"purpose": "authors", "value_kind": "owned_selection_rows", "target": "learning_management_content_author"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 1, ["read", "write"], false],
+          ["moderator", 1, ["read", "write"], false],
+          ["course_creator", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_quiz",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "questions", "value_kind": "owned_rows", "target": "learning_management_quiz_question"},
+          {"purpose": "lesson", "value_kind": "reference", "rules": ["read_only"], "target": "course_lesson"},
+          {"purpose": "maximum_attempts", "value_kind": "whole_number"},
+          {"purpose": "course", "value_kind": "reference", "rules": ["read_only"], "target": "learning_management_course"},
+          {"purpose": "show_answers", "value_kind": "boolean"},
+          {"purpose": "show_submission_history", "value_kind": "boolean"},
+          {"purpose": "passing_percentage", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "total_marks", "value_kind": "whole_number", "rules": ["required", "read_only", "nonnegative"]},
+          {"purpose": "shuffle_questions", "value_kind": "boolean"},
+          {"purpose": "limit_questions_to", "value_kind": "whole_number"},
+          {"purpose": "duration", "value_kind": "text"},
+          {"purpose": "enable_proctoring", "value_kind": "boolean"},
+          {"purpose": "maximum_violations", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "enable_negative_marking", "value_kind": "boolean"},
+          {"purpose": "marks_to_cut", "value_kind": "whole_number"},
+          {"purpose": "enable_scheduling", "value_kind": "boolean"},
+          {"purpose": "schedule_start", "value_kind": "date_and_time"},
+          {"purpose": "schedule_end", "value_kind": "date_and_time"},
+          {"purpose": "authors", "value_kind": "owned_selection_rows", "target": "learning_management_content_author"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_quiz_question",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "question", "value_kind": "reference", "rules": ["required"], "target": "learning_management_question"},
+          {"purpose": "marks", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "question_detail", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "learning_management_quiz_question_classification", "value_kind": "choice", "rules": ["read_only"], "choices": ["choices", "user_input", "open_ended"]}
+        ]
+      },
+      {
+        "concept": "learning_management_quiz_result",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "question", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "answer", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "is_correct", "value_kind": "boolean"},
+          {"purpose": "question_name", "value_kind": "reference", "target": "learning_management_question"},
+          {"purpose": "question_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "marks", "value_kind": "whole_number"},
+          {"purpose": "marks_out_of", "value_kind": "whole_number", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "learning_management_quiz_submission",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "quiz", "value_kind": "reference", "target": "learning_management_quiz"},
+          {"purpose": "result", "value_kind": "owned_rows", "target": "learning_management_quiz_result"},
+          {"purpose": "score", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "member", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "member_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "course", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "learning_management_course"},
+          {"purpose": "score_out_of", "value_kind": "whole_number", "rules": ["required", "read_only", "nonnegative"]},
+          {"purpose": "percentage", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "passing_percentage", "value_kind": "whole_number", "rules": ["required", "read_only", "nonnegative"]},
+          {"purpose": "quiz_title", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "violation_count", "value_kind": "whole_number"},
+          {"purpose": "submission_reason", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "report", "export", "share", "print", "email"], true],
+          ["moderator", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_quiz_violation_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "quiz_submission", "value_kind": "reference", "rules": ["required"], "target": "learning_management_quiz_submission"},
+          {"purpose": "event_type", "value_kind": "choice", "rules": ["required"], "choices": ["tab_switch", "number_face", "multiple_faces", "focus_loss", "camera_disconnect"]},
+          {"purpose": "severity", "value_kind": "choice", "rules": ["required"], "choices": ["violation", "warning"]},
+          {"purpose": "timestamp", "value_kind": "date_and_time"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["instructor", 0, ["select", "read", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Course delivery and learning assessment",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "learning_management_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "livecode_resource_address", "value_kind": "text"},
+          {"purpose": "mentor_request_creation", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "mentor_request_status_update", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "user_category", "value_kind": "boolean"},
+          {"purpose": "default_home", "value_kind": "boolean"},
+          {"purpose": "send_calendar_invite_for_evaluations", "value_kind": "boolean"},
+          {"purpose": "default_currency", "value_kind": "reference", "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "apply_goods_and_services_tax", "value_kind": "boolean"},
+          {"purpose": "show_usd_equivalent", "value_kind": "boolean"},
+          {"purpose": "exception_country", "value_kind": "owned_selection_rows", "target": "payment_country"},
+          {"purpose": "apply_rounding", "value_kind": "boolean"},
+          {"purpose": "batch_confirmation_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "show_courses", "value_kind": "boolean"},
+          {"purpose": "show_students", "value_kind": "boolean"},
+          {"purpose": "show_assessments", "value_kind": "boolean"},
+          {"purpose": "show_live_class", "value_kind": "boolean"},
+          {"purpose": "show_discussions", "value_kind": "boolean"},
+          {"purpose": "show_emails", "value_kind": "boolean"},
+          {"purpose": "show_dashboard", "value_kind": "boolean"},
+          {"purpose": "certification_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "show_day_view", "value_kind": "boolean"},
+          {"purpose": "unsplash_access_key", "value_kind": "text"},
+          {"purpose": "courses", "value_kind": "boolean"},
+          {"purpose": "batches", "value_kind": "boolean"},
+          {"purpose": "jobs", "value_kind": "boolean"},
+          {"purpose": "statistics", "value_kind": "boolean"},
+          {"purpose": "notifications", "value_kind": "boolean"},
+          {"purpose": "sidebar_items", "value_kind": "owned_rows", "target": "learning_management_sidebar_item"},
+          {"purpose": "signup_content", "value_kind": "formatted_text"},
+          {"purpose": "payment_gateway", "value_kind": "text"},
+          {"purpose": "allow_guest_access", "value_kind": "boolean"},
+          {"purpose": "text_direction", "value_kind": "choice", "choices": ["auto", "left_to_right", "right_to_left"]},
+          {"purpose": "payment_reminder_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "disable_signup", "value_kind": "boolean"},
+          {"purpose": "meta_description", "value_kind": "text"},
+          {"purpose": "meta_image", "value_kind": "image_reference"},
+          {"purpose": "meta_keywords", "value_kind": "text"},
+          {"purpose": "persona_captured", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "certified_members", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "prevent_skipping_videos", "value_kind": "boolean"},
+          {"purpose": "programming_exercises", "value_kind": "boolean"},
+          {"purpose": "contact_us_email", "value_kind": "text"},
+          {"purpose": "contact_us_resource_address", "value_kind": "text"},
+          {"purpose": "certifications", "value_kind": "boolean"},
+          {"purpose": "disable_installed_web_application", "value_kind": "boolean"},
+          {"purpose": "send_notification_for_published_courses", "value_kind": "choice", "choices": ["unselected", "email", "in_application"]},
+          {"purpose": "send_notification_for_published_batches", "value_kind": "choice", "choices": ["unselected", "email", "in_application"]},
+          {"purpose": "allow_job_posting", "value_kind": "boolean"},
+          {"purpose": "demo_data_present", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "send_payment_reminders_for_batch", "value_kind": "boolean"},
+          {"purpose": "send_payment_reminders_for_course", "value_kind": "boolean"},
+          {"purpose": "lesson_dwell_time", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "enforce_video_completion", "value_kind": "boolean"},
+          {"purpose": "enforce_quiz_completion", "value_kind": "boolean"},
+          {"purpose": "enforce_assignment_completion", "value_kind": "boolean"},
+          {"purpose": "enforce_programming_exercise_completion", "value_kind": "boolean"},
+          {"purpose": "enforce_quiz_passing", "value_kind": "boolean"},
+          {"purpose": "enforce_open_ended_quiz_passing", "value_kind": "boolean"},
+          {"purpose": "enforce_assignment_passing", "value_kind": "boolean"},
+          {"purpose": "enforce_programming_exercise_passing", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_sidebar_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "icon", "value_kind": "text"},
+          {"purpose": "web_page", "value_kind": "reference", "target": "web_publishing.web_page", "binding": "shared_model"},
+          {"purpose": "route", "value_kind": "text"},
+          {"purpose": "title", "value_kind": "text"},
+          {"purpose": "display_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "is_standard", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "item_type", "value_kind": "choice", "choices": ["built_in", "web_page", "route", "external"]},
+          {"purpose": "hidden", "value_kind": "boolean"},
+          {"purpose": "resource_address", "value_kind": "text"},
+          {"purpose": "open_in_new_window", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "learning_management_source",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "source", "value_kind": "text", "rules": ["unique"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["select", "read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_test_case",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "input", "value_kind": "text"},
+          {"purpose": "expected_output", "value_kind": "text", "rules": ["required"], "access_level": 1},
+          {"purpose": "hidden", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "learning_management_test_case_submission",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "input", "value_kind": "text"},
+          {"purpose": "expected_output", "value_kind": "text"},
+          {"purpose": "output", "value_kind": "text"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["passed", "failed"]}
+        ]
+      },
+      {
+        "concept": "learning_management_timetable_legend",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "color", "value_kind": "colour", "rules": ["required"]},
+          {"purpose": "label", "value_kind": "text", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "learning_management_timetable_template",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text"},
+          {"purpose": "timetable", "value_kind": "owned_rows", "target": "learning_management_batch_timetable"},
+          {"purpose": "timetable_legends", "value_kind": "owned_rows", "target": "learning_management_timetable_legend"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "learning_management_video_watch_duration",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "lesson", "value_kind": "reference", "rules": ["required"], "target": "course_lesson"},
+          {"purpose": "chapter", "value_kind": "reference", "rules": ["read_only"], "target": "course_chapter"},
+          {"purpose": "course", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "learning_management_course"},
+          {"purpose": "member", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "member_name", "value_kind": "text"},
+          {"purpose": "member_image", "value_kind": "image_reference"},
+          {"purpose": "member_username", "value_kind": "text"},
+          {"purpose": "source", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "watch_time", "value_kind": "text", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["course_creator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], true]
+        ]
+      },
+      {
+        "concept": "learning_management_video_conference_settings",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "account_identifier", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "client_identifier", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "client_secret", "value_kind": "protected_text", "rules": ["required"]},
+          {"purpose": "member", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "member_name", "value_kind": "text"},
+          {"purpose": "account_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "member_image", "value_kind": "image_reference"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["moderator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["batch_evaluator", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], true]
+        ]
+      },
+      {
+        "concept": "payment_country",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "country", "value_kind": "reference", "target": "geography.country", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "preferred_function",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "function", "value_kind": "reference", "rules": ["bypasses_value_selection_restrictions"], "target": "function"}
+        ]
+      },
+      {
+        "concept": "preferred_industry",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "industry", "value_kind": "reference", "rules": ["required"], "target": "industry"}
+        ]
+      },
+      {
+        "concept": "related_courses",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "course", "value_kind": "reference", "target": "learning_management_course"}
+        ]
+      },
+      {
+        "concept": "scheduled_flow",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "lesson", "value_kind": "reference", "rules": ["required"], "target": "course_lesson"},
+          {"purpose": "start_time", "value_kind": "time_of_day"},
+          {"purpose": "end_time", "value_kind": "time_of_day"},
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "lesson_title", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "skills",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "skill_name", "value_kind": "reference", "rules": ["required"], "target": "user_skill"}
+        ]
+      },
+      {
+        "concept": "user_skill",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "skill", "value_kind": "text", "rules": ["unique"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["learning_management_student", 0, ["select", "read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "work_experience",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "company", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "location", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "from_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "to_date", "value_kind": "civil_day"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "current", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "video_conference_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enable", "value_kind": "boolean"},
+          {"purpose": "client_identifier", "value_kind": "text"},
+          {"purpose": "client_secret", "value_kind": "protected_text"},
+          {"purpose": "account_identifier", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Customer messaging contacts",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "business_messaging_contact",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "contact_name", "value_kind": "text"},
+          {"purpose": "mobile_number", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "is_read", "value_kind": "boolean"},
+          {"purpose": "last_message", "value_kind": "long_text"},
+          {"purpose": "email", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  }
+]

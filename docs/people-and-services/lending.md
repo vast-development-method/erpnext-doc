@@ -1,0 +1,62 @@
+# Employee recovery, lending accrual and allocation
+
+## Manage an employee loan through payroll
+
+The lending service owns principal, schedules, accruals, due demands and their settlement. The salary service owns the pay period, cash wage and the link from each slip loan line to its submitted repayment. An employee identifier, company and named loan must travel across that boundary. Read the [payroll calculations](payroll-and-benefits.md) for salary composition and how the payroll payable is credited.
+
+| Operation | Required context | Result or rejection |
+|---|---|---|
+| Prepare obligations | Lending enabled, employee, company, salary end date | Select submitted loans marked for salary recovery with a state other than Closed. For term loans prepare interest and, where available, due demands through that date. Without lending the guarded call returns immediately. |
+| Price salary recovery | Current loan obligations at salary end | Populate an empty slip collection from loans with nonzero payable amounts. For each retained row reject a total payment above that loan's freshly calculated payable. Aggregate principal, interest and total payment independently. An edited total alone does not redistribute the two component fields. |
+| Submit recovery | Nonzero row, slip posting date, salary end date, loan/product, employee, company, payroll payable | Create, save and submit a normal loan repayment. Book using the slip posting date and value it at salary period end. Use the batch payroll payable where there is a batch, otherwise use the company default. Store the repayment identity on the originating row. |
+| Cancel recovery | Slip row with linked repayment | Cancel that precise repayment. Rows without a repayment identity have no cancellation action in this routine. |
+
+A January slip posted on 2 February values the loan at 31 January. Given 200 of principal and 15 of interest due, a slip loan row of 216 fails review even if February interest has accrued. A cash payroll transfer for the employee must take the recovered amount into account exactly once. Replaying an interrupted submission needs a durable row-to-repayment association and a duplicate-effect test. The row handler itself does not establish replay safety.
+
+## Accrue a term loan
+
+The quote service consumes company day-count policy, pending principal, annual percentage and inclusive start and end dates. For the term helper, actual days equal the calendar difference plus one. Divide annual interest by 365 for Actual/365 and 30/365, by 360 for Actual/360 and 30/360, otherwise by the number of days in the year containing the posting date. For the two 30-day conventions the amount helper replaces the supplied count with 30, including when the dates cover a shorter interval. This is the helper's rule. A split across years must follow the selected accrual schedule's accrual intervals.
+
+For a 36,000 principal at 10% over 1–10 March on Actual/360, daily interest is 10 and the accrued amount is 100. On 30/360 the same helper produces 300. With Actual/Actual, 36,600 at 10% for one day in a leap posting year produces 10. The accrual entry builder defaults monetary precision to 2 when unset, rounds the amount for the positivity test, and creates only a positive rounded accrual. Preserve the owner, loan, base, rate, dates, accrual type, schedule and optional disbursement links.
+
+For normal interest on a performing loan with per-document accounting enabled, debit the product's accrued-interest receivable and credit its interest income. Cancellation reverses the accounting path. Missing required accounts reject posting. The accounting-disabled branch omits the per-document posting. With monthly consolidation enabled the consolidate/reverse-delta process owns both submitted and cancelled amounts. The write-off date, non-performing asset suspense and penal/additional-interest accounts introduce separate decisions. Do not add the 100 to installment principal merely because interest accrued.
+
+## Apply a payment to demands
+
+A loan repayment records the loan, product, value date, repayment kind and amount tendered. Each allocation needs the specific outstanding demand, its component, allocated amount and any partner share. Written-off loans select the written-off collection order first. Specified settlement/adjustment types and qualifying settled loans select a settlement order next. Non-performing loans use the substandard order. Remaining loans use the standard order. The product can supply the offset order, with company configuration as fallback. Missing the chosen order on both product and company rejects the repayment.
+
+Apply components in their configured sequence while funds remain. For example, with a term loan, two instalment demands (interest 20 and principal 100), a standard sequence whose first two categories are Normal then Principal, and a 70 normal repayment, consume interest 20 then principal 50. Remaining principal on the due demand is 50. Reordering the same categories so Principal comes first consumes 70 of principal and leaves the 20 interest demand open. Select the actual categories from configuration. The category named Normal includes the interest subtype of an equated instalment demand; the similarly named Interest category has a distinct partial-settlement path. Return unapplied cash to the enclosing repayment policy for its excess handling. A successful repayment must retain demand allocations so cancellation can undo the actual split at the original precision.
+
+## Additional lending controls
+
+The logical model includes Loan Product, disbursement, collateral, repayment schedules, demand offset orders, write-off, classification and restructuring declarations. Full loss provisioning, partner settlement, consolidation deltas across a closed month, foreclosure, waiver allocation and concurrent backdated reposts need integrated tests before claiming interchangeable lending behaviour.
+
+## Underwrite a secured application
+
+Resolve the product within the application's company. An employee applicant must meet the employee-side company validation. A secured application values each proposed pledge using its quantity and supplied security price, or a valid price fetched for the security. Missing quantity or price rejects. Compute gross security value as quantity × price. For each row convert gross × (1 − haircut/100) to an integer before aggregating loanable value. With three units at 123.45 and a 15% haircut, gross is 370.35 and that row contributes 314 to the proposed ceiling. Applying the integer conversion only after aggregating multiple rows can change the allowed amount.
+
+Check requested principal against every applicable nonzero ceiling: the product max, the proposed securities max and applicant exposure. The exposure test compares existing principal plus request with sanction × (1 + product tolerance/100). With a 100,000 sanction, 2% tolerance and 80,000 existing, a request of 22,000 meets the sanction threshold while 22,001 exceeds it. Product and collateral caps still apply independently. If a noncancelled loan already references the application, a later status change on the submitted application fails. The separate security assignment validates that at least one security is assigned, rejects duplicate security identities and sums gross and post-haircut values separately.
+
+For a fixed periodic payment, this application branch chooses Monthly and enforces a nonzero amount no greater than principal. For annual percentage r and positive monthly rate i=r/1200, require payment A greater than initial monthly interest P×i. Estimated periods = ceiling(log(A/(A−P×i)) / log(1+i)). At zero rate the branch stores P/A before the period count is stored at its defined precision. The calculation of an application estimate and the dated repayment schedule belong to different services; holidays, effective disbursement, broken-period interest and repricing require their own cash-flow cases.
+
+## Disbursement and drawdown
+
+Store each disbursement as a distinct event with loan, borrower, company, effective disbursement date, accounting date, amount, receiving or bank account, optional charges and deposit. Reject zero. For a term loan or secured line of credit, compare the amount with the drawable amount based on limit and security. A line of credit also needs a disbursement date within the approved window, inclusive. A nonzero available limit is a separate upper bound. On a term loan the repayment start cannot be before disbursement. A fully approved principal is a limit: it does not create cash movement on its own.
+
+A further draw on a partially disbursed term loan runs interest accrual through the disbursement date, submits the new repayment schedule and updates affected schedules and future disbursements. Update the loan's amounts and status, record pledged security usage, log line-of-credit limit changes, retain a withheld deposit when configured, create charge demands and post the accounting effect. Cancellation reverses amounts, affected repayment schedules and security usage, handles linked charge credit notes, removes the retained deposit and reverses the accounting movement. Preserve allocation to the specific draw where multiple draws share a loan.
+
+## Restructure or write off an obligation
+
+| Decision | Rules and resulting records |
+|---|---|
+| Initiate a restructure | A loan cannot have another initiated restructure. Store effective date, overdue principal, interest, penalties, charges, proposed security deposit allocation, waiver selections and replacement loan terms. A proposal remains distinguishable from an approved schedule. |
+| Calculate replacement principal | Start with pending principal less principal adjusted. For a normal restructure add only the remaining normal interest, unaccrued interest and penal interest elected for capitalisation. Add positive outstanding charge balances elected for capitalisation. Round the result to two decimal places at this step. |
+| Approve or reject | Rejection marks the proposed repayment schedule rejected. Approval activates it, applies the corresponding adjustments and updates the loan. A normal restructure updates deposit allocation, totals, charge demands and restructure count. An instalment-skip approval checks for demands generated since the request before changing the payment terms. |
+| Write off principal | Calculate pending principal at currency precision, with two decimals as the default. For an ordinary write-off, default a missing write-off amount to that principal. The amount must equal the entire calculated pending principal. The settlement variant validates the supplied amount against the same equality. |
+| Post and cancel the write-off | With loan accounting enabled, debit the write-off expense and credit the borrower-linked loan principal account for the same amount. Record the loan and cost centre on both sides. Amounts due, unbooked interest, charges, waivers and suspense balances have separate handling. When cancelled, reverse posting and subtract the written-off amount. Preserve Written Off if another submitted write-off survives, otherwise restore Disbursed. |
+
+Suppose pending principal is 20,000 and 500 is already adjusted. Capitalise 120 normal interest and 35 of positive charges, waive 15 of penalties and leave 70 of unaccrued interest uncapitalised. The replacement principal is 19,655. A waiver is an identifiable change in the outstanding balance and cannot be added again as a capitalised amount. On an unrelated ordinary write-off with principal 4,200, an entry for only 4,000 fails. A 4,200 write-off creates equal expense debit and loan credit when accounting is enabled. Future collections on the written-off account retain their own recovery date and allocations.
+
+## Collateral shortfall scope
+
+A loan-specific shortfall belongs to that loan. An applicant-level shortfall covers the borrower independently of any specific loan. When updating a pending borrower shortfall, select only a pending record with the borrower and no loan. A loan-specific row may also carry the borrower identity and must survive an applicant-wide refresh. Track evaluation time, originating assessment, outstanding amount, collateral value, absolute shortage and shortage percentage. Retain the effective collateral price and eligible loan-to-value ratio. A security's own nonzero ratio takes precedence over its security type's ratio.

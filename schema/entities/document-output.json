@@ -1,0 +1,214 @@
+[
+  {
+    "entity": "document_output.letter_head",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "maximum_attachments": 3,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "letter_head_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "source", "type": "enumeration", "values": ["Image", "HTML"], "visible_when": ["field_has_value", "letter_head_name"]},
+      {"field": "disabled", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "letter_head_name"]},
+      {"field": "is_default", "type": "boolean", "searchable": true, "default": "0", "visible_when": ["field_has_value", "letter_head_name"]},
+      {"field": "image", "type": "image_file_reference", "visible_when": ["and", ["current_field", "letter_head_name"], ["strict_equal", ["current_field", "source"], ["literal", "Image"]]]},
+      {"field": "content", "type": "formatted_markup", "visible_when": ["and", ["not", ["current_field", "is_new_record"]], ["strict_equal", ["current_field", "source"], ["literal", "HTML"]]]},
+      {"field": "footer", "type": "formatted_markup", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "align", "type": "enumeration", "values": ["Left", "Right", "Center"], "default": "Left"},
+      {"field": "image_height", "type": "decimal"},
+      {"field": "image_width", "type": "decimal"},
+      {"field": "footer_image", "type": "image_file_reference"},
+      {"field": "footer_image_height", "type": "decimal"},
+      {"field": "footer_image_width", "type": "decimal"},
+      {"field": "footer_align", "type": "enumeration", "values": ["Left", "Right", "Center"]},
+      {"field": "footer_source", "type": "enumeration", "values": ["Image", "HTML"], "default": "HTML", "visible_when": ["field_has_value", "letter_head_name"]},
+      {"field": "header_script", "type": "expression_or_structured_text", "visible_when": ["and", ["not", ["current_field", "is_new_record"]], ["strict_equal", ["current_field", "source"], ["literal", "HTML"]]]},
+      {"field": "footer_script", "type": "expression_or_structured_text", "visible_when": ["and", ["not", ["current_field", "is_new_record"]], ["strict_equal", ["current_field", "footer_source"], ["literal", "HTML"]]]},
+      {"field": "custom_stylesheet", "type": "expression_or_structured_text", "visible_when": ["strict_equal", ["current_field", "source"], ["literal", "HTML"]]},
+      {"field": "standard", "type": "enumeration", "configuration_variant": true, "required": true, "values": ["no", "yes"]},
+      {"field": "letter_head_for", "type": "enumeration", "configuration_variant": true, "required": true, "values": ["record_type", "report"]},
+      {"field": "module_identifier", "type": "entity_reference", "configuration_variant": true, "target": "information_management.module_def"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Letter Head Image", "visible_when": ["and", ["current_field", "letter_head_name"], ["strict_equal", ["current_field", "source"], ["literal", "Image"]]]},
+      {"control": "section", "purpose": "Header", "visible_when": ["and", ["strict_equal", ["current_field", "source"], ["literal", "HTML"]], ["current_field", "letter_head_name"]]},
+      {"control": "section", "purpose": "Footer", "visible_when": ["and", ["strict_equal", ["current_field", "footer_source"], ["literal", "HTML"]], ["current_field", "letter_head_name"]]},
+      {"control": "section", "purpose": "Footer Image", "visible_when": ["and", ["strict_equal", ["current_field", "footer_source"], ["literal", "Image"]], ["current_field", "letter_head_name"]]},
+      {"control": "section", "purpose": "Scripts", "visible_when": ["not", ["current_field", "is_new_record"]], "expanded_when": ["or", ["current_field", "header_script"], ["current_field", "footer_script"]]},
+      {"control": "formatted_information", "purpose": "Instructions"}
+    ]
+  },
+  {
+    "entity": "document_output.network_printer_settings",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "server_network_address", "type": "short_text", "required": true, "default": "localhost"},
+      {"field": "port", "type": "integer", "required": true, "default": "631"},
+      {"field": "printer_name", "type": "enumeration", "required": true}
+    ]
+  },
+  {
+    "entity": "document_output.print_format",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "visible_when": ["coercive_equal", ["current_field", "print_format_for"], ["literal", "Entity type"]], "required_when": ["coercive_equal", ["current_field", "print_format_for"], ["literal", "Entity type"]]},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def"},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "standard", "type": "enumeration", "required": true, "omit_on_copy": true, "searchable": true, "values": ["No", "Yes"], "default": "No"},
+      {"field": "custom_format", "type": "boolean", "default": "0", "read_only_when": ["strict_equal", ["current_field", "print_format_for"], ["literal", "Report"]]},
+      {"field": "print_format_type", "type": "enumeration", "values": ["Document template", "JS"], "default": "Document template", "visible_when": ["field_has_value", "custom_format"]},
+      {"field": "raw_printing", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "custom_format"]},
+      {"field": "structured_markup", "type": "expression_or_structured_text", "visible_when": ["not", ["current_field", "raw_printing"]], "required_when": ["current_field", "custom_format"]},
+      {"field": "raw_commands", "type": "expression_or_structured_text", "visible_when": ["field_has_value", "raw_printing"], "required_when": ["field_has_value", "raw_printing"]},
+      {"field": "align_labels_right", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "print_format_builder_beta"]]},
+      {"field": "show_section_headings", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "print_format_builder_beta"]]},
+      {"field": "line_breaks", "type": "boolean", "default": "0", "visible_when": ["not", ["current_field", "print_format_builder_beta"]]},
+      {"field": "default_print_language_identifier", "type": "entity_reference", "target": "information_management.language"},
+      {"field": "preview_image", "type": "image_file_reference", "form_hidden": true, "omit_on_copy": true},
+      {"field": "font", "type": "short_text", "visible_when": ["not", ["current_field", "custom_format"]]},
+      {"field": "label_color", "type": "color", "visible_when": ["not", ["current_field", "custom_format"]]},
+      {"field": "value_color", "type": "color", "visible_when": ["not", ["current_field", "custom_format"]]},
+      {"field": "stylesheet", "type": "expression_or_structured_text"},
+      {"field": "format_data", "type": "expression_or_structured_text", "form_hidden": true},
+      {"field": "classic_format_data", "type": "expression_or_structured_text", "form_read_only": true, "form_hidden": true, "omit_on_copy": true},
+      {"field": "print_format_builder", "type": "boolean", "form_hidden": true, "default": "0"},
+      {"field": "absolute_value", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "entity_type_identifier"]},
+      {"field": "print_format_builder_beta", "type": "boolean", "default": "0"},
+      {"field": "margin_top", "type": "decimal", "default": "15"},
+      {"field": "margin_bottom", "type": "decimal", "default": "15"},
+      {"field": "margin_left", "type": "decimal", "default": "15"},
+      {"field": "margin_right", "type": "decimal", "default": "15"},
+      {"field": "font_size", "type": "integer", "form_hidden": true, "default": "14"},
+      {"field": "page_number", "type": "enumeration", "values": ["Hide", "Top Left", "Top Center", "Top Right", "Bottom Left", "Bottom Center", "Bottom Right"], "default": "Hide"},
+      {"field": "show_label_colon", "type": "boolean", "default": "0"},
+      {"field": "portable_document_generator", "type": "enumeration", "values": ["", "document layout engine", "browser layout engine", "paged layout engine", "typesetting engine", "stylesheet layout engine"]},
+      {"field": "paper_size", "type": "enumeration", "values": ["", "A4", "A5", "A3", "Letter", "Legal", "Receipt 80 mm", "Receipt 58 mm"], "visible_when": ["and", ["and", ["not", ["current_field", "print_format_builder_beta"]], ["not", ["current_field", "raw_printing"]]], ["call", ["member", ["list", ["literal", "browser layout engine"], ["literal", "paged layout engine"]], "includes"], ["or", ["current_field", "portable_document_generator"], ["optional_member", ["current_field", "loaded_context"], "portable_document_generator"]]]]},
+      {"field": "print_format_for", "type": "enumeration", "values": ["Entity type", "Report"], "default": "Entity type"},
+      {"field": "report_identifier", "type": "entity_reference", "target": "information_management.report", "visible_when": ["coercive_equal", ["current_field", "print_format_for"], ["literal", "Report"]], "required_when": ["coercive_equal", ["current_field", "print_format_for"], ["literal", "Report"]]},
+      {"field": "draft_data", "type": "expression_or_structured_text", "form_read_only": true, "form_hidden": true, "omit_on_copy": true}
+    ],
+    "presentation": [
+      {"control": "section", "visible_when": ["or", ["current_field", "custom_format"], ["coercive_equal", ["current_field", "print_format_for"], ["literal", "Report"]]]},
+      {"control": "section", "purpose": "Style Settings", "visible_when": ["not", ["current_field", "custom_format"]]},
+      {"control": "section", "visible_when": ["and", ["not", ["current_field", "raw_printing"]], ["not", ["current_field", "print_format_builder_beta"]]]},
+      {"control": "formatted_information", "purpose": "Custom HTML Help"},
+      {"control": "section", "visible_when": ["field_has_value", "custom_format"]},
+      {"control": "formatted_information", "purpose": "Print Format Help", "visible_when": ["field_has_value", "custom_format"]}
+    ]
+  },
+  {
+    "entity": "document_output.print_format_field_template",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "default_template_field", "type": "short_text"},
+      {"field": "template", "type": "expression_or_structured_text", "visible_when": ["not", ["current_field", "standard"]], "required_when": ["not", ["current_field", "standard"]]},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "visible_when": ["current_field", "standard"], "required_when": ["current_field", "standard"]},
+      {"field": "standard", "type": "boolean", "default": "0", "visible_when": ["context", "design_mode_enabled"]},
+      {"field": "template_file", "type": "short_text", "visible_when": ["current_field", "standard"], "required_when": ["current_field", "standard"]}
+    ]
+  },
+  {
+    "entity": "document_output.print_format_snippet",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "export", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "snippet_type", "type": "enumeration", "required": true, "values": ["Section", "Field"], "default": "Section"},
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "content", "type": "expression_or_structured_text", "required": true},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "visible_when": ["current_field", "standard"], "required_when": ["current_field", "standard"]},
+      {"field": "standard", "type": "boolean", "default": "0", "visible_when": ["context", "design_mode_enabled"]}
+    ]
+  },
+  {
+    "entity": "document_output.print_heading",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "print_heading", "type": "short_text", "required": true, "unique": true, "editable_after_posting": true},
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "document_output.print_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "send_print_as_portable_document", "type": "boolean", "default": "1"},
+      {"field": "repeat_header_footer", "type": "boolean", "default": "1"},
+      {"field": "print_generated_portable_document", "type": "boolean", "default": "0"},
+      {"field": "portable_document_page_size", "type": "enumeration", "values": ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "B10", "C5E", "Comm10E", "DLE", "Executive", "Folio", "Ledger", "Legal", "Letter", "Tabloid", "Custom"], "default": "A4"},
+      {"field": "with_letterhead", "type": "boolean", "default": "1"},
+      {"field": "allow_print_for_draft", "type": "boolean", "default": "1"},
+      {"field": "add_draft_heading", "type": "boolean", "default": "1"},
+      {"field": "allow_page_break_inside_tables", "type": "boolean", "default": "0"},
+      {"field": "allow_print_for_cancelled", "type": "boolean", "default": "0"},
+      {"field": "enable_print_server", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "enable_print_server"], "required_when": ["field_has_value", "enable_print_server"]},
+      {"field": "enable_raw_printing", "type": "boolean", "default": "0"},
+      {"field": "print_style_identifier", "type": "entity_reference", "target": "document_output.print_style", "default": "Redesign"},
+      {"field": "font", "type": "enumeration", "values": ["Default", "Helvetica Neue", "Arial", "Helvetica", "Inter", "Verdana", "Monospace"], "default": "Default"},
+      {"field": "font_size", "type": "decimal"},
+      {"field": "portable_document_page_height", "type": "decimal", "visible_when": ["coercive_equal", ["current_field", "portable_document_page_size"], ["literal", "Custom"]]},
+      {"field": "portable_document_page_width", "type": "decimal", "visible_when": ["coercive_equal", ["current_field", "portable_document_page_size"], ["literal", "Custom"]]},
+      {"field": "portable_document_generator", "type": "enumeration", "values": ["document layout engine", "browser layout engine", "paged layout engine"], "default": "browser layout engine"},
+      {"field": "maximum_bulk_print_records", "type": "integer", "nonnegative": true, "default": "100"},
+      {"field": "maximum_concurrent_bulk_exports", "type": "integer", "nonnegative": true, "default": "5"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "PDF Settings"},
+      {"control": "section", "purpose": "Page Settings"},
+      {"control": "section", "purpose": "Print Server"},
+      {"control": "section", "purpose": "Raw Printing"},
+      {"control": "section", "purpose": "Print Style"},
+      {"control": "formatted_information", "purpose": "Print Style Preview"},
+      {"control": "section", "purpose": "Fonts"}
+    ]
+  },
+  {
+    "entity": "document_output.print_style",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "print_style_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "standard", "type": "boolean", "default": "0"},
+      {"field": "stylesheet", "type": "expression_or_structured_text", "required": true},
+      {"field": "preview", "type": "image_file_reference", "form_hidden": true}
+    ]
+  }
+]

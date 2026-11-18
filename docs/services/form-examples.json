@@ -1,0 +1,321 @@
+[
+  {
+    "case_identifier": "ordinary-product-discount",
+    "contract_identifier": "commercial-product-form-calculation",
+    "event": "Quantity changed",
+    "given": {
+      "quantity": "12",
+      "rate": "25",
+      "discount_percentage": "10"
+    },
+    "expected": {
+      "gross_amount": "300",
+      "discount_amount": "30",
+      "net_amount": "270"
+    }
+  },
+  {
+    "case_identifier": "full-product-discount",
+    "contract_identifier": "commercial-product-form-calculation",
+    "event": "Discount changed",
+    "given": {
+      "gross_amount": "300",
+      "discount_percentage": "100"
+    },
+    "expected": {
+      "discount_amount": "300",
+      "net_amount": "0",
+      "parent_net_total": "0"
+    }
+  },
+  {
+    "case_identifier": "cleared-product-discount",
+    "contract_identifier": "commercial-product-form-calculation",
+    "event": "Discount changed",
+    "given": {
+      "gross_amount": "300",
+      "discount_percentage": "0",
+      "prior_discount_amount": "30"
+    },
+    "expected": {
+      "discount_amount": "0",
+      "net_amount": "300"
+    }
+  },
+  {
+    "case_identifier": "zero-amount-retains-stale-discount",
+    "contract_identifier": "commercial-product-form-calculation",
+    "event": "Quantity changed",
+    "given": {
+      "quantity": "0",
+      "rate": "25",
+      "discount_percentage": "10",
+      "prior_discount_amount": "30",
+      "prior_net_amount": "270"
+    },
+    "expected": {
+      "gross_amount": "0",
+      "discount_amount": "30",
+      "net_amount": "270",
+      "parent_gross_total": "0",
+      "parent_net_total": "270"
+    }
+  },
+  {
+    "case_identifier": "empty-product-totals",
+    "contract_identifier": "commercial-product-form-calculation",
+    "event": "Parent total refresh",
+    "given": {
+      "products": []
+    },
+    "expected": {
+      "gross_total": "0",
+      "net_total": "0"
+    }
+  },
+  {
+    "case_identifier": "zero-net-without-positive-discount-falls-back",
+    "contract_identifier": "commercial-product-form-calculation",
+    "event": "Parent total refresh",
+    "given": {
+      "gross_total": "300",
+      "summed_net_amount": "0",
+      "any_positive_discount": false
+    },
+    "expected": {
+      "net_total": "300"
+    }
+  },
+  {
+    "case_identifier": "returned-rate-replaces-nonzero-rate",
+    "contract_identifier": "commercial-product-form-calculation",
+    "event": "Product lookup response",
+    "given": {
+      "current_rate": "90",
+      "returned_rate": "125",
+      "product_unchanged": true
+    },
+    "expected": {
+      "rate": "125",
+      "recalculate_amount_and_discount": true
+    }
+  },
+  {
+    "case_identifier": "missing-returned-rate-becomes-zero",
+    "contract_identifier": "commercial-product-form-calculation",
+    "event": "Product lookup response",
+    "given": {
+      "current_rate": "90",
+      "returned_rate": null,
+      "product_unchanged": true
+    },
+    "expected": {
+      "rate": "0"
+    }
+  },
+  {
+    "case_identifier": "explicit-zero-returned-rate-preserved",
+    "contract_identifier": "commercial-product-form-calculation",
+    "event": "Product lookup response",
+    "given": {
+      "current_rate": "90",
+      "returned_rate": "0",
+      "product_unchanged": true
+    },
+    "expected": {
+      "rate": "0"
+    }
+  },
+  {
+    "case_identifier": "changed-product-response-discarded",
+    "contract_identifier": "commercial-product-form-calculation",
+    "event": "Product lookup response",
+    "given": {
+      "requested_product": "Product One",
+      "current_product": "Product Two",
+      "returned_rate": "125"
+    },
+    "expected": {
+      "apply_response": false
+    }
+  },
+  {
+    "case_identifier": "reselected-product-old-response-admitted",
+    "contract_identifier": "commercial-product-form-calculation",
+    "event": "Product lookup response",
+    "given": {
+      "selection_sequence": [
+        "Product One",
+        "Product Two",
+        "Product One"
+      ],
+      "response_from_first_request": true
+    },
+    "expected": {
+      "identity_guard_allows_response": true
+    }
+  },
+  {
+    "case_identifier": "contextual-zero-rate-falls-back",
+    "contract_identifier": "commercial-product-form-calculation",
+    "event": "Resolve product rate",
+    "given": {
+      "contextual_rate": "0",
+      "standard_rate": "90"
+    },
+    "expected": {
+      "service_rate": "90"
+    }
+  },
+  {
+    "case_identifier": "no-price-list-standard-rate",
+    "contract_identifier": "commercial-product-form-calculation",
+    "event": "Resolve product rate",
+    "given": {
+      "price_list": null,
+      "standard_rate": "90"
+    },
+    "expected": {
+      "service_rate": "90"
+    }
+  },
+  {
+    "case_identifier": "stage-response-overwrites-probability",
+    "contract_identifier": "opportunity-stage-probability-refresh",
+    "event": "Stage lookup response",
+    "given": {
+      "current_probability": "40",
+      "returned_probability": "75"
+    },
+    "expected": {
+      "probability": "75"
+    }
+  },
+  {
+    "case_identifier": "late-stage-response-overwrites-newer-stage",
+    "contract_identifier": "opportunity-stage-probability-refresh",
+    "event": "Out-of-order stage lookup responses",
+    "given": {
+      "selected_stage": "Advanced",
+      "response_order": [
+        {
+          "stage": "Advanced",
+          "probability": "75"
+        },
+        {
+          "stage": "Early",
+          "probability": "10"
+        }
+      ]
+    },
+    "expected": {
+      "selected_stage": "Advanced",
+      "probability": "10"
+    }
+  },
+  {
+    "case_identifier": "new-opportunity-has-no-integration-actions",
+    "contract_identifier": "opportunity-quotation-and-customer-actions",
+    "event": "Form loaded",
+    "given": {
+      "new_unsaved_record": true
+    },
+    "expected": {
+      "request_settings": false,
+      "new_actions": []
+    }
+  },
+  {
+    "case_identifier": "disabled-integration-adds-no-actions",
+    "contract_identifier": "opportunity-quotation-and-customer-actions",
+    "event": "Form loaded",
+    "given": {
+      "new_unsaved_record": false,
+      "integration_enabled": false
+    },
+    "expected": {
+      "new_actions": []
+    }
+  },
+  {
+    "case_identifier": "enabled-integration-with-customer",
+    "contract_identifier": "opportunity-quotation-and-customer-actions",
+    "event": "Register actions",
+    "given": {
+      "integration_enabled": true,
+      "customer_link_present": true
+    },
+    "expected": {
+      "new_actions": [
+        "Create Quotation",
+        "View Customer"
+      ]
+    }
+  },
+  {
+    "case_identifier": "repeat-registration-duplicates-actions",
+    "contract_identifier": "opportunity-quotation-and-customer-actions",
+    "event": "Register actions twice",
+    "given": {
+      "integration_enabled": true,
+      "customer_link_present": true
+    },
+    "expected": {
+      "action_counts": {
+        "Create Quotation": 2,
+        "View Customer": 2
+      }
+    }
+  },
+  {
+    "case_identifier": "empty-quotation-destination-shows-failure",
+    "contract_identifier": "opportunity-quotation-and-customer-actions",
+    "event": "Create quotation selected",
+    "given": {
+      "returned_destination": ""
+    },
+    "expected": {
+      "open_new_context": false,
+      "show_failure_notice": true
+    }
+  },
+  {
+    "case_identifier": "quotation-destination-opens-new-context",
+    "contract_identifier": "opportunity-quotation-and-customer-actions",
+    "event": "Create quotation selected",
+    "given": {
+      "returned_destination": "Nonempty authorised quotation destination"
+    },
+    "expected": {
+      "open_new_context": true,
+      "quotation_submitted": false
+    }
+  },
+  {
+    "case_identifier": "zero-product-quantity-prefills-one",
+    "contract_identifier": "opportunity-quotation-and-customer-actions",
+    "event": "Prefill quotation products",
+    "given": {
+      "linked_inventory_product": true,
+      "commercial_quantity": "0",
+      "rate": "25",
+      "discount_percentage": "10"
+    },
+    "expected": {
+      "quantity": "1",
+      "price_list_rate": "25",
+      "discount_percentage": "10"
+    }
+  },
+  {
+    "case_identifier": "unlinked-product-skipped-in-quotation",
+    "contract_identifier": "opportunity-quotation-and-customer-actions",
+    "event": "Prefill quotation products",
+    "given": {
+      "linked_inventory_product": false
+    },
+    "expected": {
+      "row_added": false
+    }
+  }
+]

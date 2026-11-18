@@ -1,0 +1,974 @@
+[
+  {
+    "entity": "relationship_management.customer_relationship_availability_status",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "report", "export"]}
+    ],
+    "fields": [
+      {"field": "availability_status", "type": "short_text", "required": true, "unique": true},
+      {"field": "category", "type": "enumeration", "required": true, "values": ["Active", "Away", "Unavailable"], "default": "Active"},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "color", "type": "enumeration", "values": ["black", "gray", "blue", "green", "red", "pink", "orange", "amber", "yellow", "cyan", "teal", "violet", "purple"], "default": "gray"},
+      {"field": "position", "type": "integer", "default": "1"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_call_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "identifier", "type": "short_text", "unique": true},
+      {"field": "calling_number", "type": "short_text", "required": true},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Initiated", "Ringing", "In Progress", "Completed", "Failed", "Busy", "No Answer", "Queued", "Canceled"]},
+      {"field": "start_time", "type": "date_and_time"},
+      {"field": "medium", "type": "short_text"},
+      {"field": "type", "type": "enumeration", "required": true, "values": ["Incoming", "Outgoing"]},
+      {"field": "called_number", "type": "short_text", "required": true},
+      {"field": "duration", "type": "duration"},
+      {"field": "recording_resource_address", "type": "text"},
+      {"field": "end_time", "type": "date_and_time"},
+      {"field": "note_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_workspace_note"},
+      {"field": "receiver_identifier", "type": "entity_reference", "target": "information_management.user", "form_policy_variant": {"visible_when": ["comparison_sequence", ["current_field", "type"], ["equal", ["choice_meaning", "incoming"]]]}},
+      {"field": "caller_identifier", "type": "entity_reference", "target": "information_management.user", "form_policy_variant": {"visible_when": ["comparison_sequence", ["current_field", "type"], ["equal", ["choice_meaning", "outgoing"]]]}},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "default": "CRM Lead"},
+      {"field": "reference_record_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier"},
+      {"field": "links_rows", "type": "owned_collection", "target": "information_management.dynamic_link"},
+      {"field": "telephony_medium", "type": "enumeration", "form_read_only": true, "values": ["", "Manual", "communication service", "telephony service"]}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_communication_status",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "status", "type": "short_text", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_communications_service_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "system_manager", "level": 1, "allows": ["read", "write", "delete", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 1, "allows": ["read", "write", "delete", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "account_sid", "type": "short_text", "form_policy_variant": {"visible_when": ["field_has_value", "enabled"], "required_when": ["current_field", "enabled"]}},
+      {"field": "service_interface_key", "type": "short_text", "form_read_only": true, "access_level": 1, "form_policy_variant": {"visible_when": ["field_has_value", "enabled"]}},
+      {"field": "service_interface_secret", "type": "protected_value", "form_read_only": true, "access_level": 1, "form_policy_variant": {"visible_when": ["field_has_value", "enabled"]}},
+      {"field": "authentication_token", "type": "protected_value", "form_policy_variant": {"visible_when": ["field_has_value", "enabled"], "required_when": ["current_field", "enabled"]}},
+      {"field": "voice_instructions_sid", "type": "short_text", "access_level": 1, "form_policy_variant": {"visible_when": ["field_has_value", "enabled"]}},
+      {"field": "record_calls", "type": "boolean", "default": "0", "form_policy_variant": {"visible_when": ["field_has_value", "enabled"]}},
+      {"field": "enabled", "type": "boolean", "default": "0"},
+      {"field": "application_name", "type": "short_text"},
+      {"field": "communications_service_applications", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_contacts",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "contact_identifier", "type": "entity_reference", "target": "contacts.contact"},
+      {"field": "full_name", "type": "short_text", "form_read_only": true},
+      {"field": "email", "type": "short_text", "form_read_only": true},
+      {"field": "mobile_number", "type": "short_text", "form_read_only": true},
+      {"field": "phone", "type": "short_text", "form_read_only": true},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender", "form_read_only": true},
+      {"field": "is_primary", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_dashboard",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "layout", "type": "expression_or_structured_text", "default": "[]"},
+      {"field": "title", "type": "short_text", "unique": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_policy_variant": {"visible_when": ["field_has_value", "private"], "required_when": ["field_has_value", "private"]}},
+      {"field": "private", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_deal",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "organization_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_organization"},
+      {"field": "probability", "type": "percentage"},
+      {"field": "annual_revenue", "type": "monetary_amount", "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "website", "type": "short_text"},
+      {"field": "next_step", "type": "short_text"},
+      {"field": "lead_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_lead"},
+      {"field": "deal_owner_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "numbering_series", "type": "enumeration", "values": ["customer relationship deal numbering prefix + four-digit year + configured sequence"], "default": "customer relationship deal numbering prefix + four-digit year + configured sequence"},
+      {"field": "email", "type": "short_text"},
+      {"field": "mobile_number", "type": "short_text"},
+      {"field": "status_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_deal_status", "required": true},
+      {"field": "contacts_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_contacts"},
+      {"field": "service_level_agreement_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_service_level_agreement"},
+      {"field": "response_by", "type": "date_and_time", "form_read_only": true},
+      {"field": "service_level_agreement_status", "type": "enumeration", "form_read_only": true, "values": ["", "First Response Due", "Rolling Response Due", "Failed", "Fulfilled"]},
+      {"field": "service_level_agreement_creation", "type": "date_and_time", "form_read_only": true},
+      {"field": "first_response_time", "type": "duration", "form_read_only": true},
+      {"field": "first_responded_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "communication_status_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_communication_status", "default": "Open"},
+      {"field": "territory_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_territory"},
+      {"field": "source_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_lead_source"},
+      {"field": "number_of_employees", "type": "enumeration", "values": ["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"]},
+      {"field": "job_title", "type": "short_text"},
+      {"field": "phone", "type": "short_text"},
+      {"field": "status_change_log_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_status_change_log"},
+      {"field": "lead_name", "type": "short_text"},
+      {"field": "organization_name", "type": "short_text"},
+      {"field": "industry_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_industry"},
+      {"field": "salutation_identifier", "type": "entity_reference", "target": "contacts.salutation"},
+      {"field": "first_name", "type": "short_text"},
+      {"field": "last_name", "type": "short_text"},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender"},
+      {"field": "contact_identifier", "type": "entity_reference", "target": "contacts.contact"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency"},
+      {"field": "products_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_products"},
+      {"field": "total", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "net_total", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "deal_value", "type": "monetary_amount", "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "lost_reason_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_lost_reason"},
+      {"field": "lost_notes", "type": "text", "form_policy_variant": {"required_when": ["comparison_sequence", ["current_field", "lost_reason_identifier"], ["equal", ["choice_meaning", "other"]]]}},
+      {"field": "exchange_rate", "type": "decimal", "default": "1"},
+      {"field": "expected_deal_value", "type": "monetary_amount", "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "expected_closure_date", "type": "calendar_date"},
+      {"field": "closed_date", "type": "calendar_date"},
+      {"field": "rolling_responses_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_rolling_response_time"},
+      {"field": "last_response_time", "type": "duration", "form_read_only": true},
+      {"field": "last_responded_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "organization_logo", "type": "image_file_reference"},
+      {"field": "company_description", "type": "text"},
+      {"field": "professional_network", "type": "short_text", "form_policy_variant": {"visible_when": ["current_field", "professional_network"]}},
+      {"field": "microblogging", "type": "short_text", "form_policy_variant": {"visible_when": ["current_field", "microblogging"]}},
+      {"field": "social_network", "type": "short_text", "form_policy_variant": {"visible_when": ["current_field", "social_network"]}}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_deal_status",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "color", "type": "enumeration", "values": ["black", "gray", "blue", "green", "red", "pink", "orange", "amber", "yellow", "cyan", "teal", "violet", "purple"], "default": "gray"},
+      {"field": "deal_status", "type": "short_text", "required": true, "unique": true},
+      {"field": "position", "type": "integer"},
+      {"field": "probability", "type": "percentage"},
+      {"field": "type", "type": "enumeration", "values": ["Open", "Ongoing", "On Hold", "Won", "Lost"], "default": "Open"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_dropdown_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "label", "type": "short_text", "form_policy_variant": {"required_when": ["comparison_sequence", ["current_field", "type"], ["equal", ["choice_meaning", "route"]]]}},
+      {"field": "type", "type": "enumeration", "values": ["Route", "Separator"], "form_policy_variant": {"read_only_when": ["current_field", "is_standard"]}},
+      {"field": "route", "type": "short_text", "form_policy_variant": {"visible_when": ["comparison_sequence", ["current_field", "type"], ["equal", ["choice_meaning", "route"]]], "required_when": ["comparison_sequence", ["current_field", "type"], ["equal", ["choice_meaning", "route"]]]}},
+      {"field": "hidden", "type": "boolean", "default": "0"},
+      {"field": "is_standard", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "icon", "type": "expression_or_structured_text"},
+      {"field": "open_in_new_window", "type": "boolean", "default": "1", "form_policy_variant": {"visible_when": ["comparison_sequence", ["current_field", "type"], ["equal", ["choice_meaning", "route"]]]}},
+      {"field": "display_name", "type": "short_text", "form_read_only": true, "unique": true, "form_policy_variant": {"visible_when": ["current_field", "is_standard"]}}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_enrichment_domain",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "domain", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_enrichment_field_mapping",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "source_key", "type": "enumeration", "required": true, "values": ["company_name", "description", "logo", "industry", "primary_email", "primary_phone", "secondary_phone", "professional network", "microblogging service", "repository host", "social network", "image sharing service", "video hosting service"]},
+      {"field": "target_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "target_field_name", "type": "short_text", "required": true},
+      {"field": "write_policy", "type": "enumeration", "required": true, "values": ["Fill if empty", "Always refresh", "Override defaults"], "default": "Fill if empty"},
+      {"field": "create_missing_link", "type": "boolean", "default": "0"},
+      {"field": "default_values", "type": "text", "form_policy_variant": {"visible_when": ["comparison_sequence", ["current_field", "write_policy"], ["equal", ["choice_meaning", "override_defaults"]]]}}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_enrichment_link_priority",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "keyword", "type": "short_text", "required": true},
+      {"field": "weight", "type": "decimal", "default": "1"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_enrichment_rule",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "rule_name", "type": "short_text", "required": true},
+      {"field": "rule_type", "type": "enumeration", "required": true, "values": ["Industry", "Social"]},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "target_value", "type": "short_text"},
+      {"field": "industry_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_industry", "form_policy_variant": {"visible_when": ["comparison_sequence", ["current_field", "rule_type"], ["equal", ["choice_meaning", "industry"]]]}},
+      {"field": "weight", "type": "decimal", "default": "1"},
+      {"field": "match_scope", "type": "enumeration", "values": ["Headline", "Full Text", "HTML", "URL"], "default": "Full Text"},
+      {"field": "patterns_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_enrichment_rule_pattern"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_enrichment_rule_pattern",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "pattern", "type": "short_text", "required": true},
+      {"field": "is_regex", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_enrichment_run",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Queued", "Running", "Completed", "Failed", "Reverted"], "default": "Queued"},
+      {"field": "source_website", "type": "short_text", "form_read_only": true},
+      {"field": "started_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "finished_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "undone_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "undone_by_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "company_name", "type": "short_text", "form_read_only": true},
+      {"field": "industry", "type": "short_text", "form_read_only": true},
+      {"field": "industry_confidence", "type": "decimal", "form_read_only": true},
+      {"field": "emails_found", "type": "integer", "form_read_only": true, "default": "0"},
+      {"field": "phones_found", "type": "integer", "form_read_only": true, "default": "0"},
+      {"field": "social_profiles", "type": "text", "form_read_only": true},
+      {"field": "changes_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_enrichment_run_change", "form_read_only": true},
+      {"field": "raw_structured_data", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "notes", "type": "text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_enrichment_run_change",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "field_name", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "old_value", "type": "text", "form_read_only": true},
+      {"field": "new_value", "type": "text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_enrichment_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "auto_enrich", "type": "boolean", "default": "0"},
+      {"field": "maximum_pages", "type": "integer", "default": "10"},
+      {"field": "maximum_depth", "type": "integer", "default": "2"},
+      {"field": "request_timeout", "type": "integer", "default": "10"},
+      {"field": "use_sitemap", "type": "boolean", "default": "1"},
+      {"field": "maximum_download_bytes", "type": "integer", "default": "3000000"},
+      {"field": "retry_count", "type": "integer", "default": "2"},
+      {"field": "user_agent", "type": "short_text", "default": "client capability identifier"},
+      {"field": "link_priority_order_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_enrichment_link_priority"},
+      {"field": "skip_patterns_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_enrichment_skip_pattern"},
+      {"field": "allowed_domains_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_enrichment_domain"},
+      {"field": "blocked_domains_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_enrichment_domain"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_enrichment_skip_pattern",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "pattern", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_fields_layout",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "type", "type": "enumeration", "values": ["Quick Entry", "Side Panel", "Data Fields", "Grid Row", "Required Fields"]},
+      {"field": "layout", "type": "expression_or_structured_text"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_form_script",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "enabled", "type": "boolean", "default": "0"},
+      {"field": "script", "type": "expression_or_structured_text", "default": "editable interaction definition"},
+      {"field": "view", "type": "enumeration", "values": ["Form", "List"], "default": "Form"},
+      {"field": "is_standard", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_global_settings",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "default": "Entity type"},
+      {"field": "type", "type": "enumeration", "required": true, "values": ["Quick Filters", "Sidebar Items"]},
+      {"field": "structured_data", "type": "structured_value"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_holiday",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "date", "type": "calendar_date", "required": true},
+      {"field": "weekly_off", "type": "boolean", "default": "0"},
+      {"field": "description", "type": "formatted_text", "required": true}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_holiday_list",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "holiday_list_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "from_date", "type": "calendar_date", "required": true},
+      {"field": "to_date", "type": "calendar_date", "required": true},
+      {"field": "total_holidays", "type": "integer"},
+      {"field": "weekly_off", "type": "enumeration", "values": ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]},
+      {"field": "holidays_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_holiday"}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "add to holidays"},
+      {"control": "action", "purpose": "clear table"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_industry",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "industry", "type": "short_text", "unique": true}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_invitation",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "email", "type": "short_text", "required": true},
+      {"field": "role", "type": "enumeration", "required": true, "values": ["", "Sales User", "Sales Manager", "System Manager"]},
+      {"field": "invitation_key", "type": "short_text"},
+      {"field": "invited_by_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "status", "type": "enumeration", "values": ["", "Pending", "Accepted", "Expired"]},
+      {"field": "email_sent_at", "type": "date_and_time"},
+      {"field": "accepted_at", "type": "date_and_time"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_lead",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "values": ["lead numbering prefix + four-digit year + configured sequence"], "default": "lead numbering prefix + four-digit year + configured sequence"},
+      {"field": "salutation_identifier", "type": "entity_reference", "target": "contacts.salutation"},
+      {"field": "first_name", "type": "short_text", "required": true},
+      {"field": "middle_name", "type": "short_text"},
+      {"field": "last_name", "type": "short_text"},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender"},
+      {"field": "status_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_lead_status", "required": true},
+      {"field": "email", "type": "short_text"},
+      {"field": "website", "type": "short_text"},
+      {"field": "mobile_number", "type": "short_text"},
+      {"field": "phone", "type": "short_text"},
+      {"field": "number_of_employees", "type": "enumeration", "values": ["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"]},
+      {"field": "annual_revenue", "type": "monetary_amount"},
+      {"field": "lead_owner_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "source_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_lead_source"},
+      {"field": "industry_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_industry"},
+      {"field": "image", "type": "image_file_reference"},
+      {"field": "lead_name", "type": "short_text"},
+      {"field": "job_title", "type": "short_text"},
+      {"field": "organization", "type": "short_text"},
+      {"field": "converted", "type": "boolean", "default": "0"},
+      {"field": "lead_score", "type": "integer", "default": "0"},
+      {"field": "lead_temperature", "type": "enumeration", "values": ["", "Cold", "Warm", "Hot"]},
+      {"field": "service_level_agreement_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_service_level_agreement"},
+      {"field": "service_level_agreement_creation", "type": "date_and_time", "form_read_only": true},
+      {"field": "service_level_agreement_status", "type": "enumeration", "form_read_only": true, "values": ["", "First Response Due", "Rolling Response Due", "Failed", "Fulfilled"]},
+      {"field": "response_by", "type": "date_and_time", "form_read_only": true},
+      {"field": "first_response_time", "type": "duration", "form_read_only": true},
+      {"field": "first_responded_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "communication_status_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_communication_status", "default": "Open"},
+      {"field": "territory_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_territory"},
+      {"field": "status_change_log_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_status_change_log"},
+      {"field": "products_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_products"},
+      {"field": "total", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "net_total", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "social_network_lead_identifier", "type": "short_text", "unique": true},
+      {"field": "social_network_form_identifier", "type": "short_text"},
+      {"field": "rolling_responses_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_rolling_response_time"},
+      {"field": "last_response_time", "type": "duration", "form_read_only": true},
+      {"field": "last_responded_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "lost_reason_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_lost_reason"},
+      {"field": "lost_notes", "type": "text", "form_policy_variant": {"required_when": ["comparison_sequence", ["current_field", "lost_reason_identifier"], ["equal", ["choice_meaning", "other"]]]}},
+      {"field": "organization_logo", "type": "image_file_reference"},
+      {"field": "company_description", "type": "text"},
+      {"field": "professional_network", "type": "short_text", "form_policy_variant": {"visible_when": ["current_field", "professional_network"]}},
+      {"field": "microblogging", "type": "short_text", "form_policy_variant": {"visible_when": ["current_field", "microblogging"]}},
+      {"field": "social_network", "type": "short_text", "form_policy_variant": {"visible_when": ["current_field", "social_network"]}}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_lead_source",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "source_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "details", "type": "formatted_text"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_lead_status",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "color", "type": "enumeration", "values": ["black", "gray", "blue", "green", "red", "pink", "orange", "amber", "yellow", "cyan", "teal", "violet", "purple"], "default": "gray"},
+      {"field": "lead_status", "type": "short_text", "required": true, "unique": true},
+      {"field": "position", "type": "integer", "default": "1"},
+      {"field": "type", "type": "enumeration", "values": ["Open", "Ongoing", "On Hold", "Won", "Lost"], "default": "Open"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_lost_reason",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "lost_reason", "type": "short_text", "required": true, "unique": true},
+      {"field": "description", "type": "formatted_text"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_notification",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "from_user_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "type", "type": "enumeration", "required": true, "values": ["Mention", "Task", "Assignment", "mobile messaging", "Automation"]},
+      {"field": "to_user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true},
+      {"field": "comment_identifier", "type": "entity_reference", "target": "information_management.comment"},
+      {"field": "read", "type": "boolean", "default": "0"},
+      {"field": "message", "type": "formatted_markup"},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier"},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "notification_type_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "notification_type_record_identifier", "type": "selected_entity_reference", "target_selected_by": "notification_type_entity_type_identifier"},
+      {"field": "notification_text", "type": "text"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_organization",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "organization_name", "type": "short_text", "unique": true},
+      {"field": "website", "type": "short_text"},
+      {"field": "organization_logo", "type": "image_file_reference"},
+      {"field": "number_of_employees", "type": "enumeration", "values": ["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"]},
+      {"field": "annual_revenue", "type": "monetary_amount", "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "industry_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_industry"},
+      {"field": "territory_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_territory"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency"},
+      {"field": "address_identifier", "type": "entity_reference", "target": "contacts.address"},
+      {"field": "exchange_rate", "type": "decimal"},
+      {"field": "company_description", "type": "text"},
+      {"field": "professional_network", "type": "short_text", "form_policy_variant": {"visible_when": ["current_field", "professional_network"]}},
+      {"field": "microblogging", "type": "short_text", "form_policy_variant": {"visible_when": ["current_field", "microblogging"]}},
+      {"field": "social_network", "type": "short_text", "form_policy_variant": {"visible_when": ["current_field", "social_network"]}}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_product",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "values": ["customer relationship product numbering prefix + four-digit year + configured sequence"]},
+      {"field": "product_code", "type": "short_text", "required": true, "unique": true},
+      {"field": "product_name", "type": "short_text"},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "image", "type": "image_file_reference"},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "standard_rate", "type": "monetary_amount"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_product_sync_issue",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "product_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_product", "form_read_only": true},
+      {"field": "kind", "type": "enumeration", "form_read_only": true, "values": ["unlinked_orphan"]},
+      {"field": "detail", "type": "text", "form_read_only": true},
+      {"field": "detected_on", "type": "date_and_time", "form_read_only": true, "default": "now"},
+      {"field": "dismissed", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_products",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "product_name", "type": "short_text", "required": true},
+      {"field": "discount_percentage", "type": "percentage"},
+      {"field": "discount_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "rate", "type": "monetary_amount", "required": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "net_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}, "form_policy_variant": {"visible_when": ["field_has_value", "discount_percentage"]}},
+      {"field": "product_code_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_product"},
+      {"field": "quantity", "type": "decimal", "default": "1"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_rolling_response_time",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "response_time", "type": "duration", "form_read_only": true},
+      {"field": "responded_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Fulfilled", "Failed"]}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_sales_hierarchy",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "full_name", "type": "short_text", "form_read_only": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true, "unique": true},
+      {"field": "previous_parent_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_sales_hierarchy"},
+      {"field": "reports_to_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_sales_hierarchy"},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_read_only": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_read_only": true},
+      {"field": "is_group", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_service_day",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "workday", "type": "enumeration", "required": true, "values": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]},
+      {"field": "start_time", "type": "time_of_day", "required": true},
+      {"field": "end_time", "type": "time_of_day", "required": true}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_service_level_agreement",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "service_level_agreement_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "enabled", "type": "boolean", "default": "0"},
+      {"field": "default", "type": "boolean", "default": "0"},
+      {"field": "condition", "type": "expression_or_structured_text", "form_policy_variant": {"visible_when": ["logical_not", ["current_field", "condition_structured_data"]]}},
+      {"field": "apply_on_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "priorities_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_service_level_priority", "required": true},
+      {"field": "working_hours_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_service_day", "required": true},
+      {"field": "start_date", "type": "calendar_date"},
+      {"field": "end_date", "type": "calendar_date"},
+      {"field": "holiday_list_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_holiday_list"},
+      {"field": "rolling_responses", "type": "boolean", "default": "0"},
+      {"field": "condition_structured_data", "type": "expression_or_structured_text", "form_policy_variant": {"visible_when": ["current_field", "condition_structured_data"]}}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_service_level_priority",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "default_priority", "type": "boolean", "default": "0"},
+      {"field": "priority_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_communication_status", "required": true},
+      {"field": "first_response_time", "type": "duration", "required": true}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_status_change_log",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "previous_status", "type": "short_text"},
+      {"field": "from_date", "type": "date_and_time"},
+      {"field": "duration", "type": "duration"},
+      {"field": "resulting_status", "type": "short_text"},
+      {"field": "to_date", "type": "date_and_time"},
+      {"field": "last_status_change_log_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_status_change_log"},
+      {"field": "log_owner_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "from_type", "type": "short_text"},
+      {"field": "to_type", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_task",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true},
+      {"field": "priority", "type": "enumeration", "values": ["Low", "Medium", "High"]},
+      {"field": "start_date", "type": "calendar_date"},
+      {"field": "assigned_to_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "status", "type": "enumeration", "values": ["Backlog", "Todo", "In Progress", "Done", "Canceled"]},
+      {"field": "due_date", "type": "date_and_time"},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "reference_record_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_telephony_agent",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true, "unique": true},
+      {"field": "mobile_number", "type": "short_text", "form_read_only": true},
+      {"field": "user_name", "type": "short_text"},
+      {"field": "telephony_service_number", "type": "short_text"},
+      {"field": "communications_service_number", "type": "short_text"},
+      {"field": "phone_numbers_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_telephony_phone"},
+      {"field": "default_medium", "type": "enumeration", "values": ["", "communication service", "telephony service"]},
+      {"field": "call_receiving_device", "type": "enumeration", "values": ["Computer", "Phone"], "default": "Computer"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_telephony_phone",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "number", "type": "short_text", "required": true},
+      {"field": "is_primary", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_telephony_service_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "enabled", "type": "boolean", "default": "0"},
+      {"field": "account_sid", "type": "short_text", "form_policy_variant": {"visible_when": ["field_has_value", "enabled"], "required_when": ["field_has_value", "enabled"]}},
+      {"field": "service_interface_key", "type": "short_text", "form_policy_variant": {"visible_when": ["field_has_value", "enabled"], "required_when": ["field_has_value", "enabled"]}},
+      {"field": "service_interface_token", "type": "protected_value", "form_policy_variant": {"visible_when": ["field_has_value", "enabled"], "required_when": ["field_has_value", "enabled"]}},
+      {"field": "record_call", "type": "boolean", "default": "0", "form_policy_variant": {"visible_when": ["field_has_value", "enabled"]}},
+      {"field": "webhook_verify_token", "type": "short_text", "form_policy_variant": {"visible_when": ["field_has_value", "enabled"], "required_when": ["field_has_value", "enabled"]}},
+      {"field": "subdomain", "type": "short_text", "form_policy_variant": {"visible_when": ["field_has_value", "enabled"], "required_when": ["field_has_value", "enabled"]}}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_territory",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "territory_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "territory_manager_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_read_only": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_read_only": true},
+      {"field": "is_group", "type": "boolean", "default": "0"},
+      {"field": "previous_parent_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_territory"},
+      {"field": "parent_customer_relationship_territory_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_territory"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_view_settings",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "columns", "type": "expression_or_structured_text"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "rows", "type": "expression_or_structured_text"},
+      {"field": "filters", "type": "expression_or_structured_text"},
+      {"field": "label", "type": "short_text"},
+      {"field": "entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "order_by", "type": "expression_or_structured_text"},
+      {"field": "pinned", "type": "boolean", "default": "0"},
+      {"field": "route_name", "type": "short_text"},
+      {"field": "load_default_columns", "type": "boolean", "default": "0"},
+      {"field": "public", "type": "boolean", "default": "0"},
+      {"field": "icon", "type": "short_text"},
+      {"field": "type", "type": "enumeration", "values": ["list", "group_by", "kanban"], "default": "list"},
+      {"field": "group_by_field", "type": "short_text"},
+      {"field": "column_field", "type": "short_text"},
+      {"field": "kanban_columns", "type": "expression_or_structured_text"},
+      {"field": "kanban_fields", "type": "expression_or_structured_text"},
+      {"field": "title_field", "type": "short_text"},
+      {"field": "is_standard", "type": "boolean", "default": "0"},
+      {"field": "is_default", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_workspace_note",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true},
+      {"field": "content", "type": "formatted_text"},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "default": "CRM Lead"},
+      {"field": "reference_record_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier"},
+      {"field": "pinned", "type": "boolean", "default": "0"},
+      {"field": "pinned_by_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "pinned_on", "type": "date_and_time", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "relationship_management.customer_relationship_workspace_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "dropdown_items_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_dropdown_item"},
+      {"field": "brand_logo", "type": "file_reference"},
+      {"field": "brand_name", "type": "short_text"},
+      {"field": "favicon", "type": "file_reference"},
+      {"field": "enable_forecasting", "type": "boolean", "default": "0"},
+      {"field": "enable_sales_hierarchy", "type": "boolean", "default": "0"},
+      {"field": "disable_onboarding", "type": "boolean", "default": "0"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency"},
+      {"field": "service_provider", "type": "enumeration", "values": ["frankfurter.app", "fawazahmed-exchange-api", "exchangerate.host", "exchangerate-api"], "default": "frankfurter.app"},
+      {"field": "access_key", "type": "short_text", "form_policy_variant": {"visible_when": {"decision": "The selected currency quotation service is the provider option that requires an access key.", "examples": [{"input_description": "The access-key-requiring provider option is selected.", "condition_truth": true}, {"input_description": "A different supported quotation provider option is selected.", "condition_truth": false}]}, "required_when": {"decision": "The selected currency quotation service is the provider option that requires an access key.", "examples": [{"input_description": "The access-key-requiring provider option is selected.", "condition_truth": true}, {"input_description": "A different supported quotation provider option is selected.", "condition_truth": false}]}}},
+      {"field": "auto_update_expected_deal_value", "type": "boolean", "default": "1"},
+      {"field": "update_timestamp_on_new_communication", "type": "boolean", "default": "1"},
+      {"field": "auto_mark_replied_on_response", "type": "boolean", "default": "0"},
+      {"field": "auto_reopen_on_new_communication", "type": "boolean", "default": "0"},
+      {"field": "customer_relationship_timeline_timestamp_format", "type": "enumeration", "values": ["Relative", "Exact"], "default": "Relative"},
+      {"field": "customer_relationship_timeline_sort_order", "type": "enumeration", "values": ["Oldest First", "Newest First"], "default": "Oldest First"},
+      {"field": "setup_completed", "type": "boolean", "default": "0"},
+      {"field": "event_notifications_rows", "type": "owned_collection", "configuration_variant": true, "target": "operator_workspace.event_notifications"},
+      {"field": "all_day_event_notifications_rows", "type": "owned_collection", "configuration_variant": true, "target": "operator_workspace.event_notifications"},
+      {"field": "default_calendar_view", "type": "enumeration", "configuration_variant": true, "values": ["daily", "weekly", "monthly"]},
+      {"field": "persona_captured", "type": "boolean", "configuration_variant": true}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "restore defaults"},
+      {"control": "action", "purpose": "restore demo data"}
+    ]
+  },
+  {
+    "entity": "relationship_management.enterprise_customer_relationship_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "service_interface_key", "type": "short_text", "form_policy_variant": {"visible_when": ["all_truthy", ["current_field", "enabled"], ["current_field", "is_enterprise_in_different_site"]], "required_when": ["field_has_value", "is_enterprise_in_different_site"]}},
+      {"field": "service_interface_secret", "type": "protected_value", "form_policy_variant": {"visible_when": ["all_truthy", ["current_field", "enabled"], ["current_field", "is_enterprise_in_different_site"]], "required_when": ["field_has_value", "is_enterprise_in_different_site"]}},
+      {"field": "enterprise_site_resource_address", "type": "short_text", "form_policy_variant": {"visible_when": ["all_truthy", ["current_field", "enabled"], ["current_field", "is_enterprise_in_different_site"]], "required_when": ["field_has_value", "is_enterprise_in_different_site"]}},
+      {"field": "enterprise_company", "type": "short_text", "form_policy_variant": {"visible_when": ["field_has_value", "enabled"], "required_when": ["field_has_value", "enabled"]}},
+      {"field": "enabled", "type": "boolean", "default": "0"},
+      {"field": "sync_issues_rows", "type": "owned_collection", "target": "relationship_management.customer_relationship_product_sync_issue", "form_read_only": true},
+      {"field": "is_enterprise_in_different_site", "type": "boolean", "default": "0", "form_policy_variant": {"visible_when": ["field_has_value", "enabled"]}},
+      {"field": "sync_products", "type": "boolean", "default": "1", "form_policy_variant": {"visible_when": ["all_truthy", ["current_field", "enabled"], ["logical_not", ["current_field", "is_enterprise_in_different_site"]]]}},
+      {"field": "create_customer_on_status_change", "type": "boolean", "default": "0", "form_policy_variant": {"visible_when": ["field_has_value", "enabled"]}},
+      {"field": "deal_status_identifier", "type": "entity_reference", "target": "relationship_management.customer_relationship_deal_status", "form_policy_variant": {"visible_when": ["all_truthy", ["current_field", "enabled"], ["current_field", "create_customer_on_status_change"]], "required_when": ["field_has_value", "create_customer_on_status_change"]}}
+    ]
+  },
+  {
+    "entity": "relationship_management.failed_lead_sync_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "type", "type": "enumeration", "form_read_only": true, "values": ["Duplicate", "Failure", "Synced"], "default": "Failure"},
+      {"field": "lead_data", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "source_identifier", "type": "entity_reference", "target": "relationship_management.lead_sync_source", "form_read_only": true},
+      {"field": "traceback", "type": "expression_or_structured_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "relationship_management.lead_sync_source",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "type", "type": "enumeration", "required": true, "values": ["social network"], "default": "social network"},
+      {"field": "last_synced_at", "type": "date_and_time", "form_read_only": true},
+      {"field": "access_token", "type": "protected_value", "required": true},
+      {"field": "social_network_page_identifier", "type": "entity_reference", "target": "relationship_management.social_network_page"},
+      {"field": "social_network_lead_form_identifier", "type": "entity_reference", "target": "relationship_management.social_network_lead_form", "unique": true},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "background_sync_frequency", "type": "enumeration", "required": true, "values": ["Every 5 Minutes", "Every 10 Minutes", "Every 15 Minutes", "Hourly", "Daily", "Monthly"], "default": "Hourly"}
+    ]
+  },
+  {
+    "entity": "relationship_management.social_network_lead_form",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "page_identifier", "type": "entity_reference", "target": "relationship_management.social_network_page", "required": true},
+      {"field": "identifier", "type": "short_text", "unique": true},
+      {"field": "form_name", "type": "short_text"},
+      {"field": "questions_rows", "type": "owned_collection", "target": "relationship_management.social_network_lead_form_question"}
+    ]
+  },
+  {
+    "entity": "relationship_management.social_network_lead_form_question",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "label", "type": "short_text"},
+      {"field": "key", "type": "short_text", "required": true},
+      {"field": "type", "type": "short_text"},
+      {"field": "identifier", "type": "short_text"},
+      {"field": "mapped_to_customer_relationship_field", "type": "suggested_text"}
+    ]
+  },
+  {
+    "entity": "relationship_management.social_network_page",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "category", "type": "short_text"},
+      {"field": "identifier", "type": "short_text", "unique": true},
+      {"field": "account_identifier", "type": "short_text"},
+      {"field": "access_token", "type": "text"},
+      {"field": "page_name", "type": "short_text"}
+    ]
+  }
+]

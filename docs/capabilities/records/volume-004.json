@@ -1,0 +1,1421 @@
+[
+  {
+    "capability": "Analytical report design",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "report_studio_calculation",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "alias", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "label", "value_kind": "text"},
+          {"purpose": "format_type", "value_kind": "choice", "choices": ["number", "integer", "currency", "percent"]},
+          {"purpose": "expression", "value_kind": "long_text", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "report_studio_column",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "source", "value_kind": "text"},
+          {"purpose": "field_path", "value_kind": "text"},
+          {"purpose": "calculation_alias", "value_kind": "text"},
+          {"purpose": "label", "value_kind": "text"},
+          {"purpose": "field_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "aggregate", "value_kind": "choice", "choices": ["unselected", "count", "sum", "average", "minimum", "maximum"]},
+          {"purpose": "width", "value_kind": "whole_number"},
+          {"purpose": "visibility_rule", "value_kind": "long_text"},
+          {"purpose": "format_rules", "value_kind": "long_text"}
+        ]
+      },
+      {
+        "concept": "report_studio_filter",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "source", "value_kind": "text"},
+          {"purpose": "field_path", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "field_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "granularity", "value_kind": "choice", "choices": ["unselected", "all", "date", "month", "year"]},
+          {"purpose": "operator", "value_kind": "choice", "rules": ["required"], "choices": ["equals", "not_equals", "contains", "does_not_contain", "greater_than", "less_than", "between", "in", "not_in", "is_set", "is_not_set"]},
+          {"purpose": "report_studio_filter_value", "value_kind": "text"},
+          {"purpose": "value_to", "value_kind": "text"},
+          {"purpose": "value_list", "value_kind": "text"},
+          {"purpose": "is_runtime", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "report_studio_group_by",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "source", "value_kind": "text"},
+          {"purpose": "field_path", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "field_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "granularity", "value_kind": "choice", "choices": ["unselected", "day", "week", "month", "quarter", "year"]}
+        ]
+      },
+      {
+        "concept": "report_studio_related_source",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "alias", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "related_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "join_type", "value_kind": "choice", "rules": ["required"], "choices": ["left_join", "inner_join"]},
+          {"purpose": "is_child_table", "value_kind": "boolean"},
+          {"purpose": "child_parent_field", "value_kind": "text"},
+          {"purpose": "conditions", "value_kind": "long_text"}
+        ]
+      },
+      {
+        "concept": "report_studio_report",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "base_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "visibility", "value_kind": "choice", "rules": ["required"], "choices": ["private", "public", "shared_with_roles"]},
+          {"purpose": "is_public", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "page_size", "value_kind": "whole_number"},
+          {"purpose": "related_sources", "value_kind": "owned_rows", "target": "report_studio_related_source"},
+          {"purpose": "calculations", "value_kind": "owned_rows", "target": "report_studio_calculation"},
+          {"purpose": "columns", "value_kind": "owned_rows", "target": "report_studio_column"},
+          {"purpose": "filters", "value_kind": "owned_rows", "target": "report_studio_filter"},
+          {"purpose": "group_by", "value_kind": "owned_rows", "target": "report_studio_group_by"},
+          {"purpose": "sort", "value_kind": "owned_rows", "target": "report_studio_sort"},
+          {"purpose": "shared_roles", "value_kind": "owned_rows", "target": "report_studio_share"},
+          {"purpose": "last_run_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "linked_report_name", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "is_published", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["report_studio_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], true]
+        ]
+      },
+      {
+        "concept": "report_studio_share",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "role", "value_kind": "reference", "rules": ["required"], "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "can_edit", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "report_studio_sort",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "source", "value_kind": "text"},
+          {"purpose": "field_path", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "direction", "value_kind": "choice", "rules": ["required"], "choices": ["ascending", "descending"]}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Analytical reporting",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "analytical_reporting_alert",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "query", "value_kind": "reference", "rules": ["required", "write_once"], "target": "analytical_reporting_query_third_configuration"},
+          {"purpose": "frequency", "value_kind": "choice", "choices": ["hourly", "daily", "weekly", "monthly", "cron"]},
+          {"purpose": "channel", "value_kind": "choice", "choices": ["email", "messaging_channel", "inbound_event_notification"]},
+          {"purpose": "recipients", "value_kind": "text"},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "messaging_channel_chat_identifier", "value_kind": "text"},
+          {"purpose": "disabled", "value_kind": "boolean"},
+          {"purpose": "permission_user", "value_kind": "reference", "rules": ["read_only"], "access_level": 1, "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "cron_format", "value_kind": "text"},
+          {"purpose": "last_execution", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "next_execution", "value_kind": "date_and_time", "rules": ["computed_value"]},
+          {"purpose": "message", "value_kind": "formatted_text"},
+          {"purpose": "condition", "value_kind": "expression_or_structured_text", "rules": ["required"]},
+          {"purpose": "condition_enabled", "value_kind": "boolean"},
+          {"purpose": "inbound_event_notification_token", "value_kind": "protected_text"},
+          {"purpose": "inbound_event_notification_resource_address", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["analytical_reporting_administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_administrator", 1, ["read"], false],
+          ["analytical_reporting_user", 1, ["read"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_chart_third_configuration",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "info", "value_kind": "text"},
+          {"purpose": "query", "value_kind": "reference", "target": "analytical_reporting_query_third_configuration"},
+          {"purpose": "chart_type", "value_kind": "text"},
+          {"purpose": "configuration", "value_kind": "structured_value"},
+          {"purpose": "workbook", "value_kind": "reference", "rules": ["required", "write_once", "indexed_for_search"], "target": "analytical_reporting_workbook"},
+          {"purpose": "old_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "sort_order", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "folder", "value_kind": "text"},
+          {"purpose": "visibility", "value_kind": "choice", "choices": ["private", "roles", "everyone", "public"]},
+          {"purpose": "visible_to_roles", "value_kind": "owned_selection_rows", "target": "information_management.has_role", "binding": "shared_model"},
+          {"purpose": "run_as_owner", "value_kind": "boolean"},
+          {"purpose": "is_standard", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "kept_for_desk", "value_kind": "boolean", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["analytical_reporting_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_user", 1, ["read"], false],
+          ["analytical_reporting_administrator", 1, ["read"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_dashboard_chart_third_configuration",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "chart", "value_kind": "reference", "target": "analytical_reporting_chart_third_configuration"}
+        ]
+      },
+      {
+        "concept": "analytical_reporting_dashboard_third_configuration",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text"},
+          {"purpose": "preview_image", "value_kind": "text"},
+          {"purpose": "items", "value_kind": "structured_value"},
+          {"purpose": "workbook", "value_kind": "reference", "rules": ["required", "write_once", "indexed_for_search"], "target": "analytical_reporting_workbook"},
+          {"purpose": "share_link", "value_kind": "text"},
+          {"purpose": "linked_charts", "value_kind": "owned_selection_rows", "rules": ["read_only"], "target": "analytical_reporting_dashboard_chart_third_configuration"},
+          {"purpose": "old_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "vertical_compact_layout", "value_kind": "boolean"},
+          {"purpose": "route", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "visibility", "value_kind": "choice", "choices": ["private", "roles", "everyone", "public"]},
+          {"purpose": "visible_to_roles", "value_kind": "owned_selection_rows", "target": "information_management.has_role", "binding": "shared_model"},
+          {"purpose": "is_standard", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "kept_for_desk", "value_kind": "boolean", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["analytical_reporting_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_user", 1, ["read"], false],
+          ["analytical_reporting_administrator", 1, ["read"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_data_source_third_configuration",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["inactive", "active"]},
+          {"purpose": "database_type", "value_kind": "choice", "choices": ["configured_data_store"]},
+          {"purpose": "host", "value_kind": "text"},
+          {"purpose": "port", "value_kind": "whole_number"},
+          {"purpose": "use_secure_sockets_layer", "value_kind": "boolean"},
+          {"purpose": "is_site_database", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "is_business_application_database", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "database_name", "value_kind": "text"},
+          {"purpose": "username", "value_kind": "text"},
+          {"purpose": "password", "value_kind": "protected_text"},
+          {"purpose": "connection_string", "value_kind": "text", "access_level": 1},
+          {"purpose": "analytical_warehouse_project_identifier", "value_kind": "text"},
+          {"purpose": "analytical_warehouse_dataset_identifier", "value_kind": "text"},
+          {"purpose": "analytical_warehouse_service_account_key", "value_kind": "structured_value", "access_level": 1},
+          {"purpose": "enable_stored_procedure_execution", "value_kind": "boolean"},
+          {"purpose": "schema", "value_kind": "text"},
+          {"purpose": "service_transport_headers", "value_kind": "structured_value", "access_level": 1},
+          {"purpose": "is_ducklake", "value_kind": "boolean"},
+          {"purpose": "analytical_reporting_data_source_third_configuration_classification", "value_kind": "choice", "rules": ["required"], "choices": ["database", "resource_exchange_service_interface"]},
+          {"purpose": "service_interface_base_resource_address", "value_kind": "text"},
+          {"purpose": "service_interface_authentication_type", "value_kind": "choice", "choices": ["none", "service_access_key_bearer_token", "basic_authentication"]},
+          {"purpose": "service_interface_token", "value_kind": "protected_text"},
+          {"purpose": "service_interface_username", "value_kind": "text"},
+          {"purpose": "service_interface_password", "value_kind": "protected_text"},
+          {"purpose": "service_interface_custom_headers", "value_kind": "structured_value", "access_level": 1},
+          {"purpose": "secure_sockets_layer_ca", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["analytical_reporting_administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_user", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_administrator", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_folder",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "workbook", "value_kind": "reference", "rules": ["required", "write_once", "indexed_for_search"], "target": "analytical_reporting_workbook"},
+          {"purpose": "analytical_reporting_folder_classification", "value_kind": "choice", "rules": ["required"], "choices": ["query", "chart"]},
+          {"purpose": "sort_order", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "is_expanded", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["analytical_reporting_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_query_execution_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "database_query", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "data_source", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "time_taken", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "query", "value_kind": "text", "rules": ["read_only", "indexed_for_search"]},
+          {"purpose": "data_store", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["success", "failed", "locked"]},
+          {"purpose": "cache", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "miss", "forced", "off"]},
+          {"purpose": "error_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "error", "value_kind": "long_text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["analytical_reporting_administrator", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_query_reference",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "query", "value_kind": "reference", "rules": ["required", "read_only", "indexed_for_search"], "target": "analytical_reporting_query_third_configuration"},
+          {"purpose": "reference_type", "value_kind": "choice", "rules": ["required", "read_only"], "choices": ["table", "query"]},
+          {"purpose": "data_source", "value_kind": "text", "rules": ["read_only", "indexed_for_search"]},
+          {"purpose": "table_name", "value_kind": "text", "rules": ["read_only", "indexed_for_search"]},
+          {"purpose": "reference_query", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "analytical_reporting_query_third_configuration"}
+        ],
+        "role_grants": [
+          ["administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_query_third_configuration",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text"},
+          {"purpose": "operations", "value_kind": "structured_value"},
+          {"purpose": "use_live_connection", "value_kind": "boolean"},
+          {"purpose": "is_script_query", "value_kind": "boolean"},
+          {"purpose": "is_builder_query", "value_kind": "boolean"},
+          {"purpose": "is_native_query", "value_kind": "boolean"},
+          {"purpose": "workbook", "value_kind": "reference", "rules": ["required", "write_once", "indexed_for_search"], "target": "analytical_reporting_workbook"},
+          {"purpose": "old_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "variables", "value_kind": "owned_rows", "target": "analytical_reporting_query_variable"},
+          {"purpose": "sort_order", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "folder", "value_kind": "text"},
+          {"purpose": "kept_for_desk", "value_kind": "boolean", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["analytical_reporting_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_query_variable",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "variable_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "variable_value", "value_kind": "protected_text", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "analytical_reporting_resource_permission",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "resource_type", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "resource_name", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "resource_type"},
+          {"purpose": "table_restrictions", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "analytical_reporting_secret_key",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "key", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "analytical_reporting_secret_key_value", "value_kind": "protected_text", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "analytical_reporting_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "setup_complete", "value_kind": "boolean"},
+          {"purpose": "onboarding_complete", "value_kind": "boolean"},
+          {"purpose": "auto_execute_query", "value_kind": "boolean"},
+          {"purpose": "query_result_expiry", "value_kind": "whole_number"},
+          {"purpose": "allow_subquery", "value_kind": "boolean"},
+          {"purpose": "query_result_limit", "value_kind": "whole_number"},
+          {"purpose": "enable_permissions", "value_kind": "boolean"},
+          {"purpose": "allow_download", "value_kind": "boolean"},
+          {"purpose": "maximum_export_rows", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "messaging_channel_service_interface_token", "value_kind": "protected_text"},
+          {"purpose": "fiscal_year_start", "value_kind": "civil_day"},
+          {"purpose": "allowed_origins", "value_kind": "text"},
+          {"purpose": "maximum_records_to_synchronization", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "week_starts_on", "value_kind": "choice", "choices": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]},
+          {"purpose": "maximum_memory_usage", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "enable_data_store", "value_kind": "boolean"},
+          {"purpose": "disable_user_lookup", "value_kind": "boolean"},
+          {"purpose": "maximum_execution_time", "value_kind": "whole_number"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["analytical_reporting_administrator", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["analytical_reporting_user", 0, ["read", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_table_import_job",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "title", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "data_source", "value_kind": "reference", "rules": ["required"], "target": "analytical_reporting_data_source_third_configuration"},
+          {"purpose": "table_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "schedule", "value_kind": "text"},
+          {"purpose": "state", "value_kind": "expression_or_structured_text"},
+          {"purpose": "script", "value_kind": "expression_or_structured_text", "rules": ["required"]},
+          {"purpose": "secrets", "value_kind": "owned_rows", "target": "analytical_reporting_secret_key"},
+          {"purpose": "last_run", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "last_status", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "last_log", "value_kind": "reference", "rules": ["read_only"], "target": "analytical_reporting_table_import_log"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_table_import_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "data_source", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "table_name", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "query", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "output", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "parquet_file", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "rows_imported", "value_kind": "whole_number", "rules": ["read_only", "nonnegative"]},
+          {"purpose": "row_size", "value_kind": "decimal", "rules": ["read_only", "nonnegative"]},
+          {"purpose": "memory_limit", "value_kind": "whole_number", "rules": ["read_only", "nonnegative"]},
+          {"purpose": "batch_size", "value_kind": "whole_number", "rules": ["read_only", "nonnegative"]},
+          {"purpose": "row_limit", "value_kind": "whole_number", "rules": ["read_only", "nonnegative"]},
+          {"purpose": "started_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "ended_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "time_taken", "value_kind": "whole_number", "rules": ["read_only", "nonnegative"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["in_progress", "completed", "failed"]},
+          {"purpose": "error", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "import_job", "value_kind": "reference", "target": "analytical_reporting_table_import_job"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_administrator", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_table_link_third_configuration",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "left_table", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "right_table", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "left_column", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "right_column", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "data_source", "value_kind": "reference", "rules": ["required"], "target": "analytical_reporting_data_source_third_configuration"}
+        ],
+        "role_grants": [
+          ["analytical_reporting_administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_table_third_configuration",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "data_source", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "analytical_reporting_data_source_third_configuration"},
+          {"purpose": "table", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "label", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "last_synchronized_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "estimated_row_count", "value_kind": "whole_number", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "estimated_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "stored", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "columns", "value_kind": "structured_value", "rules": ["read_only"]},
+          {"purpose": "row_limit", "value_kind": "whole_number"},
+          {"purpose": "synchronization_mode", "value_kind": "choice", "choices": ["full", "incremental"]},
+          {"purpose": "synchronization_schedule", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "synchronization_strategy", "value_kind": "choice", "choices": ["append_only", "update_or_insert"]},
+          {"purpose": "synchronization_cursor_column", "value_kind": "text"},
+          {"purpose": "synchronization_primary_key_column", "value_kind": "text"},
+          {"purpose": "synchronization_from", "value_kind": "date_and_time"},
+          {"purpose": "last_synchronization_bookmark", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "before_import_script", "value_kind": "expression_or_structured_text"}
+        ],
+        "role_grants": [
+          ["analytical_reporting_administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_user", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_administrator", 1, ["read"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_team",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "team_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "team_members", "value_kind": "owned_rows", "target": "analytical_reporting_team_member"},
+          {"purpose": "team_permissions", "value_kind": "owned_rows", "target": "analytical_reporting_resource_permission"}
+        ],
+        "role_grants": [
+          ["analytical_reporting_administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_user", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_team_member",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "analytical_reporting_upgrade_item",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "code", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["open", "done", "dismissed"]},
+          {"purpose": "user", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "action", "value_kind": "choice", "choices": ["unselected", "delete_workbook", "open_settings"]},
+          {"purpose": "reference_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "reference_name", "value_kind": "variable_record_reference", "record_class_field": "reference_record_class"},
+          {"purpose": "message", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "analytical_reporting_upgrade_item_payload", "value_kind": "structured_value", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["analytical_reporting_administrator", 0, ["read", "write", "delete", "report", "export", "print", "email"], false],
+          ["system_manager", 0, ["read", "write", "delete", "report", "export", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_user_invitation",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "email", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "key", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "invited_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["pending", "accepted", "expired"]},
+          {"purpose": "email_sent_at", "value_kind": "date_and_time"},
+          {"purpose": "accepted_at", "value_kind": "date_and_time"}
+        ],
+        "role_grants": [
+          ["analytical_reporting_administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "analytical_reporting_workbook",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "is_standard", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "module", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.module_def", "binding": "shared_model"},
+          {"purpose": "data_backup", "value_kind": "structured_value", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["analytical_reporting_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["analytical_reporting_administrator", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Appointment capacity and coupons",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "booking_desk_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "sidebar_logo", "value_kind": "image_reference"},
+          {"purpose": "page_title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "primary_color", "value_kind": "colour", "rules": ["required"]},
+          {"purpose": "primary_hover_color", "value_kind": "colour", "rules": ["required"]},
+          {"purpose": "accent_color", "value_kind": "colour", "rules": ["required"]},
+          {"purpose": "light_surface_color", "value_kind": "colour", "rules": ["required"]},
+          {"purpose": "page_background_color", "value_kind": "colour", "rules": ["required"]},
+          {"purpose": "body_text_color", "value_kind": "colour", "rules": ["required"]},
+          {"purpose": "favicon", "value_kind": "image_reference"},
+          {"purpose": "use_24_hour_clock_system", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "resource_availability_counter",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "counter_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "counter_slot_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "resource_type", "value_kind": "choice", "rules": ["required"], "choices": ["service_provider", "service_unit", "equipment"]},
+          {"purpose": "resource_reference", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "resource_type"},
+          {"purpose": "slot_duration_minutes", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "maximum_capacity", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "consumed_capacity", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "remaining_capacity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "is_blocked", "value_kind": "boolean"},
+          {"purpose": "block_reason", "value_kind": "text"},
+          {"purpose": "source_type", "value_kind": "choice", "choices": ["shift", "appointment", "maintenance", "break", "unavailability"]},
+          {"purpose": "source_reference", "value_kind": "text"},
+          {"purpose": "last_updated_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "created_at", "value_kind": "date_and_time", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_appointment",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "service_appointment"},
+          {"purpose": "scheduled_time", "value_kind": "date_and_time", "rules": ["required", "read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["editable_after_submission"], "choices": ["open", "pending_payment", "confirmed", "checked_in", "in_progress", "rescheduled", "completed", "cancelled", "closed", "number_show"]},
+          {"purpose": "email", "value_kind": "text"},
+          {"purpose": "customer", "value_kind": "reference", "rules": ["required"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "details", "value_kind": "text", "rules": ["editable_after_submission"]},
+          {"purpose": "appointment_date", "value_kind": "civil_day", "rules": ["required", "indexed_for_search"]},
+          {"purpose": "start_time", "value_kind": "time_of_day", "rules": ["required", "read_only"]},
+          {"purpose": "end_time", "value_kind": "time_of_day", "rules": ["required", "read_only"]},
+          {"purpose": "actual_end_time", "value_kind": "time_of_day", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "actual_duration", "value_kind": "whole_number", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "appointment_type", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "service_type"},
+          {"purpose": "payment_status", "value_kind": "choice", "rules": ["read_only", "editable_after_submission"], "choices": ["unpaid", "paid", "partly_paid", "partly_refunded", "refunded", "cancellation"]},
+          {"purpose": "confirmation_required_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "payment_expires_at", "value_kind": "date_and_time", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "total_amount", "value_kind": "money", "rules": ["required", "read_only", "nonnegative"]},
+          {"purpose": "confirmation_token", "value_kind": "text"},
+          {"purpose": "source", "value_kind": "choice", "choices": ["desk", "portal", "booking_desk"]},
+          {"purpose": "notes", "value_kind": "text", "rules": ["editable_after_submission"]},
+          {"purpose": "cancellation_notes", "value_kind": "text", "rules": ["editable_after_submission"]},
+          {"purpose": "cancellation_date", "value_kind": "date_and_time", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "appointment_provider", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "service_provider"},
+          {"purpose": "numbering_rule", "value_kind": "choice", "choices": ["assigned_sequence_of_3_digits_with_year_with_month"]},
+          {"purpose": "full_name", "value_kind": "text"},
+          {"purpose": "mobile_number", "value_kind": "text"},
+          {"purpose": "duration", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "add_video_conferencing", "value_kind": "boolean"},
+          {"purpose": "event", "value_kind": "reference", "target": "operator_workspace.event", "binding": "shared_model"},
+          {"purpose": "workspace_service_meet_link", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "selected_slot_identifiers", "value_kind": "text", "rules": ["read_only", "hidden_from_form", "editable_after_submission"]},
+          {"purpose": "appointment_price", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "service_unit", "value_kind": "reference", "target": "service_unit"},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["required", "read_only"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "rescheduled_from", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "rescheduled_to", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "cancellation_reasons", "value_kind": "owned_selection_rows", "rules": ["editable_after_submission"], "target": "service_appointment_lost_reason_detail"},
+          {"purpose": "actual_start_time", "value_kind": "time_of_day", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "guests", "value_kind": "owned_rows", "rules": ["required"], "target": "service_appointment_guest"},
+          {"purpose": "total_guests", "value_kind": "whole_number", "rules": ["read_only", "nonnegative"]},
+          {"purpose": "grand_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "is_guest", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "checked_in_at", "value_kind": "date_and_time", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "reschedule_reasons", "value_kind": "owned_selection_rows", "target": "service_appointment_lost_reason_detail"},
+          {"purpose": "reschedule_date", "value_kind": "date_and_time"},
+          {"purpose": "reschedule_notes", "value_kind": "text"},
+          {"purpose": "coupon_code", "value_kind": "reference", "target": "service_appointment_coupon_code"},
+          {"purpose": "discount_amount", "value_kind": "money"},
+          {"purpose": "is_group_booking", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "booking_identifier", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "service_booking"},
+          {"purpose": "couple_appointment_identifier", "value_kind": "reference", "rules": ["read_only", "editable_after_submission", "indexed_for_search"], "target": "service_appointment"},
+          {"purpose": "is_primary_in_couple", "value_kind": "boolean", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "service_provider_name", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "outstanding_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "all_available_providers", "value_kind": "structured_value", "rules": ["hidden_from_form", "computed_value"]},
+          {"purpose": "buffer_before_minutes", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "buffer_after_minutes", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "payment_hold_until", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "allocation_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["held", "confirmed", "released"]},
+          {"purpose": "booked_by", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["customer", 0, ["read", "write", "create", "submit", "cancel", "report", "export", "share", "print", "email"], true],
+          ["receptionist", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["service_provider", 0, ["read", "write", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_appointment_coupon_code",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "code", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "coupon_type", "value_kind": "choice", "choices": ["promotional", "complimentary", "campaign"]},
+          {"purpose": "disable", "value_kind": "boolean"},
+          {"purpose": "discount_type", "value_kind": "choice", "choices": ["percentage", "amount"]},
+          {"purpose": "discount_value", "value_kind": "decimal"},
+          {"purpose": "valid_from", "value_kind": "civil_day"},
+          {"purpose": "valid_till", "value_kind": "civil_day"},
+          {"purpose": "maximum_usage_count", "value_kind": "whole_number"},
+          {"purpose": "times_used", "value_kind": "whole_number"},
+          {"purpose": "service_types", "value_kind": "owned_rows", "target": "service_appointment_coupon_code_detail"},
+          {"purpose": "customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "customer_group", "value_kind": "reference", "target": "organization.customer_group", "binding": "shared_model"},
+          {"purpose": "booking_source", "value_kind": "choice", "choices": ["unselected", "portal", "desk"]},
+          {"purpose": "applicable_for", "value_kind": "choice", "choices": ["service_type", "service_appointment", "service_booking", "customer", "customer_group", "booking_source"]},
+          {"purpose": "maximum_discount_amount", "value_kind": "decimal"},
+          {"purpose": "minimum_order_value", "value_kind": "decimal"},
+          {"purpose": "complimentary_provider", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["operations_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["receptionist", 0, ["read", "write", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_appointment_coupon_code_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "service_type", "value_kind": "reference", "rules": ["required"], "target": "service_type"}
+        ]
+      },
+      {
+        "concept": "service_appointment_event_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "appointment", "value_kind": "reference", "rules": ["required"], "target": "service_appointment"},
+          {"purpose": "booking", "value_kind": "reference", "target": "service_booking"},
+          {"purpose": "log_type", "value_kind": "choice", "rules": ["required"], "choices": ["check_in", "start", "pause", "resume", "end"]},
+          {"purpose": "start_time", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "end_time", "value_kind": "date_and_time"},
+          {"purpose": "duration_seconds", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "created_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "notes", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["receptionist", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_appointment_event_log_second_configuration",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["read_only", "hidden_from_form"], "choices": ["assigned_sequence_of_5_digits_with_year"]},
+          {"purpose": "appointment", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "service_appointment"},
+          {"purpose": "event_type", "value_kind": "choice", "rules": ["required", "indexed_for_search"], "choices": ["status_changed", "provider_changed", "provider_handover", "unit_changed", "paused", "resumed", "cancelled", "rescheduled"]},
+          {"purpose": "changed_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "changed_at", "value_kind": "date_and_time", "rules": ["read_only", "indexed_for_search"]},
+          {"purpose": "old_value", "value_kind": "structured_value"},
+          {"purpose": "new_value", "value_kind": "structured_value"},
+          {"purpose": "notes", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_appointment_guest",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "full_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "email", "value_kind": "text"},
+          {"purpose": "mobile_number", "value_kind": "text"},
+          {"purpose": "is_primary", "value_kind": "boolean"},
+          {"purpose": "notes", "value_kind": "formatted_text"}
+        ]
+      },
+      {
+        "concept": "service_appointment_lost_reason",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "lost_reason", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "portal_access", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["receptionist", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_appointment_lost_reason_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "lost_reason", "value_kind": "reference", "target": "service_appointment_lost_reason"}
+        ]
+      },
+      {
+        "concept": "service_appointment_payment",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "payment_received", "value_kind": "boolean"},
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "reference_record_identifier", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "reference_record_class"},
+          {"purpose": "amount", "value_kind": "money"},
+          {"purpose": "currency", "value_kind": "reference", "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "user", "value_kind": "reference", "rules": ["hidden_from_form"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "payment_identifier", "value_kind": "text"},
+          {"purpose": "payment_entry", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.payment_entry", "binding": "shared_model"},
+          {"purpose": "order_identifier", "value_kind": "text"},
+          {"purpose": "payment_gateway", "value_kind": "reference", "target": "payment_services.payment_gateway", "binding": "shared_model"},
+          {"purpose": "mode_of_payment", "value_kind": "reference", "rules": ["required"], "target": "accounting.mode_of_payment", "binding": "shared_model"},
+          {"purpose": "reference_date", "value_kind": "civil_day"},
+          {"purpose": "posting_date", "value_kind": "civil_day"},
+          {"purpose": "references", "value_kind": "owned_rows", "target": "service_appointment_payment_reference"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "service_appointment_payment"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["customer", 0, ["read", "write", "create", "submit", "report", "export", "share", "print", "email"], true],
+          ["receptionist", 0, ["read", "write", "create", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_appointment_payment_reference",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "reference_name", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "reference_record_class"},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["required"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "grand_total", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "outstanding_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "allocated_amount", "value_kind": "money", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "service_appointment_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "lead_time_hours", "value_kind": "whole_number"},
+          {"purpose": "maximum_advance_days", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "auto_create_service_items", "value_kind": "boolean"},
+          {"purpose": "default_item_group", "value_kind": "reference", "target": "organization.item_group", "binding": "shared_model"},
+          {"purpose": "default_external_calendar", "value_kind": "reference", "target": "service_integrations.hosted_personal_productivity_calendar", "binding": "shared_model"},
+          {"purpose": "appointment_confirmation", "value_kind": "boolean"},
+          {"purpose": "appointment_reminder", "value_kind": "boolean"},
+          {"purpose": "appointment_confirmation_message", "value_kind": "text"},
+          {"purpose": "appointment_reminder_message", "value_kind": "text"},
+          {"purpose": "default_slot_size", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "payment_hold_minutes", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "enable_partial_confirmation", "value_kind": "boolean"},
+          {"purpose": "default_confirmation_deposit_percent", "value_kind": "percentage", "rules": ["required"]},
+          {"purpose": "allow_past_booking", "value_kind": "boolean"},
+          {"purpose": "maximum_past_days", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "buffer_before", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "buffer_after", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "auto_issue_consumables", "value_kind": "boolean"},
+          {"purpose": "payment_gateways", "value_kind": "owned_rows", "target": "service_type_payment_gateway"},
+          {"purpose": "confirmation_message_provider", "value_kind": "text"},
+          {"purpose": "enable_appointment_confirmation_without_payment", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["operations_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["receptionist", 0, ["read", "write", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_booking",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "choices": ["assigned_sequence_of_4_digits_with_year_with_month"]},
+          {"purpose": "customer", "value_kind": "reference", "rules": ["required"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "total_guests", "value_kind": "whole_number"},
+          {"purpose": "booking_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["draft", "payment_pending", "partly_paid", "confirmed", "closed", "cancelled"]},
+          {"purpose": "is_couple", "value_kind": "boolean", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "booking_held_until", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "currency", "value_kind": "reference", "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "coupon_code", "value_kind": "text"},
+          {"purpose": "coupon_scope", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "booking"]},
+          {"purpose": "subtotal", "value_kind": "money"},
+          {"purpose": "appointment_discount_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "booking_discount_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "coupon_discount_type", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "percentage", "fixed"]},
+          {"purpose": "coupon_discount_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "coupon_applied", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "grand_total", "value_kind": "money"},
+          {"purpose": "confirmation_required_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "outstanding_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "customer_invoice", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.sales_invoice", "binding": "shared_model"},
+          {"purpose": "items", "value_kind": "owned_rows", "target": "service_booking_item"},
+          {"purpose": "mobile_number", "value_kind": "text"},
+          {"purpose": "email", "value_kind": "text"},
+          {"purpose": "full_name", "value_kind": "text"},
+          {"purpose": "booking_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "service_booking"},
+          {"purpose": "booked_by", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["customer", 0, ["read", "write", "create", "submit", "cancel", "report", "export", "share", "print", "email"], true],
+          ["receptionist", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["service_provider", 0, ["read", "write", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_booking_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "service_type", "value_kind": "reference", "target": "service_type"},
+          {"purpose": "pricing_model", "value_kind": "choice", "choices": ["unselected", "per_booking", "per_guest", "guest_tier"]},
+          {"purpose": "quantity", "value_kind": "whole_number"},
+          {"purpose": "rate", "value_kind": "money"},
+          {"purpose": "total_amount", "value_kind": "money"},
+          {"purpose": "currency", "value_kind": "reference", "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "cancelled_quantity", "value_kind": "whole_number"}
+        ]
+      },
+      {
+        "concept": "service_provider",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "provider_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "email", "value_kind": "text"},
+          {"purpose": "employee", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "active", "value_kind": "boolean"},
+          {"purpose": "color_code", "value_kind": "colour"},
+          {"purpose": "first_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "middle_name_optional", "value_kind": "text"},
+          {"purpose": "last_name", "value_kind": "text"},
+          {"purpose": "user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "mobile_number", "value_kind": "text"},
+          {"purpose": "external_calendar", "value_kind": "reference", "target": "service_integrations.hosted_personal_productivity_calendar", "binding": "shared_model"},
+          {"purpose": "designation", "value_kind": "reference", "target": "organization.designation", "binding": "shared_model"},
+          {"purpose": "grade", "value_kind": "reference", "target": "workforce.employee_grade", "binding": "shared_model"},
+          {"purpose": "default_slot_length", "value_kind": "whole_number"},
+          {"purpose": "services", "value_kind": "owned_rows", "target": "service_provider_service"},
+          {"purpose": "image", "value_kind": "image_reference", "rules": ["hidden_from_form"]},
+          {"purpose": "branch", "value_kind": "reference", "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "department", "value_kind": "reference", "target": "organization.department", "binding": "shared_model"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "gender", "value_kind": "reference", "target": "contacts.gender", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false],
+          ["service_provider", 0, ["read", "write", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_provider_appointment_slot",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "provider", "value_kind": "reference", "rules": ["required", "read_only", "indexed_for_search"], "target": "service_provider"},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["required", "read_only", "indexed_for_search"]},
+          {"purpose": "start_time", "value_kind": "time_of_day", "rules": ["required", "read_only", "indexed_for_search"]},
+          {"purpose": "end_time", "value_kind": "time_of_day", "rules": ["required", "read_only"]},
+          {"purpose": "service_appointment", "value_kind": "reference", "rules": ["read_only"], "target": "service_appointment"},
+          {"purpose": "is_available", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "is_break", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "shift_assignment", "value_kind": "reference", "rules": ["required", "read_only"], "target": "service_provider_shift_assignment"},
+          {"purpose": "service_unit", "value_kind": "reference", "target": "service_unit"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "report", "export", "print"], false],
+          ["human_resources_manager", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["receptionist", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_provider_service",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "service_type", "value_kind": "reference", "rules": ["required"], "target": "service_type"},
+          {"purpose": "default", "value_kind": "boolean"},
+          {"purpose": "disabled", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "service_provider_service_assignment_provider_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "service_provider", "value_kind": "reference", "rules": ["required"], "target": "service_provider"},
+          {"purpose": "provider_name", "value_kind": "text", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "service_provider_service_assignment_service_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "service_type", "value_kind": "reference", "rules": ["required"], "target": "service_type"}
+        ]
+      },
+      {
+        "concept": "service_provider_service_assignment_tool",
+        "characteristics": ["one_configuration_record", "computed_record"],
+        "attributes": [
+          {"purpose": "action", "value_kind": "choice", "rules": ["required"], "choices": ["assign_service_to_providers", "assign_services_to_provider"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "service_type", "value_kind": "reference", "target": "service_type"},
+          {"purpose": "service_provider", "value_kind": "reference", "target": "service_provider"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["active", "inactive"]},
+          {"purpose": "branch", "value_kind": "reference", "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "department", "value_kind": "reference", "target": "organization.department", "binding": "shared_model"},
+          {"purpose": "designation", "value_kind": "reference", "target": "organization.designation", "binding": "shared_model"},
+          {"purpose": "grade", "value_kind": "reference", "target": "workforce.employee_grade", "binding": "shared_model"},
+          {"purpose": "providers", "value_kind": "owned_rows", "target": "service_provider_service_assignment_provider_detail"},
+          {"purpose": "services", "value_kind": "owned_rows", "target": "service_provider_service_assignment_service_detail"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "write", "create", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_provider_shift_assignment",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "service_provider_shift_assignment"},
+          {"purpose": "provider", "value_kind": "reference", "rules": ["required"], "target": "service_provider"},
+          {"purpose": "provider_name", "value_kind": "text"},
+          {"purpose": "shift_type", "value_kind": "reference", "rules": ["required"], "target": "service_provider_shift_type"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["editable_after_submission"], "choices": ["active", "inactive"]},
+          {"purpose": "start_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "end_date", "value_kind": "civil_day"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "repeat_type", "value_kind": "choice", "rules": ["required", "editable_after_submission"], "choices": ["daily", "weekly"]},
+          {"purpose": "monday", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "tuesday", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "wednesday", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "thursday", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "friday", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "saturday", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "sunday", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "service_unit", "value_kind": "reference", "target": "service_unit"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "write", "create", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["service_provider", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_provider_shift_assignment_tool",
+        "characteristics": ["one_configuration_record", "computed_record"],
+        "attributes": [
+          {"purpose": "action", "value_kind": "choice", "rules": ["required"], "choices": ["assign_shift"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "service_provider_shift_type", "value_kind": "reference", "target": "service_provider_shift_type"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["active", "inactive"]},
+          {"purpose": "start_date", "value_kind": "civil_day"},
+          {"purpose": "end_date", "value_kind": "civil_day"},
+          {"purpose": "service_unit_type", "value_kind": "reference", "target": "service_unit_type"},
+          {"purpose": "service_unit", "value_kind": "reference", "target": "service_unit"},
+          {"purpose": "branch", "value_kind": "reference", "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "department", "value_kind": "reference", "target": "organization.department", "binding": "shared_model"},
+          {"purpose": "designation", "value_kind": "reference", "target": "organization.designation", "binding": "shared_model"},
+          {"purpose": "service_providers", "value_kind": "owned_rows", "target": "service_provider_shift_assignment_tool_detail"},
+          {"purpose": "grade", "value_kind": "reference", "target": "workforce.employee_grade", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "write", "create", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_provider_shift_assignment_tool_detail",
+        "characteristics": ["owned_row", "computed_record"],
+        "attributes": [
+          {"purpose": "service_provider", "value_kind": "reference", "rules": ["required"], "target": "service_provider"},
+          {"purpose": "service_provider_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "service_unit", "value_kind": "reference", "target": "service_unit"}
+        ]
+      },
+      {
+        "concept": "service_provider_shift_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "start_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "end_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "break_start_time", "value_kind": "time_of_day"},
+          {"purpose": "break_end_time", "value_kind": "time_of_day"},
+          {"purpose": "holiday_list", "value_kind": "reference", "target": "organization.holiday_list", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["human_resources_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_provider_unavailability",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "provider", "value_kind": "reference", "rules": ["required"], "target": "service_provider"},
+          {"purpose": "provider_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "employee", "value_kind": "reference", "rules": ["read_only"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["active", "cancelled"]},
+          {"purpose": "from_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "to_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "all_day", "value_kind": "boolean"},
+          {"purpose": "from_time", "value_kind": "time_of_day"},
+          {"purpose": "to_time", "value_kind": "time_of_day"},
+          {"purpose": "reason", "value_kind": "choice", "rules": ["required"], "choices": ["sick", "off_day", "training", "emergency", "leave", "other"]},
+          {"purpose": "source", "value_kind": "choice", "rules": ["required"], "choices": ["manual", "workforce_leave_application", "workforce_attendance"]},
+          {"purpose": "source_record_class", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "source_name", "value_kind": "variable_record_reference", "rules": ["read_only"], "record_class_field": "source_record_class"},
+          {"purpose": "notes", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["service_manager", 0, ["read", "write", "create", "submit", "cancel", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_resource_allocation",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "allocation_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "resource_type", "value_kind": "choice", "rules": ["required"], "choices": ["service_provider", "service_unit", "equipment"]},
+          {"purpose": "resource_reference", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "resource_type"},
+          {"purpose": "service_appointment", "value_kind": "reference", "rules": ["required"], "target": "service_appointment"},
+          {"purpose": "service_booking", "value_kind": "reference", "target": "service_booking"},
+          {"purpose": "start_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "end_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "appointment_start_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "appointment_end_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "capacity_consumed", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "buffer_before_minutes", "value_kind": "whole_number"},
+          {"purpose": "buffer_after_minutes", "value_kind": "whole_number"},
+          {"purpose": "allocation_status", "value_kind": "choice", "rules": ["required"], "choices": ["draft", "held", "confirmed", "released", "cancelled"]},
+          {"purpose": "is_confirmed", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "confirmed_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "metadata_structured_data", "value_kind": "structured_value"},
+          {"purpose": "created_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "numbering_rule", "value_kind": "choice", "choices": ["assigned_sequence_of_5_digits_with_year_with_month"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "appointment_type", "value_kind": "text", "rules": ["required", "unique", "available_in_short_form", "translatable"]},
+          {"purpose": "default_duration_in_minutes", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "description", "value_kind": "formatted_text"},
+          {"purpose": "disabled", "value_kind": "boolean"},
+          {"purpose": "prices", "value_kind": "owned_rows", "target": "service_type_price"},
+          {"purpose": "item", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "item_group", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "maximum_clients_per_slot", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "consumables", "value_kind": "owned_rows", "target": "service_type_material"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "buffer_before", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "buffer_after", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "service_unit_types", "value_kind": "owned_rows", "target": "service_type_unit_type"},
+          {"purpose": "image", "value_kind": "image_reference", "rules": ["hidden_from_form"]},
+          {"purpose": "short_description", "value_kind": "text"},
+          {"purpose": "tags", "value_kind": "text"},
+          {"purpose": "payment_gateways", "value_kind": "owned_rows", "target": "service_type_payment_gateway"},
+          {"purpose": "minimum_guests", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "maximum_guests", "value_kind": "whole_number"},
+          {"purpose": "confirmation_deposit_percent", "value_kind": "percentage"},
+          {"purpose": "benefits", "value_kind": "formatted_text"},
+          {"purpose": "techniques", "value_kind": "formatted_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["item_manager", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["service_manager", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["operations_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_type_material",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "quantity", "value_kind": "decimal", "rules": ["required", "nonnegative"]},
+          {"purpose": "unit_of_measure", "value_kind": "reference", "rules": ["required"], "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "inventory_unit_of_measure", "value_kind": "reference", "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "conversion_factor", "value_kind": "decimal"},
+          {"purpose": "s_warehouse", "value_kind": "reference", "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "cost_center", "value_kind": "reference", "target": "accounting.cost_center", "binding": "shared_model"},
+          {"purpose": "valuation_rate", "value_kind": "decimal"}
+        ]
+      },
+      {
+        "concept": "service_type_payment_gateway",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "payment_gateway", "value_kind": "reference", "rules": ["required"], "target": "payment_services.payment_gateway", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "service_type_price",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "price_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["required"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "amount", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "duration", "value_kind": "whole_number", "rules": ["required", "nonnegative"]},
+          {"purpose": "guest_count", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "pricing_model", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "per_booking", "per_guest", "guest_tier"]}
+        ]
+      },
+      {
+        "concept": "service_type_unit_type",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "service_unit_type", "value_kind": "reference", "rules": ["required"], "target": "service_unit_type"}
+        ]
+      },
+      {
+        "concept": "service_unit",
+        "characteristics": ["hierarchical_record"],
+        "attributes": [
+          {"purpose": "unit_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "unit_type", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "service_unit_type"},
+          {"purpose": "location", "value_kind": "reference", "target": "fixed_assets.location", "binding": "shared_model"},
+          {"purpose": "hierarchy_left_boundary", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "hierarchy_right_boundary", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "is_group", "value_kind": "boolean"},
+          {"purpose": "old_parent", "value_kind": "reference", "rules": ["hidden_from_form"], "target": "service_unit"},
+          {"purpose": "parent_service_unit", "value_kind": "reference", "rules": ["bypasses_value_selection_restrictions"], "target": "service_unit"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "capacity", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "allow_overlap", "value_kind": "boolean"},
+          {"purpose": "couples_only_overlap", "value_kind": "boolean"},
+          {"purpose": "allow_appointments", "value_kind": "boolean"},
+          {"purpose": "disabled", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["operations_manager", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "service_unit_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "disabled", "value_kind": "boolean"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "allow_appointments", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false],
+          ["operations_manager", 0, ["read", "write", "create", "delete", "report", "export", "import", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Appointment capacity and coupons",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "customer", "purpose": "visible_on_booking_desk", "value_kind": "boolean", "placement": "customer_group"},
+      {"on": "material_request", "purpose": "service_appointment", "value_kind": "reference", "placement": "work_order", "rules": ["read_only", "editable_after_submission", "bypasses_value_selection_restrictions"]},
+      {"on": "customer_invoice", "purpose": "service_appointment", "value_kind": "reference", "placement": "customer_group", "rules": ["read_only", "editable_after_submission", "bypasses_value_selection_restrictions"]},
+      {"on": "customer_invoice", "purpose": "service_booking", "value_kind": "reference", "placement": "service_appointment", "rules": ["read_only", "editable_after_submission", "bypasses_value_selection_restrictions"]},
+      {"on": "stock_entry", "purpose": "service_appointment", "value_kind": "reference", "placement": "is_return", "rules": ["read_only", "editable_after_submission", "bypasses_value_selection_restrictions"]}
+    ]
+  },
+  {
+    "capability": "Argentine electronic invoicing",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "argentine_tax_authority_setting",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "customer_invoice_numbering_rule", "value_kind": "owned_rows", "target": "customer_invoice_numbering_rule"},
+          {"purpose": "credentials", "value_kind": "owned_rows", "target": "credentials"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["select", "read", "write", "create", "delete", "share", "print", "email"], false],
+          ["accounts_user", 0, ["select", "read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "credentials",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "cuit", "value_kind": "text"},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "token", "value_kind": "long_text"},
+          {"purpose": "sign", "value_kind": "long_text"},
+          {"purpose": "use_sandbox_environment", "value_kind": "boolean"},
+          {"purpose": "certificate", "value_kind": "file_reference"},
+          {"purpose": "private_key", "value_kind": "file_reference"},
+          {"purpose": "check_argentine_tax_authority_invoice_number_consistency", "value_kind": "boolean"},
+          {"purpose": "expiration_time", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["valid", "invalid"]}
+        ]
+      },
+      {
+        "concept": "electronic_invoice_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text"},
+          {"purpose": "error", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "message", "value_kind": "text"},
+          {"purpose": "reference_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "reference_module", "value_kind": "reference", "target": "information_management.module_def", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "text"},
+          {"purpose": "source", "value_kind": "variable_record_reference", "rules": ["read_only"], "record_class_field": "reference_record_class"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "customer_invoice_numbering_rule",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice"},
+          {"purpose": "point_of_sale_number", "value_kind": "whole_number"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Argentine electronic invoicing",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "customer", "purpose": "customer_document_types", "value_kind": "choice", "placement": "customer_group", "rules": ["translatable"]},
+      {"on": "customer", "purpose": "value_added_tax_status", "value_kind": "choice", "placement": "customer_document_types", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "mode_of_payment", "value_kind": "choice", "placement": "company_tax_identifier", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "point_of_sale", "value_kind": "text", "placement": "point_of_sale_profile", "rules": ["translatable"]},
+      {"on": "customer_invoice", "purpose": "einvoice_page_group", "value_kind": "page_group", "placement": "connections_tab"},
+      {"on": "customer_invoice", "purpose": "cae", "value_kind": "text", "placement": "einvoice_page_group", "rules": ["read_only", "editable_after_submission", "translatable"]},
+      {"on": "customer_invoice", "purpose": "caefchvto", "value_kind": "text", "placement": "cae", "rules": ["read_only", "editable_after_submission", "translatable"]},
+      {"on": "customer_invoice", "purpose": "type_of_invoice", "value_kind": "choice", "placement": "caefchvto", "rules": ["hidden_from_form", "translatable"]},
+      {"on": "customer_invoice", "purpose": "observations", "value_kind": "text", "placement": "type_of_invoice", "rules": ["read_only", "editable_after_submission", "translatable"]},
+      {"on": "customer_invoice", "purpose": "field_column_for_machine_readable_code_base64", "value_kind": "field_column", "placement": "observations"},
+      {"on": "customer_invoice", "purpose": "machine_readable_code_base64", "value_kind": "long_text", "placement": "field_column_for_machine_readable_code_base64", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "company", "purpose": "page_group_for_cuit", "value_kind": "page_group", "placement": "default_operating_cost_account"},
+      {"on": "company", "purpose": "cuit", "value_kind": "text", "placement": "page_group_for_cuit", "rules": ["translatable"]},
+      {"on": "company", "purpose": "field_column_for_value_added_tax_status", "value_kind": "field_column", "placement": "cuit"},
+      {"on": "company", "purpose": "value_added_tax_status", "value_kind": "choice", "placement": "field_column_for_value_added_tax_status", "rules": ["translatable"]}
+    ]
+  },
+  {
+    "capability": "Assisted business operations",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "business_assistant_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "settings_name", "value_kind": "text", "rules": ["required", "read_only", "hidden_from_form"]},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "business_assistant_resource_address", "value_kind": "text", "rules": ["hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Assisted business record lookup",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "business_assistant_model_info",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "platform", "value_kind": "choice", "rules": ["required", "read_only"], "choices": ["multimodal_language_model"]},
+          {"purpose": "model_name", "value_kind": "text", "rules": ["required", "unique", "read_only"]},
+          {"purpose": "knowledge_cutoff", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "verbose", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "subscription_rpm", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "free_rpm", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "free_rpd", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "active_indicator", "value_kind": "boolean", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["business_assistant_user", 0, ["select", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_assistant_parsing",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "record", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "parsing_details", "value_kind": "owned_rows", "target": "business_assistant_parsing_details"},
+          {"purpose": "enable", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_assistant_parsing_details",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "field_name", "value_kind": "text"},
+          {"purpose": "field_label", "value_kind": "text"},
+          {"purpose": "field_type", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "business_assistant_prompt",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "field_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "field_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "enable", "value_kind": "boolean"},
+          {"purpose": "is_user_specific", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "prompt", "value_kind": "formatted_text", "rules": ["required"]},
+          {"purpose": "field_label", "value_kind": "suggested_text", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["business_assistant_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_assistant_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "platform", "value_kind": "choice", "rules": ["required"], "choices": ["multimodal_language_model"]},
+          {"purpose": "model_name", "value_kind": "reference", "rules": ["required"], "target": "business_assistant_model_info"},
+          {"purpose": "service_access_key", "value_kind": "protected_text", "rules": ["required"]},
+          {"purpose": "is_subscription", "value_kind": "boolean"},
+          {"purpose": "is_free", "value_kind": "boolean"},
+          {"purpose": "auto_switch_model_on_rpm", "value_kind": "boolean"},
+          {"purpose": "usage_log_retention_days", "value_kind": "whole_number"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_assistant_usage_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "platform", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "usage_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "user", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "question", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "prompt", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "response", "value_kind": "long_text", "rules": ["read_only"]},
+          {"purpose": "model_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "sub_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "field_name", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["business_assistant_user", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["all", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  }
+]

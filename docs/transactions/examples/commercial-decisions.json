@@ -1,0 +1,847 @@
+{
+  "cases": [
+    {
+      "identifier": "ORD-SHRINK",
+      "operation": "resize-delivery-promises",
+      "input": {
+        "promised": [
+          4,
+          3,
+          2
+        ],
+        "revised": 6,
+        "stock_units_per_commercial_unit": 12
+      },
+      "expected": {
+        "kept": [
+          4,
+          2
+        ],
+        "stock": [
+          48,
+          24
+        ]
+      }
+    },
+    {
+      "identifier": "ORD-GROW",
+      "operation": "resize-delivery-promises",
+      "input": {
+        "promised": [
+          2,
+          3
+        ],
+        "revised": 8,
+        "stock_units_per_commercial_unit": 6
+      },
+      "expected": {
+        "kept": [
+          2,
+          3
+        ],
+        "stock": [
+          12,
+          18
+        ]
+      }
+    },
+    {
+      "identifier": "ORD-EMPTY-BUDGET",
+      "operation": "resize-delivery-promises",
+      "input": {
+        "promised": [
+          2,
+          3
+        ],
+        "revised": 0,
+        "stock_units_per_commercial_unit": 6
+      },
+      "expected": {
+        "kept": [],
+        "stock": []
+      }
+    },
+    {
+      "identifier": "INV-RETURNS",
+      "operation": "remaining-invoice-quantity",
+      "input": {
+        "ordered": 10,
+        "returned": 3,
+        "qualified_credit": 2,
+        "delivered": 8,
+        "net_billed_quantity": 5,
+        "mapped": 1
+      },
+      "expected": {
+        "ceiling": 9,
+        "pending": 3
+      }
+    },
+    {
+      "identifier": "INV-REDELIVERY",
+      "operation": "remaining-invoice-quantity",
+      "input": {
+        "ordered": 10,
+        "returned": 4,
+        "qualified_credit": 0,
+        "delivered": 9,
+        "net_billed_quantity": 8,
+        "mapped": 0
+      },
+      "expected": {
+        "ceiling": 9,
+        "pending": 1
+      }
+    },
+    {
+      "identifier": "INV-CAP",
+      "operation": "remaining-invoice-quantity",
+      "input": {
+        "ordered": 10,
+        "returned": 1,
+        "qualified_credit": 1,
+        "delivered": 12,
+        "net_billed_quantity": 11,
+        "mapped": 1
+      },
+      "expected": {
+        "ceiling": 10,
+        "pending": 0
+      }
+    },
+    {
+      "identifier": "PRO-FREIGHT",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": true,
+        "original_total_minor_units": 100000,
+        "quantity": 5,
+        "line_minor_units": 25000,
+        "freight_minor_units": 8000,
+        "discount_minor_units": 0
+      },
+      "expected": {
+        "total_minor_units": 27000,
+        "issued": true,
+        "ledger_rows": 0
+      }
+    },
+    {
+      "identifier": "PRO-FIXED-DISCOUNT",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": true,
+        "original_total_minor_units": 100000,
+        "quantity": 5,
+        "line_minor_units": 50000,
+        "freight_minor_units": 50000,
+        "discount_minor_units": 20000
+      },
+      "expected": {
+        "total_minor_units": 65000,
+        "issued": true,
+        "ledger_rows": 0
+      }
+    },
+    {
+      "identifier": "PRO-ZERO-ORIGINAL",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": true,
+        "original_total_minor_units": 0,
+        "quantity": 3,
+        "line_minor_units": 10000,
+        "freight_minor_units": 100,
+        "discount_minor_units": 500
+      },
+      "expected": {
+        "total_minor_units": 9600,
+        "issued": true,
+        "ledger_rows": 0
+      }
+    },
+    {
+      "identifier": "PRO-FEATURE",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": false,
+        "submitted": true,
+        "original_total_minor_units": 10000,
+        "quantity": 1,
+        "line_minor_units": 1000,
+        "freight_minor_units": 0,
+        "discount_minor_units": 0
+      },
+      "expected": {
+        "error": "feature-disabled"
+      }
+    },
+    {
+      "identifier": "PRO-ORDER-DRAFT",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": false,
+        "original_total_minor_units": 10000,
+        "quantity": 1,
+        "line_minor_units": 1000,
+        "freight_minor_units": 0,
+        "discount_minor_units": 0
+      },
+      "expected": {
+        "error": "order-unsubmitted"
+      }
+    },
+    {
+      "identifier": "PRO-QTY",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": true,
+        "original_total_minor_units": 10000,
+        "quantity": 0,
+        "line_minor_units": 1000,
+        "freight_minor_units": 0,
+        "discount_minor_units": 0
+      },
+      "expected": {
+        "error": "invalid-quantity"
+      }
+    },
+    {
+      "identifier": "PRO-AMT",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": true,
+        "original_total_minor_units": 10000,
+        "quantity": 1,
+        "line_minor_units": 0,
+        "freight_minor_units": 0,
+        "discount_minor_units": 0
+      },
+      "expected": {
+        "error": "invalid-amount"
+      }
+    },
+    {
+      "identifier": "PRO-NEGATIVE",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": true,
+        "original_total_minor_units": 0,
+        "quantity": 1,
+        "line_minor_units": 1000,
+        "freight_minor_units": 0,
+        "discount_minor_units": 1100
+      },
+      "expected": {
+        "error": "negative-total"
+      }
+    },
+    {
+      "identifier": "SUB-ARREARS",
+      "operation": "price-fixed-plan",
+      "input": {
+        "unit_minor_units": 31000,
+        "quantity": 2,
+        "days": 31,
+        "elapsed_days": 10,
+        "prepaid": false
+      },
+      "expected": {
+        "unit_rate_minor_units": 10000,
+        "extended_minor_units": 20000
+      }
+    },
+    {
+      "identifier": "SUB-PREPAID",
+      "operation": "price-fixed-plan",
+      "input": {
+        "unit_minor_units": 31000,
+        "quantity": 2,
+        "days": 31,
+        "elapsed_days": 10,
+        "prepaid": true
+      },
+      "expected": {
+        "unit_rate_minor_units": 31000,
+        "extended_minor_units": 62000
+      }
+    },
+    {
+      "identifier": "SUB-LATE",
+      "operation": "price-fixed-plan",
+      "input": {
+        "unit_minor_units": 3000,
+        "quantity": 1,
+        "days": 30,
+        "elapsed_days": 33,
+        "prepaid": false
+      },
+      "expected": {
+        "unit_rate_minor_units": 3300,
+        "extended_minor_units": 3300
+      }
+    },
+    {
+      "identifier": "POS-SHORT",
+      "operation": "session-cash",
+      "input": {
+        "opening_cash_float_minor_units": 10000,
+        "cash_minor_units": 8000,
+        "card_minor_units": 5000,
+        "change_minor_units": 1000,
+        "signed_cash_refund": -2000,
+        "counted_cash": 14800
+      },
+      "expected": {
+        "expected_cash": 15000,
+        "expected_card": 5000,
+        "difference": -200
+      }
+    },
+    {
+      "identifier": "POS-EXACT",
+      "operation": "session-cash",
+      "input": {
+        "opening_cash_float_minor_units": 0,
+        "cash_minor_units": 1000,
+        "card_minor_units": 0,
+        "change_minor_units": 100,
+        "signed_cash_refund": 0,
+        "counted_cash": 900
+      },
+      "expected": {
+        "expected_cash": 900,
+        "expected_card": 0,
+        "difference": 0
+      }
+    },
+    {
+      "identifier": "POS-NEW-RECEIPT",
+      "operation": "close-session-membership",
+      "input": {
+        "included": [
+          "R1"
+        ],
+        "currently_eligible": [
+          "R1",
+          "R2"
+        ]
+      },
+      "expected": {
+        "error": "receipt-missing"
+      }
+    },
+    {
+      "identifier": "POS-ALL",
+      "operation": "close-session-membership",
+      "input": {
+        "included": [
+          "R1",
+          "R2"
+        ],
+        "currently_eligible": [
+          "R1",
+          "R2"
+        ]
+      },
+      "expected": {
+        "complete": true
+      }
+    },
+    {
+      "identifier": "FREE-BLOCKS",
+      "operation": "repeat-free-units",
+      "input": {
+        "paid": 26,
+        "threshold": 10,
+        "minimum": 10,
+        "block": 5,
+        "reward": 2
+      },
+      "expected": {
+        "free": 8
+      }
+    },
+    {
+      "identifier": "FREE-BASE",
+      "operation": "repeat-free-units",
+      "input": {
+        "paid": 10,
+        "threshold": 10,
+        "minimum": 10,
+        "block": 5,
+        "reward": 2
+      },
+      "expected": {
+        "free": 2
+      }
+    },
+    {
+      "identifier": "FREE-DIFFERENT-THRESHOLD",
+      "operation": "repeat-free-units",
+      "input": {
+        "paid": 26,
+        "threshold": 10,
+        "minimum": 5,
+        "block": 5,
+        "reward": 2
+      },
+      "expected": {
+        "free": 6
+      }
+    },
+    {
+      "identifier": "LOY-CENT-TRUNCATION",
+      "operation": "earn-points",
+      "input": {
+        "grand_total_minor_units": 20675,
+        "redeemed_minor_units": 575,
+        "returns_minor_units": 1175,
+        "minor_units_per_point": 1000
+      },
+      "expected": {
+        "eligible_minor_units": 19000,
+        "points": 19
+      }
+    },
+    {
+      "identifier": "LOY-NO-ROUND-UP",
+      "operation": "earn-points",
+      "input": {
+        "grand_total_minor_units": 999,
+        "redeemed_minor_units": 0,
+        "returns_minor_units": 0,
+        "minor_units_per_point": 1000
+      },
+      "expected": {
+        "eligible_minor_units": 999,
+        "points": 0
+      }
+    },
+    {
+      "identifier": "LOY-SIGNED-LOT",
+      "operation": "allocate-redeemed-lots",
+      "input": {
+        "first": 10,
+        "second": 10,
+        "prior_redemption_against_first_lot": -4,
+        "request": 8
+      },
+      "expected": {
+        "first_lot_allocation": 8,
+        "second_lot_allocation": 0
+      }
+    },
+    {
+      "identifier": "LOY-GLOBAL-LIMIT",
+      "operation": "allocate-redeemed-lots",
+      "input": {
+        "first": 10,
+        "second": 10,
+        "prior_redemption_against_first_lot": -4,
+        "request": 17
+      },
+      "expected": {
+        "error": "insufficient-points"
+      }
+    },
+    {
+      "identifier": "LOY-SPREAD",
+      "operation": "allocate-redeemed-lots",
+      "input": {
+        "first": 4,
+        "second": 10,
+        "prior_redemption_against_first_lot": 0,
+        "request": 7
+      },
+      "expected": {
+        "first_lot_allocation": 4,
+        "second_lot_allocation": 3
+      }
+    },
+    {
+      "identifier": "TIME-REMAINDER",
+      "operation": "service-invoice",
+      "input": {
+        "billable_hours": 8,
+        "billed_hours": 3,
+        "billable_minor_units": 100000,
+        "billed_minor_units": 30000
+      },
+      "expected": {
+        "hours": 5,
+        "unit_rate_minor_units": 14000,
+        "amount_minor_units": 70000
+      }
+    },
+    {
+      "identifier": "TIME-EMPTY",
+      "operation": "service-invoice",
+      "input": {
+        "billable_hours": 0,
+        "billed_hours": 0,
+        "billable_minor_units": 0,
+        "billed_minor_units": 0
+      },
+      "expected": {
+        "error": "no-billable-hours"
+      }
+    },
+    {
+      "identifier": "TIME-FULL",
+      "operation": "service-invoice",
+      "input": {
+        "billable_hours": 3,
+        "billed_hours": 3,
+        "billable_minor_units": 30000,
+        "billed_minor_units": 30000
+      },
+      "expected": {
+        "error": "hours-fully-billed"
+      }
+    },
+    {
+      "identifier": "APPT-PENDING",
+      "operation": "admit-appointment",
+      "input": {
+        "capacity": 1,
+        "start": 600,
+        "duration": 30,
+        "existing": [
+          {
+            "start": 600,
+            "status": "Unverified"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "identifier": "APPT-LAST-SLOT",
+      "operation": "admit-appointment",
+      "input": {
+        "capacity": 1,
+        "start": 600,
+        "duration": 30,
+        "existing": [
+          {
+            "start": 600,
+            "status": "Open"
+          }
+        ]
+      },
+      "expected": {
+        "error": "capacity-full"
+      }
+    },
+    {
+      "identifier": "APPT-ADJACENT",
+      "operation": "admit-appointment",
+      "input": {
+        "capacity": 1,
+        "start": 630,
+        "duration": 30,
+        "existing": [
+          {
+            "start": 600,
+            "status": "Open"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "identifier": "APPT-PARTIAL-OVERLAP",
+      "operation": "admit-appointment",
+      "input": {
+        "capacity": 1,
+        "start": 615,
+        "duration": 30,
+        "existing": [
+          {
+            "start": 600,
+            "status": "Open"
+          }
+        ]
+      },
+      "expected": {
+        "error": "capacity-full"
+      }
+    },
+    {
+      "identifier": "APPT-UNLIMITED",
+      "operation": "admit-appointment",
+      "input": {
+        "capacity": 0,
+        "start": 600,
+        "duration": 30,
+        "existing": [
+          {
+            "start": 600,
+            "status": "Open"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "identifier": "SLA-RETAIN",
+      "operation": "select-service-agreement",
+      "input": {
+        "eligible": [
+          "C",
+          "D"
+        ],
+        "already": "D"
+      },
+      "expected": {
+        "selected": "D"
+      }
+    },
+    {
+      "identifier": "SLA-FIRST",
+      "operation": "select-service-agreement",
+      "input": {
+        "eligible": [
+          "C",
+          "D"
+        ],
+        "already": "EXPIRED"
+      },
+      "expected": {
+        "selected": "C"
+      }
+    },
+    {
+      "identifier": "SLA-NONE",
+      "operation": "select-service-agreement",
+      "input": {
+        "eligible": [],
+        "already": null
+      },
+      "expected": {
+        "selected": null
+      }
+    },
+    {
+      "identifier": "BULK-SUPERSEDED",
+      "operation": "retry-bulk-conversion",
+      "input": {
+        "later_success": true,
+        "worker_succeeds": true
+      },
+      "expected": {
+        "tasks_started": 0,
+        "status": "Failed",
+        "retried": true
+      }
+    },
+    {
+      "identifier": "BULK-RETRY-OK",
+      "operation": "retry-bulk-conversion",
+      "input": {
+        "later_success": false,
+        "worker_succeeds": true
+      },
+      "expected": {
+        "tasks_started": 1,
+        "status": "Success",
+        "retried": true
+      }
+    },
+    {
+      "identifier": "BULK-RETRY-FAIL",
+      "operation": "retry-bulk-conversion",
+      "input": {
+        "later_success": false,
+        "worker_succeeds": false
+      },
+      "expected": {
+        "tasks_started": 1,
+        "status": "Failed",
+        "retried": true
+      }
+    },
+    {
+      "identifier": "EDI-NATURAL-VERSION",
+      "operation": "resolve-code-version",
+      "input": {
+        "versions": [
+          "3",
+          "10"
+        ],
+        "selected_code_list_version": null
+      },
+      "expected": {
+        "version": "10"
+      }
+    },
+    {
+      "identifier": "EDI-PIN",
+      "operation": "resolve-code-version",
+      "input": {
+        "versions": [
+          "3",
+          "10"
+        ],
+        "selected_code_list_version": "3"
+      },
+      "expected": {
+        "version": "3"
+      }
+    },
+    {
+      "identifier": "EDI-EMPTY",
+      "operation": "resolve-code-version",
+      "input": {
+        "versions": [],
+        "selected_code_list_version": null
+      },
+      "expected": {
+        "version": null
+      }
+    },
+    {
+      "identifier": "CRM-COHORT",
+      "operation": "campaign-efficiency",
+      "input": {
+        "leads": 2,
+        "opportunities": 3,
+        "submitted_quotes": 2,
+        "ordered_quotes": 1
+      },
+      "expected": {
+        "opportunities_per_lead_percentage": 150,
+        "quotes_per_lead_percentage": 100,
+        "ordered_quotes_percentage": 50
+      }
+    },
+    {
+      "identifier": "CRM-NO-QUOTES",
+      "operation": "campaign-efficiency",
+      "input": {
+        "leads": 2,
+        "opportunities": 1,
+        "submitted_quotes": 0,
+        "ordered_quotes": 0
+      },
+      "expected": {
+        "opportunities_per_lead_percentage": 50,
+        "quotes_per_lead_percentage": 0,
+        "ordered_quotes_percentage": 0
+      }
+    },
+    {
+      "identifier": "AUTH-WEIGHTED",
+      "operation": "weighted-approval-discount",
+      "input": {
+        "lines": [
+          {
+            "quantity": 2,
+            "list_minor_units": 10000,
+            "actual_minor_units": 9000
+          },
+          {
+            "quantity": 1,
+            "list_minor_units": 5000,
+            "actual_minor_units": 5000
+          }
+        ],
+        "extra_discount_minor_units": 500
+      },
+      "expected": {
+        "discount_basis_points": 1000
+      }
+    },
+    {
+      "identifier": "AUTH-BASE-FALLBACK",
+      "operation": "weighted-approval-discount",
+      "input": {
+        "lines": [
+          {
+            "quantity": 1,
+            "list_minor_units": 0,
+            "actual_minor_units": 9000
+          }
+        ],
+        "extra_discount_minor_units": 0
+      },
+      "expected": {
+        "discount_basis_points": 0
+      }
+    },
+    {
+      "identifier": "QUOTE-NOTHING",
+      "operation": "quote-choice-set",
+      "input": {
+        "main_quantity": 1,
+        "main_ordered": 0,
+        "alternative_quantity": 1,
+        "alternative_ordered": 0,
+        "service_quantity": 1,
+        "service_ordered": 0
+      },
+      "expected": {
+        "status": "Open"
+      }
+    },
+    {
+      "identifier": "QUOTE-ALT-AND-SERVICE",
+      "operation": "quote-choice-set",
+      "input": {
+        "main_quantity": 1,
+        "main_ordered": 0,
+        "alternative_quantity": 1,
+        "alternative_ordered": 1,
+        "service_quantity": 1,
+        "service_ordered": 1
+      },
+      "expected": {
+        "status": "Ordered"
+      }
+    },
+    {
+      "identifier": "QUOTE-ALT-MISSING-SERVICE",
+      "operation": "quote-choice-set",
+      "input": {
+        "main_quantity": 1,
+        "main_ordered": 0,
+        "alternative_quantity": 1,
+        "alternative_ordered": 1,
+        "service_quantity": 1,
+        "service_ordered": 0
+      },
+      "expected": {
+        "status": "Partially Ordered"
+      }
+    },
+    {
+      "identifier": "QUOTE-SET-UNTOUCHED",
+      "operation": "quote-choice-set",
+      "input": {
+        "main_quantity": 1,
+        "main_ordered": 0,
+        "alternative_quantity": 1,
+        "alternative_ordered": 0,
+        "service_quantity": 1,
+        "service_ordered": 1
+      },
+      "expected": {
+        "status": "Partially Ordered"
+      }
+    }
+  ]
+}

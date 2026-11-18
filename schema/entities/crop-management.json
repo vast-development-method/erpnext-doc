@@ -1,0 +1,311 @@
+[
+  {
+    "entity": "crop_management.agriculture_analysis_criteria",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "agriculture_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "agriculture_user", "level": 0, "allows": ["read", "write", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "unique": true},
+      {"field": "standard", "type": "boolean"},
+      {"field": "linked_entity_type", "type": "enumeration", "values": ["", "Water Analysis", "Soil Analysis", "Plant Analysis", "Fertilizer", "Soil Texture", "Weather"]}
+    ]
+  },
+  {
+    "entity": "crop_management.agriculture_task",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "task_name", "type": "short_text", "required": true},
+      {"field": "start_day", "type": "integer", "required": true},
+      {"field": "end_day", "type": "integer", "required": true},
+      {"field": "holiday_management", "type": "enumeration", "required": true, "values": ["Ignore holidays", "Previous Business Day", "Next Business Day"], "default": "Ignore holidays"},
+      {"field": "priority", "type": "enumeration", "values": ["Low", "Medium", "High", "Urgent"], "default": "Low"}
+    ]
+  },
+  {
+    "entity": "crop_management.crop",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "agriculture_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "agriculture_user", "level": 0, "allows": ["read", "write", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true, "unique": true},
+      {"field": "crop_name", "type": "short_text", "required": true},
+      {"field": "scientific_name", "type": "short_text"},
+      {"field": "agriculture_task_rows", "type": "owned_collection", "target": "crop_management.agriculture_task", "required": true},
+      {"field": "period", "type": "integer", "default": "0"},
+      {"field": "crop_spacing", "type": "decimal"},
+      {"field": "crop_spacing_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure"},
+      {"field": "row_spacing", "type": "decimal"},
+      {"field": "row_spacing_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure"},
+      {"field": "type", "type": "enumeration", "values": ["Annual", "Perennial", "Biennial"]},
+      {"field": "category", "type": "short_text"},
+      {"field": "target_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "planting_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure"},
+      {"field": "planting_area", "type": "short_text"},
+      {"field": "yield_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure"},
+      {"field": "materials_required_rows", "type": "owned_collection", "target": "manufacturing.bill_of_materials_item"},
+      {"field": "produce_rows", "type": "owned_collection", "target": "manufacturing.bill_of_materials_item"},
+      {"field": "byproducts_rows", "type": "owned_collection", "target": "manufacturing.bill_of_materials_item"}
+    ]
+  },
+  {
+    "entity": "crop_management.crop_cycle",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "agriculture_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "agriculture_user", "level": 0, "allows": ["read", "write", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true, "unique": true},
+      {"field": "crop_identifier", "type": "entity_reference", "target": "crop_management.crop", "required": true},
+      {"field": "linked_location_rows", "type": "owned_collection", "target": "crop_management.linked_location"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "start_date", "type": "calendar_date", "required": true},
+      {"field": "end_date", "type": "short_text", "form_read_only": true},
+      {"field": "iso_8601_standard", "type": "boolean"},
+      {"field": "cycle_type", "type": "enumeration", "values": ["Yearly", "Less than a year"]},
+      {"field": "crop_spacing", "type": "decimal"},
+      {"field": "crop_spacing_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure"},
+      {"field": "row_spacing", "type": "decimal"},
+      {"field": "row_spacing_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure"},
+      {"field": "detected_disease_rows", "type": "owned_collection", "target": "crop_management.detected_disease"},
+      {"field": "soil_texture_rows", "type": "owned_collection", "target": "crop_management.linked_soil_texture"},
+      {"field": "soil_analysis_rows", "type": "owned_collection", "target": "crop_management.linked_soil_analysis"},
+      {"field": "plant_analysis_rows", "type": "owned_collection", "target": "crop_management.linked_plant_analysis"}
+    ]
+  },
+  {
+    "entity": "crop_management.detected_disease",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "disease_identifier", "type": "entity_reference", "target": "crop_management.disease", "required": true},
+      {"field": "start_date", "type": "calendar_date", "required": true},
+      {"field": "tasks_created", "type": "boolean", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "crop_management.disease",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "agriculture_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "agriculture_user", "level": 0, "allows": ["read", "write", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "common_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "scientific_name", "type": "short_text"},
+      {"field": "treatment_task_rows", "type": "owned_collection", "target": "crop_management.agriculture_task"},
+      {"field": "treatment_period", "type": "integer"},
+      {"field": "description", "type": "long_text"}
+    ]
+  },
+  {
+    "entity": "crop_management.fertilizer",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "agriculture_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "agriculture_user", "level": 0, "allows": ["read", "write", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "fertilizer_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "density", "type": "short_text"},
+      {"field": "fertilizer_contents_rows", "type": "owned_collection", "target": "crop_management.fertilizer_content"}
+    ]
+  },
+  {
+    "entity": "crop_management.fertilizer_content",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "title_identifier", "type": "entity_reference", "target": "crop_management.agriculture_analysis_criteria", "required": true},
+      {"field": "value", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "crop_management.linked_location",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "location_identifier", "type": "entity_reference", "target": "fixed_assets.location", "required": true}
+    ]
+  },
+  {
+    "entity": "crop_management.linked_plant_analysis",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "plant_analysis_identifier", "type": "entity_reference", "target": "crop_management.plant_analysis", "required": true}
+    ]
+  },
+  {
+    "entity": "crop_management.linked_soil_analysis",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "soil_analysis_identifier", "type": "entity_reference", "target": "crop_management.soil_analysis", "required": true}
+    ]
+  },
+  {
+    "entity": "crop_management.linked_soil_texture",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "soil_texture_identifier", "type": "entity_reference", "target": "crop_management.soil_texture", "required": true}
+    ]
+  },
+  {
+    "entity": "crop_management.plant_analysis",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "agriculture_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "agriculture_user", "level": 0, "allows": ["read", "write", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "crop_identifier", "type": "entity_reference", "target": "crop_management.crop", "required": true},
+      {"field": "location", "type": "geographic_geometry"},
+      {"field": "collection_datetime", "type": "date_and_time", "required": true},
+      {"field": "laboratory_testing_datetime", "type": "date_and_time"},
+      {"field": "result_datetime", "type": "date_and_time"},
+      {"field": "plant_analysis_criteria_rows", "type": "owned_collection", "target": "crop_management.plant_analysis_criteria"}
+    ]
+  },
+  {
+    "entity": "crop_management.plant_analysis_criteria",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "title_identifier", "type": "entity_reference", "target": "crop_management.agriculture_analysis_criteria", "required": true},
+      {"field": "value", "type": "short_text"},
+      {"field": "minimum_permissible_value", "type": "short_text"},
+      {"field": "maximum_permissible_value", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "crop_management.soil_analysis",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "agriculture_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "agriculture_user", "level": 0, "allows": ["read", "write", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "location", "type": "geographic_geometry"},
+      {"field": "collection_datetime", "type": "date_and_time", "required": true},
+      {"field": "laboratory_testing_datetime", "type": "date_and_time"},
+      {"field": "result_datetime", "type": "date_and_time"},
+      {"field": "ca_per_k", "type": "short_text", "form_read_only": true},
+      {"field": "ca_per_mg", "type": "short_text", "form_read_only": true},
+      {"field": "mg_per_k", "type": "short_text", "form_read_only": true},
+      {"field": "ca_mg_per_k", "type": "short_text", "form_read_only": true},
+      {"field": "ca_per_k_ca_mg", "type": "short_text", "form_read_only": true},
+      {"field": "invoice_number", "type": "short_text"},
+      {"field": "soil_analysis_criteria_rows", "type": "owned_collection", "target": "crop_management.soil_analysis_criteria"}
+    ]
+  },
+  {
+    "entity": "crop_management.soil_analysis_criteria",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "title_identifier", "type": "entity_reference", "target": "crop_management.agriculture_analysis_criteria", "required": true},
+      {"field": "value", "type": "short_text"},
+      {"field": "minimum_permissible_value", "type": "short_text"},
+      {"field": "maximum_permissible_value", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "crop_management.soil_texture",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "agriculture_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "agriculture_user", "level": 0, "allows": ["read", "write", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "location", "type": "geographic_geometry", "required": true},
+      {"field": "collection_datetime", "type": "date_and_time", "required": true},
+      {"field": "laboratory_testing_datetime", "type": "date_and_time"},
+      {"field": "result_datetime", "type": "date_and_time"},
+      {"field": "soil_type", "type": "enumeration", "values": ["Select", "Sand", "Loamy Sand", "Sandy Loam", "Loam", "Silt Loam", "Silt", "Sandy Clay Loam", "Clay Loam", "Silty Clay Loam", "Sandy Clay", "Silty Clay", "Clay"]},
+      {"field": "clay_composition", "type": "percentage", "default": "0"},
+      {"field": "sand_composition", "type": "percentage", "default": "0"},
+      {"field": "silt_composition", "type": "percentage", "default": "0"},
+      {"field": "soil_texture_criteria_rows", "type": "owned_collection", "target": "crop_management.soil_texture_criteria"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "ternary plot"}
+    ]
+  },
+  {
+    "entity": "crop_management.soil_texture_criteria",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "title_identifier", "type": "entity_reference", "target": "crop_management.agriculture_analysis_criteria", "required": true},
+      {"field": "value", "type": "short_text"},
+      {"field": "minimum_permissible_value", "type": "short_text"},
+      {"field": "maximum_permissible_value", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "crop_management.water_analysis",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "agriculture_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "agriculture_user", "level": 0, "allows": ["read", "write", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "location", "type": "geographic_geometry", "required": true},
+      {"field": "collection_datetime", "type": "date_and_time", "required": true},
+      {"field": "laboratory_testing_datetime", "type": "date_and_time"},
+      {"field": "result_datetime", "type": "date_and_time"},
+      {"field": "type_of_sample", "type": "short_text"},
+      {"field": "container", "type": "short_text"},
+      {"field": "origin", "type": "short_text"},
+      {"field": "collection_temperature", "type": "short_text"},
+      {"field": "storage_temperature", "type": "short_text"},
+      {"field": "appearance", "type": "short_text"},
+      {"field": "person_responsible", "type": "short_text"},
+      {"field": "water_analysis_criteria_rows", "type": "owned_collection", "target": "crop_management.water_analysis_criteria"}
+    ]
+  },
+  {
+    "entity": "crop_management.water_analysis_criteria",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "title_identifier", "type": "entity_reference", "target": "crop_management.agriculture_analysis_criteria", "required": true},
+      {"field": "value", "type": "short_text"},
+      {"field": "minimum_permissible_value", "type": "short_text"},
+      {"field": "maximum_permissible_value", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "crop_management.weather",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "agriculture_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "agriculture_user", "level": 0, "allows": ["read", "write", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "location_identifier", "type": "entity_reference", "target": "fixed_assets.location"},
+      {"field": "date", "type": "calendar_date", "required": true},
+      {"field": "source", "type": "short_text"},
+      {"field": "weather_parameter_rows", "type": "owned_collection", "target": "crop_management.weather_parameter"}
+    ]
+  },
+  {
+    "entity": "crop_management.weather_parameter",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "title_identifier", "type": "entity_reference", "target": "crop_management.agriculture_analysis_criteria", "required": true},
+      {"field": "value", "type": "short_text"},
+      {"field": "minimum_permissible_value", "type": "short_text"},
+      {"field": "maximum_permissible_value", "type": "short_text"}
+    ]
+  }
+]

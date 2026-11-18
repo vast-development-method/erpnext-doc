@@ -1,0 +1,834 @@
+[
+  {
+    "name": "Commission outsourced manufacture on a purchase order",
+    "source": "procurement.purchase_order",
+    "destination": "subcontracting.subcontracting_order",
+    "decision": "Admit service rows whose ordered quantity exceeds their subcontracted quantity. Recompute outstanding service quantity, finished-good quantity and amount. Carry the production-plan reference when the relevant service rows identify one plan. Determine material reservation from the automatic or plan policy. A job-card link can supply the supplier work-in-progress warehouse.",
+    "record_mappings": [
+      {
+        "source_entity": "procurement.purchase_order",
+        "target_entity": "subcontracting.subcontracting_order",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "excluded_from_default_copy": [
+          "total_quantity",
+          "total",
+          "net_total"
+        ]
+      },
+      {
+        "source_entity": "procurement.purchase_order_item",
+        "target_entity": "subcontracting.subcontracting_order_service_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "purchase_order_item"
+          ],
+          [
+            "material_request_identifier",
+            "material_request_identifier"
+          ],
+          [
+            "material_request_item",
+            "material_request_item"
+          ]
+        ],
+        "excluded_from_default_copy": [
+          "quantity",
+          "finished_goods_item_quantity",
+          "amount"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Create a variant manufacturing recipe",
+    "source": "manufacturing.bill_of_materials",
+    "destination": "manufacturing.bill_of_materials",
+    "decision": "Use the selected variant as the new output. Exclude template component rows that require a variant choice. For rows supplied by the variant-resolution step, derive component and stock quantities using the output scale and the component's conversion factor and field precision.",
+    "identity": "Create a distinct target record.",
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.bill_of_materials",
+        "target_entity": "manufacturing.bill_of_materials",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "manufacturing.bill_of_materials_item",
+        "target_entity": "manufacturing.bill_of_materials_item",
+        "excluded_from_default_copy": [
+          "bill_of_materials_number_identifier"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Purchase an externally performed operation",
+    "source": "manufacturing.job_card",
+    "destination": "procurement.purchase_order",
+    "decision": "Mark the purchase as subcontracted and use the card's work-in-progress warehouse as the supplier warehouse. Generate the ordered service product for the operation and preserve its link back to the operation card.",
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.job_card",
+        "target_entity": "procurement.purchase_order",
+        "explicit_field_transfers": [
+          [
+            "work_in_progress_warehouse_identifier",
+            "supplier_warehouse_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "manufacturing.job_card",
+        "target_entity": "procurement.purchase_order_item",
+        "explicit_field_transfers": [
+          [
+            "finished_good_identifier",
+            "finished_goods_item_identifier"
+          ],
+          [
+            "record_identifier",
+            "job_card_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Request materials for an operation card",
+    "source": "manufacturing.job_card",
+    "destination": "inventory.material_request",
+    "decision": "Generate a material transfer request to the card's work-in-progress warehouse. In shortage mode use the calculated shortage per card-material row. Where excess transfer is disallowed, cap requested quantities at pending requirement. Drop ineligible rows instead of requesting the whole operation quantity again.",
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.job_card",
+        "target_entity": "inventory.material_request",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "job_card_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "manufacturing.job_card_item",
+        "target_entity": "inventory.material_request_item",
+        "explicit_field_transfers": [
+          [
+            "required_quantity",
+            "quantity"
+          ],
+          [
+            "unit_of_measure_identifier",
+            "stock_unit_of_measure_identifier"
+          ],
+          [
+            "record_identifier",
+            "job_card_item"
+          ]
+        ]
+      },
+      {
+        "source_entity": "manufacturing.job_card",
+        "target_entity": "inventory.material_request_item",
+        "explicit_field_transfers": [
+          [
+            "work_in_progress_warehouse_identifier",
+            "warehouse_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Transfer components for an operation card",
+    "source": "manufacturing.job_card",
+    "destination": "inventory.stock_entry",
+    "decision": "Select positive required quantities, respecting the excess-transfer policy and already transferred quantity. Point the target warehouse to work in progress. Set material transfer for manufacture as the purpose. Resolve finished units still due, recipe and substitution authority independently of the component quantity.",
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.job_card",
+        "target_entity": "inventory.stock_entry",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "job_card_identifier"
+          ],
+          [
+            "for_quantity",
+            "finished_goods_completed_quantity"
+          ]
+        ]
+      },
+      {
+        "source_entity": "manufacturing.job_card_item",
+        "target_entity": "inventory.stock_entry_detail",
+        "explicit_field_transfers": [
+          [
+            "source_warehouse_identifier",
+            "source_warehouse_identifier"
+          ],
+          [
+            "required_quantity",
+            "quantity"
+          ],
+          [
+            "record_identifier",
+            "job_card_item"
+          ]
+        ]
+      },
+      {
+        "source_entity": "manufacturing.job_card",
+        "target_entity": "inventory.stock_entry_detail",
+        "explicit_field_transfers": [
+          [
+            "work_in_progress_warehouse_identifier",
+            "target_warehouse_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Open a corrective operation card",
+    "source": "manufacturing.job_card",
+    "destination": "manufacturing.job_card",
+    "decision": "Mark the card as corrective and retain the original card identity. Select the corrective operation and the operation being corrected. Reset completed, lost and pending quantity fields before the new work is recorded.",
+    "identity": "Create a distinct target record.",
+    "calculated_after_mapping": [
+      {
+        "target_entity": "manufacturing.job_card",
+        "target_field": "total_completed_quantity",
+        "rule": "Zero before recording the corrective work."
+      },
+      {
+        "target_entity": "manufacturing.job_card",
+        "target_field": "process_loss_quantity",
+        "rule": "Zero before recording losses on the corrective work."
+      },
+      {
+        "target_entity": "manufacturing.job_card",
+        "target_field": "pending_quantity",
+        "rule": "Zero at initialisation."
+      }
+    ],
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.job_card",
+        "target_entity": "manufacturing.job_card",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "for_job_card_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Create a master schedule for a sales forecast",
+    "source": "manufacturing.sales_forecast",
+    "destination": "manufacturing.master_production_schedule",
+    "decision": "Require the forecast to be submitted and in Planned state. Link the forecast and copy its start date. The schedule resolves actual open demand by item and location. Saving the schedule updates the linked forecast status.",
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.sales_forecast",
+        "target_entity": "manufacturing.master_production_schedule",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ],
+          [
+            "status",
+            "equals",
+            "Planned"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "sales_forecast_identifier"
+          ],
+          [
+            "from_date",
+            "from_date"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Pick materials for a manufacturing order",
+    "source": "manufacturing.work_order",
+    "destination": "inventory.pick_list",
+    "decision": "Allocate the required fraction of production, capped by still-unclaimed component quantities. Preserve the product/source warehouse allocation when several material rows use the same product. Use material transfer for manufacture as the pick purpose and the requested finished quantity as its basis.",
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.work_order",
+        "target_entity": "inventory.pick_list",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "manufacturing.work_order_item",
+        "target_entity": "inventory.pick_list_item",
+        "excluded_from_default_copy": [
+          "transferred_quantity"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Request manufacturing order components",
+    "source": "manufacturing.work_order",
+    "destination": "inventory.material_request",
+    "decision": "Use the material stock unit as the requesting unit, carry the source warehouse and set the destination to the work-in-progress warehouse. Add only positive allocated demand. Consume each allocation once across repeated source rows and date the new request line at the effective request date.",
+    "calculated_after_mapping": [
+      {
+        "target_entity": "inventory.material_request_item",
+        "target_field": "quantity",
+        "rule": "Allocated quantity remaining for this product, warehouse and operation group, consumed only once."
+      }
+    ],
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.work_order",
+        "target_entity": "inventory.material_request",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "work_order_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "manufacturing.work_order_item",
+        "target_entity": "inventory.material_request_item",
+        "explicit_field_transfers": [
+          [
+            "stock_unit_of_measure_identifier",
+            "unit_of_measure_identifier"
+          ],
+          [
+            "source_warehouse_identifier",
+            "from_warehouse_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "manufacturing.work_order",
+        "target_entity": "inventory.material_request_item",
+        "explicit_field_transfers": [
+          [
+            "work_in_progress_warehouse_identifier",
+            "warehouse_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Commission production for a customer",
+    "source": "sales.sales_order",
+    "destination": "subcontracting.subcontracting_inward_order",
+    "decision": "Select unprocessed service rows from the submitted order and preserve the original service line. Generate the outstanding production requirements in the inward subcontract order. Customer-owned material receipts and service billing progress are independent.",
+    "record_mappings": [
+      {
+        "source_entity": "sales.sales_order",
+        "target_entity": "subcontracting.subcontracting_inward_order",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "excluded_from_default_copy": [
+          "total_quantity",
+          "total",
+          "net_total"
+        ]
+      },
+      {
+        "source_entity": "sales.sales_order_item",
+        "target_entity": "subcontracting.subcontracting_inward_order_service_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "sales_order_item"
+          ]
+        ],
+        "excluded_from_default_copy": [
+          "quantity",
+          "finished_goods_item_quantity",
+          "amount"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Receive the customer's components",
+    "source": "subcontracting.subcontracting_inward_order",
+    "destination": "inventory.stock_entry",
+    "decision": "Prepare an inward material movement under the customer manufacturing order. Proposed material demand uses required less already received plus returned and the recipe-based quantity due to eligible process loss. Warehouse custody is distinct from company ownership.",
+    "record_mappings": [
+      {
+        "source_entity": "subcontracting.subcontracting_inward_order",
+        "target_entity": "inventory.stock_entry",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Return unused material to a customer",
+    "source": "subcontracting.subcontracting_inward_order",
+    "destination": "inventory.stock_entry",
+    "decision": "For customer-provided materials compute received less allocated work-order quantity less already returned. Issue only positive quantities from their recorded warehouse.",
+    "record_mappings": [
+      {
+        "source_entity": "subcontracting.subcontracting_inward_order",
+        "target_entity": "inventory.stock_entry",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Deliver goods produced for a customer",
+    "source": "subcontracting.subcontracting_inward_order",
+    "destination": "inventory.stock_entry",
+    "decision": "If overproduction delivery is enabled use produced quantity, otherwise use the lesser of ordered and produced. Subtract prior delivery progress and propose only positive remaining rows.",
+    "record_mappings": [
+      {
+        "source_entity": "subcontracting.subcontracting_inward_order",
+        "target_entity": "inventory.stock_entry",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Accept a customer's return of manufactured goods",
+    "source": "subcontracting.subcontracting_inward_order",
+    "destination": "inventory.stock_entry",
+    "decision": "Propose delivered units less units already returned. Retain the customer manufacturing order and output row so returns update the correct product balance.",
+    "record_mappings": [
+      {
+        "source_entity": "subcontracting.subcontracting_inward_order",
+        "target_entity": "inventory.stock_entry",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "subcontracting_inward_order_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Receive completed outsourced production",
+    "source": "subcontracting.subcontracting_order",
+    "destination": "subcontracting.subcontracting_receipt",
+    "decision": "For unselected rows propose order quantity less received. For an explicit selection use the requested quantity or remaining quantity as applicable. Retain the underlying service order row. Calculate process loss as accepted proposal times the configured loss percentage at its field precision.",
+    "calculated_after_mapping": [
+      {
+        "target_entity": "subcontracting.subcontracting_receipt_item",
+        "target_field": "quantity",
+        "rule": "Use selected positive proposal if supplied, otherwise original order quantity less received quantity."
+      },
+      {
+        "target_entity": "subcontracting.subcontracting_receipt_item",
+        "target_field": "received_quantity",
+        "rule": "Proposed receipt quantity."
+      },
+      {
+        "target_entity": "subcontracting.subcontracting_receipt_item",
+        "target_field": "process_loss_quantity",
+        "rule": "Proposed quantity × process-loss percentage ÷ 100, rounded at the process-loss quantity precision."
+      }
+    ],
+    "record_mappings": [
+      {
+        "source_entity": "subcontracting.subcontracting_order",
+        "target_entity": "subcontracting.subcontracting_receipt",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "supplier_warehouse_identifier",
+            "supplier_warehouse_identifier"
+          ],
+          [
+            "default_warehouse_identifier",
+            "default_warehouse_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "subcontracting.subcontracting_order_item",
+        "target_entity": "subcontracting.subcontracting_receipt_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "subcontracting_order_item"
+          ],
+          [
+            "owning_record_identifier",
+            "subcontracting_order_identifier"
+          ],
+          [
+            "bill_of_materials_identifier",
+            "bill_of_materials_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Receive the supplier service linked to completed goods",
+    "source": "procurement.purchase_order",
+    "destination": "inventory.purchase_receipt",
+    "decision": "Reconstruct service receipt rows from the associated purchase order and finished receipt. Include only order lines linked to the selected completed goods. Distinguish tax-withholding and merged tax rows so several purchases cannot duplicate fixed charges.",
+    "record_mappings": [
+      {
+        "source_entity": "procurement.purchase_order",
+        "target_entity": "inventory.purchase_receipt",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "supplier_warehouse_identifier",
+            "supplier_warehouse_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "procurement.purchase_order_item",
+        "target_entity": "inventory.purchase_receipt_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "purchase_order_item"
+          ],
+          [
+            "owning_record_identifier",
+            "purchase_order_identifier"
+          ],
+          [
+            "bill_of_materials_identifier",
+            "bill_of_materials_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.purchase_taxes_and_charges",
+        "target_entity": "accounting.purchase_taxes_and_charges"
+      }
+    ]
+  },
+  {
+    "name": "Send company components to a supplier against purchase order",
+    "source": "procurement.purchase_order",
+    "destination": "inventory.stock_entry",
+    "decision": "Set the movement purpose to sending to the subcontractor. Create material rows for the supplier warehouse from the order's eligible supplied materials. Preserve the governing order identity, whether it is a purchase order or a separate subcontract order.",
+    "record_mappings": [
+      {
+        "source_entity": "procurement.purchase_order",
+        "target_entity": "inventory.stock_entry",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "purchase_order_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Recover company components from a supplier against purchase order",
+    "source": "procurement.purchase_order",
+    "destination": "inventory.stock_entry",
+    "decision": "Build a return transfer for the original order and company. Select the remaining transferable identities and reverse custody to the receiving warehouse. This is distinct from a return of completed goods.",
+    "record_mappings": [
+      {
+        "source_entity": "procurement.purchase_order",
+        "target_entity": "inventory.stock_entry",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "purchase_order_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Send company components to a supplier against subcontracting order",
+    "source": "subcontracting.subcontracting_order",
+    "destination": "inventory.stock_entry",
+    "decision": "Set the movement purpose to sending to the subcontractor. Create material rows for the supplier warehouse from the order's eligible supplied materials. Preserve the governing order identity, whether it is a purchase order or a separate subcontract order.",
+    "record_mappings": [
+      {
+        "source_entity": "subcontracting.subcontracting_order",
+        "target_entity": "inventory.stock_entry",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "subcontracting_order_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Recover company components from a supplier against subcontracting order",
+    "source": "subcontracting.subcontracting_order",
+    "destination": "inventory.stock_entry",
+    "decision": "Build a return transfer for the original order and company. Select the remaining transferable identities and reverse custody to the receiving warehouse. This is distinct from a return of completed goods.",
+    "record_mappings": [
+      {
+        "source_entity": "subcontracting.subcontracting_order",
+        "target_entity": "inventory.stock_entry",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "subcontracting_order_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Release a finished product for internal manufacture",
+    "source": "manufacturing.production_plan",
+    "destination": "manufacturing.work_order",
+    "decision": "Reload the open plan before issuing work. Closed and completed plans cannot release new orders. Generate an order only for positive remaining production demand. Inherit reservation policy and planned start or schedule date. Warehouse overrides on the plan line take precedence over defaults. Expand the recipe into required materials and operations when preparing the work order.",
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.production_plan",
+        "target_entity": "manufacturing.work_order",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "production_plan_identifier"
+          ],
+          [
+            "reserve_stock",
+            "reserve_stock"
+          ]
+        ]
+      },
+      {
+        "source_entity": "manufacturing.production_plan_item",
+        "target_entity": "manufacturing.work_order",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "production_plan_item"
+          ],
+          [
+            "item_identifier",
+            "production_item_identifier"
+          ],
+          [
+            "bill_of_materials_number_identifier",
+            "bill_of_materials_number_identifier"
+          ],
+          [
+            "warehouse_identifier",
+            "finished_goods_warehouse_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Release a manufactured subassembly",
+    "source": "manufacturing.production_plan",
+    "destination": "manufacturing.work_order",
+    "decision": "Use subassembly rows classified for internal manufacture. Subtract work already allocated to the plan row and skip nonpositive amounts. Resolve source warehouse from the recipe, then apply the specific subassembly warehouse when set. The generated order retains the plan row and subassembly identity. A subcontracted subassembly or material-request row follows its own route.",
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.production_plan",
+        "target_entity": "manufacturing.work_order",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "production_plan_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "manufacturing.production_plan_sub_assembly_item",
+        "target_entity": "manufacturing.work_order",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "production_plan_sub_assembly_item"
+          ],
+          [
+            "production_item_identifier",
+            "production_item_identifier"
+          ],
+          [
+            "bill_of_materials_number_identifier",
+            "bill_of_materials_number_identifier"
+          ],
+          [
+            "finished_goods_warehouse_identifier",
+            "finished_goods_warehouse_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Order outsourced plan subassemblies",
+    "source": "manufacturing.production_plan",
+    "destination": "procurement.purchase_order",
+    "decision": "Select subcontract rows, consolidate outstanding requirements by supplier and take account of existing noncancelled purchase lines already linked to the plan. A supplier gets its own outsourced purchase order. Use finished-product quantity on the purchase line, the finished warehouse and the selected service item. Distinguish the scheduled procurement event from the later receipt of goods.",
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.production_plan",
+        "target_entity": "procurement.purchase_order",
+        "explicit_field_transfers": [
+          [
+            "company_identifier",
+            "company_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "manufacturing.production_plan_sub_assembly_item",
+        "target_entity": "procurement.purchase_order_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "production_plan_sub_assembly_item"
+          ],
+          [
+            "production_item_identifier",
+            "finished_goods_item_identifier"
+          ],
+          [
+            "finished_goods_warehouse_identifier",
+            "warehouse_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Request planned materials",
+    "source": "manufacturing.production_plan",
+    "destination": "inventory.material_request",
+    "decision": "Read the saved, writable, open plan. Group material requirements by sales order and request kind. Select positive remaining quantity after prior submitted requests and quantities in linked drafts converted back into the transaction unit. Reject a group warehouse. Use each required date or effective date plus item lead days. Preserve plan and requirement identities. Save drafts or submit according to the selected action.",
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.production_plan",
+        "target_entity": "inventory.material_request",
+        "explicit_field_transfers": [
+          [
+            "company_identifier",
+            "company_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "manufacturing.material_request_plan_item",
+        "target_entity": "inventory.material_request_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "material_request_plan_item"
+          ],
+          [
+            "item_identifier",
+            "item_identifier"
+          ],
+          [
+            "warehouse_identifier",
+            "warehouse_identifier"
+          ],
+          [
+            "sales_order_identifier",
+            "sales_order_identifier"
+          ]
+        ]
+      }
+    ]
+  }
+]

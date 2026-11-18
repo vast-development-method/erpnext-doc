@@ -1,0 +1,1064 @@
+[
+  {
+    "capability": "Shared whiteboards",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "user_whiteboard_state",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "state", "value_kind": "structured_value", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Sheet cutting and offcut reuse",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "layout_approval_snapshot",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "step_name", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "approver", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "decision", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "submitted", "approved", "rejected"]},
+          {"purpose": "comment", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "decision_time", "value_kind": "date_and_time", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "layout_end_piece",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "end_piece_product_identifier", "value_kind": "reference", "rules": ["read_only"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "width_mm", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "length_mm", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "strip_width_mm", "value_kind": "decimal"},
+          {"purpose": "strip_length_mm", "value_kind": "decimal"},
+          {"purpose": "strip_weight_kg", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "weight_kg", "value_kind": "decimal", "rules": ["required", "read_only"]},
+          {"purpose": "disposition", "value_kind": "choice", "choices": ["unselected", "reuse", "scrap"]},
+          {"purpose": "scrap_item", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "used_for_finished_part", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "bill_of_materials_quantity", "value_kind": "decimal"},
+          {"purpose": "net_weight_per_part_kg", "value_kind": "decimal"},
+          {"purpose": "gross_weight_per_part_kg", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "scrap_weight_per_part_kg", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "bill_of_materials_scrap_quantity_kg", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "generated_end_piece_bill_of_materials", "value_kind": "reference", "rules": ["read_only"], "target": "manufacturing.bill_of_materials", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "layout_finished_part",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "finished_part_item", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "bill_of_materials_quantity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "scrap_weight_kg", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "raw_material_weight_kg", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "generated_bill_of_materials", "value_kind": "reference", "rules": ["read_only"], "target": "manufacturing.bill_of_materials", "binding": "shared_model"},
+          {"purpose": "orientation", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "lh", "rh"]}
+        ]
+      },
+      {
+        "concept": "sheet_cutting_layout",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "layout_code", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "project", "value_kind": "reference", "rules": ["required"], "target": "projects.project", "binding": "shared_model"},
+          {"purpose": "revision_number", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "active_indicator", "value_kind": "boolean", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "based_on_layout", "value_kind": "reference", "rules": ["read_only"], "target": "sheet_cutting_layout"},
+          {"purpose": "raw_material_item", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "process_scrap_item", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "sheet_thickness_mm", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "sheet_width_mm", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "sheet_length_mm", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "weight_per_sheet_kg", "value_kind": "decimal", "rules": ["required", "read_only"]},
+          {"purpose": "consumed_weight_kg", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "leftover_weight_kg", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "consumption_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["balanced", "short", "excess"]},
+          {"purpose": "end_piece_bill_of_materials_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["not_required", "pending", "generated"]},
+          {"purpose": "strip_thickness_mm", "value_kind": "decimal", "rules": ["required", "read_only"]},
+          {"purpose": "strip_width_mm", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "strip_length_mm", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "weight_of_strip_kg", "value_kind": "decimal", "rules": ["required", "read_only"]},
+          {"purpose": "gross_weight_per_part_kg", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "parts_per_strip", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "number_of_strips", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "parts_per_sheet", "value_kind": "whole_number", "rules": ["required", "read_only"]},
+          {"purpose": "finished_part_code", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "is_lh_rh", "value_kind": "boolean"},
+          {"purpose": "orientation", "value_kind": "choice", "choices": ["unselected", "lh", "rh"]},
+          {"purpose": "twin_finished_part", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "net_weight_per_part_kg", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "scrap_weight_per_part_kg", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "generated_bill_of_materials", "value_kind": "reference", "rules": ["read_only"], "target": "manufacturing.bill_of_materials", "binding": "shared_model"},
+          {"purpose": "twin_generated_bill_of_materials", "value_kind": "reference", "rules": ["read_only"], "target": "manufacturing.bill_of_materials", "binding": "shared_model"},
+          {"purpose": "workflow_status", "value_kind": "choice", "rules": ["required", "hidden_from_form", "editable_after_submission"], "choices": ["draft", "submitted_for_check", "pm_approved", "approved_by_purchase", "released", "superseded"]},
+          {"purpose": "finished_parts", "value_kind": "owned_rows", "rules": ["read_only"], "target": "layout_finished_part"},
+          {"purpose": "end_pieces", "value_kind": "owned_rows", "target": "layout_end_piece"},
+          {"purpose": "approval_snapshot", "value_kind": "owned_rows", "rules": ["read_only"], "target": "layout_approval_snapshot"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+          ["projects_user", 0, ["read", "write", "create"], false],
+          ["projects_manager", 0, ["read", "write", "create"], false],
+          ["purchase_manager", 0, ["read", "write"], false],
+          ["mr_coordinator", 0, ["read", "write", "submit", "cancel"], false]
+        ]
+      },
+      {
+        "concept": "sheet_cutting_layout_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "logo", "value_kind": "image_reference"},
+          {"purpose": "document_number", "value_kind": "text"},
+          {"purpose": "revision_number", "value_kind": "text"},
+          {"purpose": "revision_date", "value_kind": "civil_day"},
+          {"purpose": "page_text", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Shift allocation imports",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "shift_allocation_employees",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "employee", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "employee_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "department", "value_kind": "reference", "rules": ["read_only"], "target": "organization.department", "binding": "shared_model"},
+          {"purpose": "designation", "value_kind": "text", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "shift_allocation_tool",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "from_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "branch", "value_kind": "reference", "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "designation", "value_kind": "reference", "target": "organization.designation", "binding": "shared_model"},
+          {"purpose": "to_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "department", "value_kind": "reference", "target": "organization.department", "binding": "shared_model"},
+          {"purpose": "employee_grade", "value_kind": "reference", "target": "workforce.employee_grade", "binding": "shared_model"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "shift_allocation_tool"},
+          {"purpose": "shift", "value_kind": "file_reference"},
+          {"purpose": "shift_allocation_employees", "value_kind": "owned_rows", "target": "shift_allocation_employees"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Short links and scannable destinations",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "machine_readable_code_code_generator",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "short_resource_address", "value_kind": "text", "rules": ["computed_value"]},
+          {"purpose": "long_resource_address", "value_kind": "text"},
+          {"purpose": "logo", "value_kind": "file_reference"},
+          {"purpose": "route", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "published", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "machine_readable_code_code", "value_kind": "image_reference", "rules": ["hidden_from_form"]},
+          {"purpose": "machine_readable_code_code_generator_classification", "value_kind": "choice", "rules": ["required"], "choices": ["custom", "web_form"]},
+          {"purpose": "webform", "value_kind": "reference", "target": "web_publishing.web_form", "binding": "shared_model"},
+          {"purpose": "webform_field_mapper", "value_kind": "owned_rows", "target": "webform_resource_address_mapper"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "machine_readable_code_code_generator"},
+          {"purpose": "machine_readable_code_name", "value_kind": "text", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["all", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "webform_resource_address_mapper",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "field_name", "value_kind": "text"},
+          {"purpose": "field_type", "value_kind": "text"},
+          {"purpose": "field_label", "value_kind": "text"},
+          {"purpose": "options", "value_kind": "text"},
+          {"purpose": "webform_resource_address_mapper_value", "value_kind": "text"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Singapore goods and services tax",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "state_goods_and_services_tax_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "box_1", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "box_2", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "box_3", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "bank_interest_income", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "realised_exchange_gainloss", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "box_5", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "box_5_1", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "box_5_2", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "box_5_3", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "other_income", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "singapore_goods_and_services_tax_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "state_goods_and_services_tax_details", "value_kind": "owned_rows", "rules": ["required"], "target": "state_goods_and_services_tax_detail"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Small enterprise supplier registration",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "msme_details",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "msme_registered", "value_kind": "choice", "choices": ["unselected", "yes", "number"]},
+          {"purpose": "msme_registration_number", "value_kind": "text"},
+          {"purpose": "msme_type", "value_kind": "choice", "choices": ["unselected", "micro", "small", "medium"]},
+          {"purpose": "msme_contract_done", "value_kind": "choice", "choices": ["unselected", "yes", "number"]},
+          {"purpose": "effective_from", "value_kind": "civil_day"},
+          {"purpose": "effective_to", "value_kind": "civil_day"}
+        ]
+      },
+      {
+        "concept": "msme_registration_detail",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "effective_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_to", "value_kind": "civil_day"},
+          {"purpose": "msme_registered", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "yes", "number"]},
+          {"purpose": "msme_registration_number", "value_kind": "text"},
+          {"purpose": "msme_type", "value_kind": "choice", "choices": ["unselected", "micro", "small", "medium"]},
+          {"purpose": "msme_contract_done", "value_kind": "choice", "choices": ["unselected", "yes", "number"]}
+        ]
+      },
+      {
+        "concept": "msme_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "yes", "value_kind": "whole_number"},
+          {"purpose": "interest", "value_kind": "percentage"},
+          {"purpose": "msme_settings_number", "value_kind": "whole_number"},
+          {"purpose": "msme_detail_source", "value_kind": "choice", "choices": ["supplier", "address"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "South African filing and privacy obligations",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "south_african_company_compliance_profile",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "profile_key", "value_kind": "text", "rules": ["unique", "read_only"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "reviewed", "approved", "cancelled"]},
+          {"purpose": "value_added_tax_registered", "value_kind": "boolean"},
+          {"purpose": "paye_registered", "value_kind": "boolean"},
+          {"purpose": "unemployment_insurance_fund_registered", "value_kind": "boolean"},
+          {"purpose": "sdl_registered", "value_kind": "boolean"},
+          {"purpose": "coida_registered", "value_kind": "boolean"},
+          {"purpose": "employment_equity_designated", "value_kind": "boolean"},
+          {"purpose": "seta", "value_kind": "text"},
+          {"purpose": "bargaining_council", "value_kind": "text"},
+          {"purpose": "coida_industry_class", "value_kind": "text"},
+          {"purpose": "filing_contact", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "effective_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_to", "value_kind": "civil_day"},
+          {"purpose": "reviewed_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "review_checksum", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "approved_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "approved_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "approval_evidence", "value_kind": "file_reference"},
+          {"purpose": "approval_evidence_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_company_compliance_profile"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write", "create"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "write"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false]
+        ]
+      },
+      {
+        "concept": "south_african_compliance_calendar_entry",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "calendar_key", "value_kind": "text", "rules": ["unique", "read_only"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "obligation", "value_kind": "reference", "rules": ["required"], "target": "south_african_compliance_obligation"},
+          {"purpose": "period_start", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "period_end", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "due_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["open", "in_progress", "approved", "filed", "accepted", "overdue", "not_applicable"]},
+          {"purpose": "assigned_to", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "filing", "value_kind": "reference", "target": "south_african_filing"},
+          {"purpose": "last_reminded_on", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "south_african_compliance_obligation",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "obligation_code", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "domain", "value_kind": "choice", "rules": ["required"], "choices": ["value_added_tax", "payroll", "labour", "employment_equity", "skills_development", "coida", "cipc", "corporate_tax", "popia_and_paia"]},
+          {"purpose": "authority", "value_kind": "choice", "rules": ["required"], "choices": ["south_african_revenue_service", "department_of_employment_and_labour", "compensation_fund", "cipc", "information_regulator", "other"]},
+          {"purpose": "source", "value_kind": "reference", "rules": ["required"], "target": "south_african_statutory_source"},
+          {"purpose": "frequency", "value_kind": "choice", "rules": ["required"], "choices": ["monthly", "bi_monthly", "six_monthly", "annual", "event_driven"]},
+          {"purpose": "due_rule", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "capability", "value_kind": "choice", "rules": ["required"], "choices": ["production", "controlled_manual", "preview", "unsupported"]},
+          {"purpose": "active", "value_kind": "boolean"},
+          {"purpose": "effective_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_to", "value_kind": "civil_day"},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_compliance_obligation"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false]
+        ]
+      },
+      {
+        "concept": "south_african_cross_border_transfer",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "transfer_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "responsible_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "approved", "superseded", "cancelled"]},
+          {"purpose": "recipient_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "destination_country", "value_kind": "reference", "rules": ["required"], "target": "geography.country", "binding": "shared_model"},
+          {"purpose": "transfer_purpose", "value_kind": "long_text", "rules": ["required"]},
+          {"purpose": "personal_information_categories", "value_kind": "text", "rules": ["required"], "access_level": 1},
+          {"purpose": "data_subject_categories", "value_kind": "text", "rules": ["required"], "access_level": 1},
+          {"purpose": "transfer_ground", "value_kind": "choice", "rules": ["required"], "choices": ["adequate_protection_or_binding_agreement", "consent", "contract_with_data_subject", "contract_in_data_subject_interest", "benefit_of_data_subject"]},
+          {"purpose": "safeguards", "value_kind": "long_text", "rules": ["required"], "access_level": 1},
+          {"purpose": "assessment_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "next_review_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_to", "value_kind": "civil_day"},
+          {"purpose": "transfer_assessment", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "safeguard_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "consent_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "reviewed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_cross_border_transfer"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write", "create"], true],
+          ["south_african_compliance_user", 1, ["read", "write"], true],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create", "submit"], false],
+          ["south_african_compliance_reviewer", 1, ["read", "write"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["south_african_compliance_manager", 1, ["read", "write"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "south_african_data_subject_request",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "request_type", "value_kind": "choice", "rules": ["required"], "choices": ["access_to_personal_information", "correction", "deletion_or_destruction", "objection_to_processing", "restriction_of_processing", "paia_access_to_record"]},
+          {"purpose": "data_subject_reference", "value_kind": "text", "rules": ["required"], "access_level": 1},
+          {"purpose": "responsible_user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required", "indexed_for_search"], "choices": ["received", "identity_verification_pending", "in_progress", "extended", "fulfilled", "refused", "withdrawn", "closed"]},
+          {"purpose": "request_channel", "value_kind": "choice", "rules": ["required"], "choices": ["email", "web_form", "letter", "in_person", "other"]},
+          {"purpose": "received_on", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "due_date", "value_kind": "civil_day", "rules": ["indexed_for_search"]},
+          {"purpose": "is_overdue", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "request_scope", "value_kind": "long_text", "rules": ["required"], "access_level": 1},
+          {"purpose": "request_evidence", "value_kind": "file_reference", "rules": ["required"], "access_level": 1},
+          {"purpose": "identity_verified_on", "value_kind": "civil_day", "access_level": 1},
+          {"purpose": "identity_verification_method", "value_kind": "text", "access_level": 1},
+          {"purpose": "identity_verification_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "extension_reason", "value_kind": "text", "access_level": 1},
+          {"purpose": "extension_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "refusal_reason", "value_kind": "long_text", "access_level": 1},
+          {"purpose": "completed_on", "value_kind": "civil_day"},
+          {"purpose": "final_response_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "reviewed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "text", "access_level": 1}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write", "create"], true],
+          ["south_african_compliance_user", 1, ["read", "write"], true],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create"], false],
+          ["south_african_compliance_reviewer", 1, ["read", "write", "mask"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete"], false],
+          ["south_african_compliance_manager", 1, ["read", "write", "mask"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false],
+          ["system_manager", 1, ["read", "write", "mask"], false]
+        ]
+      },
+      {
+        "concept": "south_african_feature_readiness",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "readiness_key", "value_kind": "text", "rules": ["unique", "read_only"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "feature_code", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "feature_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "domain", "value_kind": "choice", "rules": ["required"], "choices": ["core", "value_added_tax", "payroll", "labour", "employment_equity", "skills_development", "coida", "cipc", "corporate_tax", "popia_and_paia"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["production", "controlled_manual", "preview", "unsupported", "blocked"]},
+          {"purpose": "source", "value_kind": "reference", "target": "south_african_statutory_source"},
+          {"purpose": "checked_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "checked_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "blocking_reason", "value_kind": "text"},
+          {"purpose": "remediation_route", "value_kind": "text"},
+          {"purpose": "proposed_status", "value_kind": "choice", "choices": ["unselected", "production", "controlled_manual", "preview", "unsupported", "blocked"]},
+          {"purpose": "proposed_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "approval_evidence", "value_kind": "file_reference"},
+          {"purpose": "approval_evidence_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "approver", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "approved_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "approved_on", "value_kind": "date_and_time", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read"], false],
+          ["south_african_compliance_reviewer", 0, ["read"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "south_african_filing",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "filing_key", "value_kind": "text", "rules": ["unique", "read_only"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "obligation", "value_kind": "reference", "rules": ["required"], "target": "south_african_compliance_obligation"},
+          {"purpose": "capability", "value_kind": "choice", "rules": ["read_only"], "choices": ["production", "controlled_manual", "preview", "unsupported"]},
+          {"purpose": "period_start", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "period_end", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "due_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "reviewed", "approved", "filed", "accepted", "rejected", "amended", "cancelled"]},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["required"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "ledger_amount", "value_kind": "money"},
+          {"purpose": "declared_amount", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "paid_amount", "value_kind": "money"},
+          {"purpose": "unexplained_difference", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "difference_explanation", "value_kind": "text"},
+          {"purpose": "reviewed_by", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "approved_by", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "approved_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "working_paper", "value_kind": "file_reference"},
+          {"purpose": "working_paper_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "review_checksum", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_filing"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write", "create"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create", "submit"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false]
+        ]
+      },
+      {
+        "concept": "south_african_information_officer_registration",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "officer_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "designation", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "responsible_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "active", "superseded", "cancelled"]},
+          {"purpose": "registration_reference", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "submitted_on", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "registered_on", "value_kind": "civil_day"},
+          {"purpose": "effective_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_to", "value_kind": "civil_day"},
+          {"purpose": "submission_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "registration_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "deputy_officers", "value_kind": "text", "access_level": 1},
+          {"purpose": "reviewed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_information_officer_registration"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write", "create"], true],
+          ["south_african_compliance_user", 1, ["read", "write"], true],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create", "submit"], false],
+          ["south_african_compliance_reviewer", 1, ["read", "write"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["south_african_compliance_manager", 1, ["read", "write"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "south_african_operator_agreement",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "operator_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "agreement_reference", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "responsible_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "active", "expired", "terminated", "cancelled"]},
+          {"purpose": "service_description", "value_kind": "long_text", "rules": ["required"]},
+          {"purpose": "processing_scope", "value_kind": "long_text", "rules": ["required"], "access_level": 1},
+          {"purpose": "personal_information_categories", "value_kind": "text", "rules": ["required"], "access_level": 1},
+          {"purpose": "security_obligations", "value_kind": "long_text", "rules": ["required"], "access_level": 1},
+          {"purpose": "sub_operator_controls", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "return_or_destruction_terms", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "breach_notification_hours", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "signed_on", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_to", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "last_assessed_on", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "next_assessment_due", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "signed_agreement", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "security_assessment", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "reviewed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_operator_agreement"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write", "create"], true],
+          ["south_african_compliance_user", 1, ["read", "write"], true],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create", "submit"], false],
+          ["south_african_compliance_reviewer", 1, ["read", "write"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["south_african_compliance_manager", 1, ["read", "write"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "south_african_paia_manual",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "manual_title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "manual_version", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "responsible_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "published", "superseded", "cancelled"]},
+          {"purpose": "information_officer_registration", "value_kind": "reference", "rules": ["required"], "target": "south_african_information_officer_registration"},
+          {"purpose": "published_on", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_to", "value_kind": "civil_day"},
+          {"purpose": "publication_resource_address", "value_kind": "text"},
+          {"purpose": "physical_availability", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "languages", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "last_reviewed_on", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "next_review_due", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "review_scope", "value_kind": "long_text", "rules": ["required"]},
+          {"purpose": "manual_file", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "publication_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "request_form_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "fee_information_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "approval_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "reviewed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_paia_manual"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write", "create"], true],
+          ["south_african_compliance_user", 1, ["read", "write"], true],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create", "submit"], false],
+          ["south_african_compliance_reviewer", 1, ["read", "write"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["south_african_compliance_manager", 1, ["read", "write"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "south_african_personal_information_incident",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "incident_title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "severity", "value_kind": "choice", "rules": ["required"], "choices": ["low", "moderate", "high", "critical"]},
+          {"purpose": "responsible_user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required", "indexed_for_search"], "choices": ["reported", "triaged", "contained", "notification_assessment", "notifying", "remediating", "resolved", "closed"]},
+          {"purpose": "detected_at", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "occurred_from", "value_kind": "date_and_time"},
+          {"purpose": "occurred_to", "value_kind": "date_and_time"},
+          {"purpose": "incident_summary", "value_kind": "long_text", "rules": ["required"], "access_level": 1},
+          {"purpose": "systems_or_locations", "value_kind": "text", "rules": ["required"], "access_level": 1},
+          {"purpose": "personal_information_categories", "value_kind": "text", "rules": ["required"], "access_level": 1},
+          {"purpose": "affected_data_subjects", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "contained_at", "value_kind": "date_and_time"},
+          {"purpose": "containment_actions", "value_kind": "long_text", "access_level": 1},
+          {"purpose": "containment_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "notification_decision", "value_kind": "choice", "rules": ["required"], "choices": ["pending_assessment", "not_required", "regulator_only", "data_subjects_only", "regulator_and_data_subjects"]},
+          {"purpose": "notification_rationale", "value_kind": "long_text", "access_level": 1},
+          {"purpose": "notification_assessment_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "regulator_notified_on", "value_kind": "date_and_time"},
+          {"purpose": "regulator_notification_reference", "value_kind": "text", "access_level": 1},
+          {"purpose": "regulator_notification_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "data_subjects_notified_on", "value_kind": "date_and_time"},
+          {"purpose": "data_subject_notification_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "root_cause", "value_kind": "long_text", "access_level": 1},
+          {"purpose": "remediation_actions", "value_kind": "long_text", "access_level": 1},
+          {"purpose": "resolved_at", "value_kind": "date_and_time"},
+          {"purpose": "remediation_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "reviewed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "text", "access_level": 1}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write", "create"], true],
+          ["south_african_compliance_user", 1, ["read", "write"], true],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create"], false],
+          ["south_african_compliance_reviewer", 1, ["read", "write", "mask"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete"], false],
+          ["south_african_compliance_manager", 1, ["read", "write", "mask"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete"], false],
+          ["system_manager", 1, ["read", "write", "mask"], false]
+        ]
+      },
+      {
+        "concept": "south_african_processing_activity",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "activity_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "business_process", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "responsible_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "approved", "retired", "cancelled"]},
+          {"purpose": "processing_purpose", "value_kind": "long_text", "rules": ["required"]},
+          {"purpose": "processing_justification", "value_kind": "choice", "rules": ["required"], "choices": ["consent", "contract", "legal_obligation", "protect_legitimate_interest_of_data_subject", "public_law_duty", "legitimate_interests_of_responsible_party_or_third_party"]},
+          {"purpose": "justification_details", "value_kind": "long_text", "rules": ["required"]},
+          {"purpose": "data_subject_categories", "value_kind": "text", "rules": ["required"], "access_level": 1},
+          {"purpose": "personal_information_categories", "value_kind": "text", "rules": ["required"], "access_level": 1},
+          {"purpose": "special_personal_information", "value_kind": "boolean"},
+          {"purpose": "children_information", "value_kind": "boolean"},
+          {"purpose": "recipients", "value_kind": "text", "rules": ["required"], "access_level": 1},
+          {"purpose": "operators", "value_kind": "text", "access_level": 1},
+          {"purpose": "cross_border_transfer", "value_kind": "boolean"},
+          {"purpose": "cross_border_transfer_record", "value_kind": "reference", "target": "south_african_cross_border_transfer"},
+          {"purpose": "retention_schedule", "value_kind": "reference", "rules": ["required"], "target": "south_african_retention_schedule"},
+          {"purpose": "security_measures", "value_kind": "long_text", "rules": ["required"], "access_level": 1},
+          {"purpose": "last_reviewed_on", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "next_review_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "risk_assessment", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "approval_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "reviewed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_processing_activity"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write", "create"], true],
+          ["south_african_compliance_user", 1, ["read", "write"], true],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create", "submit"], false],
+          ["south_african_compliance_reviewer", 1, ["read", "write"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["south_african_compliance_manager", 1, ["read", "write"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "south_african_retention_schedule",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "record_class", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "business_owner", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "responsible_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "approved", "superseded", "cancelled"]},
+          {"purpose": "retention_trigger", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "retention_period_value", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "retention_period_unit", "value_kind": "choice", "rules": ["required"], "choices": ["days", "months", "years"]},
+          {"purpose": "legal_requirement", "value_kind": "boolean"},
+          {"purpose": "legal_basis", "value_kind": "long_text", "rules": ["required"]},
+          {"purpose": "disposal_method", "value_kind": "choice", "rules": ["required"], "choices": ["secure_destruction", "de_identification", "transfer_to_archive", "return_to_data_subject", "other"]},
+          {"purpose": "disposal_instructions", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "legal_hold_process", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "effective_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_to", "value_kind": "civil_day"},
+          {"purpose": "legal_basis_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "approval_evidence", "value_kind": "file_reference", "access_level": 1},
+          {"purpose": "reviewed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_retention_schedule"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write", "create"], true],
+          ["south_african_compliance_user", 1, ["read", "write"], true],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create", "submit"], false],
+          ["south_african_compliance_reviewer", 1, ["read", "write"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["south_african_compliance_manager", 1, ["read", "write"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["system_manager", 1, ["read", "write"], false]
+        ]
+      },
+      {
+        "concept": "south_african_statutory_change_review",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "source", "value_kind": "reference", "rules": ["required"], "target": "south_african_statutory_source"},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "impact_level", "value_kind": "choice", "rules": ["required"], "choices": ["low", "medium", "high", "critical"]},
+          {"purpose": "affected_domains", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "effective_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "legal_assessment", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "technical_assessment", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "migration_required", "value_kind": "boolean"},
+          {"purpose": "documentation_required", "value_kind": "boolean"},
+          {"purpose": "practitioner_reviewer", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "technical_reviewer", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "approved", "implemented", "superseded", "cancelled"]},
+          {"purpose": "approved_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_statutory_change_review"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write", "create"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create", "submit", "cancel", "amend"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false]
+        ]
+      },
+      {
+        "concept": "south_african_statutory_rate_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "rule_key", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "numeric_value", "value_kind": "decimal"},
+          {"purpose": "text_value", "value_kind": "text"},
+          {"purpose": "unit", "value_kind": "choice", "rules": ["required"], "choices": ["amount", "percentage", "count", "hours", "days", "text"]},
+          {"purpose": "precision", "value_kind": "whole_number"},
+          {"purpose": "notes", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "south_african_statutory_rate_pack",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "domain", "value_kind": "choice", "rules": ["required"], "choices": ["core", "value_added_tax", "payroll", "labour", "employment_equity", "skills_development", "coida", "cipc", "corporate_tax"]},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "source", "value_kind": "reference", "rules": ["required"], "target": "south_african_statutory_source"},
+          {"purpose": "effective_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_to", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "approved", "superseded", "cancelled"]},
+          {"purpose": "reviewed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "approved_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "content_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "items", "value_kind": "owned_rows", "rules": ["required"], "target": "south_african_statutory_rate_item"},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_statutory_rate_pack"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write", "create"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create", "submit", "cancel", "amend"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false]
+        ]
+      },
+      {
+        "concept": "south_african_statutory_source",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "catalog_key", "value_kind": "text", "rules": ["unique", "read_only"]},
+          {"purpose": "authority", "value_kind": "choice", "rules": ["required"], "choices": ["south_african_revenue_service", "department_of_employment_and_labour", "compensation_fund", "cipc", "information_regulator", "national_treasury", "other"]},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "document_type", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "version", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "publication_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_from", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "effective_to", "value_kind": "civil_day"},
+          {"purpose": "source_resource_address", "value_kind": "text"},
+          {"purpose": "source_file", "value_kind": "file_reference"},
+          {"purpose": "sha256_checksum", "value_kind": "text", "rules": ["unique", "read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "approved", "superseded", "cancelled"]},
+          {"purpose": "reviewed_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "approved_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_statutory_source"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read", "write", "create"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create", "submit", "cancel", "amend"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false]
+        ]
+      },
+      {
+        "concept": "south_african_submission_receipt",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "filing", "value_kind": "reference", "rules": ["required"], "target": "south_african_filing"},
+          {"purpose": "authority_reference", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "submitted_at", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "response_status", "value_kind": "choice", "rules": ["required"], "choices": ["filed", "accepted", "rejected"]},
+          {"purpose": "submitted_by", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "evidence_file", "value_kind": "file_reference", "rules": ["required"]},
+          {"purpose": "sha256_checksum", "value_kind": "text", "rules": ["unique", "read_only"]},
+          {"purpose": "declared_amount", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_submission_receipt"}
+        ],
+        "role_grants": [
+          ["south_african_compliance_user", 0, ["read"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "write", "create"], false],
+          ["south_african_compliance_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend"], false]
+        ]
+      },
+      {
+        "concept": "south_africa_value_added_tax_rate",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "rate_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "rate", "value_kind": "percentage", "rules": ["required"]},
+          {"purpose": "is_standard_rate", "value_kind": "boolean"},
+          {"purpose": "is_zero_rated", "value_kind": "boolean"},
+          {"purpose": "is_exempt", "value_kind": "boolean"},
+          {"purpose": "description", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "south_africa_value_added_tax_settings",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "unique"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "value_added_tax_registration_number", "value_kind": "text"},
+          {"purpose": "standard_value_added_tax_rate", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "enable_zero_rated_items", "value_kind": "boolean"},
+          {"purpose": "enable_exempt_items", "value_kind": "boolean"},
+          {"purpose": "statutory_control_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "statutory_rate_pack", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_statutory_rate_pack"},
+          {"purpose": "statutory_rate_pack_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "statutory_source", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_statutory_source"},
+          {"purpose": "statutory_source_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "statutory_effective_from", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "statutory_effective_to", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "value_added_tax_registration_threshold", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "value_added_tax_voluntary_threshold", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "number_invoice_threshold", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "full_invoice_threshold", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "value_added_tax_vendor_type", "value_kind": "reference", "rules": ["required"], "target": "value_added_tax_vendor_type"},
+          {"purpose": "value_added_tax_filing_category", "value_kind": "choice", "rules": ["required"], "choices": ["category_a", "category_b", "category_c", "category_d", "category_e"]},
+          {"purpose": "value_added_tax_filing_frequency", "value_kind": "choice", "rules": ["read_only", "hidden_from_form"], "choices": ["monthly", "bi_monthly", "quarterly", "annually"]},
+          {"purpose": "value_added_tax_filing_day", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "vat201_compliance_obligation", "value_kind": "reference", "target": "south_african_compliance_obligation"},
+          {"purpose": "output_value_added_tax_account", "value_kind": "reference", "rules": ["required"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "input_value_added_tax_account", "value_kind": "reference", "rules": ["required"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "capital_input_value_added_tax_account", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "import_input_value_added_tax_account", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "item_tax_template_account", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "value_added_tax_accounts", "value_kind": "owned_rows", "target": "accounting.south_africa_value_added_tax_account", "binding": "shared_model"},
+          {"purpose": "output_tax_record_class", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "standard_rate_non_capital", "value_kind": "reference", "target": "accounting.sales_taxes_and_charges_template", "binding": "shared_model"},
+          {"purpose": "standard_rate_non_capital_2", "value_kind": "reference", "target": "accounting.sales_taxes_and_charges_template", "binding": "shared_model"},
+          {"purpose": "standard_rate_capital", "value_kind": "reference", "target": "accounting.sales_taxes_and_charges_template", "binding": "shared_model"},
+          {"purpose": "zero_rate_non_exported", "value_kind": "reference", "target": "accounting.sales_taxes_and_charges_template", "binding": "shared_model"},
+          {"purpose": "zero_rate_exported", "value_kind": "reference", "target": "accounting.sales_taxes_and_charges_template", "binding": "shared_model"},
+          {"purpose": "exempt", "value_kind": "reference", "target": "accounting.sales_taxes_and_charges_template", "binding": "shared_model"},
+          {"purpose": "input_tax_record_class", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "input_capital_local", "value_kind": "reference", "target": "accounting.purchase_taxes_and_charges_template", "binding": "shared_model"},
+          {"purpose": "input_capital_import", "value_kind": "reference", "target": "accounting.purchase_taxes_and_charges_template", "binding": "shared_model"},
+          {"purpose": "input_goods_local", "value_kind": "reference", "target": "accounting.purchase_taxes_and_charges_template", "binding": "shared_model"},
+          {"purpose": "input_goods_import", "value_kind": "reference", "target": "accounting.purchase_taxes_and_charges_template", "binding": "shared_model"},
+          {"purpose": "value_added_tax_rates", "value_kind": "owned_rows", "rules": ["required"], "target": "south_africa_value_added_tax_rate"},
+          {"purpose": "south_african_revenue_service_efiling_username", "value_kind": "text"},
+          {"purpose": "south_african_revenue_service_efiling_password", "value_kind": "protected_text"},
+          {"purpose": "default_value_added_tax_report_company", "value_kind": "reference", "rules": ["read_only"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "default_value_added_tax_report_period", "value_kind": "choice", "rules": ["read_only", "hidden_from_form"], "choices": ["monthly", "bi_monthly", "quarterly", "annually"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["accounts_user", 0, ["read", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "south_africa_value_added_tax_tax_account",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "account", "value_kind": "reference", "rules": ["required"], "target": "accounting.account", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "vat201_return",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "value_added_tax_registration_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "filing_category", "value_kind": "choice", "rules": ["required"], "choices": ["category_a", "category_b", "category_c", "category_d", "category_e"]},
+          {"purpose": "tax_period", "value_kind": "choice", "rules": ["read_only", "hidden_from_form"], "choices": ["monthly", "bi_monthly", "six_monthly", "annually"]},
+          {"purpose": "from_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "to_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "submission_period", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "submission_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "transactions", "value_kind": "owned_rows", "target": "vat201_return_transaction"},
+          {"purpose": "snapshot_generated_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "source_value_added_tax_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "general_ledger_value_added_tax_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "reconciliation_difference", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "reconciliation_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["not_generated", "reconciled", "needs_review"]},
+          {"purpose": "live_ledger_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "source_snapshot_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "general_ledger_snapshot_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "standard_rated_supplies_non_capital", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "standard_rated_supplies_capital", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "standard_rated_supplies", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "zero_rated_supplies_local", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "zero_rated_supplies_exported", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "zero_rated_supplies", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "exempt_supplies", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total_supplies", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "capital_goods_input_local", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "capital_goods_input_imported", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "capital_goods_input", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "other_goods_services_input_local", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "other_goods_services_input_imported", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "other_goods_services_input", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "change_in_use_input", "value_kind": "money"},
+          {"purpose": "bad_debts_input", "value_kind": "money"},
+          {"purpose": "other_input_adjustment", "value_kind": "money"},
+          {"purpose": "other_input_adjustment_type", "value_kind": "choice", "choices": ["unselected", "second_hand_goods_notional_input", "imported_services_adjustment", "other_approved_input_adjustment"]},
+          {"purpose": "adjustment_evidence", "value_kind": "file_reference"},
+          {"purpose": "adjustment_evidence_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "total_input_tax", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "standard_rated_output_non_capital", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "standard_rated_output_capital", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "standard_rated_output", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "change_in_use_output", "value_kind": "money"},
+          {"purpose": "bad_debts_output", "value_kind": "money"},
+          {"purpose": "other_output", "value_kind": "money"},
+          {"purpose": "total_output_tax", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "value_added_tax_payable", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "value_added_tax_refundable", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "diesel_refund", "value_kind": "money"},
+          {"purpose": "total_amount_payable", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["draft", "prepared", "submitted", "accepted", "rejected"]},
+          {"purpose": "submission_reference", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "filing_due_date", "value_kind": "civil_day"},
+          {"purpose": "filing_reviewer", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "filing_approver", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "working_paper_file", "value_kind": "file_reference", "rules": ["read_only"]},
+          {"purpose": "working_paper_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "south_african_filing", "value_kind": "reference", "rules": ["read_only"], "target": "south_african_filing"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "vat201_return"},
+          {"purpose": "active_period_key", "value_kind": "text", "rules": ["unique", "read_only", "hidden_from_form"]},
+          {"purpose": "unresolved_transaction_count", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "unresolved_issues_summary", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "notes", "value_kind": "formatted_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["south_african_compliance_reviewer", 0, ["read", "report", "export", "print"], false],
+          ["south_african_compliance_manager", 0, ["read", "report", "export", "print"], false]
+        ]
+      },
+      {
+        "concept": "vat201_return_transaction",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "general_ledger_posting", "value_kind": "reference", "target": "accounting.general_ledger_entry", "binding": "shared_model"},
+          {"purpose": "voucher_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "voucher_number", "value_kind": "variable_record_reference", "rules": ["read_only"], "record_class_field": "voucher_type"},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "taxes_and_charges", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "tax_account_debit", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "tax_account_credit", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "tax_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "incl_tax_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "classification", "value_kind": "choice", "choices": ["unselected", "output_a_standard_rate_excl_capital_goods", "output_b_standard_rate_only_capital_goods", "output_c_zero_rated_excl_goods_exported", "output_d_zero_rated_only_goods_exported", "output_e_exempt", "input_a_capital_goods_and_or_services_supplied_to_you_local", "input_b_capital_goods_imported", "input_c_other_goods_supplied_to_you_excl_capital_goods", "input_d_other_goods_imported_excl_capital_goods", "south_african_revenue_service_payment_receipt"]},
+          {"purpose": "classification_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["classified", "needs_review", "excluded"]},
+          {"purpose": "classification_issue", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "is_cancelled", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "input_treatment", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "deduction_percentage", "value_kind": "percentage", "rules": ["read_only"]},
+          {"purpose": "treatment_evidence_reference", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "non_deductible_tax_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "gross_tax_amount", "value_kind": "money", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "source_rows_structured_data", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "source_modified", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "source_currency", "value_kind": "reference", "rules": ["read_only"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "exchange_rate", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "source_tax_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "source_base_tax_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "tax_account", "value_kind": "reference", "rules": ["read_only"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "general_ledger_entries_structured_data", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "general_ledger_tax_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "reconciliation_difference", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "reconciliation_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["reconciled", "needs_review", "excluded"]},
+          {"purpose": "source_snapshot_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "general_ledger_snapshot_sha256", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "classification_debugging", "value_kind": "expression_or_structured_text", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "value_added_tax_vendor_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "vendor_type", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "description", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "filing_frequency", "value_kind": "choice", "rules": ["read_only", "hidden_from_form"], "choices": ["monthly", "bi_monthly", "quarterly", "annually"]},
+          {"purpose": "turnover_threshold", "value_kind": "money"},
+          {"purpose": "notes", "value_kind": "formatted_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,576 @@
+[
+  {
+    "name": "Prepare stock movement from a supplier invoice",
+    "source": "accounting.purchase_invoice",
+    "destination": "inventory.stock_entry",
+    "decision": "Use the invoiced row's stock-unit quantity as movement quantity and carry the batch when present. The movement is a separate stock authority. The operator must complete its purpose and warehouse legs before posting.",
+    "record_mappings": [
+      {
+        "source_entity": "accounting.purchase_invoice",
+        "target_entity": "inventory.stock_entry",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.purchase_invoice_item",
+        "target_entity": "inventory.stock_entry_detail",
+        "explicit_field_transfers": [
+          [
+            "stock_quantity",
+            "transferred_quantity"
+          ],
+          [
+            "batch_number_identifier",
+            "batch_number_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Receive goods from a supplier invoice",
+    "source": "accounting.purchase_invoice",
+    "destination": "inventory.purchase_receipt",
+    "decision": "Exclude fully received rows, quantities already mapped into the target and rows outside the selection. Start with invoiced less already received and mapped. The received field initially takes that remainder. Deduct applicable returned quantity for accepted quantity and multiply the result by the unit factor for stock quantity. Initial line amount uses the pending quantity and invoice rate. Remove zero target rows and recalculate document totals.",
+    "calculated_after_mapping": [
+      {
+        "target_entity": "inventory.purchase_receipt_item",
+        "target_field": "quantity",
+        "rule": "Unreceived and unmapped quantity less applicable returned quantity."
+      },
+      {
+        "target_entity": "inventory.purchase_receipt_item",
+        "target_field": "received_quantity",
+        "rule": "Unreceived and unmapped quantity before deducting the return."
+      },
+      {
+        "target_entity": "inventory.purchase_receipt_item",
+        "target_field": "stock_quantity",
+        "rule": "Accepted quantity × invoice row conversion factor."
+      },
+      {
+        "target_entity": "inventory.purchase_receipt_item",
+        "target_field": "company_currency_amount",
+        "rule": "Unreceived and unmapped quantity × invoice unit rate × invoice exchange rate."
+      }
+    ],
+    "record_mappings": [
+      {
+        "source_entity": "accounting.purchase_invoice",
+        "target_entity": "inventory.purchase_receipt",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.purchase_invoice_item",
+        "target_entity": "inventory.purchase_receipt_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "purchase_invoice_item"
+          ],
+          [
+            "owning_record_identifier",
+            "purchase_invoice_identifier"
+          ],
+          [
+            "bill_of_materials_identifier",
+            "bill_of_materials_identifier"
+          ],
+          [
+            "purchase_order_identifier",
+            "purchase_order_identifier"
+          ],
+          [
+            "purchase_order_line",
+            "purchase_order_item"
+          ],
+          [
+            "material_request_identifier",
+            "material_request_identifier"
+          ],
+          [
+            "material_request_item",
+            "material_request_item"
+          ],
+          [
+            "work_in_progress_composite_asset_identifier",
+            "work_in_progress_composite_asset_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.purchase_taxes_and_charges",
+        "target_entity": "accounting.purchase_taxes_and_charges"
+      }
+    ]
+  },
+  {
+    "name": "Receive a purchase order",
+    "source": "procurement.purchase_order",
+    "destination": "inventory.purchase_receipt",
+    "decision": "Exclude supplier-delivered rows. For ordinary rows compare absolute received and already mapped quantities with absolute ordered quantity. For zero-quantity unit-price rows use prior mapping of that exact row to prevent adding it twice. Calculate pending quantity, extend by the unit conversion factor for stock, and value with the order rate and conversion rate. Retain the material request, sales order and composite-asset links where applicable.",
+    "calculated_after_mapping": [
+      {
+        "target_entity": "inventory.purchase_receipt_item",
+        "target_field": "stock_quantity",
+        "rule": "Remaining receivable purchase quantity × original order row conversion factor."
+      },
+      {
+        "target_entity": "inventory.purchase_receipt_item",
+        "target_field": "amount",
+        "rule": "Remaining receivable purchase quantity × order rate."
+      },
+      {
+        "target_entity": "inventory.purchase_receipt_item",
+        "target_field": "company_currency_amount",
+        "rule": "Remaining receivable purchase quantity × order rate × order exchange rate."
+      }
+    ],
+    "record_mappings": [
+      {
+        "source_entity": "procurement.purchase_order",
+        "target_entity": "inventory.purchase_receipt",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "supplier_warehouse_identifier",
+            "supplier_warehouse_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "procurement.purchase_order_item",
+        "target_entity": "inventory.purchase_receipt_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "purchase_order_item"
+          ],
+          [
+            "owning_record_identifier",
+            "purchase_order_identifier"
+          ],
+          [
+            "bill_of_materials_identifier",
+            "bill_of_materials_identifier"
+          ],
+          [
+            "material_request_identifier",
+            "material_request_identifier"
+          ],
+          [
+            "material_request_item",
+            "material_request_item"
+          ],
+          [
+            "sales_order_identifier",
+            "sales_order_identifier"
+          ],
+          [
+            "sales_order_item",
+            "sales_order_item"
+          ],
+          [
+            "work_in_progress_composite_asset_identifier",
+            "work_in_progress_composite_asset_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.purchase_taxes_and_charges",
+        "target_entity": "accounting.purchase_taxes_and_charges",
+        "collection_policy": "Reset destination collection before copying selected source rows."
+      }
+    ]
+  },
+  {
+    "name": "Bill a purchase order",
+    "source": "procurement.purchase_order",
+    "destination": "accounting.purchase_invoice",
+    "decision": "Take outstanding quantity after effective bills and rows already in this target. Allow a row whose quantity has been exhausted but whose billed value is below its order value when it is not already mapped. Unit-price rows can start with zero quantity. Resolve the payable account for the supplier/company and buying cost centre from the row, project, product or product group.",
+    "calculated_after_mapping": [
+      {
+        "target_entity": "accounting.purchase_invoice_item",
+        "target_field": "quantity",
+        "rule": "For an ordinary item, max(ordered − already billed − already mapped into the destination, 0). A price-only row starts at zero."
+      }
+    ],
+    "record_mappings": [
+      {
+        "source_entity": "procurement.purchase_order",
+        "target_entity": "accounting.purchase_invoice",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "party_account_currency_identifier",
+            "party_account_currency_identifier"
+          ],
+          [
+            "supplier_warehouse_identifier",
+            "supplier_warehouse_identifier"
+          ]
+        ],
+        "excluded_from_default_copy": [
+          "payment_terms_template_identifier"
+        ]
+      },
+      {
+        "source_entity": "procurement.purchase_order_item",
+        "target_entity": "accounting.purchase_invoice_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "purchase_order_line"
+          ],
+          [
+            "owning_record_identifier",
+            "purchase_order_identifier"
+          ],
+          [
+            "material_request_identifier",
+            "material_request_identifier"
+          ],
+          [
+            "material_request_item",
+            "material_request_item"
+          ],
+          [
+            "work_in_progress_composite_asset_identifier",
+            "work_in_progress_composite_asset_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.purchase_taxes_and_charges",
+        "target_entity": "accounting.purchase_taxes_and_charges",
+        "collection_policy": "Reset destination collection before copying selected source rows."
+      }
+    ]
+  },
+  {
+    "name": "Bill a supplier quotation directly",
+    "source": "procurement.supplier_quotation",
+    "destination": "accounting.purchase_invoice",
+    "decision": "Create the supplier bill from the submitted quotation and its product rows. Re-evaluate tax row values in the bill's context. This path bypasses receipt and purchase-order progress unless separate linked documents establish those events.",
+    "record_mappings": [
+      {
+        "source_entity": "procurement.supplier_quotation",
+        "target_entity": "accounting.purchase_invoice",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "procurement.supplier_quotation_item",
+        "target_entity": "accounting.purchase_invoice_item"
+      },
+      {
+        "source_entity": "accounting.purchase_taxes_and_charges",
+        "target_entity": "accounting.purchase_taxes_and_charges",
+        "collection_policy": "Reset destination collection before copying selected source rows."
+      }
+    ]
+  },
+  {
+    "name": "Execute an authorised material request",
+    "source": "inventory.material_request",
+    "destination": "inventory.stock_entry",
+    "decision": "Accept transfer, issue or customer-provided requests with open stock quantity. A transfer uses the source and destination, an issue uses the issuing warehouse and customer-provided stock creates a receipt with zero valuation permitted. A work-order or operation-card transfer carries the production purpose and its recipe context.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.material_request",
+        "target_entity": "inventory.stock_entry",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ],
+          [
+            "material_request_type",
+            "one of",
+            [
+              "Material Transfer",
+              "Material Issue",
+              "Customer Provided"
+            ]
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.material_request_item",
+        "target_entity": "inventory.stock_entry_detail",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "material_request_item_identifier"
+          ],
+          [
+            "owning_record_identifier",
+            "material_request_identifier"
+          ],
+          [
+            "unit_of_measure_identifier",
+            "stock_unit_of_measure_identifier"
+          ],
+          [
+            "job_card_item",
+            "job_card_item"
+          ]
+        ],
+        "excluded_from_default_copy": [
+          "expense_account_identifier"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Pick a material transfer request",
+    "source": "inventory.material_request",
+    "destination": "inventory.pick_list",
+    "decision": "Require a submitted transfer request. Map still-unpicked stock quantity at row precision. Use the request's source warehouse as the pick warehouse and retain the request row so another pick can only consume its remaining demand.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.material_request",
+        "target_entity": "inventory.pick_list",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ],
+          [
+            "material_request_type",
+            "equals",
+            "Material Transfer"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "material_request_type",
+            "purpose"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.material_request_item",
+        "target_entity": "inventory.pick_list_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "material_request_item"
+          ],
+          [
+            "stock_quantity",
+            "stock_quantity"
+          ],
+          [
+            "from_warehouse_identifier",
+            "warehouse_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Bill accepted supplier receipts",
+    "source": "inventory.purchase_receipt",
+    "destination": "accounting.purchase_invoice",
+    "decision": "Calculate pending billable quantity per received row, accounting for posted bills, returns and any already mapped into the target. Keep original receipt and originating order line, asset and project context. Derive bill stock quantity from bill quantity and conversion factor. Rejected quantity on the bill is cleared.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.purchase_receipt",
+        "target_entity": "accounting.purchase_invoice",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "supplier_warehouse_identifier",
+            "supplier_warehouse_identifier"
+          ],
+          [
+            "is_return",
+            "is_return"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.purchase_receipt_item",
+        "target_entity": "accounting.purchase_invoice_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "purchase_receipt_line"
+          ],
+          [
+            "owning_record_identifier",
+            "purchase_receipt_identifier"
+          ],
+          [
+            "quantity",
+            "received_quantity"
+          ],
+          [
+            "purchase_order_item",
+            "purchase_order_line"
+          ],
+          [
+            "purchase_order_identifier",
+            "purchase_order_identifier"
+          ],
+          [
+            "is_fixed_asset",
+            "is_fixed_asset"
+          ],
+          [
+            "asset_location_identifier",
+            "asset_location_identifier"
+          ],
+          [
+            "asset_category_identifier",
+            "asset_category_identifier"
+          ],
+          [
+            "work_in_progress_composite_asset_identifier",
+            "work_in_progress_composite_asset_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.purchase_taxes_and_charges",
+        "target_entity": "accounting.purchase_taxes_and_charges"
+      }
+    ]
+  },
+  {
+    "name": "Move received goods to another warehouse",
+    "source": "inventory.purchase_receipt",
+    "destination": "inventory.stock_entry",
+    "decision": "Create an internal material transfer using the receipt's warehouse as the source and its available tracking selection. Preserve the selected serials or batch. Build an appropriate outward allocation when multiple tracked identities are involved.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.purchase_receipt",
+        "target_entity": "inventory.stock_entry"
+      },
+      {
+        "source_entity": "inventory.purchase_receipt_item",
+        "target_entity": "inventory.stock_entry_detail",
+        "explicit_field_transfers": [
+          [
+            "warehouse_identifier",
+            "source_warehouse_identifier"
+          ],
+          [
+            "owning_record_identifier",
+            "reference_purchase_receipt_identifier"
+          ],
+          [
+            "batch_number_identifier",
+            "batch_number_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Complete the receiving leg of transit stock",
+    "source": "inventory.stock_entry",
+    "destination": "inventory.stock_entry",
+    "decision": "Require a submitted transfer to transit. Compute remaining transferred stock quantity at row precision. Divide by the original conversion factor to get receiving units. Set the transit location as the source, the chosen destination as the target, and clear the instruction to place this leg into transit again.",
+    "identity": "Create a distinct target record.",
+    "calculated_after_mapping": [
+      {
+        "target_entity": "inventory.stock_entry_detail",
+        "target_field": "quantity",
+        "rule": "Remaining transferable stock units divided by the original transaction-to-stock unit factor. Skip fully received transit movements."
+      }
+    ],
+    "record_mappings": [
+      {
+        "source_entity": "inventory.stock_entry",
+        "target_entity": "inventory.stock_entry",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ],
+          [
+            "purpose",
+            "equals",
+            "Material Transfer"
+          ],
+          [
+            "add_to_transit",
+            "equals",
+            1
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "outgoing_stock_entry_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.stock_entry_detail",
+        "target_entity": "inventory.stock_entry_detail",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "ste_detail"
+          ],
+          [
+            "owning_record_identifier",
+            "related_stock_movement_identifier"
+          ],
+          [
+            "serial_number",
+            "serial_number"
+          ],
+          [
+            "batch_number_identifier",
+            "batch_number_identifier"
+          ],
+          [
+            "target_warehouse_identifier",
+            "source_warehouse_identifier"
+          ]
+        ]
+      }
+    ]
+  }
+]

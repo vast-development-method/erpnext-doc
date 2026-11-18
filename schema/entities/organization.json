@@ -1,0 +1,1089 @@
+[
+  {
+    "entity": "organization.authorization_control",
+    "kind": "singleton_settings",
+    "grants": [],
+    "fields": []
+  },
+  {
+    "entity": "organization.authorization_rule",
+    "kind": "independent_record",
+    "import_supported": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "transaction", "type": "enumeration", "required": true, "values": ["", "Sales Order", "Purchase Order", "Quotation", "Delivery Note", "Sales Invoice", "Purchase Invoice", "Purchase Receipt"]},
+      {"field": "based_on", "type": "enumeration", "required": true, "values": ["", "Grand Total", "Average Discount", "Customerwise Discount", "Itemwise Discount", "Item Group wise Discount", "Not Applicable"]},
+      {"field": "customer_or_item", "type": "enumeration", "form_read_only": true, "form_hidden": true, "values": ["Customer", "Item", "Item Group"]},
+      {"field": "master_name_identifier", "type": "selected_entity_reference", "target_selected_by": "customer_or_item"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "value", "type": "decimal"},
+      {"field": "system_role_identifier", "type": "entity_reference", "target": "information_management.role"},
+      {"field": "to_emp_identifier", "type": "entity_reference", "target": "organization.employee", "omit_target_user_filter": true},
+      {"field": "system_user_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "to_designation_identifier", "type": "entity_reference", "target": "organization.designation"},
+      {"field": "approving_role_identifier", "type": "entity_reference", "target": "information_management.role"},
+      {"field": "approving_user_identifier", "type": "entity_reference", "target": "information_management.user"}
+    ]
+  },
+  {
+    "entity": "organization.branch",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "grants": [
+      {"role": "human_resources_user", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "branch", "type": "short_text", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "organization.brand",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "grants": [
+      {"role": "item_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "stock_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "sales_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "purchase_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "accounts_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "website_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "brand", "type": "short_text", "required": true, "unique": true},
+      {"field": "description", "type": "text"},
+      {"field": "brand_defaults_rows", "type": "owned_collection", "target": "inventory.item_default"},
+      {"field": "image", "type": "image_file_reference", "form_hidden": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Defaults"}
+    ]
+  },
+  {
+    "entity": "organization.company",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "hierarchy_parent": "parent_company_identifier",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["email", "print", "read"]},
+      {"role": "employee", "level": 0, "allows": ["read"]},
+      {"role": "sales_user", "level": 0, "allows": ["read"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read"]},
+      {"role": "purchase_user", "level": 0, "allows": ["read"]},
+      {"role": "stock_user", "level": 0, "allows": ["read"]},
+      {"role": "projects_user", "level": 0, "allows": ["read"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "auditor", "level": 0, "allows": ["select"]},
+      {"role": "human_resources_user", "level": 0, "allows": ["select"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["read", "report", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "company_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "abbreviation", "type": "short_text", "required": true, "write_once": true},
+      {"field": "is_group", "type": "boolean", "default": "0"},
+      {"field": "default_finance_book_identifier", "type": "entity_reference", "target": "accounting.finance_book"},
+      {"field": "domain", "type": "short_text"},
+      {"field": "parent_company_identifier", "type": "entity_reference", "target": "organization.company", "omit_target_user_filter": true},
+      {"field": "company_logo", "type": "image_file_reference", "form_hidden": true},
+      {"field": "company_description", "type": "formatted_text"},
+      {"field": "sales_monthly_history", "type": "text", "form_read_only": true, "form_hidden": true, "omit_on_copy": true},
+      {"field": "transactions_annual_history", "type": "expression_or_structured_text", "form_read_only": true, "form_hidden": true, "omit_on_copy": true},
+      {"field": "monthly_sales_target", "type": "monetary_amount", "currency": {"record_or_parent_field": "default_currency_identifier"}},
+      {"field": "total_monthly_sales", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"record_or_parent_field": "default_currency_identifier"}},
+      {"field": "default_currency_identifier", "type": "entity_reference", "target": "geography.currency", "required": true, "omit_target_user_filter": true},
+      {"field": "default_letter_head_identifier", "type": "entity_reference", "target": "document_output.letter_head"},
+      {"field": "default_holiday_list_identifier", "type": "entity_reference", "target": "organization.holiday_list"},
+      {"field": "default_warehouse_for_sales_return_identifier", "type": "entity_reference", "target": "inventory.warehouse", "selection_filter": [["inventory.warehouse", "is_group", "=", 0], ["inventory.warehouse", "disabled", "=", 0]]},
+      {"field": "country_identifier", "type": "entity_reference", "target": "geography.country", "required": true},
+      {"field": "create_chart_of_accounts_based_on", "type": "enumeration", "values": ["", "Standard Template", "Existing Company"]},
+      {"field": "chart_of_accounts", "type": "enumeration", "omit_on_copy": true, "visible_when": ["strict_equal", ["current_field", "create_chart_of_accounts_based_on"], ["literal", "Standard Template"]]},
+      {"field": "existing_company_identifier", "type": "entity_reference", "target": "organization.company", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["strict_equal", ["current_field", "create_chart_of_accounts_based_on"], ["literal", "Existing Company"]]},
+      {"field": "tax_identifier", "type": "short_text"},
+      {"field": "date_of_establishment", "type": "calendar_date"},
+      {"field": "default_bank_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "default_cash_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "default_receivable_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "round_off_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "round_off_cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "write_off_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "exchange_gain_loss_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "unrealized_exchange_gain_loss_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "allow_account_creation_against_child_company", "type": "boolean", "default": "0", "visible_when": ["current_field", "parent_company_identifier"]},
+      {"field": "default_payable_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "default_expense_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "default_income_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "default_deferred_revenue_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "default_deferred_expense_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "credit_limit", "type": "monetary_amount", "currency": {"record_or_parent_field": "default_currency_identifier"}, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "payment_terms_identifier", "type": "entity_reference", "target": "accounting.payment_terms_template"},
+      {"field": "enable_perpetual_inventory", "type": "boolean", "default": "1"},
+      {"field": "default_inventory_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "stock_adjustment_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true},
+      {"field": "stock_received_but_not_billed_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true},
+      {"field": "accumulated_depreciation_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "depreciation_expense_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "series_for_depreciation_entry", "type": "short_text"},
+      {"field": "disposal_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "depreciation_cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "capital_work_in_progress_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "asset_received_but_not_billed_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "exception_budget_approver_role_identifier", "type": "entity_reference", "target": "information_management.role"},
+      {"field": "date_of_incorporation", "type": "calendar_date"},
+      {"field": "date_of_commencement", "type": "calendar_date", "visible_when": ["current_field", "date_of_incorporation"]},
+      {"field": "phone_number", "type": "short_text"},
+      {"field": "fax", "type": "short_text"},
+      {"field": "email", "type": "short_text"},
+      {"field": "website", "type": "short_text"},
+      {"field": "registration_details", "type": "expression_or_structured_text"},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_read_only": true, "form_hidden": true, "searchable": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_read_only": true, "form_hidden": true, "searchable": true},
+      {"field": "previous_parent_identifier", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "default_selling_terms_identifier", "type": "entity_reference", "target": "organization.terms_and_conditions"},
+      {"field": "default_buying_terms_identifier", "type": "entity_reference", "target": "organization.terms_and_conditions"},
+      {"field": "default_in_transit_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "selection_filter": [["inventory.warehouse", "is_group", "=", 0], ["inventory.warehouse", "disabled", "=", 0], ["inventory.warehouse", "warehouse_type_identifier", "=", "Transit"]]},
+      {"field": "default_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "selection_filter": [["inventory.warehouse", "is_group", "=", 0], ["inventory.warehouse", "disabled", "=", 0]]},
+      {"field": "sample_retention_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "selection_filter": [["inventory.warehouse", "is_group", "=", 0], ["inventory.warehouse", "disabled", "=", 0]]},
+      {"field": "unrealized_profit_loss_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "default_discount_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "enable_provisional_accounting_for_non_stock_items", "type": "boolean", "default": "0"},
+      {"field": "default_provisional_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true},
+      {"field": "default_advance_received_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["current_field", "book_advance_payments_in_separate_party_account"], "required_when": ["field_has_value", "book_advance_payments_as_liability"]},
+      {"field": "default_advance_paid_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["current_field", "book_advance_payments_in_separate_party_account"], "required_when": ["field_has_value", "book_advance_payments_as_liability"]},
+      {"field": "book_advance_payments_in_separate_party_account", "type": "boolean", "default": "0"},
+      {"field": "auto_exchange_rate_revaluation", "type": "boolean", "default": "0"},
+      {"field": "auto_err_frequency", "type": "enumeration", "values": ["Daily", "Weekly", "Monthly"]},
+      {"field": "submission_error_journal_voucher", "type": "boolean", "default": "0"},
+      {"field": "expenses_added_to_stock_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "expenses_added_to_stock_contra_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "reconcile_on_advance_payment_date", "type": "boolean", "form_hidden": true, "default": "0", "visible_when": ["current_field", "book_advance_payments_in_separate_party_account"]},
+      {"field": "default_operating_cost_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "round_off_for_opening_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "omit_target_user_filter": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "reconciliation_takes_effect_on", "type": "enumeration", "values": ["Advance Payment Date", "Oldest Of Invoice Or Advance", "Reconciliation Date"], "default": "Oldest Of Invoice Or Advance"},
+      {"field": "reporting_currency_identifier", "type": "entity_reference", "target": "geography.currency", "form_read_only": true},
+      {"field": "purchase_expense_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "purchase_expense_contra_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "service_expense_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "enable_item_wise_inventory_account", "type": "boolean", "default": "0"},
+      {"field": "valuation_method", "type": "enumeration", "required": true, "values": ["FIFO", "Moving Average", "LIFO"], "default": "FIFO"},
+      {"field": "default_work_in_progress_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "selection_filter": [["inventory.warehouse", "is_group", "=", 0], ["inventory.warehouse", "disabled", "=", 0]]},
+      {"field": "default_finished_goods_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "selection_filter": [["inventory.warehouse", "is_group", "=", 0], ["inventory.warehouse", "disabled", "=", 0]]},
+      {"field": "default_scrap_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "selection_filter": [["inventory.warehouse", "is_group", "=", 0], ["inventory.warehouse", "disabled", "=", 0]]},
+      {"field": "default_sales_contact_identifier", "type": "entity_reference", "target": "contacts.contact"},
+      {"field": "accounts_frozen_till_date", "type": "calendar_date"},
+      {"field": "role_allowed_for_frozen_entries_identifier", "type": "entity_reference", "target": "information_management.role"},
+      {"field": "bank_charges_account_identifier", "type": "entity_reference", "configuration_variant": true, "target": "accounting.account"},
+      {"field": "exchange_gain_account_identifier", "type": "entity_reference", "configuration_variant": true, "target": "accounting.account"},
+      {"field": "exchange_loss_account_identifier", "type": "entity_reference", "configuration_variant": true, "target": "accounting.account"},
+      {"field": "default_purchase_price_variance_account_identifier", "type": "entity_reference", "configuration_variant": true, "target": "accounting.account"},
+      {"field": "default_manufacturing_variance_account_identifier", "type": "entity_reference", "configuration_variant": true, "target": "accounting.account"},
+      {"field": "default_letter_head_report_identifier", "type": "entity_reference", "configuration_variant": true, "target": "document_output.letter_head"},
+      {"field": "disable_sdbnb_in_sr", "type": "boolean", "configuration_variant": true},
+      {"field": "stock_delivered_but_not_billed_identifier", "type": "entity_reference", "configuration_variant": true, "target": "accounting.account"},
+      {"field": "enable_stock_delivered_but_not_billed", "type": "boolean", "configuration_variant": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Buying & Selling Settings"},
+      {"control": "section", "purpose": "Default Accounts"},
+      {"control": "section", "purpose": "Stock Settings", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"control": "section", "purpose": "Budget Detail"},
+      {"control": "section", "purpose": "Address & Contact", "visible_when": ["and", ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 0]], ["coercive_unequal", ["current_field", "is_new_record"], ["literal", 1]]]},
+      {"control": "formatted_information", "purpose": "formatted address"},
+      {"control": "section", "purpose": "Warehouse Defaults"},
+      {"control": "section", "purpose": "Fixed Asset Defaults"},
+      {"control": "section", "purpose": "Chart of Accounts"},
+      {"control": "section", "purpose": "Advance Payments"},
+      {"control": "section", "purpose": "Exchange Rate Revaluation Settings"},
+      {"control": "tab", "purpose": "Accounts"},
+      {"control": "tab", "purpose": "Buying and Selling"},
+      {"control": "section", "purpose": "Stock Expense"},
+      {"control": "tab", "purpose": "Stock and Manufacturing"},
+      {"control": "tab", "purpose": "Dashboard"},
+      {"control": "section", "purpose": "Manufacturing"},
+      {"control": "section", "purpose": "Exchange Gain / Loss"},
+      {"control": "section", "purpose": "Round Off"},
+      {"control": "section", "purpose": "Deferred Accounting"},
+      {"control": "section", "purpose": "Purchase Expense"},
+      {"control": "tab", "purpose": "Accounts Closing"}
+    ]
+  },
+  {
+    "entity": "organization.currency_exchange",
+    "kind": "independent_record",
+    "import_supported": true,
+    "grants": [
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "sales_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "purchase_user", "level": 0, "allows": ["email", "print", "read", "report"]}
+    ],
+    "fields": [
+      {"field": "date", "type": "calendar_date", "required": true, "write_once": true, "access_level": 0, "maximum_length": 0, "precision": ""},
+      {"field": "from_currency_identifier", "type": "entity_reference", "target": "geography.currency", "required": true, "write_once": true, "access_level": 0, "maximum_length": 0},
+      {"field": "to_currency_identifier", "type": "entity_reference", "target": "geography.currency", "required": true, "write_once": true, "access_level": 0, "maximum_length": 0},
+      {"field": "exchange_rate", "type": "decimal", "required": true, "access_level": 0, "maximum_length": 0, "precision": "9"},
+      {"field": "for_buying", "type": "boolean", "write_once": true, "access_level": 0, "maximum_length": 0, "precision": "", "default": "1"},
+      {"field": "for_selling", "type": "boolean", "write_once": true, "access_level": 0, "maximum_length": 0, "precision": "", "default": "1"}
+    ]
+  },
+  {
+    "entity": "organization.customer_group",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "hierarchy_parent": "parent_customer_group_identifier",
+    "grants": [
+      {"role": "sales_manager", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "sales_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "sales_master_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "sales_master_manager", "level": 1, "allows": ["read", "write"]},
+      {"role": "sales_user", "level": 1, "allows": ["read"]},
+      {"role": "sales_manager", "level": 1, "allows": ["read"]},
+      {"role": "customer", "level": 0, "allows": ["email", "export", "print", "report", "select", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["email", "print", "read", "report", "share"]},
+      {"role": "item_manager", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_manager", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["select"]},
+      {"role": "purchase_manager", "level": 0, "allows": ["select"]},
+      {"role": "website_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "customer_group_name", "type": "short_text", "required": true, "unique": true, "omit_on_copy": true},
+      {"field": "parent_customer_group_identifier", "type": "entity_reference", "target": "organization.customer_group", "omit_target_user_filter": true},
+      {"field": "is_group", "type": "boolean", "default": "0"},
+      {"field": "default_price_list_identifier", "type": "entity_reference", "target": "inventory.price_list", "omit_target_user_filter": true},
+      {"field": "payment_terms_identifier", "type": "entity_reference", "target": "accounting.payment_terms_template"},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_hidden": true, "omit_on_copy": true, "searchable": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_hidden": true, "omit_on_copy": true, "searchable": true},
+      {"field": "previous_parent_identifier", "type": "entity_reference", "target": "organization.customer_group", "form_hidden": true, "omit_on_copy": true, "omit_target_user_filter": true},
+      {"field": "accounts_rows", "type": "owned_collection", "target": "accounting.party_account", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "credit_limits_rows", "type": "owned_collection", "target": "sales.customer_credit_limit"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Default Accounts"},
+      {"control": "section", "purpose": "Credit Limits"}
+    ]
+  },
+  {
+    "entity": "organization.department",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "hierarchy_parent": "parent_department_identifier",
+    "grants": [
+      {"role": "human_resources_user", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "academics_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "employee", "level": 0, "allows": ["select"]},
+      {"role": "accounts_user", "level": 0, "allows": ["select"]},
+      {"role": "projects_manager", "level": 0, "allows": ["select"]},
+      {"role": "projects_user", "level": 0, "allows": ["select"]},
+      {"role": "quality_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "department_name", "type": "short_text", "required": true},
+      {"field": "parent_department_identifier", "type": "entity_reference", "target": "organization.department", "omit_target_user_filter": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "is_group", "type": "boolean", "default": "0"},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_read_only": true, "form_hidden": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_read_only": true, "form_hidden": true},
+      {"field": "previous_parent_identifier", "type": "short_text", "form_hidden": true, "omit_target_user_filter": true}
+    ]
+  },
+  {
+    "entity": "organization.designation",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "grants": [
+      {"role": "human_resources_user", "level": 0, "allows": ["create", "email", "print", "read", "report", "share", "write"]},
+      {"role": "sales_user", "level": 0, "allows": ["read"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "designation_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "organization.driver",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "fleet_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "delivery_user", "level": 0, "allows": ["print", "read", "report"]},
+      {"role": "delivery_manager", "level": 0, "allows": ["email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "fulfillment_user", "level": 0, "allows": ["select"]},
+      {"role": "sales_user", "level": 0, "allows": ["select"]},
+      {"role": "stock_manager", "level": 0, "allows": ["select"]},
+      {"role": "stock_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "values": ["driver numbering prefix + four-digit year + configured sequence"]},
+      {"field": "full_name", "type": "short_text", "required": true},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Active", "Suspended", "Left"]},
+      {"field": "transporter_identifier", "type": "entity_reference", "target": "procurement.supplier"},
+      {"field": "employee_identifier", "type": "entity_reference", "target": "organization.employee"},
+      {"field": "cell_number", "type": "short_text"},
+      {"field": "license_number", "type": "short_text"},
+      {"field": "issuing_date", "type": "calendar_date"},
+      {"field": "expiry_date", "type": "calendar_date"},
+      {"field": "driving_license_category_rows", "type": "owned_collection", "target": "organization.driving_license_category"},
+      {"field": "address_identifier", "type": "entity_reference", "target": "contacts.address"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "read_only_when": ["field_has_value", "employee_identifier"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "License Details"},
+      {"control": "section", "purpose": "Driving License Categories"}
+    ]
+  },
+  {
+    "entity": "organization.driving_license_category",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "class", "type": "short_text"},
+      {"field": "description", "type": "short_text"},
+      {"field": "issuing_date", "type": "calendar_date"},
+      {"field": "expiry_date", "type": "calendar_date"}
+    ]
+  },
+  {
+    "entity": "organization.email_digest",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "system_manager", "level": 1, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "enabled", "type": "boolean", "default": "0"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "frequency", "type": "enumeration", "required": true, "values": ["Daily", "Weekly", "Monthly"]},
+      {"field": "next_send", "type": "short_text", "form_read_only": true, "visible_when": ["current_field", "enabled"]},
+      {"field": "income", "type": "boolean", "default": "0"},
+      {"field": "expenses_booked", "type": "boolean", "default": "0"},
+      {"field": "income_year_to_date", "type": "boolean", "default": "0"},
+      {"field": "expense_year_to_date", "type": "boolean", "default": "0"},
+      {"field": "bank_balance", "type": "boolean", "default": "0"},
+      {"field": "credit_balance", "type": "boolean", "default": "0"},
+      {"field": "invoiced_amount", "type": "boolean", "default": "0"},
+      {"field": "payables", "type": "boolean", "default": "0"},
+      {"field": "sales_orders_to_bill", "type": "boolean", "default": "0"},
+      {"field": "purchase_orders_to_bill", "type": "boolean", "default": "0"},
+      {"field": "sales_order", "type": "boolean", "default": "0"},
+      {"field": "purchase_order", "type": "boolean", "default": "0"},
+      {"field": "sales_orders_to_deliver", "type": "boolean", "default": "0"},
+      {"field": "purchase_orders_to_receive", "type": "boolean", "default": "0"},
+      {"field": "sales_invoice", "type": "boolean", "default": "0"},
+      {"field": "purchase_invoice", "type": "boolean", "default": "0"},
+      {"field": "new_quotations", "type": "boolean", "default": "0"},
+      {"field": "pending_quotations", "type": "boolean", "default": "0"},
+      {"field": "issue", "type": "boolean", "default": "0"},
+      {"field": "project", "type": "boolean", "default": "0"},
+      {"field": "purchase_orders_items_overdue", "type": "boolean", "default": "0"},
+      {"field": "calendar_events", "type": "boolean", "default": "0"},
+      {"field": "todo_list", "type": "boolean", "default": "0"},
+      {"field": "notifications", "type": "boolean", "default": "0"},
+      {"field": "add_quote", "type": "boolean", "default": "0"},
+      {"field": "recipients_rows", "type": "owned_selection", "target": "organization.email_digest_recipient", "required": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Email Digest Settings"},
+      {"control": "section", "purpose": "Accounts"},
+      {"control": "section", "purpose": "Operations"},
+      {"control": "section", "purpose": "Other"}
+    ]
+  },
+  {
+    "entity": "organization.email_digest_recipient",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "recipient_identifier", "type": "entity_reference", "target": "information_management.user", "required": true}
+    ]
+  },
+  {
+    "entity": "organization.employee",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "hierarchy_parent": "reports_to_identifier",
+    "grants": [
+      {"role": "employee", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "human_resources_user", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["select"]},
+      {"role": "accounts_user", "level": 0, "allows": ["select"]},
+      {"role": "delivery_manager", "level": 0, "allows": ["select"]},
+      {"role": "fleet_manager", "level": 0, "allows": ["select"]},
+      {"role": "manufacturing_manager", "level": 0, "allows": ["select"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["select"]},
+      {"role": "projects_user", "level": 0, "allows": ["select"]},
+      {"role": "quality_manager", "level": 0, "allows": ["select"]},
+      {"role": "sales_master_manager", "level": 0, "allows": ["select"]},
+      {"role": "stock_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "employee", "type": "short_text", "form_hidden": true, "omit_on_copy": true},
+      {"field": "numbering_series", "type": "enumeration", "write_once": true, "omit_on_copy": true, "values": ["employee numbering prefix + configured sequence"]},
+      {"field": "salutation_identifier", "type": "entity_reference", "target": "contacts.salutation"},
+      {"field": "first_name", "type": "short_text", "required": true},
+      {"field": "middle_name", "type": "short_text"},
+      {"field": "last_name", "type": "short_text"},
+      {"field": "employee_name", "type": "short_text", "form_read_only": true},
+      {"field": "image", "type": "image_file_reference", "form_hidden": true, "omit_on_copy": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "status", "type": "enumeration", "required": true, "searchable": true, "values": ["Active", "Inactive", "Suspended", "Left"], "default": "Active"},
+      {"field": "employee_number", "type": "short_text"},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender", "required": true},
+      {"field": "date_of_birth", "type": "calendar_date", "required": true},
+      {"field": "date_of_joining", "type": "calendar_date", "required": true},
+      {"field": "emergency_phone_number", "type": "short_text"},
+      {"field": "person_to_be_contacted", "type": "short_text"},
+      {"field": "relation", "type": "short_text"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "omit_target_user_filter": true},
+      {"field": "create_user_permission", "type": "boolean", "default": "1", "visible_when": ["or", ["current_field", "user_identifier"], ["current_field", "create_user_automatically"]]},
+      {"field": "create_user_automatically", "type": "boolean", "write_once": true, "default": "0", "visible_when": ["and", ["current_field", "is_new_record"], ["not", ["current_field", "user_identifier"]]]},
+      {"field": "scheduled_confirmation_date", "type": "calendar_date"},
+      {"field": "final_confirmation_date", "type": "calendar_date"},
+      {"field": "contract_end_date", "type": "calendar_date"},
+      {"field": "notice_number_of_days", "type": "integer"},
+      {"field": "date_of_retirement", "type": "calendar_date"},
+      {"field": "department_identifier", "type": "entity_reference", "target": "organization.department"},
+      {"field": "designation_identifier", "type": "entity_reference", "target": "organization.designation", "searchable": true},
+      {"field": "reports_to_identifier", "type": "entity_reference", "target": "organization.employee", "omit_target_user_filter": true},
+      {"field": "branch_identifier", "type": "entity_reference", "target": "organization.branch"},
+      {"field": "holiday_list_identifier", "type": "entity_reference", "target": "organization.holiday_list", "omit_target_user_filter": true},
+      {"field": "salary_mode", "type": "enumeration", "values": ["", "Bank", "Cash", "Cheque"]},
+      {"field": "bank_name", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "salary_mode"], ["literal", "Bank"]]},
+      {"field": "bank_account_number", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "salary_mode"], ["literal", "Bank"]]},
+      {"field": "cell_number", "type": "short_text"},
+      {"field": "preferred_contact_email", "type": "enumeration", "values": ["", "Company Email", "Personal Email", "User ID"]},
+      {"field": "preferred_email", "type": "short_text", "form_read_only": true},
+      {"field": "company_email", "type": "short_text"},
+      {"field": "personal_email", "type": "short_text"},
+      {"field": "unsubscribed", "type": "boolean", "default": "0"},
+      {"field": "permanent_accommodation_type", "type": "enumeration", "values": ["", "Rented", "Owned"]},
+      {"field": "permanent_address", "type": "text"},
+      {"field": "current_accommodation_type", "type": "enumeration", "values": ["", "Rented", "Owned"]},
+      {"field": "current_address", "type": "text"},
+      {"field": "biography", "type": "formatted_text"},
+      {"field": "passport_number", "type": "short_text"},
+      {"field": "date_of_issue", "type": "calendar_date"},
+      {"field": "valid_upto", "type": "calendar_date"},
+      {"field": "place_of_issue", "type": "short_text"},
+      {"field": "marital_status", "type": "enumeration", "values": ["", "Single", "Married", "Divorced", "Widowed"]},
+      {"field": "blood_group", "type": "enumeration", "values": ["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]},
+      {"field": "family_background", "type": "text"},
+      {"field": "health_details", "type": "text"},
+      {"field": "education_rows", "type": "owned_collection", "target": "organization.employee_education"},
+      {"field": "external_work_history_rows", "type": "owned_collection", "target": "organization.employee_external_work_history"},
+      {"field": "internal_work_history_rows", "type": "owned_collection", "target": "organization.employee_internal_work_history"},
+      {"field": "resignation_letter_date", "type": "calendar_date"},
+      {"field": "relieving_date", "type": "calendar_date", "omit_on_copy": true, "required_when": ["coercive_equal", ["current_field", "status"], ["literal", "Left"]]},
+      {"field": "reason_for_leaving", "type": "text"},
+      {"field": "leave_encashed", "type": "enumeration", "values": ["", "Yes", "No"]},
+      {"field": "encashment_date", "type": "calendar_date", "visible_when": ["coercive_equal", ["current_field", "leave_encashed"], ["literal", "Yes"]]},
+      {"field": "held_on", "type": "calendar_date"},
+      {"field": "new_workplace", "type": "short_text"},
+      {"field": "feedback", "type": "text"},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_read_only": true, "form_hidden": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_read_only": true, "form_hidden": true},
+      {"field": "previous_parent_identifier", "type": "short_text", "form_hidden": true, "omit_target_user_filter": true},
+      {"field": "attendance_device_identifier", "type": "short_text", "unique": true, "omit_on_copy": true},
+      {"field": "salary_currency_identifier", "type": "entity_reference", "target": "geography.currency"},
+      {"field": "cost_to_company", "type": "monetary_amount", "currency": {"record_or_parent_field": "salary_currency_identifier"}},
+      {"field": "iban", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "salary_mode"], ["literal", "Bank"]]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Emergency Contact"},
+      {"control": "section", "purpose": "User Details", "expanded_when": ["current_field", "is_new_record"]},
+      {"control": "tab", "purpose": "Joining"},
+      {"control": "tab", "purpose": "Salary"},
+      {"control": "tab", "purpose": "Address & Contacts"},
+      {"control": "tab", "purpose": "Personal Details"},
+      {"control": "section", "purpose": "Educational Qualification"},
+      {"control": "section", "purpose": "Previous Work Experience"},
+      {"control": "section", "purpose": "History In Company"},
+      {"control": "tab", "purpose": "Exit"},
+      {"control": "tab", "purpose": "Attendance & Leaves"},
+      {"control": "tab", "purpose": "Overview"},
+      {"control": "section", "purpose": "Company Details"},
+      {"control": "section", "purpose": "Address"},
+      {"control": "tab", "purpose": "Profile"},
+      {"control": "section", "purpose": "Passport Details"},
+      {"control": "section", "purpose": "Bank Details"},
+      {"control": "tab", "purpose": "Connections"},
+      {"control": "section", "purpose": "Feedback"}
+    ]
+  },
+  {
+    "entity": "organization.employee_education",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "school_univ", "type": "text"},
+      {"field": "qualification", "type": "short_text"},
+      {"field": "level", "type": "enumeration", "values": ["Graduate", "Post Graduate", "Under Graduate"]},
+      {"field": "year_of_passing", "type": "integer"},
+      {"field": "class_per", "type": "short_text"},
+      {"field": "maj_opt_subj", "type": "text"}
+    ]
+  },
+  {
+    "entity": "organization.employee_external_work_history",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "company_name", "type": "short_text"},
+      {"field": "designation", "type": "short_text"},
+      {"field": "salary", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "address", "type": "text"},
+      {"field": "contact", "type": "short_text"},
+      {"field": "total_experience", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "organization.employee_group",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "human_resources_user", "level": 0, "allows": ["read", "write"]}
+    ],
+    "fields": [
+      {"field": "employee_group_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "employee_list_rows", "type": "owned_collection", "target": "organization.employee_group_table"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Employee"}
+    ]
+  },
+  {
+    "entity": "organization.employee_group_table",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "employee_identifier", "type": "entity_reference", "target": "organization.employee"},
+      {"field": "employee_name", "type": "short_text", "copy_from": ["employee_identifier", "employee_name"]},
+      {"field": "user_identifier", "type": "short_text", "form_read_only": true, "copy_from": ["employee_identifier", "user_identifier"]}
+    ]
+  },
+  {
+    "entity": "organization.employee_internal_work_history",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "branch_identifier", "type": "entity_reference", "target": "organization.branch"},
+      {"field": "department_identifier", "type": "entity_reference", "target": "organization.department"},
+      {"field": "designation_identifier", "type": "entity_reference", "target": "organization.designation"},
+      {"field": "from_date", "type": "calendar_date"},
+      {"field": "to_date", "type": "calendar_date"}
+    ]
+  },
+  {
+    "entity": "organization.global_defaults",
+    "kind": "singleton_settings",
+    "form_read_only": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "default_company_identifier", "type": "entity_reference", "target": "organization.company", "omit_target_user_filter": true},
+      {"field": "country_identifier", "type": "entity_reference", "target": "geography.country"},
+      {"field": "default_distance_unit_identifier", "type": "entity_reference", "target": "organization.unit_of_measure"},
+      {"field": "default_currency_identifier", "type": "entity_reference", "target": "geography.currency", "required": true, "omit_target_user_filter": true, "default": "INR"},
+      {"field": "hide_currency_symbol", "type": "enumeration", "values": ["", "No", "Yes"]},
+      {"field": "disable_rounded_total", "type": "boolean", "default": "0"},
+      {"field": "disable_in_words", "type": "boolean", "default": "0"},
+      {"field": "demo_company_identifier", "type": "entity_reference", "target": "organization.company", "form_read_only": true, "form_hidden": true},
+      {"field": "enable_item_search_index", "type": "boolean", "default": "0"},
+      {"field": "use_posting_datetime_for_naming_documents", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "organization.holiday",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "holiday_date", "type": "calendar_date", "required": true},
+      {"field": "description", "type": "formatted_text", "required": true},
+      {"field": "weekly_off", "type": "boolean", "default": "0"},
+      {"field": "is_half_day", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "organization.holiday_list",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "grants": [
+      {"role": "human_resources_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "human_resources_user", "level": 0, "allows": ["select"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["select"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["select"]},
+      {"role": "projects_manager", "level": 0, "allows": ["select"]},
+      {"role": "projects_user", "level": 0, "allows": ["select"]},
+      {"role": "sales_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "holiday_list_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "from_date", "type": "calendar_date", "required": true},
+      {"field": "to_date", "type": "calendar_date", "required": true},
+      {"field": "total_holidays", "type": "decimal", "form_read_only": true, "precision": "1"},
+      {"field": "weekly_off", "type": "enumeration", "omit_on_copy": true, "values": ["", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]},
+      {"field": "holidays_rows", "type": "owned_collection", "target": "organization.holiday"},
+      {"field": "color", "type": "color"},
+      {"field": "country", "type": "suggested_text"},
+      {"field": "subdivision", "type": "suggested_text", "visible_when": ["field_has_value", "country"]},
+      {"field": "is_half_day", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Add Weekly Holidays", "visible_when": ["and", ["current_field", "from_date"], ["current_field", "to_date"]]},
+      {"control": "action", "purpose": "Add to Holidays"},
+      {"control": "section", "purpose": "Holidays"},
+      {"control": "action", "purpose": "Clear Table"},
+      {"control": "section", "purpose": "Add Local Holidays", "visible_when": ["and", ["current_field", "from_date"], ["current_field", "to_date"]]},
+      {"control": "action", "purpose": "Add to Holidays"}
+    ]
+  },
+  {
+    "entity": "organization.incoterm",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "sales_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "purchase_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "stock_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "purchase_user", "level": 0, "allows": ["read"]},
+      {"role": "sales_user", "level": 0, "allows": ["read"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read"]},
+      {"role": "stock_user", "level": 0, "allows": ["read"]},
+      {"role": "delivery_manager", "level": 0, "allows": ["select"]},
+      {"role": "delivery_user", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_manager", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "code", "type": "short_text", "required": true, "unique": true, "maximum_length": 3},
+      {"field": "title", "type": "short_text", "required": true},
+      {"field": "description", "type": "long_text"}
+    ]
+  },
+  {
+    "entity": "organization.item_group",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "hierarchy_parent": "parent_item_group_identifier",
+    "maximum_attachments": 3,
+    "grants": [
+      {"role": "stock_manager", "level": 0, "allows": ["email", "export", "print", "read", "report"]},
+      {"role": "stock_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "item_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "sales_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "purchase_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "accounts_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "desk_user", "level": 0, "allows": ["email", "export", "print", "report", "select", "share"]}
+    ],
+    "fields": [
+      {"field": "item_group_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "parent_item_group_identifier", "type": "entity_reference", "target": "organization.item_group", "omit_target_user_filter": true},
+      {"field": "is_group", "type": "boolean", "default": "0"},
+      {"field": "image", "type": "image_file_reference", "form_hidden": true},
+      {"field": "item_group_defaults_rows", "type": "owned_collection", "target": "inventory.item_default"},
+      {"field": "taxes_rows", "type": "owned_collection", "target": "inventory.item_tax"},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_hidden": true, "omit_on_copy": true, "searchable": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_hidden": true, "omit_on_copy": true, "searchable": true},
+      {"field": "previous_parent_identifier", "type": "entity_reference", "target": "organization.item_group", "form_hidden": true, "omit_on_copy": true, "omit_target_user_filter": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "General Settings"},
+      {"control": "section", "purpose": "Defaults"},
+      {"control": "section", "purpose": "Item Tax"}
+    ]
+  },
+  {
+    "entity": "organization.party_type",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "party_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "unique": true},
+      {"field": "account_type", "type": "enumeration", "required": true, "values": ["Payable", "Receivable"]}
+    ]
+  },
+  {
+    "entity": "organization.quotation_lost_reason",
+    "kind": "independent_record",
+    "import_supported": true,
+    "grants": [
+      {"role": "sales_master_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "sales_user", "level": 0, "allows": ["create", "read"]},
+      {"role": "sales_manager", "level": 0, "allows": ["create", "read"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["read"]},
+      {"role": "maintenance_manager", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "order_lost_reason", "type": "short_text", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "organization.quotation_lost_reason_detail",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "lost_reason_identifier", "type": "entity_reference", "target": "organization.quotation_lost_reason"}
+    ]
+  },
+  {
+    "entity": "organization.sales_partner",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "grants": [
+      {"role": "sales_manager", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "sales_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "sales_master_manager", "level": 0, "allows": ["create", "email", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["select"]},
+      {"role": "accounts_user", "level": 0, "allows": ["select"]},
+      {"role": "delivery_manager", "level": 0, "allows": ["select"]},
+      {"role": "delivery_user", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_manager", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["select"]},
+      {"role": "purchase_manager", "level": 0, "allows": ["select"]},
+      {"role": "stock_manager", "level": 0, "allows": ["select"]},
+      {"role": "website_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "partner_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "partner_type_identifier", "type": "entity_reference", "target": "sales.sales_partner_type"},
+      {"field": "territory_identifier", "type": "entity_reference", "target": "organization.territory", "required": true},
+      {"field": "commission_rate", "type": "decimal", "required": true},
+      {"field": "targets_rows", "type": "owned_collection", "target": "organization.target_detail"},
+      {"field": "show_in_website", "type": "boolean", "default": "0"},
+      {"field": "referral_code", "type": "short_text", "unique": true, "maximum_length": 8},
+      {"field": "route", "type": "short_text", "unique": true},
+      {"field": "logo", "type": "file_reference"},
+      {"field": "partner_website", "type": "short_text"},
+      {"field": "introduction", "type": "text"},
+      {"field": "description", "type": "formatted_text"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Address & Contacts"},
+      {"control": "formatted_information", "purpose": "Address Desc", "visible_when": ["current_field", "is_new_record"]},
+      {"control": "formatted_information", "purpose": "Address HTML"},
+      {"control": "formatted_information", "purpose": "Contact Desc", "visible_when": ["current_field", "is_new_record"]},
+      {"control": "formatted_information", "purpose": "Contact HTML"},
+      {"control": "section", "purpose": "Sales Partner Target"},
+      {"control": "section", "purpose": "Website"},
+      {"control": "section", "visible_when": ["field_has_value", "show_in_website"]},
+      {"control": "section", "visible_when": ["field_has_value", "show_in_website"]}
+    ]
+  },
+  {
+    "entity": "organization.sales_person",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "hierarchy_parent": "parent_sales_person_identifier",
+    "grants": [
+      {"role": "sales_manager", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "sales_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "sales_master_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["select"]},
+      {"role": "accounts_user", "level": 0, "allows": ["select"]},
+      {"role": "delivery_manager", "level": 0, "allows": ["select"]},
+      {"role": "delivery_user", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_manager", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["select"]},
+      {"role": "stock_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "sales_person_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "parent_sales_person_identifier", "type": "entity_reference", "target": "organization.sales_person", "omit_target_user_filter": true},
+      {"field": "commission_rate", "type": "short_text"},
+      {"field": "is_group", "type": "boolean", "required": true, "default": "0"},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "employee_identifier", "type": "entity_reference", "target": "organization.employee"},
+      {"field": "department_identifier", "type": "entity_reference", "target": "organization.department", "form_read_only": true, "copy_from": ["employee_identifier", "department_identifier"]},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_hidden": true, "omit_on_copy": true, "searchable": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_hidden": true, "omit_on_copy": true, "searchable": true},
+      {"field": "previous_parent_identifier", "type": "short_text", "form_hidden": true, "omit_on_copy": true},
+      {"field": "targets_rows", "type": "owned_collection", "target": "organization.target_detail"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Name and Employee ID"},
+      {"control": "section", "purpose": "Sales Person Targets"}
+    ]
+  },
+  {
+    "entity": "organization.supplier_group",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "hierarchy_parent": "parent_supplier_group_identifier",
+    "grants": [
+      {"role": "purchase_manager", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "purchase_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "purchase_master_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "purchase_master_manager", "level": 1, "allows": ["read", "write"]},
+      {"role": "purchase_manager", "level": 1, "allows": ["read"]},
+      {"role": "purchase_user", "level": 1, "allows": ["read"]},
+      {"role": "accounts_user", "level": 0, "allows": ["email", "print", "read", "report", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["select"]},
+      {"role": "website_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "supplier_group_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "parent_supplier_group_identifier", "type": "entity_reference", "target": "organization.supplier_group", "omit_target_user_filter": true},
+      {"field": "is_group", "type": "boolean", "default": "0"},
+      {"field": "payment_terms_identifier", "type": "entity_reference", "target": "accounting.payment_terms_template"},
+      {"field": "accounts_rows", "type": "owned_collection", "target": "accounting.party_account", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_hidden": true, "omit_on_copy": true, "searchable": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_hidden": true, "omit_on_copy": true, "searchable": true},
+      {"field": "previous_parent_identifier", "type": "entity_reference", "target": "organization.supplier_group", "form_hidden": true, "omit_on_copy": true, "omit_target_user_filter": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Credit Limit"},
+      {"control": "section", "purpose": "Default Payable Account"}
+    ]
+  },
+  {
+    "entity": "organization.target_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "item_group_identifier", "type": "entity_reference", "target": "organization.item_group", "searchable": true},
+      {"field": "fiscal_year_identifier", "type": "entity_reference", "target": "accounting.fiscal_year", "required": true, "searchable": true},
+      {"field": "target_quantity", "type": "decimal"},
+      {"field": "target_amount", "type": "decimal", "searchable": true},
+      {"field": "distribution_identifier", "type": "entity_reference", "target": "accounting.monthly_distribution", "required": true}
+    ]
+  },
+  {
+    "entity": "organization.terms_and_conditions",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "grants": [
+      {"role": "sales_master_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "sales_user", "level": 0, "allows": ["read"]},
+      {"role": "purchase_user", "level": 0, "allows": ["read"]},
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "stock_user", "level": 0, "allows": ["read"]},
+      {"role": "human_resources_user", "level": 0, "allows": ["select"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["create", "read", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]},
+      {"role": "delivery_manager", "level": 0, "allows": ["select"]},
+      {"role": "delivery_user", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_manager", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true, "unique": true, "omit_on_copy": true},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "terms", "type": "formatted_text"},
+      {"field": "selling", "type": "boolean", "default": "1"},
+      {"field": "buying", "type": "boolean", "default": "1"},
+      {"field": "copy_attachments_to_transaction", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "Terms and Conditions Help"},
+      {"control": "section", "purpose": "Applicable Modules"}
+    ]
+  },
+  {
+    "entity": "organization.territory",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "hierarchy_parent": "parent_territory_identifier",
+    "grants": [
+      {"role": "sales_master_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "sales_manager", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "sales_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "stock_user", "level": 0, "allows": ["read"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["read"]},
+      {"role": "customer", "level": 0, "allows": ["email", "export", "print", "report", "select", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["email", "print", "read", "report", "share"]},
+      {"role": "delivery_manager", "level": 0, "allows": ["select"]},
+      {"role": "delivery_user", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_manager", "level": 0, "allows": ["select"]},
+      {"role": "website_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "territory_name", "type": "short_text", "required": true, "unique": true, "omit_on_copy": true},
+      {"field": "parent_territory_identifier", "type": "entity_reference", "target": "organization.territory", "omit_target_user_filter": true},
+      {"field": "is_group", "type": "boolean", "default": "0"},
+      {"field": "territory_manager_identifier", "type": "entity_reference", "target": "organization.sales_person", "searchable": true},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_hidden": true, "omit_on_copy": true, "searchable": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_hidden": true, "omit_on_copy": true, "searchable": true},
+      {"field": "previous_parent_identifier", "type": "entity_reference", "target": "organization.territory", "form_hidden": true, "omit_on_copy": true, "omit_target_user_filter": true},
+      {"field": "targets_rows", "type": "owned_collection", "target": "organization.target_detail"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Territory Targets"}
+    ]
+  },
+  {
+    "entity": "organization.transaction_deletion_record",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "entity_types_rows", "type": "owned_collection", "target": "accounting.transaction_deletion_record_details", "form_read_only": true, "omit_on_copy": true, "visible_when": ["and", ["greater", ["current_field", "lifecycle_state"], ["literal", 0]], ["or", ["not", ["current_field", "entity_types_to_delete_rows"]], ["coercive_equal", ["member", ["current_field", "entity_types_to_delete_rows"], "length"], ["literal", 0]]]]},
+      {"field": "entity_types_to_delete_rows", "type": "owned_collection", "target": "organization.transaction_deletion_record_to_delete"},
+      {"field": "entity_types_to_be_ignored_rows", "type": "owned_collection", "target": "organization.transaction_deletion_record_item"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "organization.transaction_deletion_record", "form_read_only": true, "omit_on_copy": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "values": ["Queued", "Running", "Failed", "Completed", "Cancelled"]},
+      {"field": "delete_bin_data_status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "values": ["Pending", "Completed", "Skipped"], "default": "Pending"},
+      {"field": "delete_leads_and_addresses_status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "values": ["Pending", "Completed", "Skipped"], "default": "Pending"},
+      {"field": "reset_company_default_values_status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "values": ["Pending", "Completed", "Skipped"], "default": "Pending"},
+      {"field": "clear_notifications_status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "values": ["Pending", "Completed", "Skipped"], "default": "Pending"},
+      {"field": "initialize_entity_types_table_status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "values": ["Pending", "Completed", "Skipped"], "default": "Pending"},
+      {"field": "delete_transactions_status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "values": ["Pending", "Completed", "Skipped"], "default": "Pending"},
+      {"field": "error_log", "type": "long_text", "visible_when": ["current_field", "error_log"]},
+      {"field": "process_in_single_transaction", "type": "boolean", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Tasks", "visible_when": ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 1]]}
+    ]
+  },
+  {
+    "entity": "organization.transaction_deletion_record_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "entity_type_name_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true}
+    ]
+  },
+  {
+    "entity": "organization.transaction_deletion_record_to_delete",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "entity_type_name_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "company_field", "type": "short_text"},
+      {"field": "document_count", "type": "integer", "form_read_only": true},
+      {"field": "child_entity_types", "type": "text", "form_read_only": true},
+      {"field": "deleted", "type": "boolean", "form_read_only": true, "default": "0"}
+    ]
+  },
+  {
+    "entity": "organization.unit_of_measure",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "grants": [
+      {"role": "item_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "stock_manager", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "stock_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "sales_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]},
+      {"role": "desk_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "unit_of_measure_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "must_be_whole_number", "type": "boolean", "default": "0"},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "symbol", "type": "short_text"},
+      {"field": "common_code", "type": "short_text", "maximum_length": 3},
+      {"field": "description", "type": "text"},
+      {"field": "category_identifier", "type": "entity_reference", "target": "inventory.unit_of_measure_category"}
+    ]
+  },
+  {
+    "entity": "organization.unit_of_measure_conversion_factor",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "category_identifier", "type": "entity_reference", "target": "inventory.unit_of_measure_category", "required": true},
+      {"field": "from_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "required": true},
+      {"field": "to_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "required": true},
+      {"field": "value", "type": "decimal", "required": true, "precision": "9"}
+    ]
+  },
+  {
+    "entity": "organization.vehicle",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "fleet_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "delivery_user", "level": 0, "allows": ["print", "read", "report"]},
+      {"role": "delivery_manager", "level": 0, "allows": ["email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "fulfillment_user", "level": 0, "allows": ["select"]},
+      {"role": "stock_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "license_plate", "type": "short_text", "required": true, "unique": true, "omit_on_copy": true},
+      {"field": "make", "type": "short_text", "required": true},
+      {"field": "model", "type": "short_text", "required": true},
+      {"field": "last_odometer", "type": "integer", "required": true, "write_once": true, "omit_on_copy": true},
+      {"field": "acquisition_date", "type": "calendar_date"},
+      {"field": "location", "type": "short_text"},
+      {"field": "chassis_number", "type": "short_text"},
+      {"field": "vehicle_value", "type": "monetary_amount"},
+      {"field": "employee_identifier", "type": "entity_reference", "target": "organization.employee"},
+      {"field": "insurance_company", "type": "short_text"},
+      {"field": "policy_number", "type": "short_text"},
+      {"field": "start_date", "type": "calendar_date"},
+      {"field": "end_date", "type": "calendar_date"},
+      {"field": "fuel_type", "type": "enumeration", "required": true, "values": ["Petrol", "Diesel", "Natural Gas", "Electric"]},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "required": true},
+      {"field": "carbon_check_date", "type": "calendar_date"},
+      {"field": "color", "type": "short_text"},
+      {"field": "wheels", "type": "integer"},
+      {"field": "doors", "type": "integer"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "organization.vehicle", "form_read_only": true, "omit_on_copy": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Details"},
+      {"control": "section", "purpose": "Insurance Details"},
+      {"control": "section", "purpose": "Additional Details"}
+    ]
+  },
+  {
+    "entity": "organization.website_item_group",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "item_group_identifier", "type": "entity_reference", "target": "organization.item_group", "required": true}
+    ]
+  }
+]

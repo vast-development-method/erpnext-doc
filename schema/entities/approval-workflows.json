@@ -1,0 +1,144 @@
+[
+  {
+    "entity": "approval_workflows.workflow",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "workflow_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "is_active", "type": "boolean", "default": "0"},
+      {"field": "override_status", "type": "boolean", "default": "0"},
+      {"field": "send_email_alert", "type": "boolean", "default": "0"},
+      {"field": "enable_action_confirmation", "type": "boolean", "default": "0"},
+      {"field": "states_rows", "type": "owned_collection", "target": "approval_workflows.workflow_document_state"},
+      {"field": "transitions_rows", "type": "owned_collection", "target": "approval_workflows.workflow_transition"},
+      {"field": "workflow_state_field", "type": "short_text", "required": true, "default": "workflow_state"},
+      {"field": "workflow_data", "type": "structured_value", "form_hidden": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "States"},
+      {"control": "section", "purpose": "Transition Rules"}
+    ]
+  },
+  {
+    "entity": "approval_workflows.workflow_action",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "desk_user", "level": 0, "allows": ["delete", "read"]}
+    ],
+    "fields": [
+      {"field": "status", "type": "enumeration", "values": ["Open", "Completed"]},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier"},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_hidden": true, "searchable": true},
+      {"field": "workflow_state", "type": "short_text", "form_hidden": true},
+      {"field": "completed_by_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true, "visible_when": ["current_field", "completed_by_identifier"]},
+      {"field": "completed_by_role_identifier", "type": "entity_reference", "target": "information_management.role", "form_read_only": true, "visible_when": ["current_field", "completed_by_role_identifier"]},
+      {"field": "permitted_roles_rows", "type": "owned_selection", "target": "approval_workflows.workflow_action_permitted_role", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "approval_workflows.workflow_action_master",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "workflow_action_name", "type": "short_text", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "approval_workflows.workflow_action_permitted_role",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "role_identifier", "type": "entity_reference", "target": "information_management.role"}
+    ]
+  },
+  {
+    "entity": "approval_workflows.workflow_document_state",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "state_identifier", "type": "entity_reference", "target": "approval_workflows.workflow_state", "required": true},
+      {"field": "record_status", "type": "enumeration", "values": ["0", "1", "2"], "default": "0"},
+      {"field": "update_field", "type": "enumeration"},
+      {"field": "update_value", "type": "short_text"},
+      {"field": "allow_edit_identifier", "type": "entity_reference", "target": "information_management.role", "required": true},
+      {"field": "message", "type": "text"},
+      {"field": "next_action_email_template_identifier", "type": "entity_reference", "target": "mail.email_template"},
+      {"field": "is_optional_state", "type": "boolean", "default": "0"},
+      {"field": "workflow_builder_identifier", "type": "short_text", "form_hidden": true},
+      {"field": "avoid_status_override", "type": "boolean", "default": "0"},
+      {"field": "send_email", "type": "boolean", "default": "1"},
+      {"field": "evaluate_as_expression", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "approval_workflows.workflow_state",
+    "kind": "independent_record",
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "workflow_state_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "icon", "type": "icon", "form_hidden": true},
+      {"field": "style", "type": "enumeration", "values": ["", "Primary", "Info", "Success", "Warning", "Danger", "Inverse"]}
+    ]
+  },
+  {
+    "entity": "approval_workflows.workflow_transition",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "state_identifier", "type": "entity_reference", "target": "approval_workflows.workflow_state", "required": true},
+      {"field": "action_identifier", "type": "entity_reference", "target": "approval_workflows.workflow_action_master", "required": true},
+      {"field": "next_state_identifier", "type": "entity_reference", "target": "approval_workflows.workflow_state", "required": true},
+      {"field": "allowed_identifier", "type": "entity_reference", "target": "information_management.role", "required": true},
+      {"field": "allow_self_approval", "type": "boolean", "default": "1"},
+      {"field": "condition", "type": "expression_or_structured_text"},
+      {"field": "workflow_builder_identifier", "type": "short_text", "form_hidden": true},
+      {"field": "send_email_to_creator", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "allow_self_approval"], ["literal", 1]]},
+      {"field": "transition_tasks_identifier", "type": "entity_reference", "target": "approval_workflows.workflow_transition_tasks"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Conditions"},
+      {"control": "formatted_information", "purpose": "Example"}
+    ]
+  },
+  {
+    "entity": "approval_workflows.workflow_transition_task",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "task", "type": "enumeration", "required": true},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "link_identifier", "type": "selected_entity_reference", "target_selected_by": "task", "visible_when": ["call", ["member", ["list", ["literal", "Server Script"], ["literal", "Webhook"]], "includes"], ["current_field", "task"]], "required_when": ["call", ["member", ["list", ["literal", "Server Script"], ["literal", "Webhook"]], "includes"], ["current_field", "task"]]},
+      {"field": "asynchronous", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "approval_workflows.workflow_transition_tasks",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "tasks_rows", "type": "owned_collection", "target": "approval_workflows.workflow_transition_task"}
+    ]
+  }
+]

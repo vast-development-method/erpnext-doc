@@ -1,0 +1,506 @@
+[
+  {
+    "capability": "Visitor conversion and account activation",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "visitor_session_conversion_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required", "hidden_from_form"], "choices": ["assigned_sequence_of_3_digits_with_year_with_month"]},
+          {"purpose": "visitor_session_email", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "real_email", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "conversion_mode", "value_kind": "choice", "rules": ["required"], "choices": ["rename", "manual_migration", "already_converted"]},
+          {"purpose": "conversion_channel", "value_kind": "choice", "choices": ["one_time_password", "magic_link", "workspace_service", "direct_other"]},
+          {"purpose": "conversion_duration_ms", "value_kind": "decimal"},
+          {"purpose": "merged_ghosts_count", "value_kind": "whole_number"},
+          {"purpose": "converted_at", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "client_info", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "visitor_session_fingerprint",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required", "hidden_from_form"], "choices": ["assigned_sequence_of_3_digits_with_year_with_month"]},
+          {"purpose": "fingerprint", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "visitor_session_email", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "last_seen", "value_kind": "date_and_time", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "visitor_session_lead",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required", "hidden_from_form"], "choices": ["assigned_sequence_of_3_digits_with_year_with_month"]},
+          {"purpose": "visitor_session_email", "value_kind": "reference", "rules": ["required", "unique", "read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "captured_email", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["captured", "converted", "expired"]},
+          {"purpose": "conversion_reminder_sent", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "visitor_session_magic_link_token",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required", "hidden_from_form"], "choices": ["assigned_sequence_of_3_digits_with_year_with_month"]},
+          {"purpose": "token", "value_kind": "text", "rules": ["required", "unique", "read_only"]},
+          {"purpose": "visitor_session_email", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "real_email", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["pending", "used", "expired"]},
+          {"purpose": "expires_on", "value_kind": "date_and_time", "rules": ["required", "read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "visitor_session_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enable_visitor_session_feature", "value_kind": "boolean"},
+          {"purpose": "enable_auto_cleanup", "value_kind": "boolean"},
+          {"purpose": "cleanup_batch_size", "value_kind": "whole_number"},
+          {"purpose": "visitor_session_role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "visitor_session_email_domain", "value_kind": "text"},
+          {"purpose": "expiration_days", "value_kind": "whole_number"},
+          {"purpose": "enable_fingerprinting", "value_kind": "boolean"},
+          {"purpose": "fingerprint_expiry_days", "value_kind": "whole_number"},
+          {"purpose": "default_user_role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "client_identifier", "value_kind": "text"},
+          {"purpose": "access_token_expiry_seconds", "value_kind": "whole_number"},
+          {"purpose": "refresh_token_expiry_days", "value_kind": "whole_number"},
+          {"purpose": "visitor_session_token_scope", "value_kind": "text"},
+          {"purpose": "invalidate_visitor_session_tokens_on_conversion", "value_kind": "boolean"},
+          {"purpose": "verify_one_time_password_on_conversion", "value_kind": "boolean"},
+          {"purpose": "enable_social_login", "value_kind": "boolean"},
+          {"purpose": "workspace_service_client_identifier", "value_kind": "text"},
+          {"purpose": "enable_magic_link", "value_kind": "boolean"},
+          {"purpose": "magic_link_expiry_minutes", "value_kind": "whole_number"},
+          {"purpose": "magic_link_redirect_resource_address", "value_kind": "text"},
+          {"purpose": "magic_link_email_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "magic_link_formatted_markup", "value_kind": "expression_or_structured_text"},
+          {"purpose": "magic_link_layout_style", "value_kind": "expression_or_structured_text"},
+          {"purpose": "expiry_time_minutes", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "allow_anonymous_one_time_password", "value_kind": "boolean"},
+          {"purpose": "sandbox_mode", "value_kind": "boolean"},
+          {"purpose": "sandbox_one_time_password", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "maximum_one_time_password_attempts", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "one_time_password_length", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "one_time_password_code_type", "value_kind": "choice", "rules": ["required"], "choices": ["numeric", "mixed"]},
+          {"purpose": "one_time_password_delivery_type", "value_kind": "choice", "rules": ["required"], "choices": ["email", "text_message", "both", "none"]},
+          {"purpose": "email_account", "value_kind": "reference", "target": "mail.email_account", "binding": "shared_model"},
+          {"purpose": "email_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "text_message_sender", "value_kind": "text"},
+          {"purpose": "enable_lead_capture", "value_kind": "boolean"},
+          {"purpose": "lead_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "lead_email_field_name", "value_kind": "choice"},
+          {"purpose": "lead_visitor_session_field_name", "value_kind": "choice"},
+          {"purpose": "lead_status_field_name", "value_kind": "choice"},
+          {"purpose": "lead_captured_status", "value_kind": "text"},
+          {"purpose": "lead_converted_status", "value_kind": "text"},
+          {"purpose": "lead_reminder_hours", "value_kind": "whole_number"},
+          {"purpose": "lead_reminder_email_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "enable_multi_device_merge", "value_kind": "boolean"},
+          {"purpose": "merge_detection_method", "value_kind": "choice", "choices": ["lead_email", "fingerprint", "both"]},
+          {"purpose": "enable_conversion_logging", "value_kind": "boolean"},
+          {"purpose": "conversion_log_retention_days", "value_kind": "whole_number"},
+          {"purpose": "enable_analytics_service_interface", "value_kind": "boolean"},
+          {"purpose": "enable_webhooks", "value_kind": "boolean"},
+          {"purpose": "inbound_event_notification_resource_address", "value_kind": "text"},
+          {"purpose": "inbound_event_notification_secret", "value_kind": "protected_text"},
+          {"purpose": "enable_realtime_events", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "one_time_password",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "one_time_password_code", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["valid", "expired"]},
+          {"purpose": "expiry", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "purpose", "value_kind": "choice", "rules": ["required"], "choices": ["sign_up", "reset_password", "login", "conversion"]},
+          {"purpose": "delivery_method", "value_kind": "choice", "rules": ["required"], "choices": ["email", "text_message", "both", "none"]},
+          {"purpose": "email", "value_kind": "text"},
+          {"purpose": "user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "phone", "value_kind": "text"},
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required", "hidden_from_form"], "choices": ["assigned_sequence_of_3_digits_with_year_with_month"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "export", "share", "print", "email"], false],
+          ["guest", 0, ["read", "create", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Voice agent and call records",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "telephony_call_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "telephony_medium", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "manual", "communications_service", "telephony_service"]},
+          {"purpose": "identifier", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "from", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["initiated", "ringing", "in_progress", "completed", "failed", "busy", "number_answer", "queued", "canceled"]},
+          {"purpose": "duration", "value_kind": "elapsed_time"},
+          {"purpose": "medium", "value_kind": "text"},
+          {"purpose": "start_time", "value_kind": "date_and_time"},
+          {"purpose": "to", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "telephony_call_log_classification", "value_kind": "choice", "rules": ["required"], "choices": ["incoming", "outgoing"]},
+          {"purpose": "receiver", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "caller", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "recording_resource_address", "value_kind": "text"},
+          {"purpose": "end_time", "value_kind": "date_and_time"},
+          {"purpose": "links", "value_kind": "owned_rows", "target": "information_management.dynamic_link", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["telephony_agent", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["telephony_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "telephony_telephony_service_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "record_call", "value_kind": "boolean"},
+          {"purpose": "account_sid", "value_kind": "text"},
+          {"purpose": "subdomain", "value_kind": "text"},
+          {"purpose": "inbound_event_notification_verify_token", "value_kind": "text"},
+          {"purpose": "service_access_key", "value_kind": "text"},
+          {"purpose": "service_interface_token", "value_kind": "protected_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["telephony_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["all", 0, ["read", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "telephony_one_time_password",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "channel", "value_kind": "choice", "rules": ["read_only"], "choices": ["text_message", "email"]},
+          {"purpose": "recipient", "value_kind": "text", "rules": ["required", "read_only", "indexed_for_search"]},
+          {"purpose": "purpose", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "is_verified", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "one_time_password_hash", "value_kind": "text", "rules": ["required", "read_only", "hidden_from_form"]},
+          {"purpose": "attempts", "value_kind": "whole_number", "rules": ["read_only", "nonnegative"]},
+          {"purpose": "expires_at", "value_kind": "date_and_time", "rules": ["required", "read_only"]},
+          {"purpose": "verified_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "notification_log", "value_kind": "reference", "rules": ["read_only"], "target": "telephony_text_message_log"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["telephony_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "telephony_one_time_password_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "enable_email_one_time_password", "value_kind": "boolean"},
+          {"purpose": "text_message_from_number", "value_kind": "text"},
+          {"purpose": "send_text_message_rate_limit_per_hour", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "one_time_password_length", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "one_time_password_expiry_in_seconds", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "one_time_password_maximum_attempts", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "one_time_password_message_template", "value_kind": "text"},
+          {"purpose": "email_one_time_password_subject", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["telephony_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "telephony_text_message_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "purpose", "value_kind": "choice", "rules": ["read_only"], "choices": ["general", "one_time_password"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["queued", "sent", "delivered", "failed", "undelivered"]},
+          {"purpose": "to", "value_kind": "text", "rules": ["required", "read_only", "indexed_for_search"]},
+          {"purpose": "from", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "message", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "sid", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "sent_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "sent_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "error", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["telephony_agent", 0, ["read", "create", "report"], false],
+          ["telephony_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "telephony_telephony_agent",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "user_name", "value_kind": "text"},
+          {"purpose": "mobile_number", "value_kind": "text"},
+          {"purpose": "default_medium", "value_kind": "choice", "choices": ["unselected", "communications_service", "telephony_service"]},
+          {"purpose": "communications_service", "value_kind": "boolean"},
+          {"purpose": "communications_service_number", "value_kind": "text"},
+          {"purpose": "call_receiving_device", "value_kind": "choice", "choices": ["computer", "phone"]},
+          {"purpose": "telephony_service", "value_kind": "boolean"},
+          {"purpose": "telephony_service_number", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["telephony_agent", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["telephony_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "telephony_telephony_phone",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "telephony_telephony_phone_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "is_primary", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "telephony_communications_service_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "record_calls", "value_kind": "boolean"},
+          {"purpose": "account_sid", "value_kind": "text"},
+          {"purpose": "authentication_token", "value_kind": "protected_text"},
+          {"purpose": "service_access_key", "value_kind": "text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "voice_instructions_sid", "value_kind": "text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "service_interface_secret", "value_kind": "protected_text", "rules": ["read_only"], "access_level": 1},
+          {"purpose": "application_name", "value_kind": "text"},
+          {"purpose": "communications_service_applications", "value_kind": "text", "rules": ["hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["telephony_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["all", 0, ["read", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Wallet balances and categories",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "my_wallet",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "amount", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "note", "value_kind": "text"},
+          {"purpose": "my_wallet_classification", "value_kind": "choice", "rules": ["required", "write_once"], "choices": ["expense", "income", "transfer"]},
+          {"purpose": "category", "value_kind": "reference", "target": "wallet_category"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["done", "pending"]},
+          {"purpose": "account", "value_kind": "reference", "rules": ["required"], "target": "wallet_account"},
+          {"purpose": "to_account", "value_kind": "reference", "target": "wallet_account"},
+          {"purpose": "account_balance", "value_kind": "money", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["pocket_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["pocket_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], true]
+        ]
+      },
+      {
+        "concept": "pocket_wallet_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "default_category", "value_kind": "reference", "target": "wallet_category"},
+          {"purpose": "default_account", "value_kind": "reference", "target": "wallet_account"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["pocket_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "wallet_account",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "account_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "account_type", "value_kind": "text"},
+          {"purpose": "account_balance", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "edit_account_balance", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["pocket_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["pocket_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], true]
+        ]
+      },
+      {
+        "concept": "wallet_category",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "category", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "category_type", "value_kind": "choice", "rules": ["required"], "choices": ["expense", "income"]},
+          {"purpose": "icon", "value_kind": "display_symbol"},
+          {"purpose": "color", "value_kind": "colour"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["pocket_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["pocket_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Warehouse pallet capacity and pick faces",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "warehouse_pallet",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "warehouse", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["read_only"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["active", "empty"]},
+          {"purpose": "note", "value_kind": "text"},
+          {"purpose": "items", "value_kind": "owned_rows", "target": "warehouse_pallet_item"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["stock_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["stock_user", 0, ["read", "write", "create", "report", "print"], false]
+        ]
+      },
+      {
+        "concept": "warehouse_pallet_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "product_identifier", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "quantity", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "inventory_unit_of_measure", "value_kind": "reference", "rules": ["read_only"], "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "batch_number", "value_kind": "reference", "target": "inventory.batch", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "warehouse_pick_face",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "product_identifier", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "warehouse", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["read_only"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "inventory_unit_of_measure", "value_kind": "reference", "rules": ["read_only"], "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "minimum_quantity", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "maximum_quantity", "value_kind": "decimal", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["stock_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["stock_user", 0, ["read", "report"], false]
+        ]
+      },
+      {
+        "concept": "warehouse_theatre_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enable_capacity_alerts", "value_kind": "boolean"},
+          {"purpose": "bin_threshold", "value_kind": "percentage"},
+          {"purpose": "floor_threshold", "value_kind": "percentage"},
+          {"purpose": "alert_recipients", "value_kind": "text"},
+          {"purpose": "dispatch_document", "value_kind": "choice", "choices": ["delivery_note", "customer_invoice"]},
+          {"purpose": "require_carton_scan", "value_kind": "boolean"},
+          {"purpose": "qc_warehouse", "value_kind": "reference", "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "hold_all_receipts", "value_kind": "boolean"},
+          {"purpose": "rejected_warehouse", "value_kind": "reference", "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "returns_warehouse", "value_kind": "reference", "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "enable_ops_alerts", "value_kind": "boolean"},
+          {"purpose": "stuck_hours", "value_kind": "whole_number"},
+          {"purpose": "notify_urgent_refills", "value_kind": "boolean"},
+          {"purpose": "notify_expiring_days", "value_kind": "whole_number"},
+          {"purpose": "ops_alert_email", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["stock_manager", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "warehouse_unit_of_measure_capacity",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "unit_of_measure", "value_kind": "reference", "rules": ["required"], "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "capacity", "value_kind": "decimal"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Warehouse pallet capacity and pick faces",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "warehouse", "purpose": "wt_warehouse_type", "value_kind": "choice", "placement": "warehouse_name"},
+      {"on": "warehouse", "purpose": "wt_row", "value_kind": "whole_number", "placement": "wt_warehouse_type"},
+      {"on": "warehouse", "purpose": "wt_col", "value_kind": "whole_number", "placement": "wt_row"},
+      {"on": "warehouse", "purpose": "wt_row_gap", "value_kind": "decimal", "placement": "wt_col"},
+      {"on": "warehouse", "purpose": "wt_zone_w", "value_kind": "whole_number", "placement": "wt_row_gap", "rules": ["nonnegative"]},
+      {"on": "warehouse", "purpose": "wt_zone_d", "value_kind": "whole_number", "placement": "wt_zone_w", "rules": ["nonnegative"]},
+      {"on": "warehouse", "purpose": "wt_unit_of_measure_capacities", "value_kind": "owned_rows", "placement": "wt_zone_d"},
+      {"on": "warehouse", "purpose": "wt_floor_layout", "value_kind": "long_text", "placement": "wt_unit_of_measure_capacities", "rules": ["hidden_from_form"]},
+      {"on": "warehouse", "purpose": "wt_dock_slot", "value_kind": "reference", "placement": "wt_floor_layout"},
+      {"on": "warehouse", "purpose": "wt_last_counted_on", "value_kind": "date_and_time", "placement": "wt_dock_slot", "rules": ["read_only"]},
+      {"on": "warehouse", "purpose": "wt_last_counted_by", "value_kind": "reference", "placement": "wt_last_counted_on", "rules": ["read_only"]},
+      {"on": "pick_list", "purpose": "wt_picked_by", "value_kind": "reference", "placement": "scan_mode", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "pick_list", "purpose": "wt_picked_at", "value_kind": "date_and_time", "placement": "wt_picked_by", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "customer_invoice", "purpose": "wt_cartons", "value_kind": "long_text", "placement": "update_stock", "rules": ["read_only", "hidden_from_form", "editable_after_submission"]}
+    ]
+  },
+  {
+    "capability": "Warehouse product group restrictions",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "allowed_item_group",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item_group", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "organization.item_group", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "warehouse_item_group_rule",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "warehouse", "value_kind": "reference", "rules": ["required"], "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "allowed_item_group", "value_kind": "owned_rows", "rules": ["required"], "target": "allowed_item_group"},
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["read_only", "hidden_from_form"], "choices": ["assigned_sequence_of_4_digits_with_warehouse"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["stock_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["stock_user", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  }
+]

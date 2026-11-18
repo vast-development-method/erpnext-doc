@@ -1,0 +1,48 @@
+# Reconciling four financial statements to one journal
+
+A chart account's root class controls balance-sheet and income-statement presentation. Its more specific **account type** controls the standard cash-flow report. A loan account can be a liability on the balance sheet and appear within operating cash flow in the standard report. A template with an explicit borrowings classification can report it under financing. Use the actual configured report when testing compatibility.
+
+The [two-month journal](examples/journal-to-statements.json) is a complete input and expected-output case for these four financial reports. It identifies the entity, business events, posting date, opening marker, chart classifications, units, cash-flow mode and expected monthly output. One unit in this interchange is one currency minor unit. Consume each source voucher once when reproducing ledger results. All four reports are read operations.
+
+## Trial balance
+
+Require an existing fiscal year. Validate the requested date range. Missing endpoints default to the year's bounds. The controller replaces a start outside the year by the fiscal year's start and an end outside it by the fiscal year's end, with a message. Check company-selection permission and the user's applicable company restrictions. Retrieve the company chart in hierarchy order. The same finance-book scope, project, cost-center tree and configured dimension filters must apply to balances and movements. Account, company and dimension restrictions can give a user only part of the double entry; a filtered report can legitimately have unequal total debits and credits.
+
+For opening balances the controller may start with the latest submitted period close strictly before the report start and add the subsequent effective general ledger movement through the day before the report start. The option to ignore closing balances, or the presence of general ledger entry restrictions, forces use of general ledger rows. A precomputed unrestricted balance would otherwise disclose excluded account movements. When scanning historical general ledger directly, exclude cancelled rows. Normally include flagged opening entries in opening, independently of their date, and exclude them from movement. An option treats the flag as ordinary posting-date activity. The opening and current-period switches for period-closing vouchers are independent. The option to show unclosed prior-year profit and loss controls whether general ledger history from before the fiscal-year start may contribute to P&L opening.
+
+For each account keep six numbers: opening debit and credit, period debit and credit, and closing debit and credit. Compute closing as opening plus movement on each side separately. Under net display, reduce only opening and closing to the positive debit or credit difference, preserving gross movements on both sides. Accumulate leaf amounts into parents in reverse chart order. Net group openings and closings again when requested. For a tree display total only roots. For a leaf-only display total only leaves. Summing both parents and children double-counts the ledger. The fixture uses leaf-only net display. With offsetting asset and contra-asset balances, a group-net total may therefore differ from a leaf-net total without a difference in ledger entries.
+
+## Income statement and balance sheet
+
+For the income statement, present income as credit less debit and expense as debit less credit. For each period the net profit calculation rounds the income and expense section totals individually to three places before subtraction. The helper emits a profit row only if at least one period is nonzero. The two-month fixture uses monthly movements on the income statement and cumulative period-end balances on the balance sheet. On the balance sheet use debit-normal assets including signed contra-asset balances, and credit-normal liabilities and equity. Compute provisional profit or loss as assets minus liabilities minus equity. If the opening net difference at configured numeric precision is nonzero, emit the previous-year-unclosed message and separate that opening difference from provisional profit under the applicable report path. A report label never posts a closing journal.
+
+## Indirect cash flow
+
+Start operating activity with the period's net income excluding period-close entries. For each other standard row use credit less debit on the selected non-group accounts, within the inclusive period. Reverse this sign for the `Depreciation` add-back. The residual operating row selects balance-sheet roots excluding explicit mapped types, `Cash` and `Bank`; it also includes depreciation-type accounts as an offset. A depreciation expense debit of 20.00 against a 20.00 credit in ordinary accumulated depreciation changes profit by −20.00, adds back 20.00, and contributes zero net residual. A liability with empty account type contributes its credit movement to the residual row. Signed movements of `Fixed Asset` accounts form the investing section. Signed movements of accounts typed `Equity` form the financing section. The section totals plus profit reconstruct bank movement for this fixture.
+
+Opening cash equals debit less credit in the company's non-group cash and bank accounts before the start. With the usual opening-flag policy, also include all flagged opening cash entries, including one dated on the first reporting day. Movement excludes opening entries and period closing vouchers. Opening explicitly filters cancelled general ledger rows. The movement selection has no separate cancellation filter. Compare cancelled originals and their reversals together when reconciling movement. Both paths apply general ledger permission and reporting filters. The dimension-grouped cash-flow view disables opening/closing display with a message.
+
+For noncumulative months carry the preceding month's closing forward. For cumulative columns retain the same opening while their movement start is the same. Cumulative values restart when the applicable fiscal year changes; choose the last period per fiscal year and dimension for totals instead of adding every cumulative column. For January and February changes of 310.00 and 550.00, cumulative columns show 310.00 and 860.00, and the two-month movement is 860.00.
+
+## Control totals for the fixture
+
+| Major currency units | January | February |
+|---|---:|---:|
+| Cash opening | 1,000 | 1,310 |
+| Profit in month | 680 | 30 |
+| Operating cash flow | 610 | 150 |
+| Investing cash flow | −300 | 0 |
+| Financing cash flow | 0 | 400 |
+| Cash closing | 1,310 | 1,860 |
+| Period-end assets | 2,030 | 2,260 |
+| Period-end liabilities | 350 | 150 |
+| Period-end contributed equity | 1,000 | 1,400 |
+| Accumulated provisional profit | 680 | 710 |
+| Total period debits = total period credits | 2,250 | 970 |
+| Leaf-net closing debits = leaf-net closing credits | 2,170 | 2,440 |
+
+For January the business records 800.00 of invoiced revenue and collects 500.00. It incurs 100.00 of cost of sales and 20.00 depreciation, which explains its 680.00 profit. Buying stock on credit, paying 90.00 to a supplier, spending 300.00 on equipment and borrowing 200.00 bring its bank to 1,310.00. February includes collection of the final receivable, settlement of the supplier, a 50.00 cash sale, another depreciation charge, a 400.00 owner contribution and 50.00 loan repayment. Postings, rather than account captions or cash received alone, determine these results.
+
+The fixture covers an unrestricted single-company base-currency profile with ordinary effective entries. Currency translation, partial visibility, report templates, multiple finance books, alternate opening flags, dimensional grouping and closing-balance carry-forward have different reporting scopes.
+
+[Group reporting and currency translation](group-currency-translation.md) extends the example to parent and subsidiary columns, posting and closing exchange rates, stored reporting amounts and the translation reserve.

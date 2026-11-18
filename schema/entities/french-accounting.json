@@ -1,0 +1,268 @@
+[
+  {
+    "entity": "french_accounting.accounting_export",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "accounting_document", "type": "enumeration", "required": true, "values": ["Purchase Invoice", "Sales Invoice"]},
+      {"field": "from_date", "type": "calendar_date", "required": true},
+      {"field": "to_date", "type": "calendar_date", "required": true},
+      {"field": "included_already_exported_document", "type": "boolean", "default": "0"},
+      {"field": "export_date", "type": "date_and_time", "default": {"context_default": "current_instant"}}
+    ]
+  },
+  {
+    "entity": "french_accounting.accounting_journal",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["select", "read"]}
+    ],
+    "fields": [
+      {"field": "journal_name", "type": "short_text", "required": true},
+      {"field": "type", "type": "enumeration", "values": ["Sales", "Purchase", "Cash", "Bank", "Miscellaneous"]},
+      {"field": "conditions_rows", "type": "owned_collection", "target": "french_accounting.accounting_journal_rule"},
+      {"field": "journal_code", "type": "short_text", "required": true},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true}
+    ]
+  },
+  {
+    "entity": "french_accounting.accounting_journal_rule",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "condition", "type": "expression_or_structured_text"}
+    ]
+  },
+  {
+    "entity": "french_accounting.bank_transaction_category",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "category", "type": "short_text", "required": true, "unique": true},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_read_only": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_read_only": true},
+      {"field": "is_group", "type": "boolean", "default": "0"},
+      {"field": "previous_parent_identifier", "type": "entity_reference", "target": "french_accounting.bank_transaction_category"},
+      {"field": "parent_bank_transaction_category_identifier", "type": "entity_reference", "target": "french_accounting.bank_transaction_category"},
+      {"field": "cash_flow_category", "type": "enumeration", "values": ["Outflow", "Inflow"]}
+    ]
+  },
+  {
+    "entity": "french_accounting.counterparty_accounting_category",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "employee", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "name", "type": "short_text", "required": true, "unique": true},
+      {"field": "is_active", "type": "boolean", "default": "1"}
+    ]
+  },
+  {
+    "entity": "french_accounting.counterparty_accounting_category_and_product_account_code",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "expense_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "income_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "counterparty_accounting_category_identifier", "type": "entity_reference", "target": "french_accounting.counterparty_accounting_category"}
+    ]
+  },
+  {
+    "entity": "french_accounting.enterprise_france_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read"]},
+      {"role": "purchase_manager", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "service_interface_resource_address", "type": "short_text"},
+      {"field": "service_interface_token", "type": "short_text"},
+      {"field": "update_item_supplier_part_number", "type": "boolean", "default": "0"},
+      {"field": "value_added_tax_accounting_on_down_payment", "type": "boolean", "default": "1"},
+      {"field": "customer_recovery_email", "type": "short_text"},
+      {"field": "supplier_recovery_email", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "french_accounting.french_economic_activity_code",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "purchase_master_manager", "level": 0, "allows": ["read", "report", "export"]},
+      {"role": "stock_manager", "level": 0, "allows": ["read", "report", "export"]},
+      {"role": "purchase_user", "level": 0, "allows": ["read", "report", "export"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "report", "export"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "report", "export"]},
+      {"role": "purchase_manager", "level": 0, "allows": ["read", "report", "export"]},
+      {"role": "stock_user", "level": 0, "allows": ["read", "report", "export"]},
+      {"role": "sales_master_manager", "level": 0, "allows": ["read", "report", "export"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "report", "export"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "form_read_only": true},
+      {"field": "code", "type": "short_text", "required": true, "unique": true},
+      {"field": "label", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "french_accounting.item_eco_tax",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "amount", "type": "monetary_amount", "precision": "6"},
+      {"field": "buy_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "sell_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "tax_type", "type": "enumeration", "values": ["Eco-Participation", "PMCB"]}
+    ]
+  },
+  {
+    "entity": "french_accounting.legal_form",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "import", "print", "email", "share"]},
+      {"role": "purchase_master_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export"]},
+      {"role": "all", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "sales_master_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "code", "type": "short_text", "required": true, "unique": true},
+      {"field": "label", "type": "short_text", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "french_accounting.legal_form", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "french_accounting.payment_terms_template_detail_before_invoice",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "payment_term_identifier", "type": "entity_reference", "target": "accounting.payment_term", "required": true},
+      {"field": "description", "type": "text"},
+      {"field": "invoice_portion", "type": "decimal"},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment"},
+      {"field": "date_computed_based_on", "type": "enumeration", "values": ["Document Date", "Delivery Date"]},
+      {"field": "payment_terms_before_invoice", "type": "boolean", "default": "0"},
+      {"field": "credit_days", "type": "integer"}
+    ]
+  },
+  {
+    "entity": "french_accounting.recurrence_period",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "unique": true},
+      {"field": "billing_interval_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "default": "Month"},
+      {"field": "billing_interval_count", "type": "integer", "default": "1"},
+      {"field": "generate_invoice_at_period_start", "type": "boolean", "default": "1"},
+      {"field": "start_date", "type": "enumeration", "values": ["Delivery date", "1st day of the month", "15th day of the month", "Last day of the month"], "default": "Delivery date"},
+      {"field": "generate_invoice_before_payment", "type": "boolean", "default": "0"},
+      {"field": "periodicity", "type": "enumeration", "required": true, "values": ["Day", "Week", "Month", "Year"]}
+    ]
+  },
+  {
+    "entity": "french_accounting.single_euro_payments_area_mandate",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["single euro payments area mandate numbering prefix + 4-digit sequence"], "default": "single euro payments area mandate numbering prefix + 4-digit sequence"},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "required": true},
+      {"field": "bank_account_identifier", "type": "entity_reference", "target": "accounting.bank_account", "required": true},
+      {"field": "unique_mandate_reference", "type": "short_text", "required": true, "unique": true},
+      {"field": "signature_date", "type": "calendar_date", "required": true},
+      {"field": "mandate_type", "type": "enumeration", "required": true, "values": ["CORE", "B2B"], "default": "CORE"},
+      {"field": "sequence_type", "type": "enumeration", "required": true, "values": ["FRST", "RCUR"], "default": "FRST"},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Draft", "Active", "Cancelled"], "default": "Draft"}
+    ]
+  },
+  {
+    "entity": "french_accounting.single_euro_payments_area_payment_batch",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["single euro payments area payment batch debit numbering prefix + four-digit year + 4-digit sequence", "single euro payments area payment batch credit numbering prefix + four-digit year + 4-digit sequence"], "default": "single euro payments area payment batch debit numbering prefix + four-digit year + 4-digit sequence"},
+      {"field": "payment_type", "type": "enumeration", "required": true, "values": ["Debit", "Credit"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "bank_account_identifier", "type": "entity_reference", "target": "accounting.bank_account", "required": true},
+      {"field": "execution_date", "type": "calendar_date", "required": true},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Draft", "Validated", "Exported", "Sent", "Partial Rejections", "Closed"], "default": "Draft"},
+      {"field": "lines_rows", "type": "owned_collection", "target": "french_accounting.single_euro_payments_area_payment_batch_line"},
+      {"field": "total_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "single_euro_payments_area_file", "type": "file_reference"}
+    ]
+  },
+  {
+    "entity": "french_accounting.single_euro_payments_area_payment_batch_line",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "invoice_type", "type": "enumeration", "required": true, "values": ["Sales Invoice", "Purchase Invoice"], "default": "Sales Invoice"},
+      {"field": "invoice_identifier", "type": "selected_entity_reference", "target_selected_by": "invoice_type", "required": true},
+      {"field": "party_type", "type": "enumeration", "required": true, "values": ["Customer", "Supplier"], "default": "Customer"},
+      {"field": "party_identifier", "type": "selected_entity_reference", "target_selected_by": "party_type", "required": true},
+      {"field": "amount", "type": "monetary_amount", "required": true},
+      {"field": "mandate_identifier", "type": "entity_reference", "target": "french_accounting.single_euro_payments_area_mandate"},
+      {"field": "end_to_end_identifier", "type": "short_text", "form_read_only": true, "unique": true},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Pending", "Accepted", "Rejected"], "default": "Pending"},
+      {"field": "rejection_reason", "type": "text"}
+    ]
+  },
+  {
+    "entity": "french_accounting.special_item_accountancy_code_default",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "default_values_rows", "type": "owned_collection", "target": "french_accounting.counterparty_accounting_category_and_product_account_code"}
+    ]
+  },
+  {
+    "entity": "french_accounting.transaction_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "administrator", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "system_manager", "level": 0, "allows": ["read", "report", "export"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "report", "export"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "report", "export"]}
+    ],
+    "fields": [
+      {"field": "row_index", "type": "short_text", "form_read_only": true},
+      {"field": "reference_entity_type", "type": "short_text", "form_read_only": true},
+      {"field": "document_name", "type": "short_text", "form_read_only": true},
+      {"field": "timestamp", "type": "date_and_time", "form_read_only": true},
+      {"field": "checksum_version", "type": "short_text", "form_read_only": true},
+      {"field": "previous_hash", "type": "text", "form_read_only": true},
+      {"field": "transaction_hash", "type": "text", "form_read_only": true},
+      {"field": "chaining_hash", "type": "text", "form_read_only": true},
+      {"field": "transaction_contents", "type": "long_text", "form_read_only": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "french_accounting.transaction_log", "form_read_only": true}
+    ]
+  }
+]

@@ -1,0 +1,95 @@
+[
+  {
+    "entity": "telephony.call_log",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "employee", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "identifier", "type": "short_text", "form_read_only": true, "unique": true},
+      {"field": "calling_number", "type": "short_text", "form_read_only": true},
+      {"field": "called_number", "type": "short_text", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Ringing", "In Progress", "Completed", "Failed", "Busy", "No Answer", "Queued", "Cancelled"]},
+      {"field": "duration", "type": "duration", "form_read_only": true},
+      {"field": "recording_resource_address", "type": "short_text", "form_hidden": true},
+      {"field": "medium", "type": "short_text", "form_read_only": true},
+      {"field": "type", "type": "enumeration", "form_read_only": true, "values": ["Incoming", "Outgoing"]},
+      {"field": "links_rows", "type": "owned_collection", "target": "information_management.dynamic_link"},
+      {"field": "summary", "type": "text"},
+      {"field": "start_time", "type": "date_and_time", "form_read_only": true},
+      {"field": "end_time", "type": "date_and_time", "form_read_only": true},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "form_read_only": true},
+      {"field": "employee_user_identifier", "type": "entity_reference", "target": "information_management.user", "form_hidden": true},
+      {"field": "type_of_call_identifier", "type": "entity_reference", "target": "telephony.telephony_call_type"},
+      {"field": "call_received_by_identifier", "type": "entity_reference", "target": "organization.employee", "form_read_only": true, "visible_when": ["field_has_value", "called_number"]}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "Recording HTML"},
+      {"control": "section", "purpose": "Reference"},
+      {"control": "section", "purpose": "Call Summary"},
+      {"control": "section", "purpose": "Call Details"}
+    ]
+  },
+  {
+    "entity": "telephony.incoming_call_handling_schedule",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "day_of_week", "type": "enumeration", "required": true, "values": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]},
+      {"field": "from_time", "type": "time_of_day", "required": true, "default": "9:00:00"},
+      {"field": "to_time", "type": "time_of_day", "required": true, "default": "17:00:00"},
+      {"field": "agent_group_identifier", "type": "entity_reference", "target": "organization.employee_group", "required": true}
+    ]
+  },
+  {
+    "entity": "telephony.incoming_call_settings",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "call_routing", "type": "enumeration", "values": ["Sequential", "Simultaneous"], "default": "Sequential"},
+      {"field": "greeting_message", "type": "short_text"},
+      {"field": "agent_busy_message", "type": "short_text"},
+      {"field": "agent_unavailable_message", "type": "short_text"},
+      {"field": "call_handling_schedule_rows", "type": "owned_collection", "target": "telephony.incoming_call_handling_schedule", "required": true}
+    ]
+  },
+  {
+    "entity": "telephony.telephony_call_type",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "employee", "level": 0, "allows": ["read", "select"]}
+    ],
+    "fields": [
+      {"field": "call_type", "type": "short_text", "required": true, "unique": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "telephony.telephony_call_type", "form_read_only": true, "omit_on_copy": true}
+    ]
+  },
+  {
+    "entity": "telephony.voice_call_settings",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "desk_user", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "write"]},
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "write"]},
+      {"role": "system_manager", "level": 1, "allows": ["delete", "email", "export", "print", "read", "report", "write"]},
+      {"role": "system_manager", "level": 2, "allows": ["delete", "email", "export", "print", "read", "report", "write"]},
+      {"role": "desk_user", "level": 2, "allows": ["email", "export", "print", "read", "report"]}
+    ],
+    "fields": [
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true, "unique": true, "access_level": 1},
+      {"field": "greeting_message", "type": "short_text"},
+      {"field": "agent_busy_message", "type": "short_text"},
+      {"field": "agent_unavailable_message", "type": "short_text"},
+      {"field": "call_receiving_device", "type": "enumeration", "values": ["Computer", "Phone"], "default": "Computer"}
+    ]
+  }
+]

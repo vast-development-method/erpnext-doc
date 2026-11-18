@@ -1,0 +1,1403 @@
+[
+  {
+    "entity": "accounting.ledger_merge",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true, "write_once": true, "visible_when": ["field_has_value", "root_type"]},
+      {"field": "merge_accounts_rows", "type": "owned_collection", "target": "accounting.ledger_merge_accounts", "required": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true, "write_once": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Pending", "Success", "Partial Success", "Error"]},
+      {"field": "root_type", "type": "enumeration", "required": true, "write_once": true, "values": ["", "Asset", "Liability", "Income", "Expense", "Equity"]},
+      {"field": "account_name", "type": "short_text", "required": true, "form_read_only": true, "copy_from": ["account_identifier", "account_name"], "copy_only_when_empty": true, "visible_when": ["field_has_value", "account_identifier"]},
+      {"field": "is_group", "type": "boolean", "form_read_only": true, "default": "0", "copy_from": ["account_identifier", "is_group"], "visible_when": ["field_has_value", "account_identifier"]},
+      {"field": "account_type", "type": "short_text", "form_read_only": true, "copy_from": ["account_identifier", "account_type"], "visible_when": ["and", ["current_field", "account_identifier"], ["not", ["current_field", "is_group"]]]}
+    ],
+    "presentation": [
+      {"control": "section", "visible_when": ["field_has_value", "account_identifier"]}
+    ]
+  },
+  {
+    "entity": "accounting.ledger_merge_accounts",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "merged", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "account_name", "type": "short_text", "required": true, "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "accounting.loyalty_point_entry",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "auditor", "level": 0, "allows": ["email", "export", "print", "read", "report"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["email", "export", "print", "read", "report"]},
+      {"role": "accounts_user", "level": 0, "allows": ["email", "export", "print", "read", "report"]}
+    ],
+    "fields": [
+      {"field": "loyalty_program_identifier", "type": "entity_reference", "target": "accounting.loyalty_program", "required": true},
+      {"field": "loyalty_program_tier", "type": "short_text"},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "required": true},
+      {"field": "redeem_against_identifier", "type": "entity_reference", "target": "accounting.loyalty_point_entry"},
+      {"field": "loyalty_points", "type": "integer", "required": true},
+      {"field": "purchase_amount", "type": "monetary_amount"},
+      {"field": "expiry_date", "type": "calendar_date", "required": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "invoice_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "invoice_identifier", "type": "selected_entity_reference", "target_selected_by": "invoice_type_identifier"},
+      {"field": "discretionary_reason", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "accounting.loyalty_point_entry_redemption",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "sales_invoice", "type": "short_text"},
+      {"field": "redemption_date", "type": "calendar_date"},
+      {"field": "redeemed_points", "type": "integer"}
+    ]
+  },
+  {
+    "entity": "accounting.loyalty_program",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "sales_master_manager", "level": 0, "allows": ["select"]},
+      {"role": "sales_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "loyalty_program_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "loyalty_program_type", "type": "enumeration", "values": ["Single Tier Program", "Multiple Tier Program"]},
+      {"field": "from_date", "type": "calendar_date", "required": true},
+      {"field": "to_date", "type": "calendar_date"},
+      {"field": "customer_group_identifier", "type": "entity_reference", "target": "organization.customer_group"},
+      {"field": "customer_territory_identifier", "type": "entity_reference", "target": "organization.territory"},
+      {"field": "auto_opt_in", "type": "boolean", "default": "0"},
+      {"field": "collection_rules_rows", "type": "owned_collection", "target": "accounting.loyalty_program_collection", "required": true},
+      {"field": "unit_conversion_factor", "type": "decimal"},
+      {"field": "expiry_duration", "type": "integer"},
+      {"field": "expense_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Collection Tier"},
+      {"control": "section", "purpose": "Redemption"},
+      {"control": "section", "purpose": "Help Section"},
+      {"control": "formatted_information", "purpose": "Loyalty Program Help"},
+      {"control": "section", "purpose": "Accounting Dimensions"}
+    ]
+  },
+  {
+    "entity": "accounting.loyalty_program_collection",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "tier_name", "type": "short_text", "required": true},
+      {"field": "minimum_spent", "type": "monetary_amount"},
+      {"field": "collection_factor", "type": "monetary_amount", "required": true}
+    ]
+  },
+  {
+    "entity": "accounting.mode_of_payment",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "grants": [
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "email", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "report"]},
+      {"role": "human_resources_user", "level": 0, "allows": ["select"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_manager", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["select"]},
+      {"role": "purchase_manager", "level": 0, "allows": ["select"]},
+      {"role": "purchase_user", "level": 0, "allows": ["select"]},
+      {"role": "sales_manager", "level": 0, "allows": ["select"]},
+      {"role": "sales_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "mode_of_payment", "type": "short_text", "required": true, "unique": true},
+      {"field": "type", "type": "enumeration", "values": ["Cash", "Bank", "General", "Phone"]},
+      {"field": "accounts_rows", "type": "owned_collection", "target": "accounting.mode_of_payment_account"},
+      {"field": "enabled", "type": "boolean", "default": "1"}
+    ]
+  },
+  {
+    "entity": "accounting.mode_of_payment_account",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "default_account_identifier", "type": "entity_reference", "target": "accounting.account"}
+    ]
+  },
+  {
+    "entity": "accounting.monthly_distribution",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 2, "allows": ["read", "report"]},
+      {"role": "sales_master_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "distribution_identifier", "type": "short_text", "required": true, "unique": true},
+      {"field": "fiscal_year_identifier", "type": "entity_reference", "target": "accounting.fiscal_year", "searchable": true},
+      {"field": "percentages_rows", "type": "owned_collection", "target": "accounting.monthly_distribution_percentage"}
+    ]
+  },
+  {
+    "entity": "accounting.monthly_distribution_percentage",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "month", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "percentage_allocation", "type": "decimal"}
+    ]
+  },
+  {
+    "entity": "accounting.opening_invoice_creation_tool",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "create_missing_party", "type": "boolean", "default": "0"},
+      {"field": "invoice_type", "type": "enumeration", "required": true, "values": ["Sales", "Purchase"]},
+      {"field": "invoices_rows", "type": "owned_collection", "target": "accounting.opening_invoice_creation_tool_item", "required": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Invoices"},
+      {"control": "section", "purpose": "Accounting Dimensions"}
+    ]
+  },
+  {
+    "entity": "accounting.opening_invoice_creation_tool_item",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "party_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true, "form_hidden": true},
+      {"field": "party_identifier", "type": "selected_entity_reference", "target_selected_by": "party_type_identifier", "required_when": ["not", ["member", ["context", "owning_record"], "create_missing_party"]]},
+      {"field": "temporary_opening_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "posting_date", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "due_date", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "item_name", "type": "short_text", "default": "Opening Invoice Item"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency"},
+      {"field": "outstanding_amount", "type": "monetary_amount", "required": true, "default": "0", "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "quantity", "type": "short_text", "default": "1"},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "invoice_number", "type": "short_text"},
+      {"field": "supplier_invoice_date", "type": "calendar_date", "visible_when": ["coercive_equal", ["member", ["context", "owning_record"], "invoice_type"], ["literal", "Purchase"]]},
+      {"field": "party_name", "type": "short_text"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Accounting Dimensions"}
+    ]
+  },
+  {
+    "entity": "accounting.overdue_payment",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "payment_term_identifier", "type": "entity_reference", "target": "accounting.payment_term", "form_read_only": true},
+      {"field": "description", "type": "text", "form_read_only": true, "copy_from": ["payment_term_identifier", "description"]},
+      {"field": "due_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment", "form_read_only": true},
+      {"field": "invoice_portion", "type": "percentage", "form_read_only": true},
+      {"field": "payment_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "outstanding", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}, "copy_from": ["payment_amount"]},
+      {"field": "paid_amount", "type": "monetary_amount", "currency": {"record_or_parent_field": "currency"}, "visible_when": ["field_has_value", "paid_amount"]},
+      {"field": "discounted_amount", "type": "monetary_amount", "form_read_only": true, "default": "0", "visible_when": ["field_has_value", "discounted_amount"]},
+      {"field": "sales_invoice_identifier", "type": "entity_reference", "target": "accounting.sales_invoice", "required": true, "form_read_only": true},
+      {"field": "payment_schedule", "type": "short_text", "form_read_only": true},
+      {"field": "overdue_days", "type": "short_text", "form_read_only": true},
+      {"field": "dunning_level", "type": "integer", "form_read_only": true, "default": "1"},
+      {"field": "interest", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Description"}
+    ]
+  },
+  {
+    "entity": "accounting.party_account",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true, "omit_target_user_filter": true},
+      {"field": "account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "advance_account_identifier", "type": "entity_reference", "target": "accounting.account"}
+    ]
+  },
+  {
+    "entity": "accounting.party_link",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "primary_role_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "secondary_role_identifier", "type": "entity_reference", "target": "information_management.entity_type", "visible_when": ["field_has_value", "primary_role_identifier"], "required_when": ["field_has_value", "primary_role_identifier"]},
+      {"field": "primary_party_identifier", "type": "selected_entity_reference", "target_selected_by": "primary_role_identifier", "visible_when": ["field_has_value", "primary_role_identifier"], "required_when": ["field_has_value", "primary_role_identifier"]},
+      {"field": "secondary_party_identifier", "type": "selected_entity_reference", "target_selected_by": "secondary_role_identifier", "visible_when": ["field_has_value", "secondary_role_identifier"], "required_when": ["field_has_value", "secondary_role_identifier"]}
+    ]
+  },
+  {
+    "entity": "accounting.payment_entry",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "import_supported": true,
+    "scheduling_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "accounts_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "import", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "import", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "write_once": true, "values": ["payment entry numbering prefix + four-digit year + configured sequence"]},
+      {"field": "payment_type", "type": "enumeration", "required": true, "values": ["Receive", "Pay", "Internal Transfer"]},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center", "editable_after_posting": true},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment"},
+      {"field": "party_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "searchable": true, "visible_when": ["and", ["call", ["context", "contains_value"], ["list", ["literal", "Receive"], ["literal", "Pay"]], ["current_field", "payment_type"]], ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 0]]]},
+      {"field": "party_identifier", "type": "selected_entity_reference", "target_selected_by": "party_type_identifier", "visible_when": ["and", ["call", ["context", "contains_value"], ["list", ["literal", "Receive"], ["literal", "Pay"]], ["current_field", "payment_type"]], ["current_field", "party_type_identifier"]]},
+      {"field": "party_name", "type": "short_text", "editable_after_posting": true, "visible_when": ["and", ["call", ["context", "contains_value"], ["list", ["literal", "Receive"], ["literal", "Pay"]], ["current_field", "payment_type"]], ["current_field", "party_type_identifier"]]},
+      {"field": "contact_person_identifier", "type": "entity_reference", "target": "contacts.contact", "visible_when": ["and", ["current_field", "party_identifier"], ["strict_unequal", ["current_field", "party_type_identifier"], ["literal", "Employee"]]]},
+      {"field": "contact_email", "type": "short_text", "form_read_only": true, "visible_when": ["and", ["or", ["current_field", "contact_person_identifier"], ["strict_equal", ["current_field", "party_type_identifier"], ["literal", "Employee"]]], ["current_field", "contact_email"]]},
+      {"field": "paid_from_identifier", "type": "entity_reference", "target": "accounting.account", "required": true, "visible_when": ["or", ["call", ["context", "contains_value"], ["list", ["literal", "Internal Transfer"], ["literal", "Pay"]], ["current_field", "payment_type"]], ["current_field", "party_identifier"]]},
+      {"field": "paid_from_account_currency_identifier", "type": "entity_reference", "target": "geography.currency", "required": true, "form_read_only": true, "visible_when": ["field_has_value", "paid_from_identifier"]},
+      {"field": "paid_to_identifier", "type": "entity_reference", "target": "accounting.account", "required": true, "visible_when": ["or", ["call", ["context", "contains_value"], ["list", ["literal", "Internal Transfer"], ["literal", "Receive"]], ["current_field", "payment_type"]], ["current_field", "party_identifier"]]},
+      {"field": "paid_to_account_currency_identifier", "type": "entity_reference", "target": "geography.currency", "required": true, "form_read_only": true, "visible_when": ["field_has_value", "paid_to_identifier"]},
+      {"field": "paid_amount", "type": "monetary_amount", "required": true, "currency": {"record_or_parent_field": "paid_from_account_currency_identifier"}},
+      {"field": "source_exchange_rate", "type": "decimal", "required": true, "precision": "9"},
+      {"field": "company_currency_paid_amount", "type": "monetary_amount", "required": true, "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "received_amount", "type": "monetary_amount", "required": true, "currency": {"record_or_parent_field": "paid_to_account_currency_identifier"}},
+      {"field": "target_exchange_rate", "type": "decimal", "required": true, "precision": "9"},
+      {"field": "company_currency_received_amount", "type": "monetary_amount", "required": true, "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["current_field", "received_amount"]},
+      {"field": "references_rows", "type": "owned_collection", "target": "accounting.payment_entry_reference"},
+      {"field": "total_allocated_amount", "type": "monetary_amount", "form_read_only": true, "visible_when": ["and", ["and", ["current_field", "paid_amount"], ["current_field", "received_amount"]], ["current_field", "references_rows"]]},
+      {"field": "company_currency_total_allocated_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "unallocated_amount", "type": "monetary_amount", "visible_when": ["and", ["and", ["current_field", "paid_amount"], ["current_field", "received_amount"]], ["current_field", "references_rows"]]},
+      {"field": "difference_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["and", ["current_field", "paid_amount"], ["current_field", "received_amount"]]},
+      {"field": "deductions_rows", "type": "owned_collection", "target": "accounting.payment_entry_deduction"},
+      {"field": "reference_number", "type": "short_text", "visible_when": ["and", ["current_field", "paid_from_identifier"], ["current_field", "paid_to_identifier"]], "required_when": ["or", ["coercive_equal", ["current_field", "paid_from_account_type"], ["literal", "Bank"]], ["coercive_equal", ["current_field", "paid_to_account_type"], ["literal", "Bank"]]]},
+      {"field": "reference_date", "type": "calendar_date", "searchable": true, "visible_when": ["and", ["current_field", "paid_from_identifier"], ["current_field", "paid_to_identifier"]], "required_when": ["or", ["coercive_equal", ["current_field", "paid_from_account_type"], ["literal", "Bank"]], ["coercive_equal", ["current_field", "paid_to_account_type"], ["literal", "Bank"]]]},
+      {"field": "clearance_date", "type": "calendar_date", "form_read_only": true, "omit_on_copy": true, "visible_when": ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 1]]},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project", "editable_after_posting": true},
+      {"field": "remarks", "type": "text", "omit_on_copy": true, "read_only_when": ["coercive_equal", ["current_field", "custom_remarks"], ["literal", 0]]},
+      {"field": "letter_head_identifier", "type": "entity_reference", "target": "document_output.letter_head"},
+      {"field": "print_heading_identifier", "type": "entity_reference", "target": "document_output.print_heading"},
+      {"field": "bank", "type": "display_value", "copy_from": ["bank_account_identifier", "bank_identifier"]},
+      {"field": "bank_account_number", "type": "display_value", "copy_from": ["bank_account_identifier", "bank_account_number"]},
+      {"field": "payment_order_identifier", "type": "entity_reference", "target": "accounting.payment_order", "form_read_only": true, "omit_on_copy": true},
+      {"field": "auto_repeat_identifier", "type": "entity_reference", "target": "automation.auto_repeat", "form_read_only": true, "omit_on_copy": true, "editable_after_posting": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "accounting.payment_entry", "form_read_only": true, "omit_on_copy": true},
+      {"field": "title", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "bank_account_identifier", "type": "entity_reference", "target": "accounting.bank_account", "visible_when": ["call", ["context", "contains_value"], ["list", ["literal", "Receive"], ["literal", "Pay"]], ["current_field", "payment_type"]]},
+      {"field": "party_bank_account_identifier", "type": "entity_reference", "target": "accounting.bank_account", "visible_when": ["field_has_value", "party_identifier"]},
+      {"field": "payment_order_status", "type": "enumeration", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "values": ["Initiated", "Payment Ordered"]},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "values": ["", "Draft", "Submitted", "Cancelled"], "default": "Draft"},
+      {"field": "custom_remarks", "type": "boolean", "default": "0"},
+      {"field": "tax_withholding_category_identifier", "type": "entity_reference", "target": "accounting.tax_withholding_category", "visible_when": ["current_field", "apply_tax_deducted_at_source"], "required_when": ["current_field", "apply_tax_deducted_at_source"]},
+      {"field": "purchase_taxes_and_charges_template_identifier", "type": "entity_reference", "target": "accounting.purchase_taxes_and_charges_template", "visible_when": ["coercive_equal", ["current_field", "party_type_identifier"], ["literal", "Supplier"]]},
+      {"field": "sales_taxes_and_charges_template_identifier", "type": "entity_reference", "target": "accounting.sales_taxes_and_charges_template", "visible_when": ["coercive_equal", ["current_field", "party_type_identifier"], ["literal", "Customer"]]},
+      {"field": "taxes_rows", "type": "owned_collection", "target": "accounting.advance_taxes_and_charges", "visible_when": ["or", ["coercive_equal", ["current_field", "party_type_identifier"], ["literal", "Supplier"]], ["coercive_equal", ["current_field", "party_type_identifier"], ["literal", "Customer"]]]},
+      {"field": "company_currency_total_taxes_and_charges", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_taxes_and_charges", "type": "monetary_amount", "form_read_only": true},
+      {"field": "paid_amount_after_tax", "type": "monetary_amount", "form_read_only": true, "form_hidden": true, "currency": {"record_or_parent_field": "paid_from_account_currency_identifier"}},
+      {"field": "company_currency_paid_amount_after_tax", "type": "monetary_amount", "form_read_only": true, "form_hidden": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "received_amount_after_tax", "type": "monetary_amount", "form_read_only": true, "form_hidden": true, "currency": {"record_or_parent_field": "paid_to_account_currency_identifier"}, "visible_when": ["and", ["current_field", "received_amount"], ["coercive_unequal", ["current_field", "payment_type"], ["literal", "Internal Transfer"]]]},
+      {"field": "company_currency_received_amount_after_tax", "type": "monetary_amount", "form_read_only": true, "form_hidden": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["literal_field_key_has_value", "current_record.received_amount"]},
+      {"field": "paid_from_account_type", "type": "short_text", "form_hidden": true, "copy_from": ["paid_from_identifier", "account_type"]},
+      {"field": "paid_to_account_type", "type": "short_text", "form_hidden": true, "copy_from": ["paid_to_identifier", "account_type"]},
+      {"field": "book_advance_payments_in_separate_party_account", "type": "boolean", "form_read_only": true, "omit_on_copy": true, "default": "0", "copy_from": ["company_identifier", "book_advance_payments_in_separate_party_account"]},
+      {"field": "base_in_words", "type": "text", "form_read_only": true},
+      {"field": "in_words", "type": "text", "form_read_only": true},
+      {"field": "reconcile_on_advance_payment_date", "type": "boolean", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "default": "0", "copy_from": ["company_identifier", "reconcile_on_advance_payment_date"]},
+      {"field": "is_opening", "type": "enumeration", "searchable": true, "values": ["No", "Yes"], "default": "No", "visible_when": ["coercive_equal", ["current_field", "book_advance_payments_in_separate_party_account"], ["literal", 1]]},
+      {"field": "apply_tax_deducted_at_source", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "party_type_identifier"], ["literal", "Supplier"]]},
+      {"field": "tax_withholding_group_identifier", "type": "entity_reference", "target": "accounting.tax_withholding_group"},
+      {"field": "ignore_tax_withholding_threshold", "type": "boolean", "default": "0"},
+      {"field": "tax_withholding_entries_rows", "type": "owned_collection", "target": "accounting.tax_withholding_entry", "read_only_when": ["not", ["current_field", "override_tax_withholding_entries"]]},
+      {"field": "override_tax_withholding_entries", "type": "boolean", "default": "0"},
+      {"field": "payment_term_discounts_calculated", "type": "boolean", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "default": "0"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Type of Payment"},
+      {"control": "section", "purpose": "Payment From / To", "visible_when": ["call", ["context", "contains_value"], ["list", ["literal", "Receive"], ["literal", "Pay"]], ["current_field", "payment_type"]]},
+      {"control": "section", "purpose": "Accounts and Transaction Details"},
+      {"control": "section", "purpose": "Amount", "visible_when": ["and", ["current_field", "paid_to_identifier"], ["current_field", "paid_from_identifier"]]},
+      {"control": "section", "purpose": "Reference", "visible_when": ["and", ["and", ["and", ["and", ["current_field", "party_identifier"], ["current_field", "paid_from_identifier"]], ["current_field", "paid_to_identifier"]], ["current_field", "paid_amount"]], ["current_field", "received_amount"]]},
+      {"control": "section", "purpose": "Writeoff"},
+      {"control": "action", "purpose": "Write Off Difference Amount", "visible_when": ["field_has_value", "difference_amount"]},
+      {"control": "section", "purpose": "Deductions or Loss", "visible_when": ["and", ["current_field", "paid_amount"], ["current_field", "received_amount"]], "expanded_when": ["field_has_value", "deductions_rows"]},
+      {"control": "section", "purpose": "More Information", "visible_when": ["and", ["and", ["and", ["current_field", "paid_from_identifier"], ["current_field", "paid_to_identifier"]], ["current_field", "paid_amount"]], ["current_field", "received_amount"]]},
+      {"control": "section", "purpose": "Accounting Dimensions"},
+      {"control": "section", "purpose": "Taxes and Charges"},
+      {"control": "action", "purpose": "Get Outstanding Invoices", "visible_when": ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 0]]},
+      {"control": "action", "purpose": "Get Outstanding Orders", "visible_when": ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 0]]},
+      {"control": "section", "purpose": "Tax Withholding Entry", "visible_when": ["current_field", "apply_tax_deducted_at_source"], "expanded_when": ["and", ["current_field", "apply_tax_deducted_at_source"], ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 0]]]},
+      {"control": "section", "purpose": "Auto Repeat"}
+    ]
+  },
+  {
+    "entity": "accounting.payment_entry_deduction",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center", "required": true, "editable_after_posting": true},
+      {"field": "amount", "type": "monetary_amount", "required": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "description", "type": "text"},
+      {"field": "is_exchange_gain_loss", "type": "boolean", "form_read_only": true, "default": "0", "visible_when": ["current_field", "is_exchange_gain_loss"]},
+      {"field": "dunning_identifier", "type": "entity_reference", "target": "accounting.dunning", "form_read_only": true, "omit_on_copy": true}
+    ]
+  },
+  {
+    "entity": "accounting.payment_entry_reference",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "searchable": true},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "required": true, "searchable": true},
+      {"field": "due_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "bill_number", "type": "short_text", "form_read_only": true, "omit_on_copy": true},
+      {"field": "total_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "outstanding_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "allocated_amount", "type": "monetary_amount"},
+      {"field": "exchange_rate", "type": "decimal", "form_read_only": true, "visible_when": ["coercive_equal", ["current_field", "reference_entity_type_identifier"], ["literal", "Purchase Invoice"]]},
+      {"field": "payment_term_identifier", "type": "entity_reference", "target": "accounting.payment_term"},
+      {"field": "exchange_gain_loss", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["field_has_value", "exchange_gain_loss"]},
+      {"field": "account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "account_type", "type": "short_text"},
+      {"field": "payment_type", "type": "short_text"},
+      {"field": "payment_request_identifier", "type": "entity_reference", "target": "accounting.payment_request"},
+      {"field": "payment_term_outstanding", "type": "decimal", "form_read_only": true, "visible_when": ["current_field", "payment_term_identifier"]},
+      {"field": "payment_request_outstanding", "type": "decimal", "computed": true, "form_read_only": true, "visible_when": ["and", ["current_field", "payment_request_identifier"], ["current_field", "payment_request_outstanding"]]},
+      {"field": "reconcile_effect_on", "type": "calendar_date", "form_read_only": true},
+      {"field": "advance_voucher_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "advance_voucher_number_identifier", "type": "selected_entity_reference", "target_selected_by": "advance_voucher_type_identifier", "form_read_only": true},
+      {"field": "payment_term_discount", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true}
+    ]
+  },
+  {
+    "entity": "accounting.payment_gateway_account",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "payment_gateway_identifier", "type": "entity_reference", "target": "payment_services.payment_gateway", "required": true},
+      {"field": "is_default", "type": "boolean", "default": "0"},
+      {"field": "payment_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "currency", "type": "display_value", "copy_from": ["payment_account_identifier", "account_currency_identifier"]},
+      {"field": "message", "type": "text", "default": "Please click on the link below to make your payment"},
+      {"field": "payment_channel", "type": "enumeration", "values": ["", "Email", "Phone", "Other"], "default": "Email"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true}
+    ],
+    "presentation": [
+      {"control": "section", "visible_when": ["or", ["coercive_equal", ["current_field", "payment_channel"], ["literal", "Email"]], ["not", ["current_field", "payment_channel"]]]},
+      {"control": "formatted_information", "purpose": "Message Examples"}
+    ]
+  },
+  {
+    "entity": "accounting.payment_ledger_entry",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "accounts_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]},
+      {"role": "auditor", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "posting_date", "type": "calendar_date", "searchable": true},
+      {"field": "account_type", "type": "enumeration", "values": ["Receivable", "Payable"]},
+      {"field": "account_identifier", "type": "entity_reference", "target": "accounting.account", "searchable": true},
+      {"field": "party_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "searchable": true},
+      {"field": "party_identifier", "type": "selected_entity_reference", "target_selected_by": "party_type_identifier", "searchable": true},
+      {"field": "originating_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "searchable": true},
+      {"field": "originating_document_identifier", "type": "selected_entity_reference", "target_selected_by": "originating_entity_type_identifier", "searchable": true},
+      {"field": "settled_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "searchable": true},
+      {"field": "settled_document_identifier", "type": "selected_entity_reference", "target_selected_by": "settled_entity_type_identifier", "searchable": true},
+      {"field": "amount", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "account_currency_identifier", "type": "entity_reference", "target": "geography.currency"},
+      {"field": "amount_in_account_currency", "type": "monetary_amount", "currency": {"record_or_parent_field": "account_currency_identifier"}},
+      {"field": "delinked", "type": "boolean", "default": "0"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "searchable": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "due_date", "type": "calendar_date"},
+      {"field": "finance_book_identifier", "type": "entity_reference", "target": "accounting.finance_book"},
+      {"field": "remarks", "type": "text"},
+      {"field": "originating_document_line_identifier", "type": "short_text", "searchable": true}
+    ]
+  },
+  {
+    "entity": "accounting.payment_order",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "accounts_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "omit_on_copy": true, "values": ["payment order numbering prefix + configured sequence"], "default": "payment order numbering prefix + configured sequence"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "party_identifier", "type": "entity_reference", "target": "procurement.supplier", "visible_when": ["coercive_equal", ["current_field", "payment_order_type"], ["literal", "Payment Request"]]},
+      {"field": "posting_date", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "references_rows", "type": "owned_collection", "target": "accounting.payment_order_reference", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "accounting.payment_order", "form_read_only": true, "omit_on_copy": true},
+      {"field": "payment_order_type", "type": "enumeration", "required": true, "form_read_only": true, "values": ["", "Payment Request", "Payment Entry"]},
+      {"field": "company_bank_account_identifier", "type": "entity_reference", "target": "accounting.bank_account", "required": true},
+      {"field": "company_bank_identifier", "type": "entity_reference", "target": "accounting.bank", "copy_from": ["company_bank_account_identifier", "bank_identifier"], "visible_when": ["field_has_value", "company_bank_account_identifier"]},
+      {"field": "account", "type": "short_text", "copy_from": ["company_bank_account_identifier", "account_identifier"], "visible_when": ["field_has_value", "company_bank_account_identifier"]}
+    ]
+  },
+  {
+    "entity": "accounting.payment_order_reference",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "form_read_only": true},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "required": true, "form_read_only": true},
+      {"field": "amount", "type": "monetary_amount", "required": true, "form_read_only": true},
+      {"field": "supplier_identifier", "type": "entity_reference", "target": "procurement.supplier", "form_read_only": true},
+      {"field": "payment_request_identifier", "type": "entity_reference", "target": "accounting.payment_request", "form_read_only": true},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment", "form_read_only": true, "copy_from": ["payment_request_identifier", "mode_of_payment_identifier"]},
+      {"field": "bank_account_identifier", "type": "entity_reference", "target": "accounting.bank_account", "required": true, "form_read_only": true},
+      {"field": "account_identifier", "type": "entity_reference", "target": "accounting.account", "form_read_only": true},
+      {"field": "payment_reference", "type": "short_text", "form_read_only": true, "omit_on_copy": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Bank Account Details"}
+    ]
+  },
+  {
+    "entity": "accounting.payment_reconciliation",
+    "kind": "computed_record",
+    "grants": [
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "read", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["create", "delete", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true, "omit_target_user_filter": true},
+      {"field": "party_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "party_identifier", "type": "selected_entity_reference", "target_selected_by": "party_type_identifier", "required": true, "visible_when": ["current_field", "party_type_identifier"]},
+      {"field": "receivable_payable_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true, "visible_when": ["and", ["current_field", "company_identifier"], ["current_field", "party_identifier"]]},
+      {"field": "bank_cash_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "payments_rows", "type": "owned_collection", "target": "accounting.payment_reconciliation_payment"},
+      {"field": "invoices_rows", "type": "owned_collection", "target": "accounting.payment_reconciliation_invoice"},
+      {"field": "allocation_rows", "type": "owned_collection", "target": "accounting.payment_reconciliation_allocation"},
+      {"field": "from_invoice_date", "type": "calendar_date"},
+      {"field": "to_invoice_date", "type": "calendar_date"},
+      {"field": "minimum_invoice_amount", "type": "monetary_amount"},
+      {"field": "invoice_limit", "type": "integer", "default": "50"},
+      {"field": "from_payment_date", "type": "calendar_date"},
+      {"field": "to_payment_date", "type": "calendar_date"},
+      {"field": "minimum_payment_amount", "type": "monetary_amount"},
+      {"field": "maximum_payment_amount", "type": "monetary_amount"},
+      {"field": "payment_limit", "type": "integer", "default": "50"},
+      {"field": "maximum_invoice_amount", "type": "monetary_amount"},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "default_advance_account_identifier", "type": "entity_reference", "target": "accounting.account", "visible_when": ["current_field", "party_identifier"], "required_when": ["literal_field_key_has_value", "current_record.party_type"]},
+      {"field": "invoice_name", "type": "short_text"},
+      {"field": "payment_name", "type": "short_text"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Filters", "visible_when": ["current_field", "receivable_payable_account_identifier"], "expanded_when": ["coercive_equal", ["member", ["current_field", "invoices_rows"], "length"], ["literal", 0]]},
+      {"control": "section", "purpose": "Unreconciled Entries", "visible_when": ["or", ["member", ["current_field", "payments_rows"], "length"], ["member", ["current_field", "invoices_rows"], "length"]]},
+      {"control": "section", "purpose": "Allocated Entries", "visible_when": ["field_has_value", "allocation_rows"]},
+      {"control": "section", "purpose": "Accounting Dimensions Filter", "visible_when": ["current_field", "receivable_payable_account_identifier"], "expanded_when": ["coercive_equal", ["member", ["current_field", "invoices_rows"], "length"], ["literal", 0]]}
+    ]
+  },
+  {
+    "entity": "accounting.payment_reconciliation_allocation",
+    "kind": "computed_record",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "invoice_number_identifier", "type": "selected_entity_reference", "target_selected_by": "invoice_type_identifier", "required": true, "form_read_only": true},
+      {"field": "allocated_amount", "type": "monetary_amount", "required": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "difference_account_identifier", "type": "entity_reference", "target": "accounting.account", "form_read_only": true},
+      {"field": "difference_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_type_identifier", "required": true, "form_read_only": true},
+      {"field": "is_advance", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "reference_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "form_read_only": true},
+      {"field": "invoice_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "form_read_only": true},
+      {"field": "unreconciled_amount", "type": "monetary_amount", "form_read_only": true, "form_hidden": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true, "form_hidden": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "reference_row", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "form_hidden": true},
+      {"field": "exchange_rate", "type": "decimal", "form_read_only": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "gain_loss_posting_date", "type": "calendar_date"},
+      {"field": "debit_or_credit_note_posting_date", "type": "calendar_date"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Accounting Dimensions"}
+    ]
+  },
+  {
+    "entity": "accounting.payment_reconciliation_invoice",
+    "kind": "computed_record",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "invoice_type", "type": "enumeration", "form_read_only": true, "values": ["Sales Invoice", "Purchase Invoice", "Journal Entry"]},
+      {"field": "invoice_number_identifier", "type": "selected_entity_reference", "target_selected_by": "invoice_type", "form_read_only": true},
+      {"field": "invoice_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "outstanding_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "form_hidden": true},
+      {"field": "exchange_rate", "type": "decimal", "form_hidden": true}
+    ]
+  },
+  {
+    "entity": "accounting.payment_reconciliation_payment",
+    "kind": "computed_record",
+    "grants": [],
+    "fields": [
+      {"field": "reference_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_type_identifier", "form_read_only": true},
+      {"field": "posting_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "is_advance", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "reference_row", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "form_hidden": true},
+      {"field": "difference_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "exchange_rate", "type": "decimal", "form_hidden": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "remarks", "type": "text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "accounting.payment_reference",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "payment_term_identifier", "type": "entity_reference", "target": "accounting.payment_term"},
+      {"field": "description", "type": "text"},
+      {"field": "due_date", "type": "calendar_date"},
+      {"field": "amount", "type": "monetary_amount", "precision": "2", "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "form_read_only": true, "form_hidden": true},
+      {"field": "payment_schedule_identifier", "type": "entity_reference", "target": "accounting.payment_schedule", "form_read_only": true, "editable_after_posting": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Description"}
+    ]
+  },
+  {
+    "entity": "accounting.payment_request",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "accounts_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "payment_request_type", "type": "enumeration", "required": true, "values": ["Outward", "Inward"], "default": "Inward"},
+      {"field": "transaction_date", "type": "calendar_date"},
+      {"field": "numbering_series", "type": "enumeration", "required": true, "write_once": true, "omit_on_copy": true, "values": ["payment request numbering prefix + four-digit year + configured sequence"]},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment"},
+      {"field": "party_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "party_identifier", "type": "selected_entity_reference", "target_selected_by": "party_type_identifier"},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true, "omit_on_copy": true},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "form_read_only": true, "omit_on_copy": true, "searchable": true},
+      {"field": "grand_total", "type": "monetary_amount", "required": true, "nonnegative": true, "currency": {"record_or_parent_field": "currency_identifier"}, "read_only_when": ["greater", ["member", ["current_field", "payment_reference_rows"], "length"], ["literal", 0]]},
+      {"field": "is_a_subscription", "type": "boolean", "default": "0"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "form_read_only": true},
+      {"field": "subscription_plans_rows", "type": "owned_collection", "target": "accounting.subscription_plan_detail"},
+      {"field": "bank_account_identifier", "type": "entity_reference", "target": "accounting.bank_account"},
+      {"field": "bank_identifier", "type": "entity_reference", "target": "accounting.bank", "form_read_only": true, "copy_from": ["bank_account_identifier", "bank_identifier"]},
+      {"field": "bank_account_number", "type": "display_value", "copy_from": ["bank_account_identifier", "bank_account_number"]},
+      {"field": "account", "type": "display_value", "copy_from": ["bank_account_identifier", "account_identifier"]},
+      {"field": "iban", "type": "display_value", "copy_from": ["bank_account_identifier", "iban"]},
+      {"field": "branch_code", "type": "display_value", "copy_from": ["bank_account_identifier", "branch_code"], "copy_only_when_empty": true},
+      {"field": "swift_number", "type": "display_value", "copy_from": ["bank_identifier", "swift_number"]},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "print_format", "type": "enumeration", "visible_when": ["or", ["coercive_equal", ["current_field", "payment_channel"], ["literal", "Email"]], ["not", ["current_field", "payment_channel"]]]},
+      {"field": "email_to", "type": "short_text"},
+      {"field": "subject", "type": "short_text", "visible_when": ["or", ["coercive_equal", ["current_field", "payment_channel"], ["literal", "Email"]], ["not", ["current_field", "payment_channel"]]]},
+      {"field": "payment_gateway_account_identifier", "type": "entity_reference", "target": "accounting.payment_gateway_account", "visible_when": ["coercive_equal", ["current_field", "payment_request_type"], ["literal", "Inward"]]},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "form_hidden": true, "values": ["", "Draft", "Requested", "Initiated", "Partially Paid", "Payment Ordered", "Paid", "Failed", "Cancelled"], "default": "Draft"},
+      {"field": "make_sales_invoice", "type": "boolean", "form_read_only": true, "form_hidden": true, "default": "0", "visible_when": ["coercive_equal", ["current_field", "reference_entity_type_identifier"], ["literal", "Sales Order"]]},
+      {"field": "message", "type": "text", "visible_when": ["or", ["coercive_equal", ["current_field", "payment_channel"], ["literal", "Email"]], ["not", ["current_field", "payment_channel"]]]},
+      {"field": "mute_email", "type": "boolean", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "default": "0"},
+      {"field": "payment_resource_address", "type": "short_text", "form_read_only": true, "maximum_length": 500},
+      {"field": "payment_gateway", "type": "display_value", "copy_from": ["payment_gateway_account_identifier", "payment_gateway_identifier"]},
+      {"field": "payment_account", "type": "display_value", "form_read_only": true, "copy_from": ["payment_gateway_account_identifier", "payment_account_identifier"]},
+      {"field": "payment_channel", "type": "enumeration", "form_read_only": true, "values": ["", "Email", "Phone", "Other"], "copy_from": ["payment_gateway_account_identifier", "payment_channel"], "visible_when": ["coercive_equal", ["current_field", "payment_channel"], ["literal", "Phone"]]},
+      {"field": "payment_order_identifier", "type": "entity_reference", "target": "accounting.payment_order", "form_read_only": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "accounting.payment_request", "form_read_only": true, "omit_on_copy": true},
+      {"field": "failed_reason", "type": "short_text", "form_read_only": true, "form_hidden": true, "omit_on_copy": true},
+      {"field": "outstanding_amount", "type": "monetary_amount", "form_read_only": true, "nonnegative": true, "currency": {"record_or_parent_field": "party_account_currency_identifier"}, "visible_when": ["strict_equal", ["current_field", "lifecycle_state"], ["literal", 1]]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "form_read_only": true},
+      {"field": "party_account_currency_identifier", "type": "entity_reference", "target": "geography.currency", "form_read_only": true},
+      {"field": "party_name", "type": "short_text", "form_read_only": true},
+      {"field": "phone_number", "type": "short_text"},
+      {"field": "payment_reference_rows", "type": "owned_collection", "target": "accounting.payment_reference", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Party Details"},
+      {"control": "section", "purpose": "Transaction Details"},
+      {"control": "section", "purpose": "Subscription", "visible_when": ["current_field", "is_a_subscription"]},
+      {"control": "section", "purpose": "Bank Account Details"},
+      {"control": "section", "purpose": "Accounting Dimensions"},
+      {"control": "section", "purpose": "Recipient Message And Payment Details", "visible_when": ["coercive_equal", ["current_field", "payment_request_type"], ["literal", "Inward"]]},
+      {"control": "section", "visible_when": ["or", ["or", ["coercive_equal", ["current_field", "payment_request_type"], ["literal", "Inward"]], ["coercive_equal", ["current_field", "payment_channel"], ["literal", "Email"]]], ["not", ["current_field", "payment_channel"]]]},
+      {"control": "formatted_information", "purpose": "Message Examples", "visible_when": ["or", ["coercive_equal", ["current_field", "payment_channel"], ["literal", "Email"]], ["not", ["current_field", "payment_channel"]]]},
+      {"control": "section", "purpose": "Payment Gateway Details", "visible_when": ["coercive_equal", ["current_field", "payment_request_type"], ["literal", "Inward"]], "expanded_when": ["literal_field_key_has_value", "current_record.payment_gateway_account"]}
+    ]
+  },
+  {
+    "entity": "accounting.payment_schedule",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "payment_term_identifier", "type": "entity_reference", "target": "accounting.payment_term"},
+      {"field": "description", "type": "text", "copy_from": ["payment_term_identifier", "description"], "copy_only_when_empty": true},
+      {"field": "due_date", "type": "calendar_date", "required": true},
+      {"field": "invoice_portion", "type": "percentage"},
+      {"field": "payment_amount", "type": "monetary_amount", "required": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment"},
+      {"field": "paid_amount", "type": "monetary_amount", "currency": {"record_or_parent_field": "currency"}, "visible_when": ["field_has_value", "paid_amount"]},
+      {"field": "discounted_amount", "type": "monetary_amount", "form_read_only": true, "default": "0", "visible_when": ["field_has_value", "discounted_amount"]},
+      {"field": "outstanding", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}, "copy_from": ["payment_amount"]},
+      {"field": "discount_date", "type": "calendar_date", "visible_when": ["field_has_value", "discount"], "required_when": ["field_has_value", "discount"]},
+      {"field": "discount_type", "type": "enumeration", "values": ["Percentage", "Amount"], "default": "Percentage", "copy_from": ["payment_term_identifier", "discount_type"]},
+      {"field": "discount", "type": "decimal", "copy_from": ["payment_term_identifier", "discount"]},
+      {"field": "company_currency_payment_amount", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "company_currency_outstanding", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "company_currency_paid_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["field_has_value", "company_currency_paid_amount"]},
+      {"field": "due_date_based_on", "type": "enumeration", "form_read_only": true, "values": ["", "Day(s) after invoice date", "Day(s) after the end of the invoice month", "Month(s) after the end of the invoice month"]},
+      {"field": "credit_days", "type": "integer", "form_read_only": true, "nonnegative": true, "visible_when": ["call", ["context", "contains_value"], ["list", ["literal", "Day(s) after invoice date"], ["literal", "Day(s) after the end of the invoice month"]], ["current_field", "due_date_based_on"]]},
+      {"field": "credit_months", "type": "integer", "form_read_only": true, "nonnegative": true, "visible_when": ["coercive_equal", ["current_field", "due_date_based_on"], ["literal", "Month(s) after the end of the invoice month"]]},
+      {"field": "discount_validity_based_on", "type": "enumeration", "form_read_only": true, "values": ["", "Day(s) after invoice date", "Day(s) after the end of the invoice month", "Month(s) after the end of the invoice month"], "visible_when": ["field_has_value", "discount"]},
+      {"field": "discount_validity", "type": "integer", "form_read_only": true, "visible_when": ["field_has_value", "discount_validity_based_on"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Description"}
+    ]
+  },
+  {
+    "entity": "accounting.payment_term",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "maintenance_manager", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["select"]},
+      {"role": "purchase_manager", "level": 0, "allows": ["select"]},
+      {"role": "purchase_user", "level": 0, "allows": ["select"]},
+      {"role": "sales_manager", "level": 0, "allows": ["select"]},
+      {"role": "sales_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "payment_term_name", "type": "short_text", "unique": true},
+      {"field": "invoice_portion", "type": "decimal"},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment"},
+      {"field": "due_date_based_on", "type": "enumeration", "values": ["Day(s) after invoice date", "Day(s) after the end of the invoice month", "Month(s) after the end of the invoice month"]},
+      {"field": "credit_days", "type": "integer", "visible_when": ["call", ["context", "contains_value"], ["list", ["literal", "Day(s) after invoice date"], ["literal", "Day(s) after the end of the invoice month"]], ["current_field", "due_date_based_on"]]},
+      {"field": "credit_months", "type": "integer", "visible_when": ["coercive_equal", ["current_field", "due_date_based_on"], ["literal", "Month(s) after the end of the invoice month"]]},
+      {"field": "description", "type": "text"},
+      {"field": "discount_type", "type": "enumeration", "values": ["Percentage", "Amount"], "default": "Percentage"},
+      {"field": "discount", "type": "decimal"},
+      {"field": "discount_validity_based_on", "type": "enumeration", "values": ["Day(s) after invoice date", "Day(s) after the end of the invoice month", "Month(s) after the end of the invoice month"], "default": "Day(s) after invoice date", "visible_when": ["field_has_value", "discount"]},
+      {"field": "discount_validity", "type": "integer", "visible_when": ["field_has_value", "discount"], "required_when": ["field_has_value", "discount"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Discount Settings"}
+    ]
+  },
+  {
+    "entity": "accounting.payment_terms_template",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_manager", "level": 0, "allows": ["read"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["read"]},
+      {"role": "purchase_manager", "level": 0, "allows": ["read"]},
+      {"role": "purchase_master_manager", "level": 0, "allows": ["select"]},
+      {"role": "purchase_user", "level": 0, "allows": ["read"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read"]},
+      {"role": "sales_master_manager", "level": 0, "allows": ["select"]},
+      {"role": "sales_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "template_name", "type": "short_text", "unique": true},
+      {"field": "terms_rows", "type": "owned_collection", "target": "accounting.payment_terms_template_detail", "required": true},
+      {"field": "allocate_payment_based_on_payment_terms", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "accounting.payment_terms_template_detail",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "payment_term_identifier", "type": "entity_reference", "target": "accounting.payment_term"},
+      {"field": "description", "type": "text", "copy_from": ["payment_term_identifier", "description"]},
+      {"field": "invoice_portion", "type": "decimal", "required": true, "copy_from": ["payment_term_identifier", "invoice_portion"], "copy_only_when_empty": true},
+      {"field": "due_date_based_on", "type": "enumeration", "required": true, "values": ["Day(s) after invoice date", "Day(s) after the end of the invoice month", "Month(s) after the end of the invoice month"], "copy_from": ["payment_term_identifier", "due_date_based_on"], "copy_only_when_empty": true},
+      {"field": "credit_days", "type": "integer", "nonnegative": true, "default": "0", "copy_from": ["payment_term_identifier", "credit_days"], "copy_only_when_empty": true, "visible_when": ["call", ["context", "contains_value"], ["list", ["literal", "Day(s) after invoice date"], ["literal", "Day(s) after the end of the invoice month"]], ["current_field", "due_date_based_on"]]},
+      {"field": "credit_months", "type": "integer", "nonnegative": true, "default": "0", "copy_from": ["payment_term_identifier", "credit_months"], "copy_only_when_empty": true, "visible_when": ["coercive_equal", ["current_field", "due_date_based_on"], ["literal", "Month(s) after the end of the invoice month"]]},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment", "copy_from": ["payment_term_identifier", "mode_of_payment_identifier"]},
+      {"field": "discount_type", "type": "enumeration", "values": ["Percentage", "Amount"], "default": "Percentage", "copy_from": ["payment_term_identifier", "discount_type"], "copy_only_when_empty": true},
+      {"field": "discount", "type": "decimal", "copy_from": ["payment_term_identifier", "discount"], "copy_only_when_empty": true},
+      {"field": "discount_validity_based_on", "type": "enumeration", "values": ["Day(s) after invoice date", "Day(s) after the end of the invoice month", "Month(s) after the end of the invoice month"], "default": "Day(s) after invoice date", "copy_from": ["payment_term_identifier", "discount_validity_based_on"], "copy_only_when_empty": true, "visible_when": ["field_has_value", "discount"]},
+      {"field": "discount_validity", "type": "integer", "copy_from": ["payment_term_identifier", "discount_validity"], "copy_only_when_empty": true, "visible_when": ["field_has_value", "discount"], "required_when": ["field_has_value", "discount"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Discount Settings"},
+      {"control": "section", "purpose": "Description"}
+    ]
+  },
+  {
+    "entity": "accounting.pegged_currencies",
+    "kind": "singleton_settings",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "pegged_currency_item_rows", "type": "owned_collection", "target": "accounting.pegged_currency_details"}
+    ]
+  },
+  {
+    "entity": "accounting.pegged_currency_details",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "source_currency_identifier", "type": "entity_reference", "target": "geography.currency"},
+      {"field": "pegged_exchange_rate", "type": "short_text"},
+      {"field": "pegged_against_identifier", "type": "entity_reference", "target": "geography.currency"}
+    ]
+  },
+  {
+    "entity": "accounting.period_closing_voucher",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "transaction_date", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "fiscal_year_identifier", "type": "entity_reference", "target": "accounting.fiscal_year", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "accounting.period_closing_voucher", "form_read_only": true, "omit_on_copy": true, "omit_target_user_filter": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "closing_account_head_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "stock_value_difference", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["current_field", "stock_value_difference"]},
+      {"field": "remarks", "type": "text", "required": true},
+      {"field": "general_ledger_entry_processing_status", "type": "enumeration", "form_read_only": true, "values": ["In Progress", "Completed", "Failed"], "visible_when": ["coercive_unequal", ["current_field", "lifecycle_state"], ["literal", 0]]},
+      {"field": "error_message", "type": "text", "form_read_only": true, "visible_when": ["coercive_equal", ["current_field", "general_ledger_entry_processing_status"], ["literal", "Failed"]]},
+      {"field": "period_end_date", "type": "calendar_date", "required": true},
+      {"field": "period_start_date", "type": "calendar_date", "required": true}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_closing_entry",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "sales_manager", "level": 0, "allows": ["cancel", "create", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "administrator", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "period_start_date", "type": "date_and_time", "required": true, "form_read_only": true, "copy_from": ["point_of_sale_opening_entry_identifier", "period_start_date"]},
+      {"field": "period_end_date", "type": "date_and_time", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true, "form_read_only": true, "copy_from": ["point_of_sale_opening_entry_identifier", "company_identifier"], "copy_only_when_empty": true},
+      {"field": "point_of_sale_profile_identifier", "type": "entity_reference", "target": "accounting.point_of_sale_profile", "required": true, "form_read_only": true, "copy_from": ["point_of_sale_opening_entry_identifier", "point_of_sale_profile_identifier"], "copy_only_when_empty": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true, "form_read_only": true, "copy_from": ["point_of_sale_opening_entry_identifier", "user_identifier"]},
+      {"field": "payment_reconciliation_rows", "type": "owned_collection", "target": "accounting.point_of_sale_closing_entry_detail"},
+      {"field": "grand_total", "type": "monetary_amount", "form_read_only": true, "default": "0"},
+      {"field": "net_total", "type": "monetary_amount", "form_read_only": true, "default": "0"},
+      {"field": "total_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "taxes_rows", "type": "owned_collection", "target": "accounting.point_of_sale_closing_entry_taxes", "form_read_only": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "accounting.point_of_sale_closing_entry", "form_read_only": true, "omit_on_copy": true},
+      {"field": "point_of_sale_opening_entry_identifier", "type": "entity_reference", "target": "accounting.point_of_sale_opening_entry", "required": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "form_hidden": true, "editable_after_posting": true, "values": ["Draft", "Submitted", "Queued", "Failed", "Cancelled"], "default": "Draft"},
+      {"field": "error_message", "type": "text", "form_read_only": true, "visible_when": ["field_has_value", "error_message"]},
+      {"field": "posting_time", "type": "time_of_day", "required": true, "omit_on_copy": true, "default": {"context_default": "current_instant"}},
+      {"field": "point_of_sale_invoices_rows", "type": "owned_collection", "target": "accounting.point_of_sale_invoice_reference", "form_read_only": true},
+      {"field": "sales_invoices_rows", "type": "owned_collection", "target": "accounting.sales_invoice_reference", "form_read_only": true},
+      {"field": "total_taxes_and_charges", "type": "monetary_amount", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "User Details"},
+      {"control": "section", "purpose": "Modes of Payment"},
+      {"control": "section", "purpose": "Totals", "expanded_when": ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 0]]},
+      {"control": "section", "purpose": "Linked Invoices"},
+      {"control": "section", "purpose": "Period Details"},
+      {"control": "section", "purpose": "Failure Description", "visible_when": ["field_has_value", "error_message"], "expanded_when": ["field_has_value", "error_message"]},
+      {"control": "section", "purpose": "Taxes and Charges"}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_closing_entry_detail",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment", "required": true},
+      {"field": "expected_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"related_context": "company", "field": "company_currency"}},
+      {"field": "difference", "type": "monetary_amount", "form_read_only": true, "currency": {"related_context": "company", "field": "company_currency"}},
+      {"field": "opening_amount", "type": "monetary_amount", "required": true, "form_read_only": true, "currency": {"related_context": "company", "field": "company_currency"}},
+      {"field": "closing_amount", "type": "monetary_amount", "required": true, "default": "0", "currency": {"related_context": "company", "field": "company_currency"}}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_closing_entry_taxes",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "account_head_identifier", "type": "entity_reference", "target": "accounting.account", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_customer_group",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "customer_group_identifier", "type": "entity_reference", "target": "organization.customer_group", "required": true}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_field",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "field_name", "type": "enumeration"},
+      {"field": "field_type", "type": "short_text", "form_read_only": true},
+      {"field": "label", "type": "short_text", "form_read_only": true},
+      {"field": "options", "type": "text", "form_read_only": true},
+      {"field": "required", "type": "boolean", "default": "0"},
+      {"field": "read_only", "type": "boolean", "default": "0"},
+      {"field": "default_value", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_invoice",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "import_supported": true,
+    "scheduling_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "accounts_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["amend", "create", "email", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "accounts_manager", "level": 1, "allows": ["read", "write"]},
+      {"role": "all", "level": 1, "allows": ["read"]},
+      {"role": "sales_manager", "level": 0, "allows": ["read", "select"]},
+      {"role": "sales_user", "level": 0, "allows": ["read", "select"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "write_once": true, "omit_on_copy": true, "values": ["point of sale invoice numbering prefix + four-digit year + configured sequence"]},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "searchable": true},
+      {"field": "customer_name", "type": "short_text", "form_read_only": true, "copy_from": ["customer_identifier", "customer_name"], "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "tax_identifier", "type": "short_text", "form_read_only": true},
+      {"field": "is_point_of_sale", "type": "boolean", "required": true, "form_read_only": true, "default": "1"},
+      {"field": "point_of_sale_profile_identifier", "type": "entity_reference", "target": "accounting.point_of_sale_profile", "visible_when": ["field_has_value", "is_point_of_sale"]},
+      {"field": "is_return", "type": "boolean", "omit_on_copy": true, "default": "0"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "omit_on_copy": true, "searchable": true, "default": {"context_default": "effective_date"}},
+      {"field": "posting_time", "type": "time_of_day", "omit_on_copy": true, "default": {"context_default": "current_instant"}},
+      {"field": "set_posting_time", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "lifecycle_state"], ["literal", 0]]},
+      {"field": "due_date", "type": "calendar_date", "omit_on_copy": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "accounting.point_of_sale_invoice", "form_read_only": true, "omit_on_copy": true, "omit_target_user_filter": true},
+      {"field": "return_against_identifier", "type": "entity_reference", "target": "accounting.point_of_sale_invoice", "form_read_only": true, "omit_on_copy": true, "searchable": true, "visible_when": ["field_has_value", "return_against_identifier"]},
+      {"field": "update_billed_amount_in_sales_order", "type": "boolean", "default": "0", "visible_when": ["and", ["current_field", "is_return"], ["current_field", "return_against_identifier"]]},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "purchase_order_number", "type": "short_text", "omit_on_copy": true, "editable_after_posting": true},
+      {"field": "purchase_order_date", "type": "calendar_date", "editable_after_posting": true},
+      {"field": "customer_address_identifier", "type": "entity_reference", "target": "contacts.address"},
+      {"field": "address_display", "type": "formatted_text", "form_read_only": true},
+      {"field": "contact_person_identifier", "type": "entity_reference", "target": "contacts.contact"},
+      {"field": "contact_display", "type": "text", "form_read_only": true},
+      {"field": "contact_mobile", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "contact_email", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "territory_identifier", "type": "entity_reference", "target": "organization.territory"},
+      {"field": "shipping_address_name_identifier", "type": "entity_reference", "target": "contacts.address"},
+      {"field": "shipping_address", "type": "formatted_text", "form_read_only": true},
+      {"field": "company_address_identifier", "type": "entity_reference", "target": "contacts.address"},
+      {"field": "company_address_display", "type": "formatted_text", "form_read_only": true, "form_hidden": true},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "required": true},
+      {"field": "conversion_rate", "type": "decimal", "required": true, "precision": "9"},
+      {"field": "selling_price_list_identifier", "type": "entity_reference", "target": "inventory.price_list", "required": true},
+      {"field": "price_list_currency_identifier", "type": "entity_reference", "target": "geography.currency", "required": true, "form_read_only": true},
+      {"field": "price_list_exchange_rate", "type": "decimal", "required": true, "precision": "9"},
+      {"field": "ignore_pricing_rule", "type": "boolean", "omit_on_copy": true, "access_level": 1, "default": "0"},
+      {"field": "default_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "visible_when": ["field_has_value", "update_stock"]},
+      {"field": "update_stock", "type": "boolean", "default": "0"},
+      {"field": "scan_barcode", "type": "short_text"},
+      {"field": "items_rows", "type": "owned_collection", "target": "accounting.point_of_sale_invoice_item", "required": true},
+      {"field": "pricing_rules_rows", "type": "owned_collection", "target": "accounting.pricing_rule_detail", "form_read_only": true},
+      {"field": "packed_items_rows", "type": "owned_collection", "target": "inventory.packed_item", "visible_when": ["field_has_value", "packed_items_rows"]},
+      {"field": "timesheets_rows", "type": "owned_collection", "target": "accounting.sales_invoice_timesheet"},
+      {"field": "total_billing_amount", "type": "monetary_amount", "form_read_only": true, "default": "0", "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "total_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "company_currency_total", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "company_currency_net_total", "type": "monetary_amount", "required": true, "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "net_total", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "total_net_weight", "type": "decimal", "form_read_only": true},
+      {"field": "taxes_and_charges_identifier", "type": "entity_reference", "target": "accounting.sales_taxes_and_charges_template"},
+      {"field": "shipping_rule_identifier", "type": "entity_reference", "target": "accounting.shipping_rule"},
+      {"field": "tax_category_identifier", "type": "entity_reference", "target": "accounting.tax_category"},
+      {"field": "taxes_rows", "type": "owned_collection", "target": "accounting.sales_taxes_and_charges"},
+      {"field": "other_charges_calculation", "type": "formatted_text", "form_read_only": true, "omit_on_copy": true},
+      {"field": "company_currency_total_taxes_and_charges", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_taxes_and_charges", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "loyalty_points", "type": "integer", "omit_on_copy": true, "visible_when": ["field_has_value", "redeem_loyalty_points"]},
+      {"field": "loyalty_amount", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["field_has_value", "redeem_loyalty_points"]},
+      {"field": "redeem_loyalty_points", "type": "boolean", "omit_on_copy": true, "default": "0"},
+      {"field": "loyalty_program_identifier", "type": "entity_reference", "target": "accounting.loyalty_program", "form_read_only": true, "omit_on_copy": true, "copy_from": ["customer_identifier", "loyalty_program_identifier"]},
+      {"field": "loyalty_redemption_account_identifier", "type": "entity_reference", "target": "accounting.account", "omit_on_copy": true, "visible_when": ["field_has_value", "redeem_loyalty_points"]},
+      {"field": "loyalty_redemption_cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center", "omit_on_copy": true, "visible_when": ["field_has_value", "redeem_loyalty_points"]},
+      {"field": "apply_discount_on", "type": "enumeration", "values": ["", "Grand Total", "Net Total"], "default": "Grand Total"},
+      {"field": "company_currency_discount_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "additional_discount_percentage", "type": "decimal"},
+      {"field": "discount_amount", "type": "monetary_amount", "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "company_currency_grand_total", "type": "monetary_amount", "required": true, "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "company_currency_rounding_adjustment", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "company_currency_rounded_total", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "base_in_words", "type": "short_text", "form_read_only": true},
+      {"field": "grand_total", "type": "monetary_amount", "required": true, "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "rounding_adjustment", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "rounded_total", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "in_words", "type": "short_text", "form_read_only": true},
+      {"field": "total_advance", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "party_account_currency_identifier"}},
+      {"field": "outstanding_amount", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"record_or_parent_field": "party_account_currency_identifier"}},
+      {"field": "allocate_advances_automatically", "type": "boolean", "default": "0"},
+      {"field": "advances_rows", "type": "owned_collection", "target": "accounting.sales_invoice_advance"},
+      {"field": "payment_terms_template_identifier", "type": "entity_reference", "target": "accounting.payment_terms_template", "omit_on_copy": true, "visible_when": ["and", ["not", ["current_field", "is_point_of_sale"]], ["not", ["current_field", "is_return"]]]},
+      {"field": "payment_schedule_rows", "type": "owned_collection", "target": "accounting.payment_schedule", "omit_on_copy": true, "visible_when": ["and", ["not", ["current_field", "is_point_of_sale"]], ["not", ["current_field", "is_return"]]]},
+      {"field": "cash_bank_account_identifier", "type": "entity_reference", "target": "accounting.account", "form_hidden": true, "visible_when": ["field_has_value", "is_point_of_sale"]},
+      {"field": "payments_rows", "type": "owned_collection", "target": "accounting.sales_invoice_payment", "visible_when": ["strict_equal", ["current_field", "is_point_of_sale"], ["literal", 1]]},
+      {"field": "company_currency_paid_amount", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "paid_amount", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"record_or_parent_field": "currency_identifier"}, "visible_when": ["or", ["current_field", "is_point_of_sale"], ["current_field", "redeem_loyalty_points"]]},
+      {"field": "company_currency_change_amount", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["field_has_value", "is_point_of_sale"]},
+      {"field": "change_amount", "type": "monetary_amount", "omit_on_copy": true, "currency": {"record_or_parent_field": "currency_identifier"}, "visible_when": ["field_has_value", "is_point_of_sale"]},
+      {"field": "account_for_change_amount_identifier", "type": "entity_reference", "target": "accounting.account", "visible_when": ["field_has_value", "is_point_of_sale"]},
+      {"field": "write_off_amount", "type": "monetary_amount", "omit_on_copy": true, "currency": {"record_or_parent_field": "currency_identifier"}, "read_only_when": ["current_field", "write_off_outstanding_amount_automatically"]},
+      {"field": "company_currency_write_off_amount", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "write_off_outstanding_amount_automatically", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "is_point_of_sale"]},
+      {"field": "write_off_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "write_off_cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "terms_and_conditions_identifier", "type": "entity_reference", "target": "organization.terms_and_conditions"},
+      {"field": "terms", "type": "formatted_text"},
+      {"field": "letter_head_identifier", "type": "entity_reference", "target": "document_output.letter_head", "editable_after_posting": true},
+      {"field": "group_same_items", "type": "boolean", "editable_after_posting": true, "default": "0"},
+      {"field": "language", "type": "short_text", "form_read_only": true},
+      {"field": "select_print_heading_identifier", "type": "entity_reference", "target": "document_output.print_heading", "omit_on_copy": true, "editable_after_posting": true},
+      {"field": "inter_company_invoice_reference_identifier", "type": "entity_reference", "target": "accounting.purchase_invoice", "form_read_only": true},
+      {"field": "customer_group_identifier", "type": "entity_reference", "target": "organization.customer_group", "form_hidden": true},
+      {"field": "is_discounted", "type": "boolean", "form_read_only": true, "omit_on_copy": true, "default": "0"},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "values": ["", "Draft", "Return", "Credit Note Issued", "Consolidated", "Submitted", "Paid", "Partly Paid", "Unpaid", "Partly Paid and Discounted", "Unpaid and Discounted", "Overdue and Discounted", "Overdue", "Cancelled"], "default": "Draft"},
+      {"field": "debit_to_identifier", "type": "entity_reference", "target": "accounting.account", "required": true, "searchable": true},
+      {"field": "party_account_currency_identifier", "type": "entity_reference", "target": "geography.currency", "form_read_only": true, "form_hidden": true, "omit_on_copy": true},
+      {"field": "is_opening", "type": "enumeration", "values": ["No", "Yes"], "default": "No"},
+      {"field": "remarks", "type": "text", "omit_on_copy": true},
+      {"field": "sales_partner_identifier", "type": "entity_reference", "target": "organization.sales_partner"},
+      {"field": "commission_rate", "type": "decimal"},
+      {"field": "total_commission", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "sales_team_rows", "type": "owned_collection", "target": "sales.sales_team", "editable_after_posting": true},
+      {"field": "from_date", "type": "calendar_date", "omit_on_copy": true, "editable_after_posting": true},
+      {"field": "to_date", "type": "calendar_date", "omit_on_copy": true, "editable_after_posting": true},
+      {"field": "auto_repeat_identifier", "type": "entity_reference", "target": "automation.auto_repeat", "form_read_only": true, "omit_on_copy": true, "editable_after_posting": true},
+      {"field": "against_income_account", "type": "text", "form_hidden": true, "omit_on_copy": true},
+      {"field": "consolidated_invoice_identifier", "type": "entity_reference", "target": "accounting.sales_invoice", "form_read_only": true, "omit_on_copy": true, "editable_after_posting": true},
+      {"field": "coupon_code_identifier", "type": "entity_reference", "target": "accounting.coupon_code", "visible_when": ["field_has_value", "coupon_code_identifier"]},
+      {"field": "amount_eligible_for_commission", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "update_billed_amount_in_delivery_note", "type": "boolean", "default": "1", "visible_when": ["and", ["current_field", "is_return"], ["current_field", "return_against_identifier"]]},
+      {"field": "traffic_attribution_medium_identifier", "type": "entity_reference", "target": "web_publishing.traffic_attribution_medium"},
+      {"field": "traffic_attribution_campaign_identifier", "type": "entity_reference", "target": "web_publishing.traffic_attribution_campaign"},
+      {"field": "traffic_attribution_source_identifier", "type": "entity_reference", "target": "web_publishing.traffic_attribution_source"},
+      {"field": "company_contact_person_identifier", "type": "entity_reference", "target": "contacts.contact"},
+      {"field": "last_scanned_warehouse", "type": "short_text", "computed": true, "visible_when": ["current_field", "last_scanned_warehouse"]},
+      {"field": "item_wise_tax_details_rows", "type": "owned_collection", "target": "accounting.item_wise_tax_detail", "form_hidden": true, "omit_on_copy": true},
+      {"field": "title", "type": "short_text", "omit_on_copy": true, "editable_after_posting": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Accounting Dimensions"},
+      {"control": "section", "purpose": "Customer PO Details", "expanded_when": ["field_has_value", "purchase_order_number"]},
+      {"control": "section", "purpose": "Address and Contact"},
+      {"control": "section", "purpose": "Currency and Price List", "visible_when": ["field_has_value", "customer_identifier"], "expanded_when": ["and", ["current_field", "currency_identifier"], ["coercive_unequal", ["current_field", "currency_identifier"], ["call", ["context", "company_default_currency"], ["current_field", "company_identifier"]]]]},
+      {"control": "section", "purpose": "Warehouse"},
+      {"control": "section", "purpose": "Items"},
+      {"control": "section", "purpose": "Pricing Rules"},
+      {"control": "section", "purpose": "Packing List", "visible_when": ["field_has_value", "packed_items_rows"]},
+      {"control": "formatted_information", "purpose": "Product Bundle Help"},
+      {"control": "section", "purpose": "Time Sheet List", "expanded_when": ["greater", ["current_field", "total_billing_amount"], ["literal", 0]]},
+      {"control": "section", "purpose": "Tax Breakup"},
+      {"control": "section", "purpose": "Loyalty Points Redemption"},
+      {"control": "section", "purpose": "Additional Discount", "expanded_when": ["field_has_value", "discount_amount"]},
+      {"control": "section", "purpose": "Advance Payments", "expanded_when": ["field_has_value", "advances_rows"]},
+      {"control": "action", "purpose": "Get Advances Received", "visible_when": ["not", ["current_field", "allocate_advances_automatically"]]},
+      {"control": "section", "purpose": "Payment Terms", "expanded_when": ["and", ["not", ["current_field", "is_point_of_sale"]], ["not", ["current_field", "is_return"]]]},
+      {"control": "section", "purpose": "Payments", "visible_when": ["or", ["strict_equal", ["current_field", "is_point_of_sale"], ["literal", 1]], ["and", ["current_field", "advances_rows"], ["greater", ["member", ["current_field", "advances_rows"], "length"], ["literal", 0]]]]},
+      {"control": "section", "purpose": "Changes"},
+      {"control": "section", "purpose": "Write Off", "visible_when": ["field_has_value", "grand_total"], "expanded_when": ["field_has_value", "write_off_amount"]},
+      {"control": "section", "purpose": "Terms and Conditions", "expanded_when": ["field_has_value", "terms"]},
+      {"control": "section", "purpose": "Printing Settings"},
+      {"control": "section", "purpose": "More Information", "visible_when": ["field_has_value", "customer_identifier"]},
+      {"control": "section", "purpose": "Accounting Details"},
+      {"control": "section", "purpose": "Commission", "expanded_when": ["field_has_value", "sales_partner_identifier"]},
+      {"control": "section", "purpose": "Sales Team", "expanded_when": ["field_has_value", "sales_team_rows"]},
+      {"control": "section", "purpose": "Subscription"},
+      {"control": "action", "purpose": "Update Auto Repeat Reference", "visible_when": ["current_field", "auto_repeat_identifier"]},
+      {"control": "tab", "purpose": "Payments"},
+      {"control": "tab", "purpose": "Address & Contact"},
+      {"control": "tab", "purpose": "Terms"},
+      {"control": "tab", "purpose": "More Info"},
+      {"control": "section", "purpose": "UTM Analytics"},
+      {"control": "section", "purpose": "Auto Repeat"}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_invoice_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "barcode", "type": "short_text"},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "searchable": true},
+      {"field": "item_name", "type": "short_text", "required": true},
+      {"field": "customer_item_code", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "item_group_identifier", "type": "entity_reference", "target": "organization.item_group", "form_read_only": true, "form_hidden": true},
+      {"field": "brand", "type": "short_text", "form_hidden": true},
+      {"field": "image", "type": "file_reference", "form_hidden": true, "copy_from": ["item_identifier", "image"]},
+      {"field": "quantity", "type": "decimal"},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "required": true},
+      {"field": "unit_conversion_factor", "type": "decimal", "required": true, "precision": "9"},
+      {"field": "stock_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "price_list_rate", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "company_currency_price_list_rate", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "margin_type", "type": "enumeration", "values": ["", "Percentage", "Amount"], "visible_when": ["field_has_value", "price_list_rate"]},
+      {"field": "margin_rate_or_amount", "type": "decimal", "visible_when": ["and", ["current_field", "margin_type"], ["current_field", "price_list_rate"]]},
+      {"field": "rate_with_margin", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}, "visible_when": ["and", ["and", ["current_field", "margin_type"], ["current_field", "price_list_rate"]], ["current_field", "margin_rate_or_amount"]]},
+      {"field": "discount_percentage", "type": "percentage", "precision": "2", "visible_when": ["field_has_value", "price_list_rate"]},
+      {"field": "discount_amount", "type": "monetary_amount", "currency": {"record_or_parent_field": "currency"}, "visible_when": ["field_has_value", "price_list_rate"]},
+      {"field": "company_currency_rate_with_margin", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["and", ["and", ["current_field", "margin_type"], ["current_field", "price_list_rate"]], ["current_field", "margin_rate_or_amount"]]},
+      {"field": "rate", "type": "monetary_amount", "required": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "amount", "type": "monetary_amount", "required": true, "form_read_only": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "item_tax_template_identifier", "type": "entity_reference", "target": "accounting.item_tax_template"},
+      {"field": "company_currency_rate", "type": "monetary_amount", "required": true, "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "company_currency_amount", "type": "monetary_amount", "required": true, "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "pricing_rules", "type": "text", "form_read_only": true, "form_hidden": true},
+      {"field": "is_free_item", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "net_rate", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "net_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "company_currency_net_rate", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "company_currency_net_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "delivered_by_supplier", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "income_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "is_fixed_asset", "type": "boolean", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "default": "0"},
+      {"field": "asset_identifier", "type": "entity_reference", "target": "fixed_assets.asset", "omit_on_copy": true},
+      {"field": "finance_book_identifier", "type": "entity_reference", "target": "accounting.finance_book", "visible_when": ["field_has_value", "asset_identifier"]},
+      {"field": "expense_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "deferred_revenue_account_identifier", "type": "entity_reference", "target": "accounting.account", "visible_when": ["field_has_value", "enable_deferred_revenue"]},
+      {"field": "service_stop_date", "type": "calendar_date", "omit_on_copy": true, "editable_after_posting": true, "visible_when": ["field_has_value", "enable_deferred_revenue"]},
+      {"field": "enable_deferred_revenue", "type": "boolean", "default": "0"},
+      {"field": "service_start_date", "type": "calendar_date", "omit_on_copy": true, "visible_when": ["field_has_value", "enable_deferred_revenue"]},
+      {"field": "service_end_date", "type": "calendar_date", "omit_on_copy": true, "visible_when": ["field_has_value", "enable_deferred_revenue"]},
+      {"field": "weight_per_unit", "type": "decimal", "form_read_only": true},
+      {"field": "total_weight", "type": "decimal", "form_read_only": true},
+      {"field": "weight_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true},
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "target_warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "form_hidden": true, "omit_on_copy": true, "omit_target_user_filter": true},
+      {"field": "quality_inspection_identifier", "type": "entity_reference", "target": "inventory.quality_inspection", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "batch_number_identifier", "type": "entity_reference", "target": "inventory.batch", "visible_when": ["strict_equal", ["current_field", "use_serial_batch_fields"], ["literal", 1]]},
+      {"field": "incoming_rate", "type": "monetary_amount", "nonnegative": true, "omit_on_copy": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}, "visible_when": ["and", ["and", ["member", ["context", "owning_record"], "is_return"], ["member", ["context", "owning_record"], "update_stock"]], ["not", ["member", ["context", "owning_record"], "return_against"]]]},
+      {"field": "allow_zero_valuation_rate", "type": "boolean", "omit_on_copy": true, "default": "0"},
+      {"field": "serial_number", "type": "text", "visible_when": ["strict_equal", ["current_field", "use_serial_batch_fields"], ["literal", 1]]},
+      {"field": "item_tax_rate", "type": "text", "form_read_only": true, "form_hidden": true},
+      {"field": "actual_batch_quantity", "type": "decimal", "form_read_only": true, "omit_on_copy": true, "editable_after_posting": true},
+      {"field": "actual_quantity", "type": "decimal", "form_read_only": true, "editable_after_posting": true},
+      {"field": "sales_order_identifier", "type": "entity_reference", "target": "sales.sales_order", "form_read_only": true, "omit_on_copy": true, "searchable": true},
+      {"field": "sales_order_line", "type": "short_text", "line_identity_in": "sales.sales_order_item", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "searchable": true},
+      {"field": "delivery_note_identifier", "type": "entity_reference", "target": "inventory.delivery_note", "form_read_only": true, "omit_on_copy": true, "searchable": true},
+      {"field": "delivery_note_line", "type": "short_text", "line_identity_in": "inventory.delivery_note_item", "form_read_only": true, "form_hidden": true, "omit_on_copy": true, "searchable": true},
+      {"field": "delivered_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center", "required": true, "default": {"context_default": "company"}},
+      {"field": "page_break", "type": "boolean", "omit_on_copy": true, "editable_after_posting": true, "default": "0"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "point_of_sale_invoice_item", "type": "short_text", "form_read_only": true, "omit_on_copy": true, "omit_target_user_filter": true},
+      {"field": "grant_commission", "type": "boolean", "form_read_only": true, "default": "0", "copy_from": ["item_identifier", "grant_commission"]},
+      {"field": "has_item_scanned", "type": "boolean", "form_read_only": true, "default": "0", "visible_when": ["field_has_value", "barcode"]},
+      {"field": "serial_and_batch_bundle_identifier", "type": "entity_reference", "target": "inventory.serial_and_batch_bundle", "omit_on_copy": true, "visible_when": ["or", ["strict_equal", ["current_field", "use_serial_batch_fields"], ["literal", 0]], ["current_field", "serial_and_batch_bundle_identifier"]]},
+      {"field": "use_serial_batch_fields", "type": "boolean", "default": "0"},
+      {"field": "distributed_discount_amount", "type": "monetary_amount", "currency": {"record_or_parent_field": "currency"}},
+      {"field": "mapped_additional_discount_amount", "type": "monetary_amount", "form_read_only": true, "precision": "9", "default": "0", "currency": {"record_or_parent_field": "currency"}},
+      {"field": "is_product_bundle", "type": "boolean", "configuration_variant": true, "form_read_only": true},
+      {"field": "product_bundle_identifier", "type": "entity_reference", "configuration_variant": true, "target": "sales.product_bundle"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Description"},
+      {"control": "section", "purpose": "Image"},
+      {"control": "display_image", "purpose": "Image View"},
+      {"control": "section", "purpose": "Discount and Margin"},
+      {"control": "section", "purpose": "Drop Ship", "expanded_when": ["coercive_equal", ["current_field", "delivered_by_supplier"], ["literal", 1]]},
+      {"control": "section", "purpose": "Accounting Details"},
+      {"control": "section", "purpose": "Deferred Revenue"},
+      {"control": "section", "purpose": "Item Weight Details"},
+      {"control": "section", "purpose": "Stock Details", "expanded_when": ["or", ["current_field", "serial_number"], ["current_field", "batch_number_identifier"]]},
+      {"control": "section", "purpose": "References"},
+      {"control": "section", "purpose": "Accounting Dimensions"},
+      {"control": "section", "visible_when": ["strict_equal", ["current_field", "use_serial_batch_fields"], ["literal", 1]]}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_invoice_merge_log",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "sales_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "sales_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "administrator", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "posting_date", "type": "calendar_date", "required": true},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "required": true},
+      {"field": "point_of_sale_invoices_rows", "type": "owned_collection", "target": "accounting.point_of_sale_invoice_reference", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "accounting.point_of_sale_invoice_merge_log", "form_read_only": true, "omit_on_copy": true},
+      {"field": "consolidated_invoice_identifier", "type": "entity_reference", "target": "accounting.sales_invoice", "form_read_only": true, "editable_after_posting": true},
+      {"field": "consolidated_credit_note_identifier", "type": "entity_reference", "target": "accounting.sales_invoice", "form_read_only": true, "editable_after_posting": true},
+      {"field": "point_of_sale_closing_entry_identifier", "type": "entity_reference", "target": "accounting.point_of_sale_closing_entry"},
+      {"field": "merge_invoices_based_on", "type": "enumeration", "required": true, "values": ["Customer", "Customer Group"]},
+      {"field": "customer_group_identifier", "type": "entity_reference", "target": "organization.customer_group", "visible_when": ["coercive_equal", ["current_field", "merge_invoices_based_on"], ["literal", "Customer Group"]], "required_when": ["coercive_equal", ["current_field", "merge_invoices_based_on"], ["literal", "Customer Group"]]},
+      {"field": "posting_time", "type": "time_of_day", "required": true, "omit_on_copy": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "References"}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_invoice_reference",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "point_of_sale_invoice_identifier", "type": "entity_reference", "target": "accounting.point_of_sale_invoice", "required": true},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "required": true, "form_read_only": true, "copy_from": ["point_of_sale_invoice_identifier", "customer_identifier"]},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "copy_from": ["point_of_sale_invoice_identifier", "posting_date"]},
+      {"field": "grand_total", "type": "monetary_amount", "required": true, "copy_from": ["point_of_sale_invoice_identifier", "grand_total"]},
+      {"field": "is_return", "type": "boolean", "form_read_only": true, "default": "0", "copy_from": ["point_of_sale_invoice_identifier", "is_return"]},
+      {"field": "return_against_identifier", "type": "entity_reference", "target": "accounting.point_of_sale_invoice", "form_read_only": true, "copy_from": ["point_of_sale_invoice_identifier", "return_against_identifier"]}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_item_group",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "item_group_identifier", "type": "entity_reference", "target": "organization.item_group", "required": true}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_opening_entry",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "sales_manager", "level": 0, "allows": ["cancel", "create", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "administrator", "level": 0, "allows": ["cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "period_start_date", "type": "date_and_time", "required": true},
+      {"field": "period_end_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "point_of_sale_profile_identifier", "type": "entity_reference", "target": "accounting.point_of_sale_profile", "required": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "accounting.point_of_sale_opening_entry", "form_read_only": true, "omit_on_copy": true},
+      {"field": "set_posting_date", "type": "boolean", "default": "0"},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "form_hidden": true, "editable_after_posting": true, "values": ["Draft", "Open", "Closed", "Cancelled"], "default": "Draft"},
+      {"field": "point_of_sale_closing_entry", "type": "short_text", "form_read_only": true, "editable_after_posting": true},
+      {"field": "balance_details_rows", "type": "owned_collection", "target": "accounting.point_of_sale_opening_entry_detail", "required": true}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_opening_entry_detail",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment", "required": true},
+      {"field": "opening_amount", "type": "monetary_amount", "required": true, "default": "0", "currency": {"related_context": "company", "field": "company_currency"}}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_payment_method",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "default", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["member", ["context", "owning_record"], "entity_type"], ["literal", "POS Profile"]]},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment", "required": true},
+      {"field": "allow_in_returns", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_profile",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "accounts_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["email", "print", "read", "report"]},
+      {"role": "sales_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "country", "type": "display_value", "copy_from": ["company_identifier", "country_identifier"]},
+      {"field": "company_address_identifier", "type": "entity_reference", "target": "contacts.address"},
+      {"field": "applicable_for_users_rows", "type": "owned_collection", "target": "accounting.point_of_sale_profile_user"},
+      {"field": "payments_rows", "type": "owned_collection", "target": "accounting.point_of_sale_payment_method", "required": true},
+      {"field": "item_groups_rows", "type": "owned_collection", "target": "accounting.point_of_sale_item_group"},
+      {"field": "customer_groups_rows", "type": "owned_collection", "target": "accounting.point_of_sale_customer_group"},
+      {"field": "letter_head_identifier", "type": "entity_reference", "target": "document_output.letter_head", "editable_after_posting": true},
+      {"field": "terms_and_conditions_identifier", "type": "entity_reference", "target": "organization.terms_and_conditions"},
+      {"field": "select_print_heading_identifier", "type": "entity_reference", "target": "document_output.print_heading", "editable_after_posting": true},
+      {"field": "selling_price_list_identifier", "type": "entity_reference", "target": "inventory.price_list"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "required": true},
+      {"field": "write_off_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "write_off_cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center", "required": true},
+      {"field": "account_for_change_amount_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "income_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "expense_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "taxes_and_charges_identifier", "type": "entity_reference", "target": "accounting.sales_taxes_and_charges_template"},
+      {"field": "apply_discount_on", "type": "enumeration", "values": ["Grand Total", "Net Total"], "default": "Grand Total"},
+      {"field": "tax_category_identifier", "type": "entity_reference", "target": "accounting.tax_category"},
+      {"field": "print_format_identifier", "type": "entity_reference", "target": "document_output.print_format"},
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse", "required": true, "visible_when": ["field_has_value", "update_stock"]},
+      {"field": "ignore_pricing_rule", "type": "boolean", "default": "0"},
+      {"field": "update_stock", "type": "boolean", "form_read_only": true, "form_hidden": true, "default": "1"},
+      {"field": "hide_unavailable_items", "type": "boolean", "default": "0"},
+      {"field": "hide_images", "type": "boolean", "default": "0"},
+      {"field": "auto_add_item_to_cart", "type": "boolean", "default": "0"},
+      {"field": "allow_rate_change", "type": "boolean", "default": "0"},
+      {"field": "allow_discount_change", "type": "boolean", "default": "0"},
+      {"field": "validate_stock_on_save", "type": "boolean", "default": "0"},
+      {"field": "write_off_limit", "type": "monetary_amount", "required": true, "default": "1"},
+      {"field": "disable_rounded_total", "type": "boolean", "default": "0"},
+      {"field": "traffic_attribution_campaign_identifier", "type": "entity_reference", "target": "web_publishing.traffic_attribution_campaign"},
+      {"field": "traffic_attribution_source_identifier", "type": "entity_reference", "target": "web_publishing.traffic_attribution_source"},
+      {"field": "traffic_attribution_medium_identifier", "type": "entity_reference", "target": "web_publishing.traffic_attribution_campaign"},
+      {"field": "print_receipt_on_order_complete", "type": "boolean", "default": "0"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "set_grand_total_to_default_mode_of_payment", "type": "boolean", "default": "1"},
+      {"field": "action_on_new_invoice", "type": "enumeration", "values": ["Always Ask", "Save Changes and Load New Invoice", "Discard Changes and Load New Invoice"], "default": "Always Ask"},
+      {"field": "allow_partial_payment", "type": "boolean", "default": "0"},
+      {"field": "allow_warehouse_change", "type": "boolean", "configuration_variant": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Applicable for Users"},
+      {"control": "section", "purpose": "Payment Methods"},
+      {"control": "section", "purpose": "Print Settings"},
+      {"control": "section", "purpose": "Miscellaneous"},
+      {"control": "section", "purpose": "Accounting Dimensions"},
+      {"control": "section", "purpose": "Filters"},
+      {"control": "section", "purpose": "Campaign"},
+      {"control": "tab", "purpose": "Accounting"},
+      {"control": "tab", "purpose": "More Info"},
+      {"control": "tab", "purpose": "POS Configurations"},
+      {"control": "section", "purpose": "Price List & Currency"},
+      {"control": "section", "purpose": "Write Off"},
+      {"control": "section", "purpose": "Income and Expense"},
+      {"control": "section", "purpose": "Taxes"},
+      {"control": "section", "purpose": "POS Item Selector"},
+      {"control": "section", "purpose": "POS Item Details"}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_profile_user",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "default", "type": "boolean", "default": "0"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user"}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_search_fields",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "field_name", "type": "short_text", "form_read_only": true},
+      {"field": "searchable_field_name", "type": "enumeration", "required": true}
+    ]
+  },
+  {
+    "entity": "accounting.point_of_sale_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["email", "print", "read", "share", "write"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["email", "print", "read", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read"]},
+      {"role": "sales_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "invoice_fields_rows", "type": "owned_collection", "target": "accounting.point_of_sale_field"},
+      {"field": "point_of_sale_search_fields_rows", "type": "owned_collection", "target": "accounting.point_of_sale_search_fields"},
+      {"field": "invoice_type", "type": "enumeration", "values": ["Sales Invoice", "POS Invoice"], "default": "Sales Invoice"},
+      {"field": "post_change_general_ledger_entries", "type": "boolean", "default": "0"}
+    ]
+  }
+]

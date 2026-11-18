@@ -1,0 +1,38 @@
+# Education and student billing
+
+## Convert an academic schedule to receivables
+
+A fee structure defines the categories. A fee schedule selects the structure, program, academic year/term, student category, student groups, due date, posting date and component lines. Validation sums component totals to get the per-student schedule amount, refreshes counts for every group, then multiplies the sum of group counts by the per-student amount. Overlapping groups can therefore inflate the aggregate. A program mismatch, a category outside the structure and the structure total comparison use warnings. For the latter the rule sums *stored* schedules by structure and compares that per-student sum to the structure amount. Treating all three messages as hard errors changes the operator's workflow.
+
+On submission, the order/invoice setting determines the pending state. The generation command marks the schedule In Process. Up to ten students run synchronously, larger counts queue the work, zero students cause an error. Resolve each selected student's customer, creating missing customer details through the student helper. Map components to quantity-one items with the component amount as price list rate and component discount as a percentage. The invoice carries the schedule reference and student and uses the schedule dates as configured. For orders, the due date becomes delivery date. Auto-submission is a separate setting for each document type. Saving a draft invoice leaves the receivable unposted.
+
+For three students with component totals 100 and 20, the schedule forecast is 360. If submitted linked student invoices total 240 with 80 outstanding, the dashboard reports 160 paid and 80 unpaid. The unissued 120 forms part of the forecast only. The generator catches per-student exceptions, attempts the remaining students, and on any error rolls back and records Failed and the error. It also publishes final progress 100 on that branch. Inspect the schedule state and committed documents for completion. A retry/duplicate-student case must inspect resulting invoice identities; progress alone cannot prove uniqueness.
+
+## Score an assessment
+
+Require student group membership. Resolve each criterion's maximum score from the assessment plan, reject a score above it, and apply the grading scale to each percentage. The overall percentage is 100 × sum of scores / record maximum score. Given scores of 18/20 and 30/60, the total is 48/80 or 60%. Averaging the two percentages would yield 70% and may yield a different grade. The duplicate check excludes the current record and cancelled results, comparing student and plan. Include zero maxima in failure qualification because division needs a defined denominator.
+
+## Admission, enrolment and course membership
+
+The applicant, student, billing customer and signed-in learner have independent identities. Store the admission, requested programme, academic year and term on the application. Reject a birth date equal to or later than the decision date. When both term and year are given, the term must belong to that year. Where the admission specifies minimum and maximum ages for this programme, compare the decision date to the respective birthdays. A birthday exactly on either age boundary qualifies. A successful application-payment notification sets the applicant's paid marker. The enrolment and fee records have separate lifecycles.
+
+| Event | Condition | Persistent effects |
+|---|---|---|
+| Validate programme enrolment | No other noncancelled enrolment for this student, programme, academic year and term, including another draft | Resolve the student name. If no courses were selected, supply the programme's required courses. Preserve an explicitly supplied course list. |
+| Submit enrolment | The enrolment is valid and can be submitted | Set the student's joining date from the earliest recorded programme enrolment date for the student. This particular minimum includes all stored enrolments. Process each referenced fee schedule and select an order or invoice according to institutional settings. |
+| Create course memberships | One selected course row, one student, one programme enrolment | Reuse an existing exact student/course/enrolment match. Otherwise create the link with the enrolment date. Two programmes retain distinct enrolment origins. |
+| Cancel programme enrolment | Select course memberships by originating programme enrolment | Remove those course memberships. The programme cancellation action does not itself reverse customer invoices. Check each separately linked receivable or order before closing the financial matter. |
+
+## Teaching schedules and attendance
+
+A class reserves a student group, instructor and room for a date and time range. For a course-based group take the group's course. Use the group's academic term boundaries when present, otherwise use its academic year. Boundary dates are eligible. Reject a start later than the end. Detect competing classes and assessments by group, room and responsible instructor or supervisor. A conflicting reservation can belong to a different kind of event. An identical interval conflicts and ordinarily touching end/start times can coexist. The check separately compares interior starts, interior ends, an existing span crossing the proposed start, and identical intervals. For example, an existing 09:00–12:00 interval against a proposed 09:00–10:00 one satisfies none of those exact predicates. Qualification of the stronger business requirement for exclusive use should include that shared-start containment case.
+
+A student attendance decision must have a student group or a scheduled class. A class supplies its own group and date. Require the student to belong to the resolved group and reject a holiday on the applicable company calendar. For scheduled attendance, another noncancelled row for the student and class is a duplicate. Without a scheduled class, the duplicate key is student, group and date. Two distinct classes in one group on the same date can consequently have separate attendance decisions. The ordinary attendance save applies the holiday and membership rules without a general future-date rejection.
+
+Assessment planning reserves the same shared resources. The plan's maximum score must equal the sum of its criterion maxima. Reject a criterion already used by another submitted plan for this course, student group and assessment group. Retain the criterion-level maxima on marking so a result and its overall grade can be recalculated.
+
+## Paid learning access
+
+A seat purchase relates a learner to a course or batch. A separate purchase can grant a certificate. Bind the incoming payment to the stored learner, purchase kind and purchased object. For a collection denominated in hundredths, compare the returned receipt identity, accepted payment state, currency and exact minor-unit amount to the stored tax-inclusive charge when nonzero, otherwise the base charge. A 125.00 inclusive charge requires 12,500 minor units. A receipt of 12,499 fails. A currency with a different minor unit requires an expressly configured conversion.
+
+An accepted payment marks the purchase, grants the applicable course or batch enrolment or certificate, and applies the coupon redemption. Compare both the external payment identity and previously settled purchase under concurrent delivery. Acquire exclusive access to the course/member enrolment decision so another accepted callback cannot allocate a second seat to the same learner in the course. A bank reconciliation and student invoice can link to a purchase without the membership row itself being a journal.

@@ -1,0 +1,595 @@
+{
+  "title": "Optional capability record volume",
+  "description": "Structural contract for optional entity definitions, field contributions, grants, and property-rule addresses. Consumers additionally resolve identifiers and relationships across all selected volumes.",
+  "type": "array",
+  "items": {
+    "$ref": "#/$defs/section"
+  },
+  "$defs": {
+    "permission_actions": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "select",
+          "read",
+          "write",
+          "create",
+          "delete",
+          "submit",
+          "cancel",
+          "amend",
+          "report",
+          "export",
+          "import",
+          "email",
+          "print",
+          "share",
+          "mask"
+        ]
+      },
+      "uniqueItems": true,
+      "description": "Allowed operations for this grant and access level. Authorization also depends on record context."
+    },
+    "role_grant": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "$ref": "#/$defs/permission_actions"
+        },
+        {
+          "type": "boolean"
+        }
+      ],
+      "minItems": 4,
+      "maxItems": 4,
+      "items": false,
+      "description": "Role, field access level, allowed operations, and owner-only condition in this order."
+    },
+    "added_role_grant": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "$ref": "#/$defs/permission_actions"
+        },
+        {
+          "type": "boolean"
+        }
+      ],
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false,
+      "description": "Receiving entity, role, field access level, allowed operations, and owner-only condition."
+    },
+    "rule_address": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      ],
+      "minItems": 4,
+      "maxItems": 4,
+      "items": false,
+      "description": "Receiving entity, affected field or null for the entity, property name, and type of its value if supplied. The final item identifies a type."
+    },
+    "field_rules": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "required",
+          "read_only",
+          "hidden_from_form",
+          "editable_after_submission",
+          "computed_value",
+          "nonnegative",
+          "write_once",
+          "unique",
+          "translatable",
+          "available_in_short_form",
+          "indexed_for_search",
+          "bypasses_value_selection_restrictions",
+          "remember_previous_selection"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "record_characteristics": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "owned_row",
+          "supports_submission",
+          "hierarchical_record",
+          "computed_record",
+          "one_configuration_record"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "qualified_entity": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+\\.[a-z0-9_]+$",
+      "description": "Business area and entity name in the shared dictionary."
+    },
+    "optional_entity_path": {
+      "type": "string",
+      "pattern": "^.+ / [1-9][0-9]* / .+$",
+      "description": "Optional capability, configuration number and local entity name separated by spaced slashes."
+    },
+    "added_field": {
+      "type": "object",
+      "required": [
+        "on",
+        "purpose",
+        "value_kind"
+      ],
+      "properties": {
+        "on": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Receiving entity."
+        },
+        "placement": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Preceding field in the receiving record’s presentation order."
+        },
+        "equivalent_declarations": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "Count of equivalent declarations summarized by this entry."
+        },
+        "alternative_declaration": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Distinguishes declarations of the same contributed field that have different properties."
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rules": {
+          "$ref": "#/$defs/field_rules"
+        }
+      },
+      "additionalProperties": false,
+      "description": "An installed capability can contribute a field or presentation control to a receiving entity. Target and selection metadata can require the effective runtime definition."
+    },
+    "attribute": {
+      "type": "object",
+      "required": [
+        "purpose",
+        "value_kind"
+      ],
+      "properties": {
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value_kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rules": {
+          "$ref": "#/$defs/field_rules"
+        },
+        "access_level": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_class_field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "binding": {
+          "enum": [
+            "shared_model",
+            "select_shared_capability",
+            "configured_optional_dependency",
+            "select_local_configuration",
+            "external_record_contract_required",
+            "collection_target_declared_as_independent_record"
+          ]
+        },
+        "target_options": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "equivalent_declarations": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "Count of equivalent declarations summarized by this entry."
+        }
+      },
+      "additionalProperties": false,
+      "description": "An entity attribute, its logical type, declared rules and optional relationship or selection metadata.",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "value_kind": {
+                "enum": [
+                  "reference",
+                  "owned_rows",
+                  "owned_selection_rows"
+                ]
+              }
+            },
+            "required": [
+              "value_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "target"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "value_kind": {
+                "const": "variable_record_reference"
+              }
+            },
+            "required": [
+              "value_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "record_class_field"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {},
+            "required": [
+              "record_class_field"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value_kind": {
+                "const": "variable_record_reference"
+              }
+            },
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "target"
+                  ]
+                },
+                {
+                  "required": [
+                    "binding"
+                  ]
+                },
+                {
+                  "required": [
+                    "target_options"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {},
+            "required": [
+              "target"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value_kind": {
+                "enum": [
+                  "reference",
+                  "owned_rows",
+                  "owned_selection_rows"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {},
+            "required": [
+              "binding"
+            ]
+          },
+          "then": {
+            "required": [
+              "target"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "binding": {
+                "const": "shared_model"
+              }
+            },
+            "required": [
+              "binding"
+            ]
+          },
+          "then": {
+            "properties": {
+              "target": {
+                "$ref": "#/$defs/qualified_entity"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "binding": {
+                "enum": [
+                  "select_local_configuration",
+                  "configured_optional_dependency",
+                  "select_shared_capability"
+                ]
+              }
+            },
+            "required": [
+              "binding"
+            ]
+          },
+          "then": {
+            "required": [
+              "target_options"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {},
+            "required": [
+              "target_options"
+            ]
+          },
+          "then": {
+            "required": [
+              "binding"
+            ],
+            "properties": {
+              "binding": {
+                "enum": [
+                  "select_local_configuration",
+                  "configured_optional_dependency",
+                  "select_shared_capability"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "binding": {
+                "const": "configured_optional_dependency"
+              }
+            },
+            "required": [
+              "binding"
+            ]
+          },
+          "then": {
+            "properties": {
+              "target_options": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/optional_entity_path"
+                },
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "binding": {
+                "const": "select_shared_capability"
+              }
+            },
+            "required": [
+              "binding"
+            ]
+          },
+          "then": {
+            "properties": {
+              "target_options": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/qualified_entity"
+                },
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "binding": {
+                "const": "collection_target_declared_as_independent_record"
+              }
+            },
+            "required": [
+              "binding"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value_kind": {
+                "enum": [
+                  "owned_rows",
+                  "owned_selection_rows"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "entity": {
+      "type": "object",
+      "required": [
+        "concept",
+        "characteristics",
+        "attributes"
+      ],
+      "properties": {
+        "concept": {
+          "type": "string",
+          "minLength": 1
+        },
+        "characteristics": {
+          "$ref": "#/$defs/record_characteristics"
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/attribute"
+          }
+        },
+        "role_grants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/role_grant"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "Entity identity is scoped by capability and configuration."
+    },
+    "section": {
+      "type": "object",
+      "required": [
+        "capability",
+        "configuration"
+      ],
+      "properties": {
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "configuration": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "entity_contracts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/entity"
+          }
+        },
+        "additional_fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/added_field"
+          }
+        },
+        "additional_role_grants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/added_role_grant"
+          }
+        },
+        "rule_addresses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rule_address"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "A volume section can carry a portion of a capability configuration. Join its sections on capability and configuration.",
+      "anyOf": [
+        {
+          "required": [
+            "entity_contracts"
+          ]
+        },
+        {
+          "required": [
+            "additional_fields"
+          ]
+        },
+        {
+          "required": [
+            "additional_role_grants"
+          ]
+        },
+        {
+          "required": [
+            "rule_addresses"
+          ]
+        }
+      ]
+    }
+  }
+}

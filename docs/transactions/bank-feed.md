@@ -1,0 +1,38 @@
+# Linked bank accounts and statement imports
+
+A bank feed turns provider movements into submitted Bank Transaction records that an accountant can reconcile against payment vouchers. The feed has three distinct identities: the institution holding the connection, the linked Bank Account belonging to a company, and the provider's individual transaction. Provider capabilities determine available account regions and interface languages.
+
+## Establish and renew the connection
+
+| Operation | Inputs and observed result |
+|---|---|
+| Open the connection dialog | The configuration operation requires access to bank feed settings. The bank feed administrator can manage the configuration. A disabled integration responds with the disabled state. An enabled integration returns the selected environment, a provider-issued link token and the site name. |
+| Choose the provider dialog language | Use only supported interface languages and the regions enabled for the connection. Fall back to the configured default language if necessary. Language and region do not choose the bank currency or the customer's document language. |
+| Associate an institution | An authorized settings operator exchanges the public token and uses the returned institution name to create the Bank or update its connection token. This record can serve more than one local bank account. |
+| Bind selected accounts | Require an enabled group general ledger account of type Bank in the chosen company. For each provider account, ensure its type and subtype exist, then look up its integration ID in that company. The fallback is a company-owned Bank Account with the same composed name in the same company. When creating, use the first matching group for a bank general ledger account, create the Bank Account and record its masked number and integration ID. An existing match receives updated provider metadata. The operation returns the local names it created or updated. |
+| Renew a link | Update mode uses the existing connection. When refreshing account IDs, the adapter resolves the company from the sole company, the named Bank Account, then the operator's default company. An unresolved company produces an error. |
+
+## Import a statement window
+
+The hourly maintenance job enters automatic synchronization when both the enabled and automatic-sync flags are set. The manual enqueue operation checks settings access and queues one job per enabled company Bank Account with a nonblank integration ID. For each account, the first window starts twelve calendar months before today; later windows begin on the stored integration date and end today. For an account-specific request, every provider page uses the same account filter. The offset is the number of rows already collected. Stop when the collected count reaches the latest reported total or the provider returns an empty page.
+
+| Provider fact | Bank Transaction projection |
+|---|---|
+| Account and transaction identity | The row resolves the local Bank Account by provider account ID. A previously stored provider transaction ID skips creation. The import lookup and duplicate check use the site database; their predicates do not include company or bank. A replacement supporting overlapping provider IDs needs an explicit mapping and uniqueness scope. |
+| Settlement and date | A pending row is skipped. Import the provider date when the row is eligible for creation. A repeated ID already in storage does not update its previous values. |
+| Amount and currency | A nonnegative amount becomes a withdrawal. A negative amount becomes a deposit of its absolute value. Carry the provider ISO currency code. On validation, a populated transaction currency must agree with the currency on the linked bank general ledger account when that account exists. |
+| Classification and reference | Take transaction code, then payment method for the type. Choose cheque number, payment reference, then provider name for the reference. Store the original provider name as the description. Category strings and a supplied category ID can become tags. |
+| Reconciliation | Insert and submit the Bank Transaction, then attach tags. Allocated amount is the sum allocated to linked vouchers. Unallocated amount is the absolute difference between withdrawal and deposit less the allocated amount, rounded at field precision. A submitted positive unallocated amount gives Unreconciled. A subsequent voucher allocation can change this status. |
+
+## Progress, partial failure and replay
+
+Process the returned rows in reverse sequence. Give each row a savepoint. A failure rolls back that row, records the affected account and transaction ID in the log, and allows later rows to proceed. If at least one row was inserted, the stored integration date becomes the date of the **last successfully inserted row in processing order**. Duplicate, pending, failed and empty-only windows leave the stored date unchanged. This rule depends on provider ordering and successful inserts. A failed older row can fall outside the next normal window. An implementation that guarantees eventual recovery should record failed identities or replay an explicit earlier window. The bank feed logs a reconnection requirement if the provider reports that the bank login must be renewed.
+
+## Import and retry examples
+
+| Scenario | Input | Expected observation |
+|---|---|---|
+| Filtered and shrinking pages | One account has 150 rows with a second account present. In the other test the advertised total drops from 150 to 149 on the second page. | The filtered call returns the first account's 150 rows only. The shrinking window returns 149 rows and terminates. |
+| Currency and account isolation | An INR account receives two INR rows and one USD row; a company bank account and a customer account share a display name; an account has been disabled. | Two INR rows survive and one error is recorded. A same-name party account stays unlinked. The disabled account receives no scheduled job. |
+| Derived financial case | Import a settled movement of −42.75 EUR on a EUR account with no outstanding allocations. Reimport its ID. | One submitted row carries deposit 42.75, withdrawal 0.00 and unallocated 42.75 EUR. Changing the operator's language leaves the numeric projection and provider ID intact. |
+| Derived retry case | A newest-first batch contains a valid movement dated 12 November, a pending movement dated 11 November and a currency-mismatched movement dated 10 November. | Only the 12 November row is inserted. The checkpoint advances to 12 November. An explicit historical replay is needed to pick up a later correction to an earlier movement if its date stays outside the new window. |

@@ -1,0 +1,782 @@
+[
+  {
+    "entity": "indian_accounting.bill_of_entry",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "purchase_user", "level": 0, "allows": ["read", "report", "print", "email"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "auditor", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["bill of entry numbering prefix + four-digit year + configured sequence"]},
+      {"field": "bill_of_entry_number", "type": "short_text", "required": true},
+      {"field": "bill_of_entry_date", "type": "calendar_date", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "indian_accounting.bill_of_entry", "form_read_only": true},
+      {"field": "port_code", "type": "short_text"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "company_goods_and_services_tax_registration_number", "type": "suggested_text"},
+      {"field": "items_rows", "type": "owned_collection", "target": "indian_accounting.bill_of_entry_item", "required": true},
+      {"field": "taxes_rows", "type": "owned_collection", "target": "indian_accounting.india_compliance_taxes_and_charges", "required": true},
+      {"field": "total_taxable_value", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_customs_duty", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_taxes", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "total_amount_payable", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "customs_payable_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "customs_expense_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "bill_of_lading_number", "type": "short_text"},
+      {"field": "reconciliation_status", "type": "enumeration", "form_read_only": true, "values": ["", "Not Applicable", "Reconciled", "Unreconciled", "Ignored"]},
+      {"field": "input_tax_credit_claim_period", "type": "suggested_text", "editable_after_posting": true},
+      {"field": "tax_category_identifier", "type": "entity_reference", "target": "accounting.tax_category"}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "get items from purchase invoice"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.bill_of_entry_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true, "form_read_only": true},
+      {"field": "item_name", "type": "short_text"},
+      {"field": "assessable_value", "type": "monetary_amount", "required": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "customs_duty", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "taxable_value", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "item_tax_template_identifier", "type": "entity_reference", "target": "accounting.item_tax_template"},
+      {"field": "purchase_invoice_line", "type": "short_text", "line_identity_in": "accounting.purchase_invoice_item", "form_read_only": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "is_ineligible_for_input_tax_credit", "type": "boolean", "default": "0"},
+      {"field": "integrated_goods_and_services_tax_rate", "type": "decimal", "form_read_only": true},
+      {"field": "central_goods_and_services_tax_rate", "type": "decimal", "form_read_only": true},
+      {"field": "state_goods_and_services_tax_rate", "type": "decimal", "form_read_only": true},
+      {"field": "cess_rate", "type": "decimal", "form_read_only": true},
+      {"field": "cess_non_advol_rate", "type": "decimal", "form_read_only": true},
+      {"field": "integrated_goods_and_services_tax_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "central_goods_and_services_tax_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "state_goods_and_services_tax_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "cess_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "cess_non_advol_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "goods_and_services_tax_treatment", "type": "suggested_text", "form_read_only": true},
+      {"field": "goods_and_services_tax_harmonized_system_of_nomenclature_code", "type": "suggested_text", "editable_after_posting": true},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true},
+      {"field": "quantity", "type": "decimal"},
+      {"field": "purchase_invoice_identifier", "type": "entity_reference", "target": "accounting.purchase_invoice"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.c_form",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "report", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "report", "print", "email", "share"]},
+      {"role": "all", "level": 1, "allows": ["read", "report"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["c form numbering prefix + four-digit year + configured sequence"]},
+      {"field": "c_form_number", "type": "short_text", "required": true},
+      {"field": "received_date", "type": "calendar_date", "required": true},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "required": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "quarter", "type": "enumeration", "values": ["", "I", "II", "III", "IV"]},
+      {"field": "total_amount", "type": "monetary_amount", "required": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "state", "type": "short_text", "required": true},
+      {"field": "invoices_rows", "type": "owned_collection", "target": "indian_accounting.c_form_invoice_detail"},
+      {"field": "total_invoiced_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "indian_accounting.c_form", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "indian_accounting.c_form_invoice_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "invoice_number_identifier", "type": "entity_reference", "target": "accounting.sales_invoice"},
+      {"field": "invoice_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "territory_identifier", "type": "entity_reference", "target": "organization.territory", "form_read_only": true},
+      {"field": "net_total", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "grand_total", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}}
+    ]
+  },
+  {
+    "entity": "indian_accounting.company_print_options",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "print_label", "type": "suggested_text"},
+      {"field": "print_value", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.e_invoice_applicable_company",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "applicable_from", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}}
+    ]
+  },
+  {
+    "entity": "indian_accounting.e_invoice_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "invoice_registration_number", "type": "short_text", "form_read_only": true, "unique": true},
+      {"field": "signed_invoice", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "invoice_data", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "signed_qr_code", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "is_cancelled", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "cancel_reason_code", "type": "short_text", "form_read_only": true},
+      {"field": "cancel_remark", "type": "short_text", "form_read_only": true},
+      {"field": "cancelled_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "acknowledgement_number", "type": "short_text", "form_read_only": true},
+      {"field": "acknowledged_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "is_generated_in_sandbox_mode", "type": "boolean", "default": "0"},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "indian_accounting.e_waybill_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "stock_manager", "level": 0, "allows": ["read", "delete", "report", "export", "print", "email", "share", "if_owner"]},
+      {"role": "stock_user", "level": 0, "allows": ["read", "delete", "report", "export", "print", "email", "share", "if_owner"]}
+    ],
+    "fields": [
+      {"field": "e_waybill_number", "type": "short_text", "form_read_only": true, "unique": true},
+      {"field": "valid_upto", "type": "date_and_time", "form_read_only": true},
+      {"field": "is_cancelled", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "cancel_reason_code", "type": "short_text", "form_read_only": true},
+      {"field": "cancel_remark", "type": "short_text", "form_read_only": true},
+      {"field": "data", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "is_latest_data", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "form_read_only": true},
+      {"field": "created_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "cancelled_on", "type": "date_and_time", "form_read_only": true},
+      {"field": "is_generated_in_sandbox_mode", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "extension_scheduled", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "extension_remark", "type": "short_text", "form_read_only": true},
+      {"field": "extension_reason_code", "type": "short_text", "form_read_only": true},
+      {"field": "extension_data", "type": "structured_value", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_account",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "central_goods_and_services_tax_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "state_goods_and_services_tax_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "integrated_goods_and_services_tax_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "cess_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "cess_non_advol_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "account_type", "type": "enumeration", "required": true, "values": ["Input", "Output", "Purchase Reverse Charge", "Sales Reverse Charge", "Output Refund"]}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_credential",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "service", "type": "enumeration", "required": true, "values": ["e-Waybill / e-Invoice", "Returns"], "default": "e-Waybill / e-Invoice"},
+      {"field": "goods_and_services_tax_registration_number", "type": "suggested_text", "required": true},
+      {"field": "username", "type": "short_text", "required": true},
+      {"field": "password", "type": "protected_value"},
+      {"field": "session_key", "type": "short_text", "form_read_only": true},
+      {"field": "authentication_token", "type": "short_text", "form_read_only": true},
+      {"field": "application_key", "type": "short_text"},
+      {"field": "session_expiry", "type": "date_and_time", "form_read_only": true},
+      {"field": "session_network_address", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_harmonized_system_of_nomenclature_code",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "all", "level": 0, "allows": ["read"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create"]},
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create"]},
+      {"role": "item_manager", "level": 0, "allows": ["read", "write", "create"]},
+      {"role": "stock_manager", "level": 0, "allows": ["read", "write", "create"]}
+    ],
+    "fields": [
+      {"field": "harmonized_system_of_nomenclature_code", "type": "short_text", "required": true, "unique": true},
+      {"field": "description", "type": "text"},
+      {"field": "taxes_rows", "type": "owned_collection", "target": "inventory.item_tax"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_invoice_management_system",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "company_goods_and_services_tax_registration_number", "type": "suggested_text"},
+      {"field": "period", "type": "suggested_text"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "invoice structured markup"},
+      {"control": "formatted_information", "purpose": "invoice empty state"},
+      {"control": "formatted_information", "purpose": "no invoice data"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_inward_supply",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "report", "export"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "company_goods_and_services_tax_registration_number", "type": "short_text"},
+      {"field": "supplier_name", "type": "short_text"},
+      {"field": "supplier_goods_and_services_tax_registration_number", "type": "short_text"},
+      {"field": "entity_type", "type": "enumeration", "values": ["", "Invoice", "Credit Note", "Debit Note", "ISD Invoice", "ISD Credit Note", "Bill of Entry"]},
+      {"field": "place_of_supply", "type": "short_text"},
+      {"field": "supply_type", "type": "enumeration", "values": ["", "Regular", "SEZ Without Payment of Tax", "SEZ With Payment of Tax", "Deemed Export", "Intra-State Supplies Attracting IGST"]},
+      {"field": "classification", "type": "enumeration", "values": ["", "B2B", "B2BA", "CDNR", "CDNRA", "ISD", "ISDA", "IMPG", "IMPGSEZ", "ECOM", "ECOMA", "TDS", "TCS"]},
+      {"field": "items_rows", "type": "owned_collection", "target": "indian_accounting.goods_and_services_tax_inward_supply_item"},
+      {"field": "document_value", "type": "decimal"},
+      {"field": "diffprcnt", "type": "short_text"},
+      {"field": "port_code", "type": "short_text"},
+      {"field": "invoice_registration_number_source", "type": "short_text"},
+      {"field": "invoice_registration_number_number", "type": "short_text"},
+      {"field": "invoice_registration_number_gen_date", "type": "calendar_date"},
+      {"field": "input_tax_credit_availability", "type": "enumeration", "values": ["", "Yes", "No", "Temporary"]},
+      {"field": "reason_input_tax_credit_unavailability", "type": "short_text"},
+      {"field": "other_return_period", "type": "short_text"},
+      {"field": "is_amended", "type": "boolean", "default": "0"},
+      {"field": "amendment_type", "type": "short_text"},
+      {"field": "original_entity_type", "type": "enumeration", "values": ["", "Credit Note", "Debit Note", "ISD Invoice", "ISD Credit Note"]},
+      {"field": "action", "type": "enumeration", "values": ["No Action", "Accept", "Ignore", "Pending"], "default": "No Action"},
+      {"field": "link_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "match_status", "type": "enumeration", "values": ["", "Exact Match", "Suggested Match", "Mismatch", "Manual Match", "Unlinked", "Amended"]},
+      {"field": "link_name_identifier", "type": "selected_entity_reference", "target_selected_by": "link_entity_type_identifier"},
+      {"field": "sup_return_period", "type": "short_text"},
+      {"field": "goods_and_services_tax_return_1_filled", "type": "boolean", "default": "0"},
+      {"field": "goods_and_services_tax_return_3b_filled", "type": "boolean", "default": "0"},
+      {"field": "goods_and_services_tax_return_1_filing_date", "type": "calendar_date"},
+      {"field": "registration_cancel_date", "type": "calendar_date"},
+      {"field": "return_period_2b", "type": "short_text"},
+      {"field": "gen_date_2b", "type": "calendar_date"},
+      {"field": "is_reverse_charge", "type": "boolean", "default": "0"},
+      {"field": "bill_number", "type": "short_text"},
+      {"field": "bill_date", "type": "calendar_date"},
+      {"field": "original_bill_number", "type": "short_text"},
+      {"field": "original_bill_date", "type": "calendar_date"},
+      {"field": "integrated_goods_and_services_tax", "type": "decimal"},
+      {"field": "central_goods_and_services_tax", "type": "decimal"},
+      {"field": "state_goods_and_services_tax", "type": "decimal"},
+      {"field": "cess", "type": "decimal"},
+      {"field": "taxable_value", "type": "decimal"},
+      {"field": "ims_action", "type": "short_text", "form_read_only": true},
+      {"field": "previous_ims_action", "type": "short_text", "form_read_only": true},
+      {"field": "is_pending_action_allowed", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "is_supplier_return_filed", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "is_downloaded_from_ims", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "supplier_return_form", "type": "short_text", "form_read_only": true},
+      {"field": "is_downloaded_from_2b", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "is_downloaded_from_2a", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "previous_action", "type": "enumeration", "form_read_only": true, "values": ["No Action", "Accept", "Ignore", "Pending"]},
+      {"field": "input_tax_credit_reduction_required", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "is_input_tax_credit_reduction_blocked", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "declared_integrated_goods_and_services_tax", "type": "decimal", "form_read_only": true},
+      {"field": "declared_central_goods_and_services_tax", "type": "decimal", "form_read_only": true},
+      {"field": "declared_state_goods_and_services_tax", "type": "decimal", "form_read_only": true},
+      {"field": "declared_cess", "type": "decimal", "form_read_only": true},
+      {"field": "remarks", "type": "text", "form_read_only": true},
+      {"field": "is_remarks_blocked", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "is_declaration_pending_upload", "type": "boolean", "form_read_only": true, "default": "0"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_inward_supply_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "item_number", "type": "integer"},
+      {"field": "taxable_value", "type": "decimal"},
+      {"field": "rate", "type": "decimal"},
+      {"field": "integrated_goods_and_services_tax", "type": "decimal"},
+      {"field": "central_goods_and_services_tax", "type": "decimal"},
+      {"field": "state_goods_and_services_tax", "type": "decimal"},
+      {"field": "cess", "type": "decimal"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_registration_number",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "report", "export"]}
+    ],
+    "fields": [
+      {"field": "goods_and_services_tax_registration_number", "type": "short_text", "required": true, "unique": true},
+      {"field": "legal_name", "type": "short_text", "form_read_only": true},
+      {"field": "trade_name", "type": "short_text", "form_read_only": true},
+      {"field": "status", "type": "short_text"},
+      {"field": "registration_date", "type": "calendar_date"},
+      {"field": "cancelled_date", "type": "calendar_date"},
+      {"field": "last_updated_on", "type": "date_and_time"},
+      {"field": "is_blocked", "type": "boolean", "default": "0"},
+      {"field": "transporter_identifier_status", "type": "short_text"},
+      {"field": "goods_and_services_tax_return_1_filed_upto", "type": "calendar_date"},
+      {"field": "last_permanent_account_number_used_for_goods_and_services_tax_return", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_return_1",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "export"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "export"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "export"]},
+      {"role": "auditor", "level": 0, "allows": ["read", "write", "create", "export"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "company_goods_and_services_tax_registration_number", "type": "suggested_text", "required": true},
+      {"field": "year", "type": "suggested_text", "required": true},
+      {"field": "month_or_quarter", "type": "enumeration", "required": true},
+      {"field": "filing_preference", "type": "enumeration", "values": ["", "Monthly", "Quarterly"]},
+      {"field": "file_nil_gstr1", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "tabs structured markup"},
+      {"control": "formatted_information", "purpose": "tabs empty state"},
+      {"control": "formatted_information", "purpose": "tabs no data"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_return_3_b_report",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create"]},
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "year", "type": "enumeration"},
+      {"field": "structured_data_output", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "enqueue_report", "type": "boolean", "default": "0"},
+      {"field": "filter_by", "type": "enumeration", "values": ["ITC Claim Period", "Posting Date"], "default": "ITC Claim Period"},
+      {"field": "generation_status", "type": "short_text", "form_read_only": true},
+      {"field": "filing_status", "type": "enumeration", "form_read_only": true, "values": ["Not Filed", "Filed"]},
+      {"field": "company_goods_and_services_tax_registration_number", "type": "suggested_text"},
+      {"field": "month_or_quarter", "type": "enumeration", "values": ["Apr - Jun", "Jul - Sep", "Oct - Dec", "Jan - Mar", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "gstr3b form"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_return_action",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "request_type", "type": "short_text"},
+      {"field": "token", "type": "short_text"},
+      {"field": "status", "type": "short_text"},
+      {"field": "creation_time", "type": "date_and_time"},
+      {"field": "integration_request_identifier", "type": "entity_reference", "target": "service_integrations.integration_request", "form_read_only": true},
+      {"field": "request_identifier", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_return_export",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "company_goods_and_services_tax_registration_number", "type": "suggested_text", "required": true},
+      {"field": "goods_and_services_tax_return", "type": "enumeration", "required": true, "values": ["GSTR-2A", "GSTR-2B"], "default": "GSTR-2B"},
+      {"field": "from_date", "type": "calendar_date"},
+      {"field": "to_date", "type": "calendar_date"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "summary structured markup"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_return_import_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "report", "export"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "report", "export"]}
+    ],
+    "fields": [
+      {"field": "goods_and_services_tax_registration_number", "type": "short_text"},
+      {"field": "classification", "type": "short_text"},
+      {"field": "return_period", "type": "short_text"},
+      {"field": "last_updated_on", "type": "date_and_time"},
+      {"field": "return_type", "type": "short_text"},
+      {"field": "data_not_found", "type": "boolean", "default": "0"},
+      {"field": "request_identifier", "type": "short_text"},
+      {"field": "request_time", "type": "date_and_time"},
+      {"field": "dont_redownload", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_return_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "report", "export", "print", "email", "share"]},
+      {"role": "auditor", "level": 0, "allows": ["read", "write", "create", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "filing_status", "type": "short_text", "form_read_only": true},
+      {"field": "return_period", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "form_read_only": true},
+      {"field": "filing_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "acknowledgement_number", "type": "short_text", "form_read_only": true},
+      {"field": "goods_and_services_tax_registration_number", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "generation_status", "type": "enumeration", "form_read_only": true, "values": ["", "In Progress", "Generated", "Failed"]},
+      {"field": "unfiled", "type": "file_reference", "form_read_only": true},
+      {"field": "filed", "type": "file_reference", "form_read_only": true},
+      {"field": "raw_gov_data", "type": "file_reference", "form_read_only": true},
+      {"field": "unfiled_summary", "type": "file_reference", "form_read_only": true},
+      {"field": "filed_summary", "type": "file_reference", "form_read_only": true},
+      {"field": "is_latest_data", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "books", "type": "file_reference", "form_read_only": true},
+      {"field": "books_summary", "type": "file_reference", "form_read_only": true},
+      {"field": "reconcile", "type": "file_reference", "form_read_only": true},
+      {"field": "reconcile_summary", "type": "file_reference", "form_read_only": true},
+      {"field": "return_type", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "filing_preference", "type": "short_text", "form_read_only": true},
+      {"field": "upload_error", "type": "file_reference", "form_read_only": true},
+      {"field": "authenticated_summary", "type": "file_reference", "form_read_only": true},
+      {"field": "actions_rows", "type": "owned_collection", "target": "indian_accounting.goods_and_services_tax_return_action", "form_read_only": true},
+      {"field": "is_nil", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "section_summary", "type": "long_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create"]},
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create"]}
+    ],
+    "fields": [
+      {"field": "goods_and_services_tax_accounts_rows", "type": "owned_collection", "target": "indian_accounting.goods_and_services_tax_account"},
+      {"field": "round_off_goods_and_services_tax_values", "type": "boolean", "default": "0"},
+      {"field": "harmonized_system_of_nomenclature_wise_tax_breakup", "type": "boolean", "default": "1"},
+      {"field": "service_interface_secret", "type": "protected_value"},
+      {"field": "validate_harmonized_system_of_nomenclature_code", "type": "boolean", "default": "1"},
+      {"field": "minimum_harmonized_system_of_nomenclature_digits", "type": "enumeration", "values": ["4", "6", "8"], "default": "6"},
+      {"field": "credentials_rows", "type": "owned_collection", "target": "indian_accounting.goods_and_services_tax_credential"},
+      {"field": "enable_e_waybill", "type": "boolean", "default": "1"},
+      {"field": "attach_e_waybill_print", "type": "boolean", "default": "1"},
+      {"field": "enable_service_interface", "type": "boolean", "default": "0"},
+      {"field": "e_invoice_applicable_from", "type": "calendar_date"},
+      {"field": "e_waybill_threshold", "type": "monetary_amount", "default": "50000"},
+      {"field": "auto_generate_e_waybill", "type": "boolean", "default": "1"},
+      {"field": "fetch_e_waybill_data", "type": "boolean", "default": "1"},
+      {"field": "auto_generate_e_invoice", "type": "boolean", "default": "1"},
+      {"field": "enable_e_invoice", "type": "boolean", "default": "0"},
+      {"field": "enable_reverse_charge_in_sales", "type": "boolean", "default": "0"},
+      {"field": "enable_e_waybill_from_delivery_note", "type": "boolean", "default": "0"},
+      {"field": "enable_overseas_transactions", "type": "boolean", "default": "0"},
+      {"field": "autofill_party_info", "type": "boolean", "default": "1"},
+      {"field": "enable_e_waybill_from_purchase_invoice", "type": "boolean", "default": "0"},
+      {"field": "sandbox_mode", "type": "boolean", "default": "0"},
+      {"field": "apply_e_invoice_only_for_selected_companies", "type": "boolean", "default": "0"},
+      {"field": "e_invoice_applicable_companies_rows", "type": "owned_collection", "target": "indian_accounting.e_invoice_applicable_company"},
+      {"field": "goods_and_services_tax_unit_of_measure_map_rows", "type": "owned_collection", "target": "indian_accounting.goods_and_services_tax_unit_of_measure_map"},
+      {"field": "generate_e_waybill_with_e_invoice", "type": "boolean", "default": "1"},
+      {"field": "archive_party_info_days", "type": "integer", "default": "7"},
+      {"field": "goods_and_services_tax_registration_number_status_refresh_interval", "type": "integer", "default": "30"},
+      {"field": "reverse_charge_threshold", "type": "monetary_amount", "default": "5000"},
+      {"field": "distribute_expense_with_input_service_distributor_credit", "type": "boolean", "default": "1"},
+      {"field": "auto_create_input_service_distributor_recipient_invoice", "type": "boolean", "default": "1"},
+      {"field": "enable_reverse_charge_for_unregistered_supplier", "type": "boolean", "default": "0"},
+      {"field": "require_supplier_invoice_number", "type": "boolean", "default": "1"},
+      {"field": "validate_goods_and_services_tax_registration_number_status", "type": "boolean", "default": "1"},
+      {"field": "gstn_public_certificate", "type": "expression_or_structured_text"},
+      {"field": "nic_public_key", "type": "expression_or_structured_text"},
+      {"field": "enable_e_waybill_from_purchase_receipt", "type": "boolean", "default": "0"},
+      {"field": "enable_auto_reconciliation", "type": "boolean", "default": "0"},
+      {"field": "inward_supply_period", "type": "integer", "default": "2"},
+      {"field": "reconcile_on_monday", "type": "boolean", "default": "0"},
+      {"field": "reconcile_on_friday", "type": "boolean", "default": "1"},
+      {"field": "reconcile_on_tuesday", "type": "boolean", "default": "1"},
+      {"field": "reconcile_on_saturday", "type": "boolean", "default": "0"},
+      {"field": "reconcile_on_wednesday", "type": "boolean", "default": "0"},
+      {"field": "reconcile_on_sunday", "type": "boolean", "default": "0"},
+      {"field": "reconcile_on_thursday", "type": "boolean", "default": "0"},
+      {"field": "enable_retry_einv_ewb_generation", "type": "boolean", "default": "0"},
+      {"field": "is_retry_einv_ewb_generation_pending", "type": "boolean", "default": "0"},
+      {"field": "enable_sales_through_ecommerce_operators", "type": "boolean", "default": "0"},
+      {"field": "role_allowed_to_modify_identifier", "type": "entity_reference", "target": "information_management.role"},
+      {"field": "restrict_changes_after_goods_and_services_tax_return_1", "type": "boolean", "default": "0"},
+      {"field": "enable_e_waybill_for_sc", "type": "boolean", "default": "0"},
+      {"field": "enable_e_waybill_from_asset_movement", "type": "boolean", "default": "0"},
+      {"field": "fetch_e_invoice_details_from_goods_and_services_tax_portal", "type": "boolean", "default": "1"},
+      {"field": "auto_cancel_e_waybill", "type": "boolean", "default": "0"},
+      {"field": "auto_cancel_e_invoice", "type": "boolean", "default": "0"},
+      {"field": "reason_for_e_waybill_cancellation", "type": "enumeration", "values": ["Duplicate", "Order Cancelled", "Data Entry Mistake"], "default": "Data Entry Mistake"},
+      {"field": "reason_for_e_invoice_cancellation", "type": "enumeration", "values": ["Duplicate", "Order Cancelled", "Data Entry Mistake"], "default": "Data Entry Mistake"},
+      {"field": "compare_unfiled_data", "type": "boolean", "default": "1"},
+      {"field": "enable_goods_and_services_tax_return_1_service_interface", "type": "boolean", "default": "0"},
+      {"field": "restrict_cancel_if_e_invoice_final", "type": "boolean", "default": "0"},
+      {"field": "e_invoice_reporting_time_limit_days", "type": "integer", "default": "30"},
+      {"field": "use_fallback_for_nic", "type": "boolean", "default": "1"},
+      {"field": "e_waybill_threshold_for_intrastate_rows", "type": "owned_collection", "target": "indian_accounting.state_wise_e_waybill_threshold"},
+      {"field": "nil_exempt_e_invoice_treatment", "type": "enumeration", "values": ["Do Not Generate", "Generate with Other Charges", "Generate with Taxable Values"], "default": "Do Not Generate"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.goods_and_services_tax_unit_of_measure_map",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "required": true, "unique": true},
+      {"field": "goods_and_services_tax_unit_of_measure", "type": "suggested_text", "required": true}
+    ]
+  },
+  {
+    "entity": "indian_accounting.india_compliance_taxes_and_charges",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "charge_type", "type": "enumeration", "required": true, "values": ["", "Actual", "On Net Total", "On Item Quantity"], "default": "On Net Total"},
+      {"field": "account_head_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "rate", "type": "decimal"},
+      {"field": "item_wise_tax_rates", "type": "expression_or_structured_text"},
+      {"field": "tax_amount", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "company_currency_total", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "goods_and_services_tax_tax_type", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "indian_accounting.input_service_distributor_distribution_invoice",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "purchase_user", "level": 0, "allows": ["read", "report", "print", "email"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "auditor", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["input service distributor distribution invoice numbering prefix + two-digit day + four-digit year + configured sequence"]},
+      {"field": "is_credit_note", "type": "boolean", "default": "0"},
+      {"field": "taxes_rows", "type": "owned_collection", "target": "indian_accounting.input_service_distributor_tax_item"},
+      {"field": "is_ineligible_for_input_tax_credit", "type": "boolean", "default": "0"},
+      {"field": "total_tax", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "indian_accounting.input_service_distributor_distribution_invoice", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "credit_note_against_identifier", "type": "entity_reference", "target": "indian_accounting.input_service_distributor_distribution_invoice"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "company_address_identifier", "type": "entity_reference", "target": "contacts.address", "required": true},
+      {"field": "party_address_identifier", "type": "entity_reference", "target": "contacts.address", "required": true},
+      {"field": "party_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "party_address_display", "type": "formatted_text", "form_read_only": true},
+      {"field": "company_address_display", "type": "formatted_text", "form_read_only": true},
+      {"field": "company_goods_and_services_tax_registration_number", "type": "short_text", "form_read_only": true},
+      {"field": "company_point_of_sale", "type": "short_text", "form_read_only": true},
+      {"field": "party_goods_and_services_tax_registration_number", "type": "short_text", "form_read_only": true},
+      {"field": "party_point_of_sale", "type": "short_text", "form_read_only": true},
+      {"field": "party_identifier", "type": "selected_entity_reference", "target_selected_by": "party_type_identifier"},
+      {"field": "source_items_rows", "type": "owned_collection", "target": "indian_accounting.input_service_distributor_source_item", "required": true},
+      {"field": "remarks", "type": "text"},
+      {"field": "branch_turnover", "type": "monetary_amount"},
+      {"field": "total_turnover", "type": "monetary_amount"},
+      {"field": "distribution_ratio", "type": "decimal", "form_read_only": true},
+      {"field": "is_against_party", "type": "boolean", "default": "0"},
+      {"field": "purchase_invoice_identifier", "type": "entity_reference", "target": "accounting.purchase_invoice"},
+      {"field": "total_expense", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "grand_total", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "input_service_distributor_provisional_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "input_service_distributor_provisional_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "party_address_copy", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "indian_accounting.input_service_distributor_recipient_invoice",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "purchase_user", "level": 0, "allows": ["read", "report", "print", "email"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "auditor", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["input service distributor recipient invoice numbering prefix + four-digit year + configured sequence"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "is_credit_note", "type": "boolean", "default": "0"},
+      {"field": "credit_note_against_identifier", "type": "entity_reference", "target": "indian_accounting.input_service_distributor_recipient_invoice"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "indian_accounting.input_service_distributor_recipient_invoice", "form_read_only": true},
+      {"field": "is_against_party", "type": "boolean", "default": "0"},
+      {"field": "party_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "party_identifier", "type": "selected_entity_reference", "target_selected_by": "party_type_identifier"},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "branch_turnover", "type": "monetary_amount"},
+      {"field": "total_turnover", "type": "monetary_amount"},
+      {"field": "distribution_ratio", "type": "decimal", "form_read_only": true},
+      {"field": "source_items_rows", "type": "owned_collection", "target": "indian_accounting.input_service_distributor_source_item", "required": true},
+      {"field": "taxes_rows", "type": "owned_collection", "target": "indian_accounting.input_service_distributor_tax_item"},
+      {"field": "is_ineligible_for_input_tax_credit", "type": "boolean", "default": "0"},
+      {"field": "total_tax", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "grand_total", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "party_address_identifier", "type": "entity_reference", "target": "contacts.address", "required": true},
+      {"field": "party_goods_and_services_tax_registration_number", "type": "short_text", "form_read_only": true},
+      {"field": "party_point_of_sale", "type": "short_text", "form_read_only": true},
+      {"field": "party_address_display", "type": "formatted_text", "form_read_only": true},
+      {"field": "company_address_identifier", "type": "entity_reference", "target": "contacts.address", "required": true},
+      {"field": "company_address_display", "type": "formatted_text", "form_read_only": true},
+      {"field": "remarks", "type": "text"},
+      {"field": "input_service_distributor_distribution_invoice_reference_identifier", "type": "entity_reference", "target": "indian_accounting.input_service_distributor_distribution_invoice"},
+      {"field": "total_expense", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "input_service_distributor_provisional_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "input_service_distributor_provisional_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "external_input_service_distributor_invoice_number", "type": "short_text"},
+      {"field": "input_tax_credit_claim_period", "type": "suggested_text", "editable_after_posting": true},
+      {"field": "company_goods_and_services_tax_registration_number", "type": "short_text", "form_read_only": true},
+      {"field": "company_point_of_sale", "type": "short_text", "form_read_only": true},
+      {"field": "reconciliation_status", "type": "enumeration", "form_read_only": true, "values": ["", "Not Applicable", "Reconciled", "Unreconciled", "Ignored"]},
+      {"field": "company_address_copy", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "indian_accounting.input_service_distributor_source_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "total_integrated_goods_and_services_tax", "type": "monetary_amount", "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_central_goods_and_services_tax", "type": "monetary_amount", "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_state_goods_and_services_tax", "type": "monetary_amount", "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_cess", "type": "monetary_amount", "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_cess_non_advol", "type": "monetary_amount", "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "distributed_integrated_goods_and_services_tax", "type": "monetary_amount", "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "distributed_central_goods_and_services_tax", "type": "monetary_amount", "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "distributed_state_goods_and_services_tax", "type": "monetary_amount", "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "distributed_cess", "type": "monetary_amount", "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "distributed_cess_non_advol", "type": "monetary_amount", "default": "0", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "item_name", "type": "short_text"},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "purchase_invoice_item_identifier", "type": "entity_reference", "target": "accounting.purchase_invoice_item"},
+      {"field": "expense_head_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "goods_and_services_tax_harmonized_system_of_nomenclature_code", "type": "short_text", "form_read_only": true},
+      {"field": "distributed_expense", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_expense", "type": "monetary_amount", "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}}
+    ]
+  },
+  {
+    "entity": "indian_accounting.input_service_distributor_tax_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "goods_and_services_tax_tax_type", "type": "short_text", "form_read_only": true},
+      {"field": "tax_amount", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "account_head_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "description", "type": "text"},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.permanent_account_number",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "delete", "report", "export", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "report", "export", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "report", "export", "share"]}
+    ],
+    "fields": [
+      {"field": "permanent_account_number", "type": "short_text", "required": true, "unique": true},
+      {"field": "permanent_account_number_status", "type": "short_text"},
+      {"field": "last_updated_on", "type": "date_and_time"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.purchase_reconciliation_tool",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "company_goods_and_services_tax_registration_number", "type": "suggested_text"},
+      {"field": "period", "type": "enumeration", "required": true, "values": ["", "This Month", "This Quarter to Last Month", "This Quarter", "This Fiscal Year to Last Month", "This Fiscal Year", "Last Month", "Last Quarter", "Last Fiscal Year", "Custom"]},
+      {"field": "from_date", "type": "calendar_date"},
+      {"field": "to_date", "type": "calendar_date"},
+      {"field": "goods_and_services_tax_return", "type": "enumeration", "values": ["GSTR 2B", "Both GSTR 2A & 2B"]},
+      {"field": "include_ignored", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "reconciliation structured markup"},
+      {"control": "formatted_information", "purpose": "no reconciliation data"},
+      {"control": "formatted_information", "purpose": "not reconciled"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.state_wise_e_waybill_threshold",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "state", "type": "suggested_text", "required": true},
+      {"field": "intrastate_applicable", "type": "boolean", "default": "1"},
+      {"field": "intrastate_threshold", "type": "monetary_amount"}
+    ]
+  },
+  {
+    "entity": "indian_accounting.turnover_record",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "report"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "auditor", "level": 0, "allows": ["read", "report", "export", "print", "email"]}
+    ],
+    "fields": [
+      {"field": "from_date", "type": "calendar_date", "required": true},
+      {"field": "to_date", "type": "calendar_date", "required": true},
+      {"field": "amount", "type": "monetary_amount", "required": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "goods_and_services_tax_registration_number", "type": "suggested_text"},
+      {"field": "goods_and_services_tax_state", "type": "suggested_text", "required": true},
+      {"field": "period_state", "type": "short_text", "form_read_only": true},
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["turnover record numbering prefix + two-digit year + configured sequence"]}
+    ]
+  }
+]

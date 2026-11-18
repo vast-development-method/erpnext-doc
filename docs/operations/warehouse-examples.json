@@ -1,0 +1,282 @@
+[
+  {
+    "operation": "Share one destination capacity across source warehouses",
+    "inputs": {
+      "offered_units_by_source": [
+        10,
+        10
+      ],
+      "destination_capacity": 10
+    },
+    "expected": {
+      "units_assigned_to_destination": 10
+    }
+  },
+  {
+    "operation": "Keep rejected tracking identities on the first receipt split",
+    "inputs": {
+      "accepted": 5,
+      "rejected": 2,
+      "capacity_by_priority": [
+        3,
+        10
+      ]
+    },
+    "expected": {
+      "accepted_by_split": [
+        3,
+        2
+      ],
+      "rejected_by_split": [
+        2,
+        0
+      ],
+      "rejected_bundle_present_by_split": [
+        true,
+        false
+      ]
+    }
+  },
+  {
+    "operation": "Partition selected batch quantities among destination warehouses",
+    "inputs": {
+      "source_units_by_batch": [
+        10,
+        10
+      ],
+      "selected_batch": 2,
+      "transfer_units": 5,
+      "target_capacity": [
+        3,
+        2
+      ]
+    },
+    "expected": {
+      "source_units_by_batch": [
+        10,
+        5
+      ],
+      "target_units_of_selected_batch": [
+        3,
+        2
+      ],
+      "first_bundle_identity_retained": true,
+      "row_identities_stable_on_resave": true
+    }
+  },
+  {
+    "operation": "Skip a location unable to accept one whole package",
+    "inputs": {
+      "whole_bags": 2,
+      "stock_units_per_bag": 1000,
+      "free_stock_units_by_priority": [
+        500,
+        2000
+      ]
+    },
+    "expected": {
+      "allocated_bags_by_priority": [
+        0,
+        2
+      ],
+      "allocated_stock_units": 2000
+    }
+  },
+  {
+    "operation": "Allocate repeated components to their distinct bundle rows",
+    "inputs": {
+      "ordered_bundles": 3,
+      "same_component_per_occurrence": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "stock_units_per_occurrence": [
+        3,
+        6
+      ],
+      "order_picked_bundles": 3,
+      "delivery_bundles": 3
+    }
+  },
+  {
+    "operation": "Release the open reservations of a cancelled pick",
+    "inputs": {
+      "ordered_quantity": 10,
+      "submitted_pick": true,
+      "created_reservation_from_pick": true,
+      "action": "cancel_pick"
+    },
+    "expected": {
+      "submitted_reservations_from_pick": 0
+    }
+  },
+  {
+    "operation": "Deliver only complete bundles from a pick",
+    "inputs": {
+      "first_pick_content": "component A only",
+      "second_pick_content": "component B only",
+      "source_for_delivery": "second pick"
+    },
+    "expected": {
+      "generate_delivery": "rejected_no_complete_bundle"
+    }
+  },
+  {
+    "operation": "Exclude already delivered serial identities",
+    "inputs": {
+      "picked_serial_ordinals": [
+        1,
+        2,
+        3
+      ],
+      "first_delivery_ordinals": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "second_delivery_quantity": 1,
+      "second_delivery_ordinals": [
+        3
+      ]
+    }
+  },
+  {
+    "operation": "Split a demand row by available warehouse stock",
+    "inputs": {
+      "requested": 1000,
+      "stock_by_warehouse": [
+        5,
+        10
+      ]
+    },
+    "expected": {
+      "first_pick_quantity": 5,
+      "second_pick_quantity": 10
+    }
+  },
+  {
+    "operation": "Convert package weight to the delivery unit",
+    "inputs": {
+      "box_quantity": 2,
+      "units_per_box": 12,
+      "kilograms_per_stock_unit": 1
+    },
+    "expected": {
+      "package_net_weight_in_kilograms": 24
+    }
+  },
+  {
+    "operation": "Keep component identities stable across delivery edits",
+    "inputs": {
+      "submitted_packing_slip": true,
+      "action": "append unrelated line to draft delivery"
+    },
+    "expected": {
+      "packed_row_identities_preserved": true
+    }
+  },
+  {
+    "operation": "Accumulate all packing rows claiming the same delivery line",
+    "inputs": {
+      "source_row_quantity": 5,
+      "new_rows_for_same_reference": [
+        4,
+        4
+      ]
+    },
+    "expected": {
+      "insert_slip": "rejected"
+    }
+  },
+  {
+    "operation": "Reject independent slip cancellation after delivery submission",
+    "inputs": {
+      "delivery_quantity": 5,
+      "packing_slip_submitted": true,
+      "delivery_submitted": true
+    },
+    "expected": {
+      "independent_slip_cancel": "rejected",
+      "slip_state_after_delivery_cancel": "cancelled"
+    }
+  },
+  {
+    "operation": "Enforce a single trip per delivery",
+    "inputs": {
+      "note_has_active_trip": true,
+      "attempt_second_trip": true,
+      "note_reassigned_before_original_trip_cancelled": true
+    },
+    "expected": {
+      "second_trip_creation": "rejected",
+      "new_owner_survives_original_trip_cancellation": true
+    }
+  },
+  {
+    "operation": "Accept a driver licence valid through the departure day",
+    "inputs": {
+      "driver_licence_expiry": "departure date"
+    },
+    "expected": {
+      "trip_state": "submitted"
+    }
+  },
+  {
+    "operation": "Release the delivery when a stop is removed",
+    "inputs": {
+      "initial_note_count": 2,
+      "remove_second_stop": true
+    },
+    "expected": {
+      "second_note_trip_link": null,
+      "remaining_trip_can_submit_and_cancel": true
+    }
+  },
+  {
+    "operation": "Sum distances over route segments bounded by fixed stops",
+    "inputs": {
+      "locked_stops": [
+        true,
+        false
+      ],
+      "leg_metres": 1000,
+      "distance_factor": 1
+    },
+    "expected": {
+      "total_distance": 3000
+    }
+  },
+  {
+    "operation": "Estimate arrival at every stop on a constrained route",
+    "inputs": {
+      "locked_stops": [
+        false,
+        true
+      ],
+      "leg_metres": 1000,
+      "leg_seconds": 600,
+      "distance_factor": 1
+    },
+    "expected": {
+      "last_stop_has_arrival": true,
+      "last_stop_distance": 1000
+    }
+  },
+  {
+    "operation": "Respect existing delivery transport details when attaching a trip",
+    "inputs": {
+      "existing_vehicle": "MH12AB1234",
+      "existing_transport_ref": "LR-777",
+      "action": "link then delete draft trip"
+    },
+    "expected": {
+      "retained_vehicle": "MH12AB1234",
+      "retained_transport_ref": "LR-777",
+      "trip_driver_after_delete": null,
+      "trip_id_after_delete": null
+    }
+  }
+]

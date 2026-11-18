@@ -1,0 +1,248 @@
+[
+  {
+    "entity": "quality_management.non_conformance",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "employee", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["create", "read", "write"]}
+    ],
+    "fields": [
+      {"field": "subject", "type": "short_text", "required": true},
+      {"field": "procedure_identifier", "type": "entity_reference", "target": "quality_management.quality_procedure", "required": true},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Open", "Resolved", "Cancelled"]},
+      {"field": "details", "type": "formatted_text"},
+      {"field": "process_owner", "type": "short_text", "form_read_only": true, "copy_from": ["procedure_identifier", "process_owner_identifier"]},
+      {"field": "full_name", "type": "short_text", "form_read_only": true, "copy_from": ["procedure_identifier", "process_owner_full_name"]},
+      {"field": "corrective_action", "type": "formatted_text"},
+      {"field": "preventive_action", "type": "formatted_text"}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_action",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["print", "read", "report"]}
+    ],
+    "fields": [
+      {"field": "goal_identifier", "type": "entity_reference", "target": "quality_management.quality_goal", "copy_from": ["review_identifier", "goal_identifier"]},
+      {"field": "date", "type": "calendar_date", "form_read_only": true, "default": {"context_default": "effective_date"}},
+      {"field": "procedure_identifier", "type": "entity_reference", "target": "quality_management.quality_procedure", "copy_from": ["review_identifier", "procedure_identifier"], "copy_only_when_empty": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Open", "Completed"], "default": "Open"},
+      {"field": "corrective_preventive", "type": "enumeration", "required": true, "values": ["Corrective", "Preventive"], "default": "Corrective"},
+      {"field": "resolutions_rows", "type": "owned_collection", "target": "quality_management.quality_action_resolution"},
+      {"field": "review_identifier", "type": "entity_reference", "target": "quality_management.quality_review"},
+      {"field": "feedback_identifier", "type": "entity_reference", "target": "quality_management.quality_feedback"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Resolution"}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_action_resolution",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "problem", "type": "long_text"},
+      {"field": "resolution", "type": "formatted_text"},
+      {"field": "status", "type": "enumeration", "values": ["Open", "Completed"]},
+      {"field": "responsible_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "completion_by", "type": "calendar_date"}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_feedback",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["print", "read", "report"]}
+    ],
+    "fields": [
+      {"field": "template_identifier", "type": "entity_reference", "target": "quality_management.quality_feedback_template", "required": true},
+      {"field": "parameters_rows", "type": "owned_collection", "target": "quality_management.quality_feedback_parameter", "copy_from": ["template_identifier", "feedback_values"]},
+      {"field": "document_type", "type": "enumeration", "required": true, "values": ["User", "Customer"]},
+      {"field": "document_name_identifier", "type": "selected_entity_reference", "target_selected_by": "document_type", "required": true}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_feedback_parameter",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "parameter", "type": "short_text", "form_read_only": true},
+      {"field": "rating", "type": "enumeration", "values": ["", "1", "2", "3", "4", "5"]},
+      {"field": "feedback", "type": "formatted_text"}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_feedback_template",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "template", "type": "short_text", "required": true, "unique": true},
+      {"field": "parameters_rows", "type": "owned_collection", "target": "quality_management.quality_feedback_template_parameter", "required": true}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_feedback_template_parameter",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "parameter", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_goal",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["print", "read", "report"]}
+    ],
+    "fields": [
+      {"field": "frequency", "type": "enumeration", "values": ["None", "Daily", "Weekly", "Monthly", "Quarterly"], "default": "None"},
+      {"field": "procedure_identifier", "type": "entity_reference", "target": "quality_management.quality_procedure"},
+      {"field": "date", "type": "enumeration", "values": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"], "visible_when": ["or", ["coercive_equal", ["current_field", "frequency"], ["literal", "Monthly"]], ["coercive_equal", ["current_field", "frequency"], ["literal", "Quarterly"]]]},
+      {"field": "weekday", "type": "enumeration", "values": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "visible_when": ["coercive_equal", ["current_field", "frequency"], ["literal", "Weekly"]]},
+      {"field": "objectives_rows", "type": "owned_collection", "target": "quality_management.quality_goal_objective"},
+      {"field": "goal", "type": "short_text", "required": true, "unique": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Objectives"}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_goal_objective",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "objective", "type": "text", "required": true},
+      {"field": "target", "type": "short_text"},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure"}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_meeting",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["print", "read", "report"]}
+    ],
+    "fields": [
+      {"field": "status", "type": "enumeration", "values": ["Open", "Closed"], "default": "Open"},
+      {"field": "minutes_rows", "type": "owned_collection", "target": "quality_management.quality_meeting_minutes"},
+      {"field": "agenda_rows", "type": "owned_collection", "target": "quality_management.quality_meeting_agenda"}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_meeting_agenda",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "agenda", "type": "formatted_text"}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_meeting_minutes",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "minute", "type": "formatted_text"},
+      {"field": "document_type", "type": "enumeration", "required": true, "values": ["Quality Review", "Quality Action", "Quality Feedback"]},
+      {"field": "document_name_identifier", "type": "selected_entity_reference", "target_selected_by": "document_type"}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_procedure",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "hierarchy_parent": "parent_quality_procedure_identifier",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["print", "read", "report"]}
+    ],
+    "fields": [
+      {"field": "parent_quality_procedure_identifier", "type": "entity_reference", "target": "quality_management.quality_procedure", "omit_target_user_filter": true},
+      {"field": "is_group", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_read_only": true, "form_hidden": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_read_only": true, "form_hidden": true},
+      {"field": "previous_parent_identifier", "type": "short_text", "form_read_only": true, "form_hidden": true},
+      {"field": "processes_rows", "type": "owned_collection", "target": "quality_management.quality_procedure_process"},
+      {"field": "quality_procedure_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "process_owner_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "process_owner_full_name", "type": "short_text", "form_hidden": true, "copy_from": ["process_owner_identifier", "full_name"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Parent"}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_procedure_process",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "process_description", "type": "formatted_text"},
+      {"field": "procedure_identifier", "type": "entity_reference", "target": "quality_management.quality_procedure"}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_review",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "quality_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["print", "read", "report"]}
+    ],
+    "fields": [
+      {"field": "date", "type": "calendar_date", "form_read_only": true, "default": {"context_default": "effective_date"}},
+      {"field": "procedure_identifier", "type": "entity_reference", "target": "quality_management.quality_procedure", "form_read_only": true, "copy_from": ["goal_identifier", "procedure_identifier"]},
+      {"field": "additional_information", "type": "text"},
+      {"field": "reviews_rows", "type": "owned_collection", "target": "quality_management.quality_review_objective"},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Open", "Passed", "Failed"], "default": "Open"},
+      {"field": "goal_identifier", "type": "entity_reference", "target": "quality_management.quality_goal", "required": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Review"},
+      {"control": "section", "purpose": "Notes"}
+    ]
+  },
+  {
+    "entity": "quality_management.quality_review_objective",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "objective", "type": "text", "form_read_only": true},
+      {"field": "target", "type": "short_text", "form_read_only": true},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true, "copy_from": ["target_unit"]},
+      {"field": "review", "type": "formatted_text"},
+      {"field": "status", "type": "enumeration", "values": ["Open", "Passed", "Failed"], "default": "Open"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Review"}
+    ]
+  }
+]

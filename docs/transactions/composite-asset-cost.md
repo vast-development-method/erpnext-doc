@@ -1,0 +1,26 @@
+# Composite asset capitalization
+
+One capitalization links a target asset and item, a posting instant, company, optional finance book and three source collections. Stock rows identify item, warehouse, stock quantity, inventory dimensions and optional serial/batch bundle. Asset rows name individual assets and optional row finance books. Service rows identify service, quantity, rate, expense account, cost center and project. The target asset's cost, source asset's disposal history, inventory valuation and general ledger each preserve a different measurement.
+
+## Admission and valuation
+
+1. Require a draft composite target belonging to the company and target fixed-asset item. Refuse a sold, scrapped or capitalized target. At submission require at least one stock, asset or service row.
+2. Require a stock item and positive stock quantity for each material, and a service that is neither a stock nor fixed-asset item with positive quantity and rate. Validate item availability and required inventory dimensions. Source assets must be distinct, submitted, from the same company, eligible for disposal and different from the target. A posting before the last booked depreciation of a source asset fails.
+3. Compute each stock amount as stock quantity times valuation rate at row precision. For repeated untracked rows of the same item and warehouse, evaluate the inventory issue cost of the *cumulative* quantity up to each row. The difference between successive cumulative values belongs to that row. A one-unit FIFO layer at 100.00 followed by one at 200.00 gives two one-unit rows of 100.00 and 200.00. Using the first preview rate twice understates the new asset by 100.00. Rows with a serial number, batch or bundle follow their identity-specific path.
+4. Round each consumed asset value at its field precision. Round each service quantity times rate at row precision. Round each of the three subtotals, then round their sum at total-value precision. Target incoming rate equals total value. On submission add that total to the target's purchase amount, net purchase amount and total asset cost. The target is subsequently submitted in its own lifecycle.
+
+## Posting and replay
+
+Submit first issues the stock and records its actual value difference. It depreciates eligible consumed assets through the posting date, records their disposal date and sets status to `Capitalized`. Construct ledger rows as follows.
+
+| Source | Credit | Debit or other consequence |
+|---|---|---|
+| Material consumed | Absolute outgoing stock value difference to inventory control under perpetual accounting, or company default expense under periodic accounting | Stock quantity decreases in either mode. Carry each row's cost center and project. |
+| Ordinary consumed asset | Source fixed-asset account at gross carrying cost | Debit accumulated depreciation. Transfer at the consumed line's value using the disposal gain/loss account for any difference from carrying value. Use the row book or inherit the header book. |
+| Composite component | No further component-disposal journal in this operation | The component value still contributes to the target asset record, and its disposal status changes. A component-only capitalization can therefore have zero new general ledger entries. |
+| Service | Source service expense at its line amount | No stock or payable movement here. The expense account identifies the cost being reclassified. |
+| Target | — | Debit the **net credits less debits actually emitted**, at ledger precision, to the target fixed-asset account, or the configured capital-work-in-progress account when enabled and available. Omit a zero net line. |
+
+A worked example uses two stock layers of 100.00 and 200.00, installation service of 40.00, and an ordinary asset with cost 1,000.00 and accumulated depreciation 400.00. Its book value at transfer is 600.00. Debit composite work in progress 940.00 and accumulated depreciation 400.00. Credit source asset cost 1,000.00, inventory 300.00 and service expense 40.00. Both sides total 1,340.00. Two physical units leave stock. The component asset history and the new target identity still reconcile when both fixed-asset accounts map to one chart account. A periodic inventory policy changes the 300.00 credit destination to default expense. See `FIN-005`–`FIN-007` in the [vectors](examples/financial-decisions.json).
+
+A later stock valuation correction recalculates the affected row and all totals. If the rounded total difference is zero the update returns. If the target is still draft, persist the revised row and capitalization and add only the difference to the target. A material cost difference with a submitted target raises an error instructing the operator to cancel target and capitalization before reposting. Regenerating the accounting rows alone must not dispose of an asset or generate depreciation twice. Cancellation first cancels a submitted target if necessary, reverses the voucher's stock and general ledger effects, reposts future effects, restores source status and depreciation schedule where applicable, clears disposal date, and subtracts the capitalization total from target cost. Preserve linkage to the capitalization and the disposal-generated journal when reversing. Stock lookup authority can differ from capitalization form authority.

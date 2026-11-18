@@ -1,0 +1,266 @@
+[
+  {
+    "entity": "customer_support.issue",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "support_team", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["select"]},
+      {"role": "human_resources_user", "level": 0, "allows": ["select"]},
+      {"role": "projects_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "write_once": true, "omit_on_copy": true, "values": ["issue numbering prefix + four-digit year + configured sequence"]},
+      {"field": "subject", "type": "short_text", "required": true},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "searchable": true},
+      {"field": "raised_by", "type": "short_text", "visible_when": ["current_field", "is_new_record"]},
+      {"field": "status", "type": "enumeration", "omit_on_copy": true, "searchable": true, "values": ["Open", "Replied", "On Hold", "Resolved", "Closed"], "default": "Open"},
+      {"field": "priority_identifier", "type": "entity_reference", "target": "customer_support.issue_priority"},
+      {"field": "issue_type_identifier", "type": "entity_reference", "target": "customer_support.issue_type"},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "service_level_agreement_identifier", "type": "entity_reference", "target": "customer_support.service_level_agreement"},
+      {"field": "response_by", "type": "date_and_time", "form_read_only": true, "visible_when": ["and", ["coercive_unequal", ["current_field", "status"], ["literal", "Replied"]], ["current_field", "service_level_agreement_identifier"]]},
+      {"field": "first_responded_on", "type": "date_and_time"},
+      {"field": "lead_identifier", "type": "entity_reference", "target": "sales_relationships.lead"},
+      {"field": "contact_identifier", "type": "entity_reference", "target": "contacts.contact"},
+      {"field": "email_account_identifier", "type": "entity_reference", "target": "mail.email_account"},
+      {"field": "customer_name", "type": "short_text", "form_read_only": true},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "copy_from": ["email_account_identifier", "company"], "copy_only_when_empty": true},
+      {"field": "resolution_details", "type": "formatted_text", "omit_on_copy": true, "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"field": "opening_date", "type": "calendar_date", "form_read_only": true, "omit_on_copy": true, "default": {"context_default": "effective_date"}},
+      {"field": "opening_time", "type": "time_of_day", "form_read_only": true, "omit_on_copy": true},
+      {"field": "content_type", "type": "short_text", "form_hidden": true},
+      {"field": "attachment", "type": "file_reference", "form_hidden": true},
+      {"field": "via_customer_portal", "type": "boolean", "default": "0"},
+      {"field": "service_level_agreement_creation", "type": "date_and_time", "form_read_only": true, "form_hidden": true},
+      {"field": "issue_split_from_identifier", "type": "entity_reference", "target": "customer_support.issue", "form_read_only": true},
+      {"field": "average_response_time", "type": "duration", "form_read_only": true},
+      {"field": "resolution_time", "type": "duration", "form_read_only": true},
+      {"field": "user_resolution_time", "type": "duration", "form_read_only": true},
+      {"field": "on_hold_since", "type": "date_and_time", "form_read_only": true, "form_hidden": true},
+      {"field": "total_hold_time", "type": "duration", "form_read_only": true},
+      {"field": "agreement_status", "type": "enumeration", "form_read_only": true, "values": ["First Response Due", "Resolution Due", "Fulfilled", "Failed"], "default": "First Response Due", "visible_when": ["current_field", "service_level_agreement_identifier"]},
+      {"field": "first_response_time", "type": "duration", "form_read_only": true},
+      {"field": "service_level_agreement_resolution_by", "type": "date_and_time", "form_read_only": true, "visible_when": ["and", ["coercive_unequal", ["current_field", "status"], ["literal", "Replied"]], ["current_field", "service_level_agreement_identifier"]]},
+      {"field": "service_level_agreement_resolution_date", "type": "date_and_time", "form_read_only": true, "omit_on_copy": true, "visible_when": ["not", ["current_field", "is_new_record"]]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Details", "expanded_when": ["coercive_unequal", ["current_field", "status"], ["literal", "Closed"]]},
+      {"control": "section", "purpose": "Service Level Agreement Details"},
+      {"control": "section", "purpose": "Response Details"},
+      {"control": "section", "purpose": "Reference"},
+      {"control": "section", "purpose": "Resolution Details"},
+      {"control": "action", "purpose": "Reset Service Level Agreement", "visible_when": ["current_field", "service_level_agreement_identifier"]}
+    ]
+  },
+  {
+    "entity": "customer_support.issue_priority",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "support_team", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "customer_support.issue_type",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "support_team", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "customer_support.pause_service_level_agreement_on_status",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "status", "type": "enumeration", "required": true}
+    ]
+  },
+  {
+    "entity": "customer_support.service_day",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "workday", "type": "enumeration", "required": true, "values": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]},
+      {"field": "start_time", "type": "time_of_day", "required": true},
+      {"field": "end_time", "type": "time_of_day", "required": true}
+    ]
+  },
+  {
+    "entity": "customer_support.service_level_agreement",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "service_level", "type": "short_text", "required": true, "write_once": true},
+      {"field": "holiday_list_identifier", "type": "entity_reference", "target": "organization.holiday_list", "required": true},
+      {"field": "start_date", "type": "calendar_date"},
+      {"field": "end_date", "type": "calendar_date"},
+      {"field": "support_and_resolution_rows", "type": "owned_collection", "target": "customer_support.service_day", "required": true},
+      {"field": "priorities_rows", "type": "owned_collection", "target": "customer_support.service_level_priority", "required": true},
+      {"field": "entity_identifier", "type": "selected_entity_reference", "target_selected_by": "entity_type", "visible_when": ["not", ["current_field", "default_service_level_agreement"]]},
+      {"field": "entity_type", "type": "enumeration", "values": ["", "Customer", "Customer Group", "Territory"], "visible_when": ["not", ["current_field", "default_service_level_agreement"]]},
+      {"field": "default_service_level_agreement", "type": "boolean", "default": "0"},
+      {"field": "default_priority_identifier", "type": "entity_reference", "target": "customer_support.issue_priority", "form_read_only": true},
+      {"field": "pause_service_level_agreement_on_rows", "type": "owned_collection", "target": "customer_support.pause_service_level_agreement_on_status"},
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "write_once": true},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "service_level_agreement_fulfilled_on_rows", "type": "owned_collection", "target": "customer_support.service_level_agreement_fulfilled_on_status", "required": true},
+      {"field": "apply_service_level_agreement_for_resolution", "type": "boolean", "default": "1"},
+      {"field": "condition", "type": "expression_or_structured_text", "visible_when": ["not", ["current_field", "default_service_level_agreement"]]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Valid From", "visible_when": ["current_field", "document_type_identifier"]},
+      {"control": "section", "purpose": "Response and Resolution"},
+      {"control": "section", "purpose": "Working Hours"},
+      {"control": "section", "purpose": "Status Details", "visible_when": ["field_has_value", "document_type_identifier"]},
+      {"control": "section", "purpose": "Assignment Conditions", "visible_when": ["field_has_value", "document_type_identifier"]}
+    ]
+  },
+  {
+    "entity": "customer_support.service_level_agreement_fulfilled_on_status",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "status", "type": "enumeration", "required": true}
+    ]
+  },
+  {
+    "entity": "customer_support.service_level_priority",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "priority_identifier", "type": "entity_reference", "target": "customer_support.issue_priority", "required": true},
+      {"field": "resolution_time", "type": "duration"},
+      {"field": "default_priority", "type": "boolean", "default": "0"},
+      {"field": "response_time", "type": "duration", "required": true}
+    ]
+  },
+  {
+    "entity": "customer_support.support_search_source",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "source_name", "type": "short_text"},
+      {"field": "source_type", "type": "enumeration", "required": true, "values": ["API", "Link"]},
+      {"field": "service_base_address", "type": "short_text"},
+      {"field": "query_route", "type": "short_text"},
+      {"field": "search_term_param_name", "type": "short_text"},
+      {"field": "response_result_key_path", "type": "short_text"},
+      {"field": "post_route", "type": "short_text"},
+      {"field": "post_route_key_list", "type": "short_text"},
+      {"field": "post_title_key", "type": "short_text"},
+      {"field": "post_description_key", "type": "short_text"},
+      {"field": "source_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "result_title_field", "type": "short_text"},
+      {"field": "result_preview_field", "type": "short_text"},
+      {"field": "result_route_field", "type": "short_text"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "API", "visible_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "API"]]},
+      {"control": "section", "purpose": "Query Options", "visible_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "API"]]},
+      {"control": "section", "purpose": "Response Options", "visible_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "API"]]},
+      {"control": "section", "purpose": "Link Options", "visible_when": ["coercive_equal", ["current_field", "source_type"], ["literal", "Link"]]}
+    ]
+  },
+  {
+    "entity": "customer_support.support_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "close_issue_after_days", "type": "integer", "nonnegative": true, "default": "7"},
+      {"field": "get_started_sections", "type": "expression_or_structured_text"},
+      {"field": "show_latest_forum_posts", "type": "boolean", "default": "0"},
+      {"field": "forum_resource_address", "type": "short_text"},
+      {"field": "get_latest_query", "type": "short_text"},
+      {"field": "response_key_list", "type": "short_text"},
+      {"field": "post_title_key", "type": "short_text"},
+      {"field": "post_description_key", "type": "short_text"},
+      {"field": "post_route_key", "type": "short_text"},
+      {"field": "post_route_string", "type": "short_text"},
+      {"field": "search_apis_rows", "type": "owned_collection", "target": "customer_support.support_search_source"},
+      {"field": "track_service_level_agreement", "type": "boolean", "default": "0"},
+      {"field": "allow_resetting_service_level_agreement", "type": "boolean", "default": "0", "visible_when": ["current_field", "track_service_level_agreement"]},
+      {"field": "greeting_title", "type": "short_text", "default": "We're here to help"},
+      {"field": "greeting_subtitle", "type": "short_text", "default": "Browse help topics"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Issues"},
+      {"control": "section", "purpose": "Support Portal"},
+      {"control": "section", "purpose": "Forum Posts", "visible_when": ["field_has_value", "show_latest_forum_posts"]},
+      {"control": "section", "purpose": "Search APIs"},
+      {"control": "section", "purpose": "Service Level Agreements"},
+      {"control": "section", "purpose": "Greetings Section"}
+    ]
+  },
+  {
+    "entity": "customer_support.warranty_claim",
+    "kind": "independent_record",
+    "import_supported": true,
+    "grants": [
+      {"role": "maintenance_user", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "write_once": true, "omit_on_copy": true, "values": ["warranty claim numbering prefix + four-digit year + configured sequence"]},
+      {"field": "status", "type": "enumeration", "required": true, "omit_on_copy": true, "searchable": true, "values": ["", "Open", "Closed", "Work In Progress", "Cancelled"], "default": "Open"},
+      {"field": "complaint_date", "type": "calendar_date", "required": true, "searchable": true, "default": {"context_default": "effective_date"}},
+      {"field": "serial_number_identifier", "type": "entity_reference", "target": "inventory.serial_no", "searchable": true},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "required": true, "searchable": true},
+      {"field": "complaint", "type": "formatted_text", "required": true, "omit_on_copy": true},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "searchable": true, "copy_from": ["serial_number_identifier", "item_identifier"], "copy_only_when_empty": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true, "copy_from": ["item_identifier", "item_name"], "visible_when": ["current_field", "item_identifier"]},
+      {"field": "description", "type": "text", "form_read_only": true, "copy_from": ["item_identifier", "description"], "visible_when": ["current_field", "item_identifier"]},
+      {"field": "warranty_amc_status", "type": "enumeration", "searchable": true, "values": ["", "Under Warranty", "Out of Warranty", "Under AMC", "Out of AMC"], "copy_from": ["serial_number_identifier", "maintenance_status"], "copy_only_when_empty": true},
+      {"field": "warranty_expiry_date", "type": "calendar_date", "copy_from": ["serial_number_identifier", "warranty_expiry_date"], "copy_only_when_empty": true},
+      {"field": "amc_expiry_date", "type": "calendar_date", "copy_from": ["serial_number_identifier", "amc_expiry_date"], "copy_only_when_empty": true},
+      {"field": "resolution_date", "type": "date_and_time", "omit_on_copy": true, "searchable": true},
+      {"field": "resolved_by_identifier", "type": "entity_reference", "target": "information_management.user", "omit_on_copy": true, "searchable": true, "omit_target_user_filter": true},
+      {"field": "resolution_details", "type": "text", "omit_on_copy": true},
+      {"field": "customer_name", "type": "short_text", "form_read_only": true, "copy_from": ["customer_identifier", "customer_name"], "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "contact_person_identifier", "type": "entity_reference", "target": "contacts.contact"},
+      {"field": "contact_display", "type": "text", "form_read_only": true, "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "contact_mobile", "type": "short_text", "form_read_only": true, "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "contact_email", "type": "short_text", "form_read_only": true, "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "territory_identifier", "type": "entity_reference", "target": "organization.territory", "form_read_only": true, "searchable": true, "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "customer_group_identifier", "type": "entity_reference", "target": "organization.customer_group", "form_read_only": true, "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "customer_address_identifier", "type": "entity_reference", "target": "contacts.address"},
+      {"field": "address_display", "type": "formatted_text", "form_read_only": true, "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "service_address", "type": "text", "visible_when": ["field_has_value", "customer_identifier"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true, "searchable": true},
+      {"field": "complaint_raised_by", "type": "short_text"},
+      {"field": "from_company", "type": "short_text"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "customer_support.warranty_claim", "form_hidden": true, "omit_on_copy": true, "omit_target_user_filter": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Item and Warranty Details"},
+      {"control": "section", "purpose": "Resolution"},
+      {"control": "section", "purpose": "Customer Details", "visible_when": ["field_has_value", "customer_identifier"]},
+      {"control": "section", "purpose": "More Information"}
+    ]
+  }
+]

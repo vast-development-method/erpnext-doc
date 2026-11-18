@@ -1,0 +1,129 @@
+[
+  {
+    "entity": "lodging.hotel_room",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "hotel_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "hotel_room_type_identifier", "type": "entity_reference", "target": "lodging.hotel_room_type", "required": true},
+      {"field": "capacity", "type": "integer", "required": true},
+      {"field": "extra_bed_capacity", "type": "integer"}
+    ]
+  },
+  {
+    "entity": "lodging.hotel_room_amenity",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "billable", "type": "boolean"}
+    ]
+  },
+  {
+    "entity": "lodging.hotel_room_package",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "hotel_room_type_identifier", "type": "entity_reference", "target": "lodging.hotel_room_type", "required": true},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "amenities_rows", "type": "owned_collection", "target": "lodging.hotel_room_amenity", "required": true}
+    ]
+  },
+  {
+    "entity": "lodging.hotel_room_pricing",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "hotel_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "required": true},
+      {"field": "from_date", "type": "calendar_date", "required": true},
+      {"field": "to_date", "type": "calendar_date", "required": true},
+      {"field": "items_rows", "type": "owned_collection", "target": "lodging.hotel_room_pricing_item", "required": true}
+    ]
+  },
+  {
+    "entity": "lodging.hotel_room_pricing_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "rate", "type": "monetary_amount", "required": true}
+    ]
+  },
+  {
+    "entity": "lodging.hotel_room_pricing_package",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "from_date", "type": "calendar_date", "required": true},
+      {"field": "to_date", "type": "calendar_date", "required": true},
+      {"field": "hotel_room_package_identifier", "type": "entity_reference", "target": "lodging.hotel_room_package", "required": true},
+      {"field": "rate", "type": "monetary_amount", "required": true}
+    ]
+  },
+  {
+    "entity": "lodging.hotel_room_reservation",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "hotel_reservation_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "guest_name", "type": "short_text", "required": true},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer"},
+      {"field": "from_date", "type": "calendar_date", "required": true},
+      {"field": "to_date", "type": "calendar_date", "required": true},
+      {"field": "late_checkin", "type": "boolean"},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Booked", "Advance Paid", "Invoiced", "Paid", "Completed", "Cancelled"]},
+      {"field": "items_rows", "type": "owned_collection", "target": "lodging.hotel_room_reservation_item", "required": true},
+      {"field": "net_total", "type": "monetary_amount"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "lodging.hotel_room_reservation", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "lodging.hotel_room_reservation_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "quantity", "type": "integer"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency"},
+      {"field": "rate", "type": "monetary_amount"},
+      {"field": "amount", "type": "monetary_amount"}
+    ]
+  },
+  {
+    "entity": "lodging.hotel_room_type",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "hotel_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "capacity", "type": "integer"},
+      {"field": "extra_bed_capacity", "type": "integer"},
+      {"field": "amenities_rows", "type": "owned_collection", "target": "lodging.hotel_room_amenity", "required": true}
+    ]
+  },
+  {
+    "entity": "lodging.hotel_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "hotel_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "default_customer_identifier", "type": "entity_reference", "target": "sales.customer", "required": true},
+      {"field": "default_taxes_and_charges_identifier", "type": "entity_reference", "target": "accounting.sales_taxes_and_charges_template"},
+      {"field": "default_invoice_numbering_series", "type": "short_text"}
+    ]
+  }
+]

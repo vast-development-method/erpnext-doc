@@ -1,0 +1,1423 @@
+[
+  {
+    "entity": "clinical_services.nursing_checklist_template",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true, "unique": true},
+      {"field": "department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department"},
+      {"field": "tasks_rows", "type": "owned_collection", "target": "clinical_services.nursing_checklist_template_task", "required": true},
+      {"field": "disabled", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "clinical_services.nursing_checklist_template_task",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "activity_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_activity"},
+      {"field": "description", "type": "text"},
+      {"field": "type", "type": "enumeration", "values": ["", "Pre-Op", "Post-Op"]},
+      {"field": "role_identifier", "type": "entity_reference", "target": "information_management.role"},
+      {"field": "mandatory", "type": "boolean", "default": "0"},
+      {"field": "task_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "task_duration", "type": "duration"},
+      {"field": "time_offset", "type": "duration"}
+    ]
+  },
+  {
+    "entity": "clinical_services.nursing_task",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "activity_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_activity", "required": true},
+      {"field": "description", "type": "text", "form_read_only": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "required": true, "form_read_only": true, "editable_after_posting": true, "values": ["Draft", "Requested", "Received", "Accepted", "Rejected", "Ready", "In Progress", "On Hold", "Missed", "Completed", "Failed", "Cancelled", "Entered in Error"], "default": "Draft"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "clinical_services.nursing_task", "form_read_only": true},
+      {"field": "numbering_series", "type": "enumeration", "values": ["nursing task numbering prefix + four-digit year + configured sequence"]},
+      {"field": "mandatory", "type": "boolean", "default": "0"},
+      {"field": "task_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "task_document_name_identifier", "type": "selected_entity_reference", "target_selected_by": "task_entity_type_identifier", "form_read_only": true, "editable_after_posting": true},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "age", "type": "short_text", "form_read_only": true},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender", "form_read_only": true},
+      {"field": "inpatient_record_identifier", "type": "entity_reference", "target": "clinical_services.inpatient_record", "form_read_only": true},
+      {"field": "inpatient_status", "type": "short_text", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "service_unit_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_service_unit"},
+      {"field": "date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "notes", "type": "formatted_text", "editable_after_posting": true},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "title", "type": "short_text", "form_read_only": true},
+      {"field": "requested_start_time", "type": "date_and_time"},
+      {"field": "requested_end_time", "type": "date_and_time"},
+      {"field": "duration", "type": "duration"},
+      {"field": "task_start_time", "type": "date_and_time", "editable_after_posting": true},
+      {"field": "task_end_time", "type": "date_and_time", "editable_after_posting": true},
+      {"field": "task_duration", "type": "duration", "form_read_only": true, "editable_after_posting": true},
+      {"field": "medical_department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department"}
+    ]
+  },
+  {
+    "entity": "clinical_services.observation",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "lab_test_approver", "level": 0, "allows": ["read", "write", "create", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "write", "create", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "observation_template_identifier", "type": "entity_reference", "target": "clinical_services.observation_template", "required": true},
+      {"field": "status", "type": "enumeration", "editable_after_posting": true, "values": ["Registered", "Preliminary", "Final", "Amended", "Corrected", "Cancelled", "Entered in Error", "Unknown", "Approved", "Rejected"], "default": "Registered"},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "numbering_series", "type": "enumeration", "values": ["observation numbering prefix + four-digit year + configured sequence"]},
+      {"field": "codification_table_rows", "type": "owned_collection", "target": "clinical_services.codification_table"},
+      {"field": "age", "type": "short_text", "form_read_only": true},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender"},
+      {"field": "permitted_data_type", "type": "enumeration", "values": ["Quantity", "Select", "Text", "Boolean", "Numeric", "Range", "Ratio", "Time", "DateTime", "Period", "Attach", "Duration", "Percent"]},
+      {"field": "result", "type": "long_text"},
+      {"field": "result_flag", "type": "short_text", "form_read_only": true},
+      {"field": "result_flag_color", "type": "short_text", "form_read_only": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_record_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "form_read_only": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "clinical_services.observation", "form_read_only": true},
+      {"field": "patient_name", "type": "short_text"},
+      {"field": "inpatient_record_identifier", "type": "entity_reference", "target": "clinical_services.inpatient_record", "form_read_only": true},
+      {"field": "inpatient_status", "type": "short_text", "form_read_only": true},
+      {"field": "parent_observation_identifier", "type": "entity_reference", "target": "clinical_services.observation", "form_read_only": true},
+      {"field": "service_request_identifier", "type": "entity_reference", "target": "clinical_services.service_request", "form_read_only": true},
+      {"field": "sales_invoice_identifier", "type": "entity_reference", "target": "accounting.sales_invoice", "form_read_only": true},
+      {"field": "options", "type": "text", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "sample_collection_time", "type": "date_and_time"},
+      {"field": "sample_status", "type": "enumeration", "values": ["", "Accepted", "Rejected"]},
+      {"field": "observation_category", "type": "enumeration", "required": true, "form_read_only": true, "values": ["", "Social History", "Vital Signs", "Imaging", "Laboratory", "Procedure", "Survey", "Exam", "Therapy", "Activity"]},
+      {"field": "medical_department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department"},
+      {"field": "time_of_result", "type": "date_and_time", "form_read_only": true},
+      {"field": "time_of_approval", "type": "date_and_time", "form_read_only": true},
+      {"field": "note", "type": "formatted_text"},
+      {"field": "specimen_identifier", "type": "entity_reference", "target": "clinical_services.specimen", "form_read_only": true},
+      {"field": "sales_invoice_status", "type": "short_text", "form_read_only": true},
+      {"field": "observation_method_identifier", "type": "entity_reference", "target": "clinical_services.code_value", "form_read_only": true},
+      {"field": "reference", "type": "text", "form_read_only": true},
+      {"field": "observation_row_position", "type": "integer"},
+      {"field": "healthcare_practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner"},
+      {"field": "practitioner_name", "type": "short_text", "form_read_only": true},
+      {"field": "sample_collection_required", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "preferred_display_name", "type": "short_text", "form_read_only": true},
+      {"field": "permitted_unit_identifier", "type": "entity_reference", "target": "clinical_services.lab_test_unit_of_measure", "form_read_only": true},
+      {"field": "sample_identifier", "type": "entity_reference", "target": "clinical_services.lab_test_sample"},
+      {"field": "sample_type_identifier", "type": "entity_reference", "target": "clinical_services.sample_type", "form_read_only": true},
+      {"field": "method", "type": "short_text", "form_read_only": true},
+      {"field": "days", "type": "integer", "form_read_only": true},
+      {"field": "result_interpretation", "type": "formatted_text"},
+      {"field": "result_template_identifier", "type": "entity_reference", "target": "organization.terms_and_conditions"},
+      {"field": "interpretation_template_identifier", "type": "entity_reference", "target": "organization.terms_and_conditions"},
+      {"field": "has_component", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "disapproval_reason", "type": "text", "form_read_only": true, "editable_after_posting": true},
+      {"field": "posting_date", "type": "calendar_date", "form_read_only": true, "default": {"context_default": "effective_date"}},
+      {"field": "sales_invoice_item", "type": "short_text", "form_read_only": true},
+      {"field": "invoiced", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "appointment_identifier", "type": "entity_reference", "target": "clinical_services.patient_appointment"},
+      {"field": "emergency_record_identifier", "type": "entity_reference", "target": "clinical_services.emergency_record", "form_read_only": true},
+      {"field": "service_unit_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_service_unit"},
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "consume_stock", "type": "boolean", "default": "1"},
+      {"field": "stock_entry_identifier", "type": "entity_reference", "target": "inventory.stock_entry", "form_read_only": true},
+      {"field": "consumables_rows", "type": "owned_collection", "target": "clinical_services.observation_consumable"}
+    ]
+  },
+  {
+    "entity": "clinical_services.observation_component",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "observation_template_identifier", "type": "entity_reference", "target": "clinical_services.observation_template"},
+      {"field": "based_on_formula", "type": "boolean", "default": "0"},
+      {"field": "formula", "type": "expression_or_structured_text"},
+      {"field": "abbreviation", "type": "short_text", "form_read_only": true},
+      {"field": "condition", "type": "expression_or_structured_text"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "note"}
+    ]
+  },
+  {
+    "entity": "clinical_services.observation_consumable",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true},
+      {"field": "consumed_at", "type": "enumeration", "form_read_only": true, "values": ["", "Specimen", "Sample Collection", "Observation"]},
+      {"field": "quantity", "type": "decimal", "required": true, "default": "1"},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true},
+      {"field": "unit_conversion_factor", "type": "decimal", "form_read_only": true, "default": "1"},
+      {"field": "stock_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true},
+      {"field": "batch_number_identifier", "type": "entity_reference", "target": "inventory.batch"},
+      {"field": "issued_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "stock_entry_identifier", "type": "entity_reference", "target": "inventory.stock_entry", "form_read_only": true},
+      {"field": "suggested_quantity", "type": "decimal", "form_read_only": true},
+      {"field": "collect_action", "type": "short_text", "form_read_only": true},
+      {"field": "specimen_identifier", "type": "entity_reference", "target": "clinical_services.specimen", "form_read_only": true},
+      {"field": "observation_template_identifier", "type": "entity_reference", "target": "clinical_services.observation_template", "form_read_only": true},
+      {"field": "sample_identifier", "type": "entity_reference", "target": "clinical_services.lab_test_sample", "form_read_only": true},
+      {"field": "container_closure_color", "type": "short_text", "form_read_only": true},
+      {"field": "medical_department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.observation_reference_range",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "applies_to", "type": "enumeration", "values": ["All", "Male", "Female", "Pregnant"]},
+      {"field": "reference_text", "type": "text"},
+      {"field": "gestational_age", "type": "decimal"},
+      {"field": "permitted_data_type", "type": "enumeration", "form_read_only": true, "values": ["Quantity", "Select", "Text", "Boolean", "Numeric", "Range", "Ratio", "Time", "DateTime", "Period", "Duration", "Percent"]},
+      {"field": "indicator_color", "type": "color"},
+      {"field": "show_indicator_on_report", "type": "boolean", "default": "0"},
+      {"field": "datetime", "type": "date_and_time"},
+      {"field": "age_from", "type": "short_text"},
+      {"field": "age_to", "type": "short_text"},
+      {"field": "from_datetime", "type": "date_and_time"},
+      {"field": "to_datetime", "type": "date_and_time"},
+      {"field": "from_age_type", "type": "enumeration", "values": ["Years", "Months", "Days"], "default": "Years"},
+      {"field": "to_age_type", "type": "enumeration", "values": ["Years", "Months", "Days"], "default": "Years"},
+      {"field": "from_duration", "type": "duration"},
+      {"field": "to_duration", "type": "duration"},
+      {"field": "age", "type": "enumeration", "values": ["All", "Range"]},
+      {"field": "boolean_value", "type": "enumeration", "values": ["", "Yes", "No"]},
+      {"field": "ratio", "type": "short_text"},
+      {"field": "options", "type": "enumeration"},
+      {"field": "conditions", "type": "expression_or_structured_text"},
+      {"field": "short_interpretation", "type": "short_text"},
+      {"field": "long_interpretation", "type": "text"},
+      {"field": "reference_type_identifier", "type": "entity_reference", "target": "clinical_services.code_value"},
+      {"field": "reference_from", "type": "short_text"},
+      {"field": "reference_to", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "clinical_services.observation_sample_collection",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "sample_identifier", "type": "entity_reference", "target": "clinical_services.lab_test_sample", "default": "Urine"},
+      {"field": "sample_type_identifier", "type": "entity_reference", "target": "clinical_services.sample_type", "form_read_only": true},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "clinical_services.lab_test_unit_of_measure", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "required": true, "form_read_only": true, "values": ["Open", "Collected"]},
+      {"field": "observation_template_identifier", "type": "entity_reference", "target": "clinical_services.observation_template"},
+      {"field": "collection_date_time", "type": "date_and_time", "form_read_only": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_record_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "form_read_only": true},
+      {"field": "sample_quantity", "type": "decimal"},
+      {"field": "container_closure_color", "type": "color", "form_read_only": true},
+      {"field": "has_component", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "specimen_text", "type": "short_text", "form_read_only": true},
+      {"field": "component_observation_parent", "type": "short_text", "form_read_only": true},
+      {"field": "component_observations", "type": "text", "form_read_only": true},
+      {"field": "collection_point_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_service_unit"},
+      {"field": "collected_user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "collected_by", "type": "short_text", "form_read_only": true},
+      {"field": "medical_department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department", "form_read_only": true},
+      {"field": "reference_child", "type": "short_text", "form_read_only": true},
+      {"field": "service_request_identifier", "type": "entity_reference", "target": "clinical_services.service_request", "form_read_only": true},
+      {"field": "practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "show components"}
+    ]
+  },
+  {
+    "entity": "clinical_services.observation_template",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["select", "read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "observation", "type": "short_text", "required": true, "unique": true},
+      {"field": "observation_category", "type": "enumeration", "required": true, "values": ["", "Social History", "Vital Signs", "Imaging", "Laboratory", "Procedure", "Survey", "Exam", "Therapy", "Activity"]},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "permitted_data_type", "type": "enumeration", "values": ["", "Quantity", "Select", "Text", "Boolean", "Numeric", "Range", "Ratio", "Time", "DateTime", "Period", "Attach", "Duration", "Percent"]},
+      {"field": "permitted_unit_identifier", "type": "entity_reference", "target": "clinical_services.lab_test_unit_of_measure"},
+      {"field": "method_identifier", "type": "entity_reference", "target": "clinical_services.code_value"},
+      {"field": "observation_reference_range_rows", "type": "owned_collection", "target": "clinical_services.observation_reference_range"},
+      {"field": "observation_component_rows", "type": "owned_collection", "target": "clinical_services.observation_component"},
+      {"field": "codification_table_rows", "type": "owned_collection", "target": "clinical_services.codification_table"},
+      {"field": "has_component", "type": "boolean", "default": "0"},
+      {"field": "service_unit_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_service_unit_type"},
+      {"field": "sample_identifier", "type": "entity_reference", "target": "clinical_services.lab_test_sample"},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "clinical_services.lab_test_unit_of_measure"},
+      {"field": "sample_quantity", "type": "decimal"},
+      {"field": "sample_details", "type": "text"},
+      {"field": "preferred_display_name", "type": "short_text"},
+      {"field": "options", "type": "text"},
+      {"field": "result_template_identifier", "type": "entity_reference", "target": "organization.terms_and_conditions"},
+      {"field": "medical_department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department"},
+      {"field": "sample_type_identifier", "type": "entity_reference", "target": "clinical_services.sample_type", "form_read_only": true},
+      {"field": "template_identifier", "type": "entity_reference", "target": "organization.terms_and_conditions"},
+      {"field": "container_closure_color_identifier", "type": "entity_reference", "target": "web_publishing.color"},
+      {"field": "link_existing_item", "type": "boolean", "default": "0"},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "is_billable", "type": "boolean", "default": "0"},
+      {"field": "change_in_item", "type": "boolean", "default": "0"},
+      {"field": "rate", "type": "monetary_amount"},
+      {"field": "item_group_identifier", "type": "entity_reference", "target": "organization.item_group"},
+      {"field": "item_code", "type": "short_text"},
+      {"field": "method_value", "type": "short_text"},
+      {"field": "sample_collection_required", "type": "boolean", "default": "0"},
+      {"field": "abbreviation", "type": "short_text"},
+      {"field": "interpretation_template_identifier", "type": "entity_reference", "target": "organization.terms_and_conditions"},
+      {"field": "diagnosis_rows", "type": "owned_selection", "target": "clinical_services.patient_encounter_diagnosis"},
+      {"field": "patient_care_type_identifier", "type": "entity_reference", "target": "clinical_services.patient_care_type"},
+      {"field": "staff_role_identifier", "type": "entity_reference", "target": "information_management.role"},
+      {"field": "consume_stock", "type": "boolean", "default": "0"},
+      {"field": "consumables_rows", "type": "owned_collection", "target": "clinical_services.observation_template_consumable"}
+    ]
+  },
+  {
+    "entity": "clinical_services.observation_template_consumable",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "item_name", "type": "short_text", "form_read_only": true},
+      {"field": "consumed_at", "type": "enumeration", "required": true, "values": ["Specimen", "Sample Collection", "Observation"], "default": "Observation"},
+      {"field": "quantity", "type": "decimal", "required": true, "default": "1"},
+      {"field": "unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure"},
+      {"field": "unit_conversion_factor", "type": "decimal", "form_read_only": true, "default": "1"},
+      {"field": "stock_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.organism",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "organism", "type": "short_text", "required": true, "unique": true},
+      {"field": "abbreviation", "type": "short_text", "unique": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.organism_test_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "organism_identifier", "type": "entity_reference", "target": "clinical_services.organism", "required": true},
+      {"field": "colony_population", "type": "text"},
+      {"field": "colony_unit_of_measure_identifier", "type": "entity_reference", "target": "clinical_services.lab_test_unit_of_measure"}
+    ]
+  },
+  {
+    "entity": "clinical_services.organism_test_result",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "organism_identifier", "type": "entity_reference", "target": "clinical_services.organism", "required": true},
+      {"field": "colony_population", "type": "text"},
+      {"field": "colony_unit_of_measure_identifier", "type": "entity_reference", "target": "clinical_services.lab_test_unit_of_measure"}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "laboratory_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "inpatient_status", "type": "enumeration", "form_read_only": true, "values": ["", "Admission Scheduled", "Admitted", "Discharge Scheduled"]},
+      {"field": "inpatient_record_identifier", "type": "entity_reference", "target": "clinical_services.inpatient_record", "form_read_only": true},
+      {"field": "emergency_record_identifier", "type": "entity_reference", "target": "clinical_services.emergency_record", "form_read_only": true},
+      {"field": "numbering_series", "type": "enumeration", "values": ["patient numbering prefix + four-digit year + configured sequence", "emergency patient encounter numbering prefix + four-digit year + configured sequence"]},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "sex_identifier", "type": "entity_reference", "target": "contacts.gender", "required": true},
+      {"field": "blood_group", "type": "enumeration", "values": ["", "A Positive", "A Negative", "AB Positive", "AB Negative", "B Positive", "B Negative", "O Positive", "O Negative"]},
+      {"field": "date_of_birth", "type": "calendar_date"},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Active", "Disabled"]},
+      {"field": "image", "type": "image_file_reference"},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer"},
+      {"field": "report_preference", "type": "enumeration", "values": ["", "Email", "Print"]},
+      {"field": "mobile", "type": "short_text"},
+      {"field": "email", "type": "short_text"},
+      {"field": "phone", "type": "short_text"},
+      {"field": "patient_relation_rows", "type": "owned_collection", "target": "clinical_services.patient_relation"},
+      {"field": "allergies", "type": "text"},
+      {"field": "medication", "type": "text"},
+      {"field": "medical_history", "type": "text"},
+      {"field": "surgical_history", "type": "text"},
+      {"field": "occupation", "type": "short_text"},
+      {"field": "marital_status", "type": "enumeration", "values": ["", "Single", "Married", "Divorced", "Widow"]},
+      {"field": "tobacco_past_use", "type": "short_text"},
+      {"field": "tobacco_current_use", "type": "short_text"},
+      {"field": "alcohol_past_use", "type": "short_text"},
+      {"field": "alcohol_current_use", "type": "short_text"},
+      {"field": "surrounding_factors", "type": "text"},
+      {"field": "other_risk_factors", "type": "text"},
+      {"field": "patient_details", "type": "text"},
+      {"field": "default_currency_identifier", "type": "entity_reference", "target": "geography.currency"},
+      {"field": "last_name", "type": "short_text"},
+      {"field": "first_name", "type": "short_text", "required": true},
+      {"field": "middle_name", "type": "short_text"},
+      {"field": "customer_group_identifier", "type": "entity_reference", "target": "organization.customer_group"},
+      {"field": "territory_identifier", "type": "entity_reference", "target": "organization.territory"},
+      {"field": "default_price_list_identifier", "type": "entity_reference", "target": "inventory.price_list"},
+      {"field": "language_identifier", "type": "entity_reference", "target": "information_management.language"},
+      {"field": "invite_user", "type": "boolean", "default": "1"},
+      {"field": "user_identifier", "type": "display_value"},
+      {"field": "unique_identifier", "type": "short_text", "unique": true},
+      {"field": "country_identifier", "type": "entity_reference", "target": "geography.country"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "age structured markup"},
+      {"control": "formatted_information", "purpose": "formatted address"},
+      {"control": "formatted_information", "purpose": "formatted contact details"}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_allergy",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "write", "create", "report", "print"]}
+    ],
+    "fields": [
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Active", "Inactive"], "default": "Active"},
+      {"field": "recorded_on", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "allergy_identifier", "type": "entity_reference", "target": "clinical_services.allergy", "required": true},
+      {"field": "allergy_category", "type": "short_text", "form_read_only": true},
+      {"field": "severity", "type": "enumeration", "required": true, "values": ["Severe", "Major", "Moderate", "Minor"]},
+      {"field": "reaction", "type": "text"},
+      {"field": "note", "type": "text"}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_appointment",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "inpatient_record_identifier", "type": "entity_reference", "target": "clinical_services.inpatient_record", "form_read_only": true},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "appointment_type_identifier", "type": "entity_reference", "target": "clinical_services.appointment_type", "required": true},
+      {"field": "duration", "type": "integer"},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["", "Scheduled", "Open", "Confirmed", "Checked In", "Checked Out", "Closed", "Cancelled", "No Show"]},
+      {"field": "procedure_template_identifier", "type": "entity_reference", "target": "clinical_services.clinical_procedure_template"},
+      {"field": "procedure_prescription_identifier", "type": "entity_reference", "target": "clinical_services.procedure_prescription", "form_read_only": true},
+      {"field": "service_unit_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_service_unit", "form_read_only": true},
+      {"field": "practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner"},
+      {"field": "department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department"},
+      {"field": "appointment_date", "type": "calendar_date", "required": true, "form_read_only": true},
+      {"field": "appointment_time", "type": "time_of_day", "form_read_only": true},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "patient_sex_identifier", "type": "entity_reference", "target": "contacts.gender", "form_read_only": true},
+      {"field": "patient_age", "type": "short_text", "form_read_only": true},
+      {"field": "appointment_datetime", "type": "date_and_time", "form_read_only": true},
+      {"field": "mode_of_payment_identifier", "type": "entity_reference", "target": "accounting.mode_of_payment"},
+      {"field": "paid_amount", "type": "monetary_amount"},
+      {"field": "invoiced", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "notes", "type": "text"},
+      {"field": "referring_practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner"},
+      {"field": "reminded", "type": "boolean", "default": "0"},
+      {"field": "therapy_type_identifier", "type": "entity_reference", "target": "clinical_services.therapy_type"},
+      {"field": "therapy_plan_identifier", "type": "entity_reference", "target": "clinical_services.therapy_plan"},
+      {"field": "reference_sales_invoice_identifier", "type": "entity_reference", "target": "accounting.sales_invoice", "form_read_only": true},
+      {"field": "numbering_series", "type": "enumeration", "values": ["patient appointment numbering prefix + four-digit year + configured sequence"]},
+      {"field": "billing_item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true},
+      {"field": "title", "type": "short_text", "form_read_only": true},
+      {"field": "practitioner_name", "type": "short_text", "form_read_only": true},
+      {"field": "source_identifier", "type": "entity_reference", "target": "web_publishing.traffic_attribution_source"},
+      {"field": "insurance_payor_identifier", "type": "entity_reference", "target": "clinical_services.insurance_payor", "form_read_only": true},
+      {"field": "insurance_policy_identifier", "type": "entity_reference", "target": "clinical_services.patient_insurance_policy"},
+      {"field": "insurance_coverage_identifier", "type": "entity_reference", "target": "clinical_services.patient_insurance_coverage", "form_read_only": true},
+      {"field": "coverage_status", "type": "short_text", "form_read_only": true},
+      {"field": "hosted_personal_productivity_meet_link", "type": "short_text", "form_read_only": true},
+      {"field": "add_video_conferencing", "type": "boolean", "default": "0"},
+      {"field": "event_identifier", "type": "entity_reference", "target": "operator_workspace.event", "form_read_only": true},
+      {"field": "appointment_based_on_check_in", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "position_in_queue", "type": "integer", "form_read_only": true},
+      {"field": "appointment_for", "type": "enumeration", "required": true, "form_read_only": true, "values": ["", "Practitioner", "Department", "Service Unit"]},
+      {"field": "service_request_identifier", "type": "entity_reference", "target": "clinical_services.service_request", "form_read_only": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_record_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "form_read_only": true},
+      {"field": "template_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "template_delivery_note_identifier", "type": "selected_entity_reference", "target_selected_by": "template_entity_type_identifier", "form_read_only": true},
+      {"field": "appointment_end_datetime", "type": "date_and_time", "form_read_only": true},
+      {"field": "emergency_record_identifier", "type": "entity_reference", "target": "clinical_services.emergency_record", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "get procedure from encounter"},
+      {"control": "action", "purpose": "get prescribed therapies"},
+      {"control": "action", "purpose": "get orders"}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_assessment",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "submit", "cancel", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "assessment_template_identifier", "type": "entity_reference", "target": "clinical_services.patient_assessment_template", "required": true},
+      {"field": "therapy_session_identifier", "type": "entity_reference", "target": "clinical_services.therapy_session"},
+      {"field": "healthcare_practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner"},
+      {"field": "assessment_datetime", "type": "date_and_time", "required": true},
+      {"field": "assessment_sheet_rows", "type": "owned_collection", "target": "clinical_services.patient_assessment_sheet"},
+      {"field": "total_score", "type": "integer", "form_read_only": true},
+      {"field": "total_score_obtained", "type": "integer", "form_read_only": true},
+      {"field": "scale_minimum", "type": "integer", "form_read_only": true},
+      {"field": "scale_maximum", "type": "integer", "form_read_only": true},
+      {"field": "numbering_series", "type": "enumeration", "values": ["patient assessment numbering prefix + four-digit year + configured sequence"]},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "clinical_services.patient_assessment", "form_read_only": true},
+      {"field": "assessment_description", "type": "text"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_assessment_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "assessment_parameter_identifier", "type": "entity_reference", "target": "clinical_services.patient_assessment_parameter", "required": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_assessment_parameter",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "assessment_parameter", "type": "short_text", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_assessment_sheet",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "parameter_identifier", "type": "entity_reference", "target": "clinical_services.patient_assessment_parameter", "required": true},
+      {"field": "score", "type": "enumeration", "required": true},
+      {"field": "time", "type": "time_of_day", "default": {"context_default": "current_instant"}},
+      {"field": "comments", "type": "text"}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_assessment_template",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "parameters_rows", "type": "owned_collection", "target": "clinical_services.patient_assessment_detail"},
+      {"field": "assessment_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "scale_minimum", "type": "integer"},
+      {"field": "scale_maximum", "type": "integer"},
+      {"field": "assessment_description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_care_type",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "patient_care_type", "type": "short_text", "required": true, "unique": true},
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_encounter",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "inpatient_record_identifier", "type": "entity_reference", "target": "clinical_services.inpatient_record", "form_read_only": true, "editable_after_posting": true},
+      {"field": "numbering_series", "type": "enumeration", "values": ["patient encounter numbering prefix + four-digit year + configured sequence"]},
+      {"field": "appointment_identifier", "type": "entity_reference", "target": "clinical_services.patient_appointment"},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "patient_age", "type": "short_text", "form_read_only": true},
+      {"field": "patient_sex_identifier", "type": "entity_reference", "target": "contacts.gender", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner", "required": true},
+      {"field": "encounter_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "encounter_time", "type": "time_of_day", "required": true, "default": {"context_default": "current_instant"}},
+      {"field": "invoiced", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "symptoms_rows", "type": "owned_selection", "target": "clinical_services.patient_encounter_symptom"},
+      {"field": "symptoms_in_print", "type": "boolean", "default": "0"},
+      {"field": "diagnosis_rows", "type": "owned_selection", "target": "clinical_services.patient_encounter_diagnosis"},
+      {"field": "diagnosis_in_print", "type": "boolean", "default": "1"},
+      {"field": "codification_table_rows", "type": "owned_collection", "target": "clinical_services.codification_table"},
+      {"field": "drug_prescription_rows", "type": "owned_collection", "target": "clinical_services.drug_prescription"},
+      {"field": "lab_test_prescription_rows", "type": "owned_collection", "target": "clinical_services.lab_prescription"},
+      {"field": "procedure_prescription_rows", "type": "owned_collection", "target": "clinical_services.procedure_prescription"},
+      {"field": "encounter_comment", "type": "text"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "clinical_services.patient_encounter", "form_read_only": true},
+      {"field": "therapies_rows", "type": "owned_collection", "target": "clinical_services.therapy_plan_detail"},
+      {"field": "appointment_type_identifier", "type": "entity_reference", "target": "clinical_services.appointment_type", "required": true},
+      {"field": "medical_department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department", "form_read_only": true},
+      {"field": "inpatient_status", "type": "short_text", "form_read_only": true, "editable_after_posting": true},
+      {"field": "emergency_record_identifier", "type": "entity_reference", "target": "clinical_services.emergency_record", "form_read_only": true, "editable_after_posting": true},
+      {"field": "practitioner_name", "type": "short_text", "form_read_only": true},
+      {"field": "title", "type": "short_text", "form_read_only": true, "editable_after_posting": true},
+      {"field": "source", "type": "enumeration", "values": ["Direct", "Referral", "External Referral"]},
+      {"field": "referring_practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner"},
+      {"field": "insurance_policy_identifier", "type": "entity_reference", "target": "clinical_services.patient_insurance_policy"},
+      {"field": "insurance_payor_identifier", "type": "entity_reference", "target": "clinical_services.insurance_payor"},
+      {"field": "insurance_coverage_identifier", "type": "entity_reference", "target": "clinical_services.patient_insurance_coverage", "form_read_only": true, "editable_after_posting": true},
+      {"field": "coverage_status", "type": "short_text", "form_read_only": true, "editable_after_posting": true},
+      {"field": "hosted_personal_productivity_meet_link", "type": "short_text", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["", "Open", "Ordered", "Completed", "Cancelled"]},
+      {"field": "submit_orders_on_save", "type": "boolean", "default": "0"}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "get applicable treatment plans"},
+      {"control": "formatted_information", "purpose": "encounter details"},
+      {"control": "formatted_information", "purpose": "clinical notes"},
+      {"control": "formatted_information", "purpose": "order history structured markup"}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_encounter_diagnosis",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "diagnosis_identifier", "type": "entity_reference", "target": "clinical_services.diagnosis", "required": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_encounter_symptom",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "complaint_identifier", "type": "entity_reference", "target": "clinical_services.complaint", "required": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_history_custom_document_type",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "selected_fields", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "date_field_name", "type": "short_text", "required": true}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "add edit fields"}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_history_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "custom_entity_types_rows", "type": "owned_collection", "target": "clinical_services.patient_history_custom_document_type"},
+      {"field": "standard_entity_types_rows", "type": "owned_collection", "target": "clinical_services.patient_history_standard_document_type", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_history_standard_document_type",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "form_read_only": true},
+      {"field": "selected_fields", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "date_field_name", "type": "short_text", "required": true, "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "add edit fields"}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_insurance_coverage",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["select", "read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["select", "read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["select", "read", "write", "create", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["select", "read", "write", "create", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "form_read_only": true, "values": ["patient insurance coverage numbering prefix + four-digit year + configured sequence"]},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "insurance_policy_identifier", "type": "entity_reference", "target": "clinical_services.patient_insurance_policy", "required": true},
+      {"field": "insurance_payor_identifier", "type": "entity_reference", "target": "clinical_services.insurance_payor", "required": true, "form_read_only": true},
+      {"field": "price_list_rate", "type": "monetary_amount", "form_read_only": true},
+      {"field": "discount", "type": "percentage"},
+      {"field": "coverage", "type": "percentage"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "clinical_services.patient_insurance_coverage", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "required": true, "form_read_only": true, "editable_after_posting": true, "values": ["Draft", "Approved", "Cancelled", "Rejected", "Invoiced", "Partly Invoiced"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "policy_number", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "policy_expiry_date", "type": "calendar_date", "required": true, "form_read_only": true},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "coverage_validity_end_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "insurance_plan_identifier", "type": "entity_reference", "target": "clinical_services.insurance_payor_eligibility_plan", "form_read_only": true},
+      {"field": "mode_of_approval", "type": "enumeration", "required": true, "form_read_only": true, "values": ["", "Manual", "Automatic"], "default": "Manual"},
+      {"field": "price_list_identifier", "type": "entity_reference", "target": "inventory.price_list", "form_read_only": true},
+      {"field": "discount_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "quantity", "type": "decimal", "required": true},
+      {"field": "patient_payable", "type": "monetary_amount", "form_read_only": true},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender", "form_read_only": true},
+      {"field": "birth_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "title", "type": "short_text", "form_read_only": true},
+      {"field": "template_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "template_delivery_note_identifier", "type": "selected_entity_reference", "target_selected_by": "template_entity_type_identifier"},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true, "editable_after_posting": true},
+      {"field": "coverage_amount", "type": "monetary_amount", "form_read_only": true, "editable_after_posting": true},
+      {"field": "quantity_invoiced", "type": "decimal", "form_read_only": true, "editable_after_posting": true, "default": "0"},
+      {"field": "coverage_amount_invoiced", "type": "monetary_amount", "form_read_only": true, "editable_after_posting": true, "default": "0"},
+      {"field": "approved_amount", "type": "monetary_amount", "form_read_only": true, "default": "0"},
+      {"field": "paid_amount", "type": "monetary_amount", "form_read_only": true, "default": "0"},
+      {"field": "item_eligibility_identifier", "type": "entity_reference", "target": "clinical_services.item_insurance_eligibility", "form_read_only": true},
+      {"field": "code_system_identifier", "type": "entity_reference", "target": "clinical_services.code_system", "form_read_only": true},
+      {"field": "code_value_identifier", "type": "entity_reference", "target": "clinical_services.code_value", "form_read_only": true},
+      {"field": "code_description", "type": "text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_insurance_policy",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "values": ["patient insurance policy numbering prefix + four-digit year + configured sequence"]},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "mobile_number", "type": "short_text", "form_read_only": true},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender", "form_read_only": true},
+      {"field": "insurance_payor_identifier", "type": "entity_reference", "target": "clinical_services.insurance_payor", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "clinical_services.patient_insurance_policy", "form_read_only": true},
+      {"field": "title", "type": "short_text", "form_read_only": true},
+      {"field": "email", "type": "short_text", "form_read_only": true},
+      {"field": "birth_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "country_identifier", "type": "entity_reference", "target": "geography.country", "form_read_only": true},
+      {"field": "insurance_plan_identifier", "type": "entity_reference", "target": "clinical_services.insurance_payor_eligibility_plan"},
+      {"field": "policy_expiry_date", "type": "calendar_date", "required": true},
+      {"field": "date", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "policy_number", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_medical_record",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "report", "print"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "values": ["patient medical record numbering prefix + four-digit year + configured sequence"]},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient"},
+      {"field": "attach", "type": "file_reference"},
+      {"field": "subject", "type": "formatted_text"},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Open", "Close"]},
+      {"field": "communication_date", "type": "calendar_date", "form_read_only": true, "default": {"context_default": "effective_date"}},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "form_read_only": true},
+      {"field": "reference_owner", "type": "short_text", "form_read_only": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true, "default": {"context_default": "current_user"}}
+    ]
+  },
+  {
+    "entity": "clinical_services.patient_relation",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "relation", "type": "enumeration", "values": ["", "Father", "Mother", "Spouse", "Siblings", "Family", "Other"]},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "clinical_services.practitioner_availability",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "write", "create", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "clinical_services.practitioner_availability", "form_read_only": true},
+      {"field": "scope_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "default": "Healthcare Practitioner"},
+      {"field": "scope_identifier", "type": "selected_entity_reference", "target_selected_by": "scope_type_identifier", "required": true},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Active", "Expired"]},
+      {"field": "note", "type": "text"},
+      {"field": "type", "type": "enumeration", "required": true, "values": ["", "Available", "Unavailable"], "default": "Available"},
+      {"field": "start_time", "type": "time_of_day", "required": true},
+      {"field": "end_date", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "end_time", "type": "time_of_day", "required": true},
+      {"field": "duration", "type": "integer", "form_read_only": true, "precision": "0"},
+      {"field": "start_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "reason", "type": "enumeration", "values": ["", "Time Off", "Break", "Training", "Travel", "Emergency"]},
+      {"field": "title", "type": "text", "form_read_only": true},
+      {"field": "repeat", "type": "enumeration", "values": ["Never", "Daily", "Weekly", "Monthly"], "default": "Never"},
+      {"field": "monday", "type": "boolean", "default": "0"},
+      {"field": "tuesday", "type": "boolean", "default": "0"},
+      {"field": "wednesday", "type": "boolean", "default": "0"},
+      {"field": "thursday", "type": "boolean", "default": "0"},
+      {"field": "friday", "type": "boolean", "default": "0"},
+      {"field": "saturday", "type": "boolean", "default": "0"},
+      {"field": "sunday", "type": "boolean", "default": "0"},
+      {"field": "service_unit_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_service_unit"},
+      {"field": "display", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "clinical_services.practitioner_schedule",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "schedule_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "time_slots_rows", "type": "owned_collection", "target": "clinical_services.healthcare_schedule_time_slot"},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "allow_video_conferencing", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "clinical_services.practitioner_service_unit_schedule",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "schedule_identifier", "type": "entity_reference", "target": "clinical_services.practitioner_schedule", "required": true},
+      {"field": "service_unit_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_service_unit"}
+    ]
+  },
+  {
+    "entity": "clinical_services.prescription_dosage",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "dosage", "type": "short_text", "required": true, "unique": true},
+      {"field": "dosage_strength_rows", "type": "owned_collection", "target": "clinical_services.dosage_strength"}
+    ]
+  },
+  {
+    "entity": "clinical_services.prescription_duration",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "number", "type": "integer", "required": true},
+      {"field": "period", "type": "enumeration", "required": true, "values": ["Hour", "Day", "Week", "Month"]}
+    ]
+  },
+  {
+    "entity": "clinical_services.procedure_prescription",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "procedure_identifier", "type": "entity_reference", "target": "clinical_services.clinical_procedure_template", "required": true},
+      {"field": "procedure_name", "type": "short_text"},
+      {"field": "department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department"},
+      {"field": "practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner"},
+      {"field": "date", "type": "calendar_date"},
+      {"field": "comments", "type": "short_text"},
+      {"field": "appointment_booked", "type": "boolean", "default": "0"},
+      {"field": "procedure_created", "type": "boolean", "default": "0"},
+      {"field": "invoiced", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "patient_care_type_identifier", "type": "entity_reference", "target": "clinical_services.patient_care_type"},
+      {"field": "intent_identifier", "type": "entity_reference", "target": "clinical_services.code_value"},
+      {"field": "priority_identifier", "type": "entity_reference", "target": "clinical_services.code_value"},
+      {"field": "service_request", "type": "short_text", "form_read_only": true, "editable_after_posting": true},
+      {"field": "number_of_sessions", "type": "integer", "default": "1"},
+      {"field": "interval", "type": "duration"}
+    ]
+  },
+  {
+    "entity": "clinical_services.sample_collection",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "laboratory_user", "level": 0, "allows": ["read", "write", "create", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "inpatient_record_identifier", "type": "entity_reference", "target": "clinical_services.inpatient_record", "form_read_only": true},
+      {"field": "emergency_record_identifier", "type": "entity_reference", "target": "clinical_services.emergency_record", "form_read_only": true},
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["sample collection numbering prefix + four-digit year + configured sequence"]},
+      {"field": "invoiced", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "patient_age", "type": "short_text", "form_read_only": true},
+      {"field": "patient_sex_identifier", "type": "entity_reference", "target": "contacts.gender", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "sample_identifier", "type": "entity_reference", "target": "clinical_services.lab_test_sample"},
+      {"field": "sample_unit_of_measure", "type": "short_text", "form_read_only": true},
+      {"field": "collected_by_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "collected_time", "type": "date_and_time"},
+      {"field": "num_print", "type": "integer", "editable_after_posting": true, "default": "1"},
+      {"field": "sample_quantity", "type": "decimal", "default": "0"},
+      {"field": "sample_details", "type": "long_text"},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Pending", "Partly Collected", "Collected"]},
+      {"field": "observation_sample_collection_rows", "type": "owned_collection", "target": "clinical_services.observation_sample_collection"},
+      {"field": "service_request_identifier", "type": "entity_reference", "target": "clinical_services.service_request", "form_read_only": true},
+      {"field": "collection_point_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_service_unit"},
+      {"field": "reference_record_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_record_identifier", "form_read_only": true},
+      {"field": "referring_practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "clinical_services.sample_collection", "form_read_only": true},
+      {"field": "appointment_identifier", "type": "entity_reference", "target": "clinical_services.patient_appointment"},
+      {"field": "consume_stock", "type": "boolean", "default": "1"},
+      {"field": "warehouse_identifier", "type": "entity_reference", "target": "inventory.warehouse"},
+      {"field": "consumables_rows", "type": "owned_collection", "target": "clinical_services.observation_consumable"}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "sample structured markup"}
+    ]
+  },
+  {
+    "entity": "clinical_services.sample_type",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "sample_type", "type": "short_text", "unique": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.sensitivity",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "laboratory_user", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "sensitivity", "type": "short_text", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.sensitivity_test_result",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "antibiotic_identifier", "type": "entity_reference", "target": "clinical_services.antibiotic"},
+      {"field": "antibiotic_sensitivity_identifier", "type": "entity_reference", "target": "clinical_services.sensitivity"}
+    ]
+  },
+  {
+    "entity": "clinical_services.service_request",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["service request numbering prefix + configured sequence"]},
+      {"field": "sequence", "type": "integer"},
+      {"field": "order_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "order_group_identifier", "type": "selected_entity_reference", "target_selected_by": "source_record_identifier"},
+      {"field": "order_reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "order_reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "order_reference_entity_type_identifier"},
+      {"field": "expected_date", "type": "calendar_date"},
+      {"field": "staff_role_identifier", "type": "entity_reference", "target": "information_management.role"},
+      {"field": "patient_care_type_identifier", "type": "entity_reference", "target": "clinical_services.patient_care_type"},
+      {"field": "status_identifier", "type": "entity_reference", "target": "clinical_services.code_value", "required": true, "editable_after_posting": true},
+      {"field": "intent_identifier", "type": "entity_reference", "target": "clinical_services.code_value"},
+      {"field": "priority_identifier", "type": "entity_reference", "target": "clinical_services.code_value"},
+      {"field": "quantity", "type": "integer", "default": "1"},
+      {"field": "as_needed", "type": "boolean", "default": "0"},
+      {"field": "healthcare_service_unit_type_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_service_unit_type"},
+      {"field": "reason_reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reason_reference_identifier", "type": "selected_entity_reference", "target_selected_by": "reason_reference_entity_type_identifier", "form_read_only": true},
+      {"field": "order_description", "type": "text"},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "source", "type": "enumeration", "values": ["Direct", "Referral", "External Referral"]},
+      {"field": "referring_practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "clinical_services.service_request", "form_read_only": true},
+      {"field": "practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner", "required": true},
+      {"field": "medical_department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department", "form_read_only": true},
+      {"field": "patient_age", "type": "integer", "form_read_only": true},
+      {"field": "dosage_form_identifier", "type": "entity_reference", "target": "clinical_services.dosage_form"},
+      {"field": "dosage_identifier", "type": "entity_reference", "target": "clinical_services.prescription_dosage"},
+      {"field": "referred_to_practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner"},
+      {"field": "item_code", "type": "display_value"},
+      {"field": "inpatient_record_identifier", "type": "entity_reference", "target": "clinical_services.inpatient_record", "form_read_only": true},
+      {"field": "inpatient_status", "type": "short_text", "form_read_only": true},
+      {"field": "emergency_record_identifier", "type": "entity_reference", "target": "clinical_services.emergency_record", "form_read_only": true},
+      {"field": "patient_instructions", "type": "text"},
+      {"field": "order_group_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "default": "Patient Encounter"},
+      {"field": "order_time", "type": "time_of_day", "required": true},
+      {"field": "patient_gender_identifier", "type": "entity_reference", "target": "contacts.gender", "form_read_only": true},
+      {"field": "patient_blood_group", "type": "enumeration", "form_read_only": true, "values": ["", "A Positive", "A Negative", "AB Positive", "AB Negative", "B Positive", "B Negative", "O Positive", "O Negative"]},
+      {"field": "patient_email", "type": "short_text", "form_read_only": true},
+      {"field": "patient_mobile", "type": "short_text", "form_read_only": true},
+      {"field": "patient_birth_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "title", "type": "short_text", "form_read_only": true},
+      {"field": "insurance_policy_identifier", "type": "entity_reference", "target": "clinical_services.patient_insurance_policy", "form_read_only": true, "editable_after_posting": true},
+      {"field": "insurance_payor_identifier", "type": "entity_reference", "target": "clinical_services.insurance_payor", "form_read_only": true, "editable_after_posting": true},
+      {"field": "period_identifier", "type": "entity_reference", "target": "clinical_services.prescription_duration"},
+      {"field": "occurrence_date", "type": "calendar_date"},
+      {"field": "occurrence_time", "type": "time_of_day"},
+      {"field": "insurance_coverage_identifier", "type": "entity_reference", "target": "clinical_services.patient_insurance_coverage", "form_read_only": true, "editable_after_posting": true},
+      {"field": "coverage_status", "type": "short_text", "form_read_only": true, "editable_after_posting": true},
+      {"field": "template_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "template_delivery_note_identifier", "type": "selected_entity_reference", "target_selected_by": "template_entity_type_identifier", "required": true},
+      {"field": "patient_age_data", "type": "short_text", "form_read_only": true},
+      {"field": "quantity_invoiced", "type": "decimal", "form_read_only": true, "default": "0"},
+      {"field": "billing_status", "type": "enumeration", "form_read_only": true, "values": ["Pending", "Partly Invoiced", "Invoiced"], "default": "Pending"},
+      {"field": "codification_table_rows", "type": "owned_collection", "target": "clinical_services.codification_table"},
+      {"field": "source_record_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "sample_collection_required", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "practitioner_email", "type": "short_text", "form_read_only": true},
+      {"field": "interval", "type": "duration"},
+      {"field": "practitioner_name", "type": "short_text"},
+      {"field": "comment", "type": "text"}
+    ]
+  },
+  {
+    "entity": "clinical_services.service_request_category",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "create", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "patient_care_type_identifier", "type": "entity_reference", "target": "clinical_services.patient_care_type"},
+      {"field": "category", "type": "short_text", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.service_request_reason",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "service_request_reason", "type": "short_text", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.service_unit_type_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "required": true},
+      {"field": "charge", "type": "decimal"},
+      {"field": "is_stock_item", "type": "boolean", "default": "0"},
+      {"field": "billing_type", "type": "enumeration", "values": ["", "Based on Consumption", "Fixed"]}
+    ]
+  },
+  {
+    "entity": "clinical_services.shift_handover",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["shift handover numbering prefix + four-digit year + configured sequence"], "default": "shift handover numbering prefix + four-digit year + configured sequence"},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "handover_time", "type": "date_and_time", "required": true, "default": {"context_default": "current_instant"}},
+      {"field": "status", "type": "enumeration", "required": true, "values": ["Handed Over", "Accepted", "Cancelled"], "default": "Handed Over"},
+      {"field": "handed_over_by_identifier", "type": "entity_reference", "target": "information_management.user", "required": true, "form_read_only": true},
+      {"field": "from_shift", "type": "short_text"},
+      {"field": "handed_over_to_identifier", "type": "entity_reference", "target": "information_management.user", "required": true},
+      {"field": "to_shift", "type": "short_text"},
+      {"field": "situation", "type": "text"},
+      {"field": "background", "type": "text"},
+      {"field": "assessment", "type": "text"},
+      {"field": "recommendation", "type": "text"},
+      {"field": "accepted_by_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "accepted_at", "type": "date_and_time", "form_read_only": true},
+      {"field": "inpatient_record_identifier", "type": "entity_reference", "target": "clinical_services.inpatient_record"},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"}
+    ]
+  },
+  {
+    "entity": "clinical_services.specimen",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "status", "type": "enumeration", "values": ["Available", "Unavailable", "Unsatisfactory", "Entered In Error"]},
+      {"field": "note", "type": "formatted_text"},
+      {"field": "received_time", "type": "date_and_time"},
+      {"field": "barcode", "type": "barcode"},
+      {"field": "specimen_type_identifier", "type": "entity_reference", "target": "clinical_services.lab_test_sample"},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient"},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "patient_age", "type": "short_text", "form_read_only": true},
+      {"field": "patient_gender_identifier", "type": "entity_reference", "target": "contacts.gender", "form_read_only": true},
+      {"field": "sample_collection_identifier", "type": "entity_reference", "target": "clinical_services.sample_collection", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.therapy_plan",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "start_date", "type": "calendar_date", "required": true},
+      {"field": "therapy_plan_details_rows", "type": "owned_collection", "target": "clinical_services.therapy_plan_detail", "required": true},
+      {"field": "numbering_series", "type": "enumeration", "values": ["therapy plan numbering prefix + four-digit year + configured sequence"]},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "title", "type": "short_text", "default": "{patient_name}"},
+      {"field": "total_sessions", "type": "integer", "form_read_only": true},
+      {"field": "total_sessions_completed", "type": "integer", "form_read_only": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Not Started", "In Progress", "Completed", "Cancelled"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "therapy_plan_template_identifier", "type": "entity_reference", "target": "clinical_services.therapy_plan_template"},
+      {"field": "invoiced", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "source_record_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "order_group_identifier", "type": "selected_entity_reference", "target_selected_by": "source_record_identifier", "form_read_only": true},
+      {"field": "practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner", "required": true},
+      {"field": "practitioner_name", "type": "short_text", "form_read_only": true},
+      {"field": "emergency_record_identifier", "type": "entity_reference", "target": "clinical_services.emergency_record", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.therapy_plan_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "therapy_type_identifier", "type": "entity_reference", "target": "clinical_services.therapy_type", "required": true},
+      {"field": "number_of_sessions", "type": "integer"},
+      {"field": "sessions_completed", "type": "integer", "form_read_only": true, "editable_after_posting": true, "default": "0"},
+      {"field": "patient_care_type_identifier", "type": "entity_reference", "target": "clinical_services.patient_care_type"},
+      {"field": "intent_identifier", "type": "entity_reference", "target": "clinical_services.code_value"},
+      {"field": "priority_identifier", "type": "entity_reference", "target": "clinical_services.code_value"},
+      {"field": "service_request", "type": "short_text", "form_read_only": true, "editable_after_posting": true},
+      {"field": "interval", "type": "duration"}
+    ]
+  },
+  {
+    "entity": "clinical_services.therapy_plan_template",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "plan_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "therapy_types_rows", "type": "owned_collection", "target": "clinical_services.therapy_plan_template_detail", "required": true},
+      {"field": "linked_item_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "item_code", "type": "short_text"},
+      {"field": "item_name", "type": "short_text", "required": true},
+      {"field": "item_group_identifier", "type": "entity_reference", "target": "organization.item_group", "required": true},
+      {"field": "description", "type": "text"},
+      {"field": "total_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "total_sessions", "type": "integer", "form_read_only": true},
+      {"field": "link_existing_item", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "clinical_services.therapy_plan_template_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "therapy_type_identifier", "type": "entity_reference", "target": "clinical_services.therapy_type", "required": true},
+      {"field": "number_of_sessions", "type": "integer"},
+      {"field": "rate", "type": "monetary_amount"},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "interval", "type": "duration"}
+    ]
+  },
+  {
+    "entity": "clinical_services.therapy_session",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "submit", "cancel", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "values": ["therapy session numbering prefix + four-digit year + configured sequence"]},
+      {"field": "appointment_identifier", "type": "entity_reference", "target": "clinical_services.patient_appointment"},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender", "form_read_only": true},
+      {"field": "practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner"},
+      {"field": "department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department"},
+      {"field": "duration", "type": "integer", "required": true},
+      {"field": "location", "type": "enumeration", "values": ["", "Center", "Home", "Tele"]},
+      {"field": "rate", "type": "monetary_amount"},
+      {"field": "exercises_rows", "type": "owned_collection", "target": "clinical_services.exercise"},
+      {"field": "therapy_type_identifier", "type": "entity_reference", "target": "clinical_services.therapy_type", "required": true},
+      {"field": "therapy_plan_identifier", "type": "entity_reference", "target": "clinical_services.therapy_plan", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "clinical_services.therapy_session", "form_read_only": true},
+      {"field": "service_unit_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_service_unit"},
+      {"field": "start_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "start_time", "type": "time_of_day", "default": {"context_default": "current_instant"}},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "invoiced", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "patient_age", "type": "short_text", "form_read_only": true},
+      {"field": "total_counts_targeted", "type": "integer", "form_read_only": true},
+      {"field": "total_counts_completed", "type": "integer", "form_read_only": true},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "codification_table_rows", "type": "owned_collection", "target": "clinical_services.codification_table"},
+      {"field": "service_request_identifier", "type": "entity_reference", "target": "clinical_services.service_request", "form_read_only": true},
+      {"field": "emergency_record_identifier", "type": "entity_reference", "target": "clinical_services.emergency_record", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.therapy_type",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "therapy_type", "type": "short_text", "required": true, "unique": true},
+      {"field": "is_billable", "type": "boolean", "default": "0"},
+      {"field": "rate", "type": "monetary_amount"},
+      {"field": "exercises_rows", "type": "owned_collection", "target": "clinical_services.exercise"},
+      {"field": "default_duration", "type": "integer"},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true},
+      {"field": "item_code", "type": "short_text", "required": true},
+      {"field": "item_group_identifier", "type": "entity_reference", "target": "organization.item_group", "required": true},
+      {"field": "item_name", "type": "short_text", "required": true},
+      {"field": "description", "type": "text"},
+      {"field": "medical_department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department"},
+      {"field": "change_in_item", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "therapy_for_rows", "type": "owned_selection", "target": "clinical_services.body_part_link"},
+      {"field": "healthcare_service_unit_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_service_unit"},
+      {"field": "codification_table_rows", "type": "owned_collection", "target": "clinical_services.codification_table"},
+      {"field": "nursing_checklist_template_identifier", "type": "entity_reference", "target": "clinical_services.nursing_checklist_template"},
+      {"field": "patient_care_type_identifier", "type": "entity_reference", "target": "clinical_services.patient_care_type"},
+      {"field": "staff_role_identifier", "type": "entity_reference", "target": "information_management.role"}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "add exercises"}
+    ]
+  },
+  {
+    "entity": "clinical_services.treatment_counselling",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "values": ["treatment counselling numbering prefix + four-digit year + configured sequence"]},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "editable_after_posting": true, "values": ["", "Active", "Completed", "Closed"]},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender", "form_read_only": true},
+      {"field": "patient_age", "type": "short_text", "form_read_only": true},
+      {"field": "treatment_plan_template_identifier", "type": "entity_reference", "target": "clinical_services.treatment_plan_template", "required": true},
+      {"field": "price_list_identifier", "type": "entity_reference", "target": "inventory.price_list", "required": true},
+      {"field": "treatment_plan_template_items_rows", "type": "owned_collection", "target": "clinical_services.treatment_plan_template_item"},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true, "editable_after_posting": true},
+      {"field": "outstanding_amount", "type": "monetary_amount", "form_read_only": true, "editable_after_posting": true},
+      {"field": "paid_amount", "type": "monetary_amount", "form_read_only": true, "editable_after_posting": true},
+      {"field": "encounter_status", "type": "short_text", "form_read_only": true, "editable_after_posting": true},
+      {"field": "medical_department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department", "form_read_only": true},
+      {"field": "primary_practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner"},
+      {"field": "secondary_practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner"},
+      {"field": "admission_nursing_checklist_template_identifier", "type": "entity_reference", "target": "clinical_services.nursing_checklist_template"},
+      {"field": "admission_instruction", "type": "text"},
+      {"field": "admission_ordered_for", "type": "calendar_date", "form_read_only": true},
+      {"field": "admission_service_unit_type_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_service_unit_type"},
+      {"field": "expected_length_of_stay", "type": "integer"},
+      {"field": "admission_encounter_identifier", "type": "entity_reference", "target": "clinical_services.patient_encounter", "form_read_only": true},
+      {"field": "referring_practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner", "form_read_only": true},
+      {"field": "inpatient_record_identifier", "type": "entity_reference", "target": "clinical_services.inpatient_record", "form_read_only": true, "editable_after_posting": true},
+      {"field": "terms_and_conditions_identifier", "type": "entity_reference", "target": "organization.terms_and_conditions"},
+      {"field": "terms", "type": "formatted_text"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "clinical_services.treatment_counselling", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.treatment_plan_template",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "medical_department_identifier", "type": "entity_reference", "target": "clinical_services.medical_department"},
+      {"field": "description", "type": "text"},
+      {"field": "goal", "type": "text"},
+      {"field": "practitioners_rows", "type": "owned_selection", "target": "clinical_services.treatment_plan_template_practitioner"},
+      {"field": "order_group_identifier", "type": "entity_reference", "target": "clinical_services.patient_encounter", "form_read_only": true},
+      {"field": "template_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "patient_age_from", "type": "integer"},
+      {"field": "patient_age_to", "type": "integer"},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender"},
+      {"field": "complaints_rows", "type": "owned_selection", "target": "clinical_services.patient_encounter_symptom"},
+      {"field": "diagnosis_rows", "type": "owned_selection", "target": "clinical_services.patient_encounter_diagnosis"},
+      {"field": "items_rows", "type": "owned_collection", "target": "clinical_services.treatment_plan_template_item"},
+      {"field": "drugs_rows", "type": "owned_collection", "target": "clinical_services.drug_prescription"},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "healthcare_service_unit_type_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_service_unit_type"},
+      {"field": "expected_length_of_stay", "type": "integer"},
+      {"field": "is_inpatient", "type": "boolean", "default": "0"},
+      {"field": "treatment_counselling_required_for_network_address", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "clinical_services.treatment_plan_template_item",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true},
+      {"field": "template_identifier", "type": "selected_entity_reference", "target_selected_by": "type_identifier", "required": true},
+      {"field": "quantity", "type": "integer", "default": "1"},
+      {"field": "instructions", "type": "text"},
+      {"field": "drug_name", "type": "short_text"},
+      {"field": "strength", "type": "decimal"},
+      {"field": "strength_unit_of_measure_identifier", "type": "entity_reference", "target": "organization.unit_of_measure"},
+      {"field": "dosage_form_identifier", "type": "entity_reference", "target": "clinical_services.dosage_form"},
+      {"field": "dosage_by_interval", "type": "boolean", "default": "0"},
+      {"field": "dosage_identifier", "type": "entity_reference", "target": "clinical_services.prescription_dosage"},
+      {"field": "interval", "type": "integer"},
+      {"field": "interval_unit_of_measure", "type": "enumeration", "values": ["", "Hour", "Day"]},
+      {"field": "period_identifier", "type": "entity_reference", "target": "clinical_services.prescription_duration"},
+      {"field": "number_of_repeats_allowed", "type": "decimal"},
+      {"field": "drug_identifier", "type": "entity_reference", "target": "inventory.item"},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "service_request", "type": "short_text", "form_read_only": true, "editable_after_posting": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.treatment_plan_template_practitioner",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "practitioner_identifier", "type": "entity_reference", "target": "clinical_services.healthcare_practitioner", "required": true}
+    ]
+  },
+  {
+    "entity": "clinical_services.triage_level",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "healthcare_administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "physician", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "triage_level", "type": "short_text", "required": true, "unique": true},
+      {"field": "code", "type": "short_text"},
+      {"field": "color", "type": "color"},
+      {"field": "priority", "type": "integer", "required": true},
+      {"field": "target_reassessment_minutes", "type": "integer"},
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "clinical_services.vital_signs",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "physician", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "nursing_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "inpatient_record_identifier", "type": "entity_reference", "target": "clinical_services.inpatient_record", "form_read_only": true},
+      {"field": "patient_identifier", "type": "entity_reference", "target": "clinical_services.patient", "required": true},
+      {"field": "patient_name", "type": "short_text", "form_read_only": true},
+      {"field": "appointment_identifier", "type": "entity_reference", "target": "clinical_services.patient_appointment", "form_read_only": true},
+      {"field": "encounter_identifier", "type": "entity_reference", "target": "clinical_services.patient_encounter", "form_read_only": true},
+      {"field": "signs_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "signs_time", "type": "time_of_day", "required": true, "default": {"context_default": "current_instant"}},
+      {"field": "temperature", "type": "short_text"},
+      {"field": "pulse", "type": "short_text"},
+      {"field": "respiratory_rate", "type": "short_text"},
+      {"field": "tongue", "type": "enumeration", "values": ["", "Coated", "Very Coated", "Normal", "Furry", "Cuts"]},
+      {"field": "abdomen", "type": "enumeration", "values": ["", "Normal", "Bloated", "Full", "Fluid", "Constipated"]},
+      {"field": "reflexes", "type": "enumeration", "values": ["", "Normal", "Hyper", "Very Hyper", "One Sided"]},
+      {"field": "blood_pressure_systolic", "type": "short_text"},
+      {"field": "blood_pressure_diastolic", "type": "short_text"},
+      {"field": "blood_pressure", "type": "short_text", "form_read_only": true},
+      {"field": "vital_signs_note", "type": "text"},
+      {"field": "height", "type": "decimal"},
+      {"field": "weight", "type": "decimal"},
+      {"field": "body_mass_index", "type": "decimal", "form_read_only": true, "default": "0.00"},
+      {"field": "nutrition_note", "type": "text"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "clinical_services.vital_signs", "form_read_only": true},
+      {"field": "numbering_series", "type": "enumeration", "required": true, "values": ["vital signs numbering prefix + four-digit year + configured sequence"]},
+      {"field": "title", "type": "short_text", "form_read_only": true, "editable_after_posting": true}
+    ]
+  }
+]

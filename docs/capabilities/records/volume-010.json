@@ -1,0 +1,878 @@
+[
+  {
+    "capability": "Channel item and warehouse mapping",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "commerce_channel_configuration",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "service_interface_base_resource_address", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "email", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "password", "value_kind": "protected_text", "rules": ["required"]},
+          {"purpose": "source_warehouse", "value_kind": "reference", "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "target_warehouse", "value_kind": "reference", "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "stock_entry_type", "value_kind": "reference", "target": "inventory.stock_entry_type", "binding": "shared_model"},
+          {"purpose": "customer_for_customer_order", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "should_create_stock_entry", "value_kind": "boolean", "rules": ["required"]},
+          {"purpose": "customer_order_mode", "value_kind": "choice", "choices": ["none", "combined", "separate"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["sales_master_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "commerce_channel_stock_keeping_unit_mapping",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "commerce_channel_code", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "item", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["item_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["sales_master_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Cheque payment runs",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "check_run",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "end_date", "value_kind": "civil_day"},
+          {"purpose": "initial_check_number", "value_kind": "whole_number", "rules": ["editable_after_submission"]},
+          {"purpose": "final_check_number", "value_kind": "whole_number", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "amount_check_run", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required", "available_in_short_form", "remember_previous_selection"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "bank_account", "value_kind": "reference", "rules": ["required", "available_in_short_form", "remember_previous_selection"], "target": "accounting.bank_account", "binding": "shared_model"},
+          {"purpose": "pay_to_account", "value_kind": "reference", "rules": ["required", "remember_previous_selection"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "company_discretionary_data", "value_kind": "text", "rules": ["editable_after_submission"]},
+          {"purpose": "beg_balance", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "hidden_from_form"], "target": "check_run"},
+          {"purpose": "transactions", "value_kind": "long_text", "rules": ["hidden_from_form", "editable_after_submission"]},
+          {"purpose": "print_count", "value_kind": "whole_number", "rules": ["hidden_from_form", "editable_after_submission"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["hidden_from_form", "editable_after_submission"], "choices": ["draft", "pending_approval", "approved", "submitting", "submitted", "ready_to_print", "confirm_print", "printed"]},
+          {"purpose": "posting_date", "value_kind": "civil_day"},
+          {"purpose": "automated_clearing_house_file_generated", "value_kind": "boolean", "rules": ["hidden_from_form", "editable_after_submission"]}
+        ],
+        "role_grants": [
+          ["accounts_user", 0, ["select", "read", "write", "create", "report"], false],
+          ["accounts_manager", 0, ["select", "read", "write", "create", "submit", "report", "export", "share", "print"], false]
+        ]
+      },
+      {
+        "concept": "check_run_settings",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "bank_account", "value_kind": "reference", "rules": ["required"], "target": "accounting.bank_account", "binding": "shared_model"},
+          {"purpose": "include_purchase_invoices", "value_kind": "boolean"},
+          {"purpose": "include_journal_entries", "value_kind": "boolean"},
+          {"purpose": "include_expense_claims", "value_kind": "boolean"},
+          {"purpose": "include_tax_payable", "value_kind": "boolean"},
+          {"purpose": "allow_cancellation", "value_kind": "boolean"},
+          {"purpose": "automated_clearing_house_file_extension", "value_kind": "text"},
+          {"purpose": "pre_check_overdue_items", "value_kind": "boolean"},
+          {"purpose": "cascade_cancellation", "value_kind": "boolean"},
+          {"purpose": "number_of_invoices_per_voucher", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "pay_to_account", "value_kind": "reference", "rules": ["required"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "automated_clearing_house_service_class_code", "value_kind": "choice", "choices": ["200", "220", "225"]},
+          {"purpose": "automated_clearing_house_standard_class_code", "value_kind": "choice", "choices": ["ppd"]},
+          {"purpose": "automated_clearing_house_description", "value_kind": "text"},
+          {"purpose": "print_format", "value_kind": "reference", "target": "document_output.print_format", "binding": "shared_model"},
+          {"purpose": "split_by_address", "value_kind": "boolean"},
+          {"purpose": "automatically_release_on_hold_invoices", "value_kind": "boolean"},
+          {"purpose": "immediate_origin", "value_kind": "text"},
+          {"purpose": "company_discretionary_data", "value_kind": "text"},
+          {"purpose": "post_processing_hook", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "supplier_invoice", "value_kind": "reference", "target": "accounting.mode_of_payment", "binding": "shared_model"},
+          {"purpose": "journal_entry", "value_kind": "reference", "target": "accounting.mode_of_payment", "binding": "shared_model"},
+          {"purpose": "expense_claim", "value_kind": "reference", "target": "accounting.mode_of_payment", "binding": "shared_model"},
+          {"purpose": "tax_payable", "value_kind": "reference", "target": "accounting.mode_of_payment", "binding": "shared_model"},
+          {"purpose": "file_preview_threshold", "value_kind": "whole_number"},
+          {"purpose": "validate_unique_check_number", "value_kind": "boolean"},
+          {"purpose": "allow_stand_alone_debit_notes", "value_kind": "choice", "choices": ["yes", "number"]},
+          {"purpose": "role_allowed_to_download_automated_clearing_house_file_multiple_times", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "set_payment_entry_posting_date", "value_kind": "choice", "choices": ["use_today_s_date", "use_check_run_s_posting_date"]},
+          {"purpose": "approver_role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "allow_only_verified_accounts_in_nacha_generation", "value_kind": "boolean"},
+          {"purpose": "attach_positive_pay", "value_kind": "boolean"},
+          {"purpose": "positive_pay_file_format", "value_kind": "choice", "choices": ["csv", "spreadsheet"]},
+          {"purpose": "csv_delimiter", "value_kind": "text"},
+          {"purpose": "csv_quoting", "value_kind": "choice", "choices": ["minimal", "all", "non_numeric", "none"]},
+          {"purpose": "show_due_date", "value_kind": "choice", "choices": ["show_due_date", "show_days_past_due"]},
+          {"purpose": "payment_discount_account", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Cheque payment runs",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "bank", "purpose": "aba_number", "value_kind": "text", "placement": "preceding_field_column_in_bank"},
+      {"on": "bank_account", "purpose": "check_number", "value_kind": "text", "placement": "company", "rules": ["translatable"]},
+      {"on": "bank_account", "purpose": "company_automated_clearing_house_identifier", "value_kind": "text", "placement": "check_number", "rules": ["translatable"]},
+      {"on": "bank_account", "purpose": "allow_quick_check", "value_kind": "boolean", "placement": "is_company_account"},
+      {"on": "employee", "purpose": "bank_account", "value_kind": "protected_text", "placement": "bank"},
+      {"on": "employee", "purpose": "mode_of_payment", "value_kind": "reference", "placement": "salary_mode"},
+      {"on": "employee", "purpose": "bank", "value_kind": "reference", "placement": "mode_of_payment"},
+      {"on": "payment_entry", "purpose": "check_run", "value_kind": "text", "placement": "payment_order_status", "rules": ["read_only"]},
+      {"on": "payment_entry", "purpose": "voided_date", "value_kind": "civil_day", "placement": "current_status", "rules": ["read_only", "editable_after_submission"]},
+      {"on": "supplier_invoice", "purpose": "supplier_default_mode_of_payment", "value_kind": "reference", "placement": "bill_number"},
+      {"on": "sales_taxes_and_charges", "purpose": "due_date", "value_kind": "civil_day", "placement": "rate", "rules": ["read_only"]},
+      {"on": "sales_taxes_and_charges", "purpose": "party", "value_kind": "variable_record_reference", "placement": "party_type"},
+      {"on": "sales_taxes_and_charges", "purpose": "field_column_for_party_type", "value_kind": "field_column", "placement": "due_date"},
+      {"on": "sales_taxes_and_charges", "purpose": "party_type", "value_kind": "reference", "placement": "field_column_for_party_type"},
+      {"on": "sales_taxes_and_charges", "purpose": "outstanding_amount", "value_kind": "money", "placement": "base_tax_amount_after_discount_amount", "rules": ["read_only"]},
+      {"on": "supplier", "purpose": "bank_account", "value_kind": "protected_text", "placement": "release_date"},
+      {"on": "supplier", "purpose": "bank", "value_kind": "reference", "placement": "cb_21"},
+      {"on": "supplier", "purpose": "supplier_default_mode_of_payment", "value_kind": "reference", "placement": "payment_terms"},
+      {"on": "supplier", "purpose": "number_of_invoices_per_check_voucher", "value_kind": "whole_number", "placement": "supplier_default_mode_of_payment"}
+    ]
+  },
+  {
+    "capability": "Cheque payment runs",
+    "configuration": 1,
+    "rule_addresses": [
+      ["mode_of_payment", "type", "options", "text"],
+      ["sales_taxes_and_charges", null, "field_order", "text"]
+    ]
+  },
+  {
+    "capability": "Collaborative diagramming",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "diagram",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "board_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "scene", "value_kind": "long_text"},
+          {"purpose": "thumbnail", "value_kind": "image_reference", "rules": ["hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["desk_user", 0, ["read", "write", "create", "delete", "share"], false]
+        ]
+      },
+      {
+        "concept": "diagram_library",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "items", "value_kind": "long_text"}
+        ],
+        "role_grants": [
+          ["desk_user", 0, ["read", "write", "create", "delete"], false]
+        ]
+      },
+      {
+        "concept": "diagram_version",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "board", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "diagram"},
+          {"purpose": "label", "value_kind": "text"},
+          {"purpose": "auto", "value_kind": "boolean"},
+          {"purpose": "added", "value_kind": "whole_number"},
+          {"purpose": "changed", "value_kind": "whole_number"},
+          {"purpose": "removed", "value_kind": "whole_number"},
+          {"purpose": "scene", "value_kind": "long_text"},
+          {"purpose": "thumbnail", "value_kind": "image_reference"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Collaborative document spaces",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "collaborative_document_favorite",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "page", "value_kind": "reference", "rules": ["required"], "target": "collaborative_document_page"},
+          {"purpose": "sort_order", "value_kind": "whole_number"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["desk_user", 0, ["read", "write", "create", "delete"], true]
+        ]
+      },
+      {
+        "concept": "collaborative_document_page",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text"},
+          {"purpose": "icon", "value_kind": "text"},
+          {"purpose": "cover", "value_kind": "text"},
+          {"purpose": "space", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "collaborative_document_space"},
+          {"purpose": "parent_page", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "collaborative_document_page"},
+          {"purpose": "sort_order", "value_kind": "decimal"},
+          {"purpose": "content", "value_kind": "structured_value"},
+          {"purpose": "content_text", "value_kind": "long_text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "full_width", "value_kind": "boolean"},
+          {"purpose": "is_locked", "value_kind": "boolean"},
+          {"purpose": "project", "value_kind": "reference", "target": "projects.project", "binding": "shared_model"},
+          {"purpose": "is_project_page", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "content_version", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "last_edited_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "last_edited_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "is_archived", "value_kind": "boolean", "rules": ["indexed_for_search"]},
+          {"purpose": "archived_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "archived_on", "value_kind": "date_and_time", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["collaborative_document_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["desk_user", 0, ["read", "write", "create", "delete", "share"], false]
+        ]
+      },
+      {
+        "concept": "collaborative_document_page_version",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "page", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "collaborative_document_page"},
+          {"purpose": "title", "value_kind": "text"},
+          {"purpose": "content_version", "value_kind": "whole_number"},
+          {"purpose": "content", "value_kind": "structured_value"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["collaborative_document_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["desk_user", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "collaborative_document_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "auto_create_project_pages", "value_kind": "boolean"},
+          {"purpose": "projects_space", "value_kind": "reference", "target": "collaborative_document_space"},
+          {"purpose": "starter_pages_created", "value_kind": "boolean", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "share", "print", "email"], false],
+          ["collaborative_document_manager", 0, ["read", "write", "create", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "collaborative_document_space",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "icon", "value_kind": "text"},
+          {"purpose": "visibility", "value_kind": "choice", "choices": ["workspace", "private"]},
+          {"purpose": "default_access", "value_kind": "choice", "choices": ["can_edit", "can_view"]},
+          {"purpose": "sort_order", "value_kind": "whole_number"},
+          {"purpose": "project", "value_kind": "reference", "target": "projects.project", "binding": "shared_model"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "members", "value_kind": "owned_rows", "target": "collaborative_document_space_member"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["collaborative_document_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["desk_user", 0, ["read", "write", "create", "delete", "share"], false]
+        ]
+      },
+      {
+        "concept": "collaborative_document_space_member",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "access", "value_kind": "choice", "rules": ["required"], "choices": ["full_access", "can_edit", "can_view"]}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Collaborative knowledge publishing",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "knowledge_library_change_request",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "knowledge_library_space", "value_kind": "reference", "rules": ["required"], "target": "knowledge_library_space"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["required"], "choices": ["draft", "in_review", "changes_requested", "approved", "rejected", "merged", "archived"]},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "base_revision", "value_kind": "reference", "rules": ["required"], "target": "knowledge_library_revision"},
+          {"purpose": "head_revision", "value_kind": "reference", "rules": ["required"], "target": "knowledge_library_revision"},
+          {"purpose": "merge_revision", "value_kind": "reference", "rules": ["read_only"], "target": "knowledge_library_revision"},
+          {"purpose": "outdated", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "merged_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "merged_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "archived_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "operation_version", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form", "nonnegative"]},
+          {"purpose": "structure_version", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form", "nonnegative"]},
+          {"purpose": "applied_op_identifiers", "value_kind": "structured_value", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "reviewed_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reviewed_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "rejected_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "review_comment", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_approver", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_user", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], true],
+          ["knowledge_library_user", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_content_blob",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "hash", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "content", "value_kind": "long_text"},
+          {"purpose": "content_type", "value_kind": "text"},
+          {"purpose": "size", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "created_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "created_at", "value_kind": "date_and_time", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_document",
+        "characteristics": ["hierarchical_record"],
+        "attributes": [
+          {"purpose": "hierarchy_left_boundary", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form", "indexed_for_search"]},
+          {"purpose": "hierarchy_right_boundary", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form", "indexed_for_search"]},
+          {"purpose": "is_group", "value_kind": "boolean"},
+          {"purpose": "is_tab", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "tab_icon", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "old_parent", "value_kind": "reference", "target": "knowledge_library_document"},
+          {"purpose": "parent_knowledge_library_document", "value_kind": "reference", "rules": ["bypasses_value_selection_restrictions"], "target": "knowledge_library_document"},
+          {"purpose": "sort_order", "value_kind": "whole_number", "rules": ["hidden_from_form"]},
+          {"purpose": "route", "value_kind": "text", "rules": ["indexed_for_search"]},
+          {"purpose": "slug", "value_kind": "text"},
+          {"purpose": "record_key", "value_kind": "text", "rules": ["unique", "read_only", "hidden_from_form"]},
+          {"purpose": "content", "value_kind": "expression_or_structured_text"},
+          {"purpose": "source_path", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "is_published", "value_kind": "boolean"},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "knowledge_library_space", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "knowledge_library_space"},
+          {"purpose": "is_external_link", "value_kind": "boolean"},
+          {"purpose": "external_resource_address", "value_kind": "text"},
+          {"purpose": "meta_title", "value_kind": "text"},
+          {"purpose": "meta_description", "value_kind": "text"},
+          {"purpose": "meta_image", "value_kind": "image_reference"},
+          {"purpose": "disable_indexing", "value_kind": "boolean", "rules": ["indexed_for_search"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_user", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_merge_conflict",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "change_request", "value_kind": "reference", "rules": ["required"], "target": "knowledge_library_change_request"},
+          {"purpose": "record_key", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "conflict_type", "value_kind": "choice", "rules": ["required"], "choices": ["content", "meta", "tree"]},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["open", "resolved"]},
+          {"purpose": "base_payload", "value_kind": "structured_value"},
+          {"purpose": "ours_payload", "value_kind": "structured_value"},
+          {"purpose": "theirs_payload", "value_kind": "structured_value"},
+          {"purpose": "resolution", "value_kind": "choice", "choices": ["ours", "theirs", "manual"]},
+          {"purpose": "resolved_payload", "value_kind": "structured_value"},
+          {"purpose": "resolved_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "resolved_at", "value_kind": "date_and_time"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_revision",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "knowledge_library_space", "value_kind": "reference", "rules": ["required"], "target": "knowledge_library_space"},
+          {"purpose": "change_request", "value_kind": "reference", "target": "knowledge_library_change_request"},
+          {"purpose": "parent_revision", "value_kind": "reference", "target": "knowledge_library_revision"},
+          {"purpose": "checkpoint_revision", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "knowledge_library_revision"},
+          {"purpose": "message", "value_kind": "text"},
+          {"purpose": "source_engineering_change", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "is_merge", "value_kind": "boolean"},
+          {"purpose": "is_working", "value_kind": "boolean"},
+          {"purpose": "is_overlay", "value_kind": "boolean"},
+          {"purpose": "hashes_stale", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "created_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "created_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "tree_hash", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "content_hash", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "record_count", "value_kind": "whole_number", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_revision_item",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "revision", "value_kind": "reference", "rules": ["required"], "target": "knowledge_library_revision"},
+          {"purpose": "record_key", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "title", "value_kind": "text"},
+          {"purpose": "slug", "value_kind": "text"},
+          {"purpose": "route", "value_kind": "text"},
+          {"purpose": "is_group", "value_kind": "boolean"},
+          {"purpose": "is_tab", "value_kind": "boolean"},
+          {"purpose": "tab_icon", "value_kind": "text"},
+          {"purpose": "is_published", "value_kind": "boolean"},
+          {"purpose": "is_external_link", "value_kind": "boolean"},
+          {"purpose": "external_resource_address", "value_kind": "text"},
+          {"purpose": "parent_key", "value_kind": "text"},
+          {"purpose": "order_index", "value_kind": "whole_number"},
+          {"purpose": "content_blob", "value_kind": "reference", "target": "knowledge_library_content_blob"},
+          {"purpose": "is_deleted", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "migrate_to_knowledge_library",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "application_name", "value_kind": "text"},
+          {"purpose": "documents_directory", "value_kind": "text"},
+          {"purpose": "assets_directory", "value_kind": "text"},
+          {"purpose": "documentation_route", "value_kind": "text"},
+          {"purpose": "assets_prepend", "value_kind": "text"},
+          {"purpose": "documents_base_resource_address", "value_kind": "text"},
+          {"purpose": "create_new_assets", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_application_switcher_list_table",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "application_title", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "knowledge_library_space", "value_kind": "reference", "target": "knowledge_library_space"}
+        ]
+      },
+      {
+        "concept": "knowledge_library_feedback",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "knowledge_library_page", "value_kind": "reference", "target": "knowledge_library_page"},
+          {"purpose": "rating", "value_kind": "rating"},
+          {"purpose": "feedback", "value_kind": "text"},
+          {"purpose": "email_identifier", "value_kind": "text"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["open", "closed"]},
+          {"purpose": "knowledge_library_feedback_classification", "value_kind": "choice", "choices": ["good", "bad", "ok"]},
+          {"purpose": "knowledge_library_document", "value_kind": "reference", "rules": ["required"], "target": "knowledge_library_document"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_approver", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["all", 0, ["write", "create", "report", "export", "share", "print", "email"], false],
+          ["guest", 0, ["write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_revision_control_synchronization_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "knowledge_library_space", "value_kind": "reference", "rules": ["required", "read_only"], "target": "knowledge_library_space"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["running", "success", "number_change", "error"]},
+          {"purpose": "trigger", "value_kind": "choice", "rules": ["read_only"], "choices": ["manual", "inbound_event_notification", "scheduled", "local"]},
+          {"purpose": "engineering_revision_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "started_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "finished_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "created_count", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "updated_count", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "deleted_count", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "moved_count", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "log", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "error", "value_kind": "expression_or_structured_text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_approver", 0, ["read", "delete", "report", "share", "print"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_engineering_repository_connection",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "engineering_repository_login", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "expires_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "refresh_token_expires_at", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "access_token", "value_kind": "protected_text"},
+          {"purpose": "refresh_token", "value_kind": "protected_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_engineering_repository_inbound_event_notification_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "event", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "signature", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "repository", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "repository_owner", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "revision_control_reference_type", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "branch", "tag"]},
+          {"purpose": "branch", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "engineering_repository_installation_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "synchronized_spaces", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "payload", "value_kind": "expression_or_structured_text", "rules": ["required", "read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_approver", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_group_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "parent_label", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "knowledge_library_page", "value_kind": "reference", "rules": ["required"], "target": "knowledge_library_page"},
+          {"purpose": "hide_on_sidebar", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "knowledge_library_page",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "content", "value_kind": "formatted_text", "rules": ["required", "available_in_short_form"]},
+          {"purpose": "published", "value_kind": "boolean"},
+          {"purpose": "route", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "allow_guest", "value_kind": "boolean"},
+          {"purpose": "meta_description", "value_kind": "text"},
+          {"purpose": "meta_image", "value_kind": "image_reference"},
+          {"purpose": "meta_keywords", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_approver", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_page_patch",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "knowledge_library_page", "value_kind": "reference", "rules": ["read_only"], "target": "knowledge_library_page"},
+          {"purpose": "raised_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "approved_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["under_review", "changes_requested", "rejected", "approved", "draft"]},
+          {"purpose": "new_code", "value_kind": "expression_or_structured_text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "knowledge_library_page_patch"},
+          {"purpose": "message", "value_kind": "text"},
+          {"purpose": "new", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "new_title", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "orignal_code", "value_kind": "expression_or_structured_text"},
+          {"purpose": "new_sidebar_group", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["all", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], true],
+          ["knowledge_library_approver", 0, ["select", "read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["guest", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_page_revision",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "message", "value_kind": "text"},
+          {"purpose": "content", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "raised_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "raised_by_username", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "knowledge_library_pages", "value_kind": "owned_rows", "target": "knowledge_library_page_revision_item"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_approver", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_page_revision_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "knowledge_library_page", "value_kind": "reference", "target": "knowledge_library_page"}
+        ]
+      },
+      {
+        "concept": "knowledge_library_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "expression", "value_kind": "expression_or_structured_text"},
+          {"purpose": "default_knowledge_library_space", "value_kind": "suggested_text"},
+          {"purpose": "enable_table_of_contents", "value_kind": "boolean"},
+          {"purpose": "auto_convert_images_to_webp", "value_kind": "boolean"},
+          {"purpose": "auto_generate_meta_images", "value_kind": "boolean"},
+          {"purpose": "enable_feedback", "value_kind": "boolean"},
+          {"purpose": "ask_for_contact_details", "value_kind": "boolean"},
+          {"purpose": "feedback_submission_limit", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "head_formatted_markup", "value_kind": "expression_or_structured_text"},
+          {"purpose": "engineering_repository_application_identifier", "value_kind": "text"},
+          {"purpose": "engineering_repository_application_client_identifier", "value_kind": "text"},
+          {"purpose": "engineering_repository_application_public_link", "value_kind": "text"},
+          {"purpose": "engineering_repository_application_client_secret", "value_kind": "protected_text"},
+          {"purpose": "engineering_repository_application_private_key", "value_kind": "protected_text"},
+          {"purpose": "engineering_repository_inbound_event_notification_secret", "value_kind": "protected_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["knowledge_library_approver", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["knowledge_library_manager", 0, ["read", "write", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_sidebar",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "parent_label", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "knowledge_library_page", "value_kind": "reference", "rules": ["required", "unique"], "target": "knowledge_library_page"}
+        ]
+      },
+      {
+        "concept": "knowledge_library_space",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "route", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "knowledge_library_sidebars", "value_kind": "owned_rows", "target": "knowledge_library_group_item"},
+          {"purpose": "navbar_items", "value_kind": "owned_rows", "target": "web_publishing.top_bar_item", "binding": "shared_model"},
+          {"purpose": "light_mode_logo", "value_kind": "image_reference"},
+          {"purpose": "dark_mode_logo", "value_kind": "image_reference"},
+          {"purpose": "space_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "application_switcher_logo", "value_kind": "image_reference"},
+          {"purpose": "space_icon", "value_kind": "text"},
+          {"purpose": "space_color", "value_kind": "text"},
+          {"purpose": "avatar", "value_kind": "long_text", "rules": ["hidden_from_form"]},
+          {"purpose": "avatar_style", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "avatar_seed", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "favicon", "value_kind": "image_reference"},
+          {"purpose": "roles", "value_kind": "owned_rows", "target": "knowledge_library_space_role"},
+          {"purpose": "allow_contributions", "value_kind": "boolean"},
+          {"purpose": "root_group", "value_kind": "reference", "rules": ["unique"], "target": "knowledge_library_document"},
+          {"purpose": "main_revision", "value_kind": "reference", "rules": ["read_only"], "target": "knowledge_library_revision"},
+          {"purpose": "last_edited", "value_kind": "date_and_time", "rules": ["read_only", "indexed_for_search"]},
+          {"purpose": "enable_tabs", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "home_tab_title", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "home_tab_icon", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "enable_feedback_collection", "value_kind": "boolean"},
+          {"purpose": "allow_portable_document_download", "value_kind": "boolean"},
+          {"purpose": "show_in_switcher", "value_kind": "boolean"},
+          {"purpose": "is_published", "value_kind": "boolean"},
+          {"purpose": "switcher_order", "value_kind": "whole_number", "rules": ["nonnegative"]},
+          {"purpose": "revision_control_synchronized", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "repo_full_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "branch", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "documents_subdir", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "engineering_repository_installation_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "last_synchronization_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "pending", "running", "success", "error"]},
+          {"purpose": "last_synchronized_engineering_revision_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "last_synchronization_time", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "last_synchronization_error", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "knowledge_library_configuration", "value_kind": "expression_or_structured_text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_approver", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["knowledge_library_user", 0, ["select", "read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "knowledge_library_space_role",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "role", "value_kind": "reference", "rules": ["required"], "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "permission_level", "value_kind": "choice", "rules": ["required"], "choices": ["read", "write"]}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Committee opening of supplier quotations",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "committee",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "committee_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "minimum_number_of_members_needed_to_open", "value_kind": "whole_number", "rules": ["required", "available_in_short_form"]},
+          {"purpose": "disabled", "value_kind": "boolean"},
+          {"purpose": "description", "value_kind": "formatted_text"},
+          {"purpose": "committee_members", "value_kind": "owned_rows", "rules": ["required"], "target": "committee_member"},
+          {"purpose": "opening_minutes", "value_kind": "boolean"},
+          {"purpose": "committee_register", "value_kind": "boolean"},
+          {"purpose": "evaluation_minutes", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["purchase_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "committee_member",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "user_identifier", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "user_signature"},
+          {"purpose": "full_name", "value_kind": "displayed_value"},
+          {"purpose": "signature", "value_kind": "file_reference"}
+        ]
+      },
+      {
+        "concept": "committee_note",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "quotation", "value_kind": "reference", "rules": ["required"], "target": "procurement.request_for_quotation", "binding": "shared_model"},
+          {"purpose": "generated_content", "value_kind": "formatted_text"},
+          {"purpose": "note_type", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "committee_register", "evaluation_minutes", "opening_minutes"]},
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required"], "choices": ["assigned_sequence_with_year"]},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "committee_note"},
+          {"purpose": "committee", "value_kind": "reference", "rules": ["required", "read_only"], "target": "committee"},
+          {"purpose": "evaluation_committee", "value_kind": "reference", "target": "committee"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "request_for_quotation_opening_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "allow_multiple_supplier_quotations_from_portal", "value_kind": "boolean", "rules": ["required"]},
+          {"purpose": "skip_supplier_quotation_opening_by_committee", "value_kind": "boolean", "rules": ["required"]},
+          {"purpose": "ignore_default_buying_price_list_validation", "value_kind": "boolean", "rules": ["required"]},
+          {"purpose": "require_mandatory_on_request_for_quotation", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "user_signature",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "full_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "signature", "value_kind": "file_reference"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["system_manager", 1, ["read", "write", "report", "export", "share", "print", "email"], false],
+          ["desk_user", 0, ["select", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Committee opening of supplier quotations",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "request_for_quotation", "purpose": "field_column_for_minimum_expected_quotes", "value_kind": "field_column", "placement": "closing_time"},
+      {"on": "request_for_quotation", "purpose": "workflow_state", "value_kind": "reference", "rules": ["hidden_from_form", "editable_after_submission"]},
+      {"on": "request_for_quotation", "purpose": "closing_time", "value_kind": "time_of_day", "placement": "closing_date", "rules": ["required", "editable_after_submission"]},
+      {"on": "request_for_quotation", "purpose": "closing_date", "value_kind": "civil_day", "placement": "vendor", "rules": ["required", "editable_after_submission"]},
+      {"on": "request_for_quotation", "purpose": "committee", "value_kind": "reference", "placement": "minimum_expected_quotes", "rules": ["required"]},
+      {"on": "request_for_quotation", "purpose": "minimum_expected_quotes", "value_kind": "whole_number", "placement": "field_column_for_minimum_expected_quotes", "rules": ["required", "editable_after_submission"]},
+      {"on": "supplier_quotation", "purpose": "workflow_state", "value_kind": "reference", "rules": ["hidden_from_form", "editable_after_submission"]},
+      {"on": "supplier_quotation", "purpose": "submission_status", "value_kind": "choice", "placement": "transaction_date", "rules": ["read_only", "hidden_from_form", "translatable"]},
+      {"on": "supplier_quotation_item", "purpose": "is_lowest", "value_kind": "boolean", "placement": "amount"}
+    ]
+  },
+  {
+    "capability": "Committee opening of supplier quotations",
+    "configuration": 1,
+    "additional_role_grants": [
+      ["request_for_quotation", "purchase_user", 0, ["read", "write", "create", "amend", "report", "share", "print", "email"], false],
+      ["request_for_quotation", "purchase_manager", 1, ["read", "write"], false],
+      ["request_for_quotation", "purchase_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "share", "print", "email"], false],
+      ["request_for_quotation", "manufacturing_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "share", "print", "email"], false],
+      ["request_for_quotation", "stock_user", 0, ["read", "report", "print", "email"], false],
+      ["request_for_quotation", "all", 1, ["read"], false],
+      ["request_for_quotation", "procurement_assistant", 0, ["read", "write", "create", "amend", "report", "export", "import", "share", "print", "email"], false],
+      ["request_for_quotation", "procurement_officer", 0, ["read", "write", "submit", "cancel", "report", "export", "share", "print", "email"], false],
+      ["request_for_quotation", "chief_manager_finance_and_administration", 0, ["read", "write", "report", "export", "import"], false],
+      ["supplier_quotation", "stock_user", 0, ["read", "report", "print", "email"], false],
+      ["supplier_quotation", "purchase_user", 0, ["read", "write", "create", "submit", "amend", "report", "share", "print", "email"], false],
+      ["supplier_quotation", "purchase_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "share", "print", "email"], false],
+      ["supplier_quotation", "purchase_manager", 1, ["read", "write"], false],
+      ["supplier_quotation", "procurement_assistant", 0, ["read", "write", "report", "export", "import", "share", "print", "email"], false],
+      ["supplier_quotation", "chief_manager_finance_and_administration", 0, ["read", "write", "report", "export", "import", "share", "print", "email"], false],
+      ["supplier_quotation", "procurement_officer", 0, ["read", "write", "create", "amend", "report", "export", "import", "share", "print", "email"], false],
+      ["supplier_quotation", "managing_director", 0, ["read", "write", "submit", "cancel", "report", "export", "import", "share", "print", "email"], false]
+    ]
+  },
+  {
+    "capability": "Committee opening of supplier quotations",
+    "configuration": 1,
+    "rule_addresses": [
+      ["request_for_quotation", "closing_date", "in_list_view", "boolean"],
+      ["request_for_quotation", "transaction_date", "in_list_view", "boolean"],
+      ["request_for_quotation", "numbering_rule", "in_list_view", "boolean"],
+      ["request_for_quotation", "company", "in_list_view", "boolean"],
+      ["request_for_quotation", "closing_time", "in_list_view", "boolean"],
+      ["request_for_quotation", "message_for_supplier", "in_list_view", "boolean"],
+      ["request_for_quotation", "numbering_rule", "options", "text"],
+      ["supplier_quotation", "in_words", "print_hide", "boolean"],
+      ["supplier_quotation", "in_words", "hidden", "boolean"],
+      ["supplier_quotation", "disable_rounded_total", "default", "text"],
+      ["supplier_quotation", "rounded_total", "print_hide", "boolean"],
+      ["supplier_quotation", "rounded_total", "hidden", "boolean"],
+      ["supplier_quotation", "base_rounded_total", "print_hide", "boolean"],
+      ["supplier_quotation", "base_rounded_total", "hidden", "boolean"],
+      ["supplier_quotation", "numbering_rule", "options", "text"]
+    ]
+  },
+  {
+    "capability": "Company-scoped navigation",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "global_company_filter_ignore_record_class",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "record_class_to_ignore", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "global_company_filter_setting",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "treat_empty_company_as_global", "value_kind": "boolean"},
+          {"purpose": "table_adzt", "value_kind": "owned_rows", "target": "global_company_filter_ignore_record_class"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  }
+]

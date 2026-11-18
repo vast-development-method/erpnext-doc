@@ -1,0 +1,1130 @@
+[
+  {
+    "capability": "Reception access and room booking",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "conference_room",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "room_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "room_type", "value_kind": "choice", "choices": ["unselected", "small_meeting_room", "medium_conference_room", "large_boardroom", "training_room", "video_conference_room"]},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "location", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "floor", "value_kind": "text"},
+          {"purpose": "capacity", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "available_from", "value_kind": "time_of_day"},
+          {"purpose": "available_to", "value_kind": "time_of_day"},
+          {"purpose": "minimum_booking_minutes", "value_kind": "whole_number"},
+          {"purpose": "maximum_booking_hours", "value_kind": "whole_number"},
+          {"purpose": "amenities", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "share", "print", "email"], false],
+          ["facility_manager", 0, ["read", "write", "create", "delete", "report", "share", "print", "email"], false],
+          ["employee", 0, ["read"], false]
+        ]
+      },
+      {
+        "concept": "conference_room_booking",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required", "write_once"], "choices": ["assigned_sequence_of_5_digits_with_year"]},
+          {"purpose": "meeting_title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "conference_room", "value_kind": "reference", "rules": ["required", "indexed_for_search"], "target": "conference_room"},
+          {"purpose": "room_capacity", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "visitor_pass", "value_kind": "reference", "rules": ["read_only"], "target": "visitor_pass"},
+          {"purpose": "meeting_type", "value_kind": "choice", "rules": ["required"], "choices": ["internal", "external", "hybrid"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "pending_approval", "approved", "rejected", "cancelled"]},
+          {"purpose": "booking_date", "value_kind": "civil_day", "rules": ["required", "indexed_for_search"]},
+          {"purpose": "start_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "end_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "duration_hours", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "booked_by", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "department", "value_kind": "reference", "rules": ["read_only"], "target": "organization.department", "binding": "shared_model"},
+          {"purpose": "expected_attendees", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "room_cleaning_required", "value_kind": "boolean"},
+          {"purpose": "coffee_tea_required", "value_kind": "boolean"},
+          {"purpose": "water_required", "value_kind": "boolean"},
+          {"purpose": "snacks_required", "value_kind": "boolean"},
+          {"purpose": "special_instructions", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "conference_room_booking"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "share", "print", "email"], false],
+          ["facility_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "share", "print", "email"], false],
+          ["employee", 0, ["read", "write", "create", "report", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "contact_trace_record",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "visitor_pass", "value_kind": "reference", "rules": ["required"], "target": "visitor_pass"},
+          {"purpose": "security_log", "value_kind": "reference", "target": "security_log"},
+          {"purpose": "visited_area", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "time_in", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "time_out", "value_kind": "date_and_time"},
+          {"purpose": "close_contacts", "value_kind": "text"},
+          {"purpose": "exposure_risk", "value_kind": "choice", "choices": ["low", "medium", "high"]},
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["active", "closed"]},
+          {"purpose": "notes", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "factory_tour_area",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "area_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "from_time", "value_kind": "time_of_day"},
+          {"purpose": "to_time", "value_kind": "time_of_day"},
+          {"purpose": "responsible_person", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "remarks", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "hospitality_request",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "visitor_pass", "value_kind": "reference", "rules": ["required"], "target": "visitor_pass"},
+          {"purpose": "visitor_name_display", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "visitor_type_display", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "visitor_mobile_display", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "cab_required", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "hotel_required", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "factory_tour_required", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "buggy_required", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "greeting_required", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "visit_start_time", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "visit_end_time", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "assigned_meal_slots", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "hospitality_type", "value_kind": "choice", "rules": ["read_only", "hidden_from_form"], "choices": ["single_meal", "two_meals", "full_day"]},
+          {"purpose": "special_diet", "value_kind": "choice", "choices": ["none", "non_vegetarian", "vegetarian", "vegan", "gluten_free", "halal", "jain"]},
+          {"purpose": "dietary_allergies", "value_kind": "text"},
+          {"purpose": "accessibility_requirements", "value_kind": "choice", "choices": ["none", "wheelchair", "mobility_aid"]},
+          {"purpose": "meal_required", "value_kind": "boolean"},
+          {"purpose": "meal_type", "value_kind": "choice", "choices": ["breakfast", "lunch", "dinner", "breakfast_lunch", "lunch_dinner", "breakfast_dinner", "snacks", "all_day"]},
+          {"purpose": "snacks_required", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "tea_coffee_required", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "conference_room", "value_kind": "reference", "rules": ["hidden_from_form"], "target": "conference_room"},
+          {"purpose": "seating_capacity", "value_kind": "whole_number", "rules": ["hidden_from_form"]},
+          {"purpose": "service_time", "value_kind": "date_and_time", "rules": ["hidden_from_form"]},
+          {"purpose": "assigned_staff", "value_kind": "reference", "rules": ["hidden_from_form"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "cab_type", "value_kind": "choice", "choices": ["unselected", "pickup", "drop", "both"]},
+          {"purpose": "pickup_location", "value_kind": "text"},
+          {"purpose": "pickup_datetime", "value_kind": "date_and_time"},
+          {"purpose": "cab_pickup_instructions", "value_kind": "text"},
+          {"purpose": "drop_location", "value_kind": "text"},
+          {"purpose": "drop_datetime", "value_kind": "date_and_time"},
+          {"purpose": "cab_vendor", "value_kind": "reference", "rules": ["hidden_from_form"], "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "driver_name", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "driver_phone", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "hotel_name", "value_kind": "reference", "rules": ["hidden_from_form"], "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "check_in", "value_kind": "civil_day"},
+          {"purpose": "check_out", "value_kind": "civil_day"},
+          {"purpose": "nights", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "room_type", "value_kind": "choice", "choices": ["unselected", "standard", "deluxe", "suite", "executive"]},
+          {"purpose": "number_of_rooms", "value_kind": "whole_number"},
+          {"purpose": "number_of_guests", "value_kind": "whole_number"},
+          {"purpose": "booking_reference", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "hotel_special_requests", "value_kind": "text"},
+          {"purpose": "hotel_cost", "value_kind": "money", "rules": ["hidden_from_form"]},
+          {"purpose": "tour_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "tour_start_time", "value_kind": "time_of_day"},
+          {"purpose": "tour_end_time", "value_kind": "time_of_day"},
+          {"purpose": "tour_guide", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "tour_areas", "value_kind": "owned_rows", "target": "factory_tour_area"},
+          {"purpose": "buggy_pickup_point", "value_kind": "text"},
+          {"purpose": "buggy_drop_point", "value_kind": "text"},
+          {"purpose": "buggy_datetime", "value_kind": "date_and_time"},
+          {"purpose": "buggy_number", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "buggy_driver", "value_kind": "reference", "rules": ["hidden_from_form"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "greeting_type", "value_kind": "choice", "choices": ["unselected", "bouquet", "gift", "welcome_board", "cake", "traditional_welcome"]},
+          {"purpose": "greeting_delivery_time", "value_kind": "date_and_time"},
+          {"purpose": "greeting_delivery_point", "value_kind": "text"},
+          {"purpose": "greeting_assigned_to", "value_kind": "reference", "rules": ["hidden_from_form"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "greeting_cost", "value_kind": "money", "rules": ["hidden_from_form"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["pending", "confirmed", "served", "completed", "cancelled"]},
+          {"purpose": "notes", "value_kind": "formatted_text", "rules": ["hidden_from_form"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "hospitality_request"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false],
+          ["hospitality_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false],
+          ["host_employee", 0, ["read", "write", "create", "submit", "report", "share", "print", "email"], false],
+          ["employee", 0, ["read", "write", "create", "report", "share", "print", "email"], false],
+          ["hod", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["ceo", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "security_item_verify",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "item_type", "value_kind": "choice", "choices": ["electronic", "bag", "document", "other"]},
+          {"purpose": "verified", "value_kind": "boolean"},
+          {"purpose": "remarks", "value_kind": "text"},
+          {"purpose": "item_image", "value_kind": "image_reference"},
+          {"purpose": "visitor_item_row_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "item_category", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "quantity_declared", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "unit_of_measure", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "serial_asset_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "quantity_found", "value_kind": "decimal"},
+          {"purpose": "item_verified", "value_kind": "boolean"},
+          {"purpose": "discrepancy", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "security_remarks", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "security_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "visitor_pass", "value_kind": "reference", "rules": ["required"], "target": "visitor_pass"},
+          {"purpose": "event_type", "value_kind": "choice", "rules": ["required"], "choices": ["check_in", "check_out", "gate_transfer", "alert", "badge_collected"]},
+          {"purpose": "gate_name", "value_kind": "choice", "rules": ["required"], "choices": ["main_gate", "back_gate", "vip_entrance", "loading_dock", "emergency_exit"]},
+          {"purpose": "badge_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "security_officer", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "verification_started_on", "value_kind": "date_and_time", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "verification_duration", "value_kind": "elapsed_time", "rules": ["read_only"]},
+          {"purpose": "machine_readable_code_code_scanned", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "gate_auto_assigned", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "mdceo_notified", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "vip_meeting_room", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "vip_protocol_notes", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "visitor_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "visitor_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "visitor_company", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "mobile_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "person_to_visit", "value_kind": "reference", "rules": ["read_only"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "purpose_of_visit", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "identifier_proof_type_verified", "value_kind": "choice", "choices": ["aadhaar", "permanent_account_number_card", "passport", "driving_license"]},
+          {"purpose": "identifier_proof_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "visit_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "expected_checkin", "value_kind": "time_of_day", "rules": ["read_only"]},
+          {"purpose": "expected_checkout", "value_kind": "time_of_day", "rules": ["read_only"]},
+          {"purpose": "vehicle_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "check_in_date_time", "value_kind": "date_and_time"},
+          {"purpose": "check_out_date_time", "value_kind": "date_and_time"},
+          {"purpose": "identifier_proof_scan", "value_kind": "image_reference", "rules": ["read_only"]},
+          {"purpose": "visitor_photo", "value_kind": "image_reference", "rules": ["read_only"]},
+          {"purpose": "buggy_required", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "greeting_required", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "factory_tour_required", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "temperature", "value_kind": "decimal", "rules": ["hidden_from_form"]},
+          {"purpose": "symptoms_flag", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "symptoms_details", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "visited_area", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "remarks", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "photo_at_gate", "value_kind": "image_reference"},
+          {"purpose": "identifier_proof_match", "value_kind": "boolean"},
+          {"purpose": "pass_photo_match", "value_kind": "boolean"},
+          {"purpose": "exception_reason", "value_kind": "text"},
+          {"purpose": "verification_notes", "value_kind": "text"},
+          {"purpose": "all_items_confirmed", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "item_verification", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "items_carried", "value_kind": "text"},
+          {"purpose": "items_verification", "value_kind": "owned_rows", "target": "security_item_verify"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["security", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "visitor_blacklist",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "visitor_name", "value_kind": "text"},
+          {"purpose": "identifier_proof_type", "value_kind": "choice", "choices": ["unselected", "aadhaar", "permanent_account_number_card", "passport", "driving_license"]},
+          {"purpose": "identifier_proof_number", "value_kind": "text"},
+          {"purpose": "reason", "value_kind": "text"},
+          {"purpose": "blocked_by", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "blocked_on", "value_kind": "civil_day"},
+          {"purpose": "active_indicator", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "visitor_event_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "visitor_pass", "value_kind": "reference", "rules": ["required"], "target": "visitor_pass"},
+          {"purpose": "event_type", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "event_status", "value_kind": "text"},
+          {"purpose": "event_time", "value_kind": "date_and_time"},
+          {"purpose": "source_record_class", "value_kind": "text"},
+          {"purpose": "source_name", "value_kind": "variable_record_reference", "record_class_field": "source_record_class"},
+          {"purpose": "details", "value_kind": "long_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "visitor_invitation",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "visitor_type", "value_kind": "choice", "rules": ["required"], "choices": ["contractor", "candidate", "customer", "supplier", "vip"]},
+          {"purpose": "visitor_email", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "host_employee", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "visit_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "expected_checkin", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "expected_checkout", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "purpose_of_visit", "value_kind": "text"},
+          {"purpose": "meal_required", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "meal_type", "value_kind": "choice", "rules": ["read_only", "hidden_from_form"], "choices": ["breakfast", "lunch", "dinner", "breakfast_lunch", "lunch_dinner", "breakfast_dinner", "snacks", "all_day"]},
+          {"purpose": "assigned_meal_slots", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "hospitality_type", "value_kind": "choice", "rules": ["read_only", "hidden_from_form"], "choices": ["single_meal", "two_meals", "full_day"]},
+          {"purpose": "refreshments_required", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "conference_room", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "created_by_user", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "invitation_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "sent", "opened", "saved", "submitted", "expired"]},
+          {"purpose": "invitation_sent_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "invitation_expires_on", "value_kind": "date_and_time"},
+          {"purpose": "link_opened_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "form_saved_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "form_submitted_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "portal_submission_resource_address", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "visitor_pass", "value_kind": "reference", "rules": ["read_only"], "target": "visitor_pass"},
+          {"purpose": "invitation_token", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["employee", 0, ["read", "write", "create", "report", "share", "print", "email"], false],
+          ["sales_manager", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "visitor_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "product_identifier", "value_kind": "reference", "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "item_category", "value_kind": "choice", "choices": ["electronics", "tool", "document_sample_gift_perishable_weapon_other"]},
+          {"purpose": "quantity", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "unit_of_measure", "value_kind": "reference", "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "is_new_item", "value_kind": "boolean"},
+          {"purpose": "serial_number", "value_kind": "text"},
+          {"purpose": "estimated_value", "value_kind": "money"},
+          {"purpose": "verified_by_security", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "verification_remarks", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "visitor_pass",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "visitor_type", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "contractor", "candidate", "customer", "supplier", "vip"]},
+          {"purpose": "entry_type", "value_kind": "choice", "choices": ["new", "existing"]},
+          {"purpose": "existing_visitor_pass", "value_kind": "reference", "target": "visitor_pass"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only", "hidden_from_form"], "choices": ["draft", "pending_approval", "approved", "items_verified", "checked_in", "checked_out", "cancelled"]},
+          {"purpose": "workflow_state", "value_kind": "reference", "rules": ["read_only", "hidden_from_form"], "target": "approval_workflows.workflow_state", "binding": "shared_model"},
+          {"purpose": "request_channel", "value_kind": "choice", "choices": ["desk", "portal", "phone", "email"]},
+          {"purpose": "visitor_invitation", "value_kind": "reference", "rules": ["read_only", "hidden_from_form"], "target": "visitor_invitation"},
+          {"purpose": "visitor_full_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "visitor_summary", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "mobile_number", "value_kind": "telephone_number", "rules": ["required"]},
+          {"purpose": "email_identifier", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "company_organisation", "value_kind": "text"},
+          {"purpose": "identifier_proof_type", "value_kind": "choice", "rules": ["required"], "choices": ["aadhaar", "permanent_account_number_card", "passport", "driving_license"]},
+          {"purpose": "identifier_proof_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "identifier_proof_scan", "value_kind": "image_reference", "rules": ["required"]},
+          {"purpose": "visitor_photo", "value_kind": "image_reference", "rules": ["required"]},
+          {"purpose": "purpose_of_visit", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "person_to_visit", "value_kind": "reference", "rules": ["required"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "host_department", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "visit_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "expected_checkin", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "expected_checkout", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "vehicle_number", "value_kind": "text"},
+          {"purpose": "customer_relationship_reference_type", "value_kind": "choice", "choices": ["lead", "opportunity", "customer"]},
+          {"purpose": "customer_relationship_lead_opportunity", "value_kind": "variable_record_reference", "record_class_field": "customer_relationship_reference_type"},
+          {"purpose": "visit_category", "value_kind": "choice", "choices": ["product_demo", "negotiation", "site_visit", "complaint", "audit"]},
+          {"purpose": "sales_executive", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "products_discussed", "value_kind": "text"},
+          {"purpose": "meeting_outcome", "value_kind": "choice", "choices": ["pending", "deal_closed", "follow_up_needed", "number_interest"]},
+          {"purpose": "followup_date", "value_kind": "civil_day"},
+          {"purpose": "meeting_minutes", "value_kind": "formatted_text"},
+          {"purpose": "contractor_link", "value_kind": "reference", "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "work_order_reference", "value_kind": "reference", "target": "maintenance.maintenance_visit", "binding": "shared_model"},
+          {"purpose": "tools_list", "value_kind": "text"},
+          {"purpose": "multi_day_pass", "value_kind": "boolean"},
+          {"purpose": "pass_valid_until", "value_kind": "civil_day"},
+          {"purpose": "job_applicant_link", "value_kind": "reference", "target": "workforce.job_applicant", "binding": "shared_model"},
+          {"purpose": "position_applied", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "candidate_interview_type", "value_kind": "choice", "choices": ["walk_in", "scheduled", "group_discussion", "technical_round"]},
+          {"purpose": "interview_panel", "value_kind": "text"},
+          {"purpose": "supplier_link", "value_kind": "reference", "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "supplier_visit_mode", "value_kind": "choice", "choices": ["unselected", "meeting", "audit", "service"]},
+          {"purpose": "meeting_subject", "value_kind": "text"},
+          {"purpose": "nda_required", "value_kind": "boolean", "rules": ["hidden_from_form"]},
+          {"purpose": "documents_shared", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "vip_category", "value_kind": "choice", "choices": ["board_member", "government_official", "investor", "media", "guest_speaker", "partner"]},
+          {"purpose": "mdceo_notified", "value_kind": "boolean"},
+          {"purpose": "interpreter_required", "value_kind": "boolean"},
+          {"purpose": "interpreter_language", "value_kind": "choice", "choices": ["unselected", "english", "tamil", "hindi", "telugu", "kannada", "malayalam", "japanese", "mandarin", "german", "french", "arabic"]},
+          {"purpose": "protocol_notes", "value_kind": "formatted_text"},
+          {"purpose": "last_vip_notification_stage", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "last_workflow_notification_stage", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "badge_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "badge_colour", "value_kind": "choice", "choices": ["orange", "purple", "green", "teal", "gold"]},
+          {"purpose": "approval_date", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "approved_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "machine_readable_code_code_image", "value_kind": "image_reference", "rules": ["read_only"]},
+          {"purpose": "gate_verified_photo", "value_kind": "image_reference", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "gate_verified_on", "value_kind": "date_and_time", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "gate_verified_by", "value_kind": "reference", "rules": ["read_only", "editable_after_submission"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "actual_checkin", "value_kind": "date_and_time", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "actual_checkout", "value_kind": "date_and_time", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "number_show", "value_kind": "boolean", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "current_location", "value_kind": "text", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "items_verification_status", "value_kind": "choice", "rules": ["hidden_from_form"], "choices": ["pending", "partial", "all_verified"]},
+          {"purpose": "item_verification_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["pending", "partial", "all_verified"]},
+          {"purpose": "items_verified", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "all_items_verified", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "meal_required", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "meal_type", "value_kind": "choice", "rules": ["editable_after_submission"], "choices": ["breakfast", "lunch", "dinner", "breakfast_lunch", "lunch_dinner", "breakfast_dinner", "snacks", "all_day"]},
+          {"purpose": "assigned_meal_slots", "value_kind": "text", "rules": ["read_only", "hidden_from_form", "editable_after_submission"]},
+          {"purpose": "hospitality_type", "value_kind": "choice", "rules": ["read_only", "hidden_from_form", "editable_after_submission"], "choices": ["single_meal", "two_meals", "full_day"]},
+          {"purpose": "number_of_people", "value_kind": "whole_number", "rules": ["editable_after_submission"]},
+          {"purpose": "special_diet", "value_kind": "choice", "rules": ["editable_after_submission"], "choices": ["none", "non_vegetarian", "vegetarian", "vegan", "gluten_free", "halal", "jain"]},
+          {"purpose": "refreshments_required", "value_kind": "boolean", "rules": ["hidden_from_form", "editable_after_submission"]},
+          {"purpose": "conference_room", "value_kind": "reference", "rules": ["editable_after_submission"], "target": "conference_room"},
+          {"purpose": "service_time", "value_kind": "date_and_time", "rules": ["hidden_from_form", "editable_after_submission"]},
+          {"purpose": "food_department_staff_assigned", "value_kind": "reference", "rules": ["hidden_from_form", "editable_after_submission"], "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "food_status", "value_kind": "choice", "rules": ["hidden_from_form", "editable_after_submission"], "choices": ["pending", "ordered", "served", "completed", "cancelled"]},
+          {"purpose": "hospitality_notes", "value_kind": "formatted_text", "rules": ["editable_after_submission"]},
+          {"purpose": "hospitality_request", "value_kind": "reference", "rules": ["read_only", "editable_after_submission"], "target": "hospitality_request"},
+          {"purpose": "cab_required", "value_kind": "boolean"},
+          {"purpose": "hotel_required", "value_kind": "boolean"},
+          {"purpose": "factory_tour_required", "value_kind": "boolean"},
+          {"purpose": "buggy_required", "value_kind": "boolean"},
+          {"purpose": "greeting_required", "value_kind": "boolean"},
+          {"purpose": "hospitality_overall_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["not_required", "pending", "in_progress", "completed", "cancelled"]},
+          {"purpose": "items_carried", "value_kind": "text"},
+          {"purpose": "visitor_items", "value_kind": "owned_rows", "rules": ["hidden_from_form"], "target": "visitor_item"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "visitor_pass"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false],
+          ["sales_manager", 0, ["read", "write", "create", "submit", "report", "export", "share", "print", "email"], false],
+          ["human_resources_manager", 0, ["read", "write", "create", "submit", "report", "export", "share", "print", "email"], false],
+          ["hod", 0, ["read", "write", "submit", "report", "export", "share", "print", "email"], false],
+          ["ceo", 0, ["read", "write", "submit", "report", "export", "share", "print", "email"], false],
+          ["security", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["employee", 0, ["read", "write", "create", "submit", "report", "share", "print", "email"], false],
+          ["host_employee", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["hospitality_manager", 0, ["read", "report", "export", "share", "print", "email"], false],
+          ["facility_manager", 0, ["read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "visitor_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "visitor_type_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "approver_role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "secondary_approver_role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "badge_prefix", "value_kind": "text"},
+          {"purpose": "badge_colour", "value_kind": "choice", "choices": ["orange", "purple", "green", "teal", "gold", "blue", "red", "grey"]},
+          {"purpose": "default_gate", "value_kind": "choice", "choices": ["main_gate", "back_gate", "vip_entrance", "loading_dock", "emergency_exit"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "share", "print", "email"], false],
+          ["employee", 0, ["read", "write", "create", "report", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "vms_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "administrator_email", "value_kind": "text"},
+          {"purpose": "food_department_email", "value_kind": "text"},
+          {"purpose": "default_checkout_time", "value_kind": "time_of_day"},
+          {"purpose": "maximum_visit_duration_hours", "value_kind": "whole_number"},
+          {"purpose": "require_visitor_photo", "value_kind": "boolean"},
+          {"purpose": "machine_readable_code_scan_required_at_gate", "value_kind": "boolean"},
+          {"purpose": "require_item_declaration", "value_kind": "boolean"},
+          {"purpose": "block_check_in_without_verification", "value_kind": "boolean"},
+          {"purpose": "blacklist_action", "value_kind": "choice", "choices": ["block_entry", "alert_only", "log_only"]},
+          {"purpose": "gate_list", "value_kind": "text"},
+          {"purpose": "enable_badge", "value_kind": "boolean"},
+          {"purpose": "badge_required_for", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["employee", 0, ["read"], false],
+          ["security", 0, ["read"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Reception access and room booking",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "job_applicant", "purpose": "interview_checkin_time", "value_kind": "time_of_day", "placement": "interview_visit_date"},
+      {"on": "job_applicant", "purpose": "interview_checkout_time", "value_kind": "time_of_day", "placement": "interview_checkin_time"},
+      {"on": "job_applicant", "purpose": "interview_host", "value_kind": "reference", "placement": "interview_mode"},
+      {"on": "job_applicant", "purpose": "interview_mode", "value_kind": "choice", "placement": "field_group_for_interview_mode"},
+      {"on": "job_applicant", "purpose": "interview_visit_date", "value_kind": "civil_day", "placement": "field_column_for_interview_visit_date"},
+      {"on": "job_applicant", "purpose": "field_column_for_interview_visit_date", "value_kind": "field_column", "placement": "interview_host"},
+      {"on": "job_applicant", "purpose": "field_group_for_interview_mode", "value_kind": "field_group", "placement": "current_status"},
+      {"on": "visitor_pass", "purpose": "description", "value_kind": "text", "placement": "visitor_invitation", "rules": ["translatable"]},
+      {"on": "visitor_pass", "purpose": "nationality", "value_kind": "reference", "placement": "existing_visitor_pass", "rules": ["required"]},
+      {"on": "visitor_pass", "purpose": "visa_copy", "value_kind": "file_reference", "placement": "nationality"}
+    ]
+  },
+  {
+    "capability": "Reception access and room booking",
+    "configuration": 1,
+    "rule_addresses": [
+      ["visitor_pass", "followup_date", "hidden", "boolean"],
+      ["visitor_pass", "food_department_staff_assigned", "hidden", "boolean"],
+      ["visitor_pass", "food_status", "hidden", "boolean"],
+      ["visitor_pass", "hospitality_overall_status", "hidden", "boolean"],
+      ["visitor_pass", "identifier_proof_type", "options", "text"],
+      ["visitor_pass", null, "field_order", "text"],
+      ["visitor_pass", "meeting_minutes", "hidden", "boolean"],
+      ["visitor_pass", "meeting_outcome", "hidden", "boolean"],
+      ["visitor_pass", "products_discussed", "hidden", "boolean"],
+      ["visitor_pass", "section_break_gqft", "hidden", "boolean"],
+      ["visitor_pass", "service_time", "hidden", "boolean"],
+      ["visitor_pass", "visitor_type", "field_type", "choice"],
+      ["visitor_pass", "visitor_type", "options", "text"]
+    ]
+  },
+  {
+    "capability": "Recipient template message campaigns",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "message_template",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "template_name", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "template_message", "value_kind": "long_text"},
+          {"purpose": "template_variables", "value_kind": "text", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "send_message_variables",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "template_variable", "value_kind": "displayed_value", "rules": ["required"]},
+          {"purpose": "send_message_variables_value", "value_kind": "text", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "send_business_messaging_gateway_message",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "message_send_to", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "all_supplier", "all_customer", "all_employee", "all_lead", "group"]},
+          {"purpose": "when_to_send", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "now", "schedule"]},
+          {"purpose": "group", "value_kind": "reference", "target": "business_messaging_gateway_group"},
+          {"purpose": "message_template", "value_kind": "reference", "rules": ["required"], "target": "message_template"},
+          {"purpose": "message", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "send_message_variables", "value_kind": "owned_rows", "target": "send_message_variables"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "send_business_messaging_gateway_message"},
+          {"purpose": "sent", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "schedule_date_and_time", "value_kind": "date_and_time"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "template_variable",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "template_variable", "value_kind": "displayed_value", "rules": ["required"]},
+          {"purpose": "document_variable", "value_kind": "choice", "rules": ["required"]},
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["required", "read_only"], "target": "information_management.entity_type", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "business_messaging_gateway_group",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "group_name", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "reference_record_class", "value_kind": "choice", "choices": ["lead", "customer", "supplier", "employee"]},
+          {"purpose": "business_messaging_gateway_group_details", "value_kind": "owned_rows", "target": "business_messaging_gateway_group_details"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_messaging_gateway_group_details",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document_type", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "group_member", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "document_type"},
+          {"purpose": "mobile_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "enable", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "business_messaging_gateway_message_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "mobile_number", "value_kind": "displayed_value"},
+          {"purpose": "document", "value_kind": "displayed_value"},
+          {"purpose": "reference_record_class", "value_kind": "displayed_value"},
+          {"purpose": "resource_address", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "headers", "value_kind": "text"},
+          {"purpose": "payload", "value_kind": "expression_or_structured_text"},
+          {"purpose": "status_code", "value_kind": "text"},
+          {"purpose": "response", "value_kind": "expression_or_structured_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_messaging_gateway_message_rule",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "display_name", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "enable", "value_kind": "boolean"},
+          {"purpose": "mobile_number_field", "value_kind": "choice"},
+          {"purpose": "based_on", "value_kind": "choice", "choices": ["unselected", "new", "save", "submit", "cancel", "value_change"]},
+          {"purpose": "fields", "value_kind": "choice"},
+          {"purpose": "conditions", "value_kind": "expression_or_structured_text"},
+          {"purpose": "message_template", "value_kind": "reference", "rules": ["required"], "target": "message_template"},
+          {"purpose": "template_variable", "value_kind": "owned_rows", "target": "template_variable"},
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "business_messaging_gateway_setting",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "resource_address", "value_kind": "text"},
+          {"purpose": "business_messaging_number", "value_kind": "text"},
+          {"purpose": "token", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Recurring item subscriptions",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "simple_subscription",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "customer", "value_kind": "reference", "rules": ["required"], "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "items", "value_kind": "owned_rows", "target": "simple_subscription_item"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "simple_subscription"},
+          {"purpose": "taxes_and_charges", "value_kind": "reference", "target": "accounting.sales_taxes_and_charges_template", "binding": "shared_model"},
+          {"purpose": "customer_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "frequency", "value_kind": "choice", "choices": ["monthly", "quarterly", "halfyearly", "yearly", "biennial", "triennial"]},
+          {"purpose": "disabled", "value_kind": "boolean", "rules": ["editable_after_submission"]},
+          {"purpose": "start_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "billing_time", "value_kind": "choice", "choices": ["at_beginning_of_period", "after_end_of_period"]},
+          {"purpose": "period_type", "value_kind": "choice", "choices": ["calendar_months", "start_date"]},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["required"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "customer_address", "value_kind": "reference", "rules": ["editable_after_submission"], "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "billing_address_display", "value_kind": "formatted_text", "rules": ["read_only", "computed_value"]},
+          {"purpose": "shipping_address_name", "value_kind": "reference", "rules": ["editable_after_submission"], "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "shipping_address_display", "value_kind": "formatted_text", "rules": ["read_only", "computed_value"]},
+          {"purpose": "contact_person", "value_kind": "reference", "rules": ["editable_after_submission"], "target": "contacts.contact", "binding": "shared_model"},
+          {"purpose": "contact_display", "value_kind": "text", "rules": ["read_only", "computed_value"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "simple_subscription_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "quantity", "value_kind": "decimal"},
+          {"purpose": "current_rate", "value_kind": "money", "rules": ["computed_value"]},
+          {"purpose": "current_description", "value_kind": "formatted_text", "rules": ["read_only", "computed_value"]},
+          {"purpose": "item_name", "value_kind": "text", "rules": ["read_only", "computed_value"]},
+          {"purpose": "item", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Regional financial statement templates",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "ohada_financial_report_column",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "column_code", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "label", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "period_scope", "value_kind": "choice", "rules": ["required"], "choices": ["all_periods", "current_period_only", "previous_periods_only"]},
+          {"purpose": "title_template", "value_kind": "text"},
+          {"purpose": "field_type", "value_kind": "choice", "choices": ["unselected", "currency", "float", "int", "percent"]},
+          {"purpose": "hidden", "value_kind": "boolean"},
+          {"purpose": "empty_column", "value_kind": "boolean"},
+          {"purpose": "default_balance_type", "value_kind": "choice", "choices": ["unselected", "opening_balance", "closing_balance", "period_movement_debits_credits", "debits", "credits"]},
+          {"purpose": "default_reverse_sign", "value_kind": "choice", "choices": ["unselected", "reverse_sign", "keep_sign"]},
+          {"purpose": "default_is_formula", "value_kind": "boolean"},
+          {"purpose": "default_calculation_formula", "value_kind": "expression_or_structured_text"}
+        ]
+      },
+      {
+        "concept": "ohada_financial_report_row",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "reference_code", "value_kind": "text"},
+          {"purpose": "show_line_reference", "value_kind": "boolean"},
+          {"purpose": "display_name", "value_kind": "text"},
+          {"purpose": "indentation_level", "value_kind": "whole_number"},
+          {"purpose": "data_source", "value_kind": "choice", "choices": ["unselected", "account_data", "calculated_amount", "custom_service_interface", "blank_line", "column_break", "section_break"]},
+          {"purpose": "balance_type", "value_kind": "choice", "choices": ["unselected", "opening_balance", "closing_balance", "period_movement_debits_credits", "debits", "credits"]},
+          {"purpose": "balance_filter", "value_kind": "choice", "choices": ["all", "debit_accounts", "credit_accounts", "net_debit", "net_credit"]},
+          {"purpose": "bold_text", "value_kind": "boolean"},
+          {"purpose": "italic_text", "value_kind": "boolean"},
+          {"purpose": "hidden_calculation", "value_kind": "boolean"},
+          {"purpose": "hide_when_empty", "value_kind": "boolean"},
+          {"purpose": "reverse_sign", "value_kind": "boolean"},
+          {"purpose": "calculation_formula", "value_kind": "expression_or_structured_text"},
+          {"purpose": "include_in_charts", "value_kind": "boolean"},
+          {"purpose": "color", "value_kind": "colour"},
+          {"purpose": "field_type", "value_kind": "choice", "choices": ["unselected", "currency", "float", "int", "percent"]},
+          {"purpose": "column_settings", "value_kind": "structured_value", "rules": ["hidden_from_form"]},
+          {"purpose": "advanced_filtering", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "ohada_financial_report_template",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "template_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "report_type", "value_kind": "choice", "rules": ["required"], "choices": ["unselected", "profit_and_loss_statement", "balance_sheet", "cash_flow", "custom_financial_statement"]},
+          {"purpose": "module", "value_kind": "reference", "target": "information_management.module_def", "binding": "shared_model"},
+          {"purpose": "disabled", "value_kind": "boolean"},
+          {"purpose": "columns", "value_kind": "owned_rows", "target": "ohada_financial_report_column"},
+          {"purpose": "rows", "value_kind": "owned_rows", "target": "ohada_financial_report_row"}
+        ],
+        "role_grants": [
+          ["accounts_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["read"], false],
+          ["auditor", 0, ["read"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Restaurant orders and station routing",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "cuisine_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "description", "value_kind": "text", "rules": ["required", "unique"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_user", 0, ["read", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_point_of_sale_profile",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "rules": ["required"], "target": "accounting.point_of_sale_profile", "binding": "shared_model"},
+          {"purpose": "rate", "value_kind": "money"}
+        ]
+      },
+      {
+        "concept": "desk_form",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "route", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "module", "value_kind": "reference", "target": "information_management.module_def", "binding": "shared_model"},
+          {"purpose": "is_standard", "value_kind": "boolean"},
+          {"purpose": "published", "value_kind": "boolean"},
+          {"purpose": "login_required", "value_kind": "boolean"},
+          {"purpose": "route_to_success_link", "value_kind": "boolean"},
+          {"purpose": "allow_edit", "value_kind": "boolean"},
+          {"purpose": "allow_multiple", "value_kind": "boolean"},
+          {"purpose": "show_in_grid", "value_kind": "boolean"},
+          {"purpose": "allow_delete", "value_kind": "boolean"},
+          {"purpose": "allow_print", "value_kind": "boolean"},
+          {"purpose": "print_format", "value_kind": "reference", "target": "document_output.print_format", "binding": "shared_model"},
+          {"purpose": "allow_comments", "value_kind": "boolean"},
+          {"purpose": "show_attachments", "value_kind": "boolean"},
+          {"purpose": "allow_incomplete", "value_kind": "boolean"},
+          {"purpose": "introduction_text", "value_kind": "formatted_text"},
+          {"purpose": "desk_form_fields", "value_kind": "owned_rows", "target": "desk_form_field"},
+          {"purpose": "maximum_attachment_size", "value_kind": "whole_number"},
+          {"purpose": "client_script", "value_kind": "expression_or_structured_text"},
+          {"purpose": "layout_style", "value_kind": "expression_or_structured_text"},
+          {"purpose": "button_label", "value_kind": "text"},
+          {"purpose": "success_message", "value_kind": "text"},
+          {"purpose": "success_resource_address", "value_kind": "text"},
+          {"purpose": "breadcrumbs", "value_kind": "expression_or_structured_text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "share"], false],
+          ["restaurant_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_user", 0, ["read", "write", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "desk_form_field",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "field_name", "value_kind": "choice"},
+          {"purpose": "field_type", "value_kind": "choice", "choices": ["attach", "attach_image", "barcode", "button", "check", "code", "color", "column_break", "currency", "data", "date", "datetime", "dynamic_link", "float", "fold", "geolocation", "heading", "formatted_markup", "formatted_markup_editor", "image", "int", "link", "long_text", "markdown_editor", "password", "percent", "read_only", "rating", "section_break", "select", "small_text", "table", "table_multi_select", "text", "text_editor", "time", "signature"]},
+          {"purpose": "label", "value_kind": "text"},
+          {"purpose": "allow_read_on_all_link_options", "value_kind": "boolean"},
+          {"purpose": "required", "value_kind": "boolean"},
+          {"purpose": "depends_on", "value_kind": "expression_or_structured_text"},
+          {"purpose": "read_only", "value_kind": "boolean"},
+          {"purpose": "show_in_filter", "value_kind": "boolean"},
+          {"purpose": "hidden", "value_kind": "boolean"},
+          {"purpose": "extra_field", "value_kind": "boolean"},
+          {"purpose": "collapsible", "value_kind": "boolean"},
+          {"purpose": "options", "value_kind": "text"},
+          {"purpose": "maximum_length", "value_kind": "whole_number"},
+          {"purpose": "maximum_value", "value_kind": "whole_number"},
+          {"purpose": "fetch_from", "value_kind": "text"},
+          {"purpose": "fetch_if_empty", "value_kind": "boolean"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "default", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "item_customizable",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "rate", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "quantity", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "included", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "order_entry_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item_group", "value_kind": "displayed_value"},
+          {"purpose": "current_status", "value_kind": "reference", "rules": ["required"], "target": "status_order_pc"},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "product_identifier", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_invoice", "value_kind": "displayed_value"},
+          {"purpose": "quantity", "value_kind": "decimal"},
+          {"purpose": "rate", "value_kind": "money"},
+          {"purpose": "discount_percentage", "value_kind": "decimal"},
+          {"purpose": "identifier", "value_kind": "displayed_value"},
+          {"purpose": "item_name", "value_kind": "displayed_value"},
+          {"purpose": "price_list_rate", "value_kind": "money"},
+          {"purpose": "amount", "value_kind": "money"},
+          {"purpose": "item_tax_template", "value_kind": "reference", "target": "accounting.item_tax_template", "binding": "shared_model"},
+          {"purpose": "item_tax_rate", "value_kind": "text"},
+          {"purpose": "table_description", "value_kind": "displayed_value"},
+          {"purpose": "valuation_rate", "value_kind": "money"},
+          {"purpose": "discount_amount", "value_kind": "money"},
+          {"purpose": "tax_amount", "value_kind": "money"},
+          {"purpose": "ordered_time", "value_kind": "date_and_time"},
+          {"purpose": "batch_number", "value_kind": "reference", "target": "inventory.batch", "binding": "shared_model"},
+          {"purpose": "has_batch_number", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "has_serial_number", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "serial_number", "value_kind": "reference", "target": "inventory.serial_no", "binding": "shared_model"},
+          {"purpose": "table", "value_kind": "reference", "target": "restaurant_object"},
+          {"purpose": "room", "value_kind": "displayed_value"},
+          {"purpose": "branch", "value_kind": "displayed_value"},
+          {"purpose": "room_description", "value_kind": "displayed_value"},
+          {"purpose": "sub_items", "value_kind": "text"},
+          {"purpose": "from_customize", "value_kind": "boolean"},
+          {"purpose": "is_customizable", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "order_origin",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "order_origin_classification", "value_kind": "displayed_value"},
+          {"purpose": "origin", "value_kind": "reference", "rules": ["required"], "target": "restaurant_object"},
+          {"purpose": "description", "value_kind": "displayed_value"}
+        ]
+      },
+      {
+        "concept": "order_payment",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "mode_of_payment", "value_kind": "reference", "rules": ["required"], "target": "accounting.mode_of_payment", "binding": "shared_model"},
+          {"purpose": "amount", "value_kind": "money", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "production_center_branch",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "branch", "value_kind": "reference", "rules": ["required"], "target": "organization.branch", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "production_center_group",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item_group", "value_kind": "reference", "rules": ["required"], "target": "organization.item_group", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "restaurant_booking",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "current_status", "value_kind": "choice", "choices": ["open", "waitlisted", "cancelled", "number_show", "success"]},
+          {"purpose": "number_of_people", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "reservation_time", "value_kind": "date_and_time", "rules": ["required"]},
+          {"purpose": "reservation_end_time", "value_kind": "date_and_time"},
+          {"purpose": "customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "customer_name", "value_kind": "displayed_value"},
+          {"purpose": "contact_number", "value_kind": "text"},
+          {"purpose": "table", "value_kind": "reference", "target": "restaurant_object"},
+          {"purpose": "room", "value_kind": "displayed_value"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "table_description", "value_kind": "displayed_value"}
+        ],
+        "role_grants": [
+          ["restaurant_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_exceptions",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "role_profile", "value_kind": "reference", "rules": ["required"], "target": "information_management.role_profile", "binding": "shared_model"},
+          {"purpose": "order_delete", "value_kind": "boolean"},
+          {"purpose": "order_pay", "value_kind": "boolean"},
+          {"purpose": "order_manage", "value_kind": "boolean"},
+          {"purpose": "order_write", "value_kind": "boolean"},
+          {"purpose": "order_create", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "restaurant_form",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_menu",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "menu_items", "value_kind": "owned_rows", "target": "restaurant_menu_item"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_menu_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "item", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "current_status", "value_kind": "boolean"},
+          {"purpose": "item_group", "value_kind": "displayed_value"}
+        ]
+      },
+      {
+        "concept": "restaurant_object",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "number_of_seats", "value_kind": "whole_number"},
+          {"purpose": "minimum_seating", "value_kind": "whole_number"},
+          {"purpose": "description", "value_kind": "text", "rules": ["unique"]},
+          {"purpose": "restaurant_object_classification", "value_kind": "choice", "rules": ["required"], "choices": ["room", "table", "production_center"]},
+          {"purpose": "color", "value_kind": "colour"},
+          {"purpose": "room", "value_kind": "reference", "target": "restaurant_object"},
+          {"purpose": "status_managed", "value_kind": "owned_rows", "target": "status_managed_production_center"},
+          {"purpose": "production_center_group", "value_kind": "owned_rows", "target": "production_center_group"},
+          {"purpose": "current_user", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "data_style", "value_kind": "expression_or_structured_text"},
+          {"purpose": "room_description", "value_kind": "displayed_value"},
+          {"purpose": "shape", "value_kind": "choice", "choices": ["square", "round"]},
+          {"purpose": "company", "value_kind": "displayed_value"},
+          {"purpose": "restricted_to_rooms", "value_kind": "boolean"},
+          {"purpose": "restricted_rooms", "value_kind": "owned_rows", "target": "order_origin"},
+          {"purpose": "restricted_to_tables", "value_kind": "boolean"},
+          {"purpose": "restricted_tables", "value_kind": "owned_rows", "target": "order_origin"},
+          {"purpose": "restricted_to_parent_room", "value_kind": "boolean"},
+          {"purpose": "restricted_to_branches", "value_kind": "boolean"},
+          {"purpose": "restricted_branches", "value_kind": "owned_rows", "target": "production_center_branch"},
+          {"purpose": "customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "group_items_by_order", "value_kind": "boolean"},
+          {"purpose": "file", "value_kind": "file_reference"},
+          {"purpose": "image", "value_kind": "image_reference"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_user", 0, ["select", "read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_permission",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "is_customer_relationship", "value_kind": "boolean"},
+          {"purpose": "description", "value_kind": "displayed_value"},
+          {"purpose": "object_name", "value_kind": "reference", "rules": ["required"], "target": "restaurant_object"},
+          {"purpose": "room", "value_kind": "displayed_value", "rules": ["read_only"]},
+          {"purpose": "restaurant_permission_classification", "value_kind": "displayed_value", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "restaurant_permission_manage",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "point_of_sale_profile_user", "value_kind": "reference", "rules": ["unique"], "target": "accounting.point_of_sale_profile_user", "binding": "shared_model"},
+          {"purpose": "user", "value_kind": "displayed_value"},
+          {"purpose": "restaurant_permissions", "value_kind": "owned_rows", "target": "restaurant_permission"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "restaurant_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "restricted_to_owner_table", "value_kind": "boolean"},
+          {"purpose": "restricted_to_owner_order", "value_kind": "boolean"},
+          {"purpose": "color", "value_kind": "colour"},
+          {"purpose": "print_format", "value_kind": "reference", "target": "document_output.print_format", "binding": "shared_model"},
+          {"purpose": "to_new_order", "value_kind": "boolean"},
+          {"purpose": "to_pay", "value_kind": "boolean"},
+          {"purpose": "to_transfer_order", "value_kind": "boolean"},
+          {"purpose": "to_change_status_order", "value_kind": "boolean"},
+          {"purpose": "restaurant_exceptions", "value_kind": "owned_rows", "target": "restaurant_exceptions"},
+          {"purpose": "multiple_pending_order", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "raw_material_delivery_charges",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "default_rate", "value_kind": "decimal", "rules": ["required", "nonnegative"]},
+          {"purpose": "disabled", "value_kind": "boolean"},
+          {"purpose": "shipping_account", "value_kind": "reference", "rules": ["required"], "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "cost_center", "value_kind": "reference", "rules": ["required"], "target": "accounting.cost_center", "binding": "shared_model"},
+          {"purpose": "shipping_rule", "value_kind": "reference", "target": "accounting.shipping_rule", "binding": "shared_model"},
+          {"purpose": "point_of_sale_profiles", "value_kind": "owned_rows", "target": "restaurant_point_of_sale_profile"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "status_managed_production_center",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "next_status", "value_kind": "reference", "rules": ["required"], "target": "status_order_pc"},
+          {"purpose": "status_managed", "value_kind": "reference", "rules": ["required"], "target": "status_order_pc"}
+        ]
+      },
+      {
+        "concept": "status_order_pc",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "action", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "color", "value_kind": "colour", "rules": ["required"]},
+          {"purpose": "message", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "action_message", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "icon", "value_kind": "text"},
+          {"purpose": "allows_to_edit_item", "value_kind": "boolean"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["restaurant_user", 0, ["select", "read", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "table_order",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "table", "value_kind": "reference", "target": "restaurant_object"},
+          {"purpose": "numbering_rule", "value_kind": "choice", "choices": ["assigned_sequence_with_year"]},
+          {"purpose": "current_status", "value_kind": "reference", "target": "status_order_pc"},
+          {"purpose": "room", "value_kind": "reference", "target": "restaurant_object"},
+          {"purpose": "customer", "value_kind": "reference", "target": "sales.customer", "binding": "shared_model"},
+          {"purpose": "dinners", "value_kind": "whole_number"},
+          {"purpose": "link_invoice", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "entry_items", "value_kind": "owned_rows", "target": "order_entry_item"},
+          {"purpose": "discount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "tax", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "table_order"},
+          {"purpose": "point_of_sale_profile", "value_kind": "reference", "target": "accounting.point_of_sale_profile", "binding": "shared_model"},
+          {"purpose": "taxes_and_charges", "value_kind": "text"},
+          {"purpose": "selling_price_list", "value_kind": "text"},
+          {"purpose": "company", "value_kind": "displayed_value", "rules": ["required"]},
+          {"purpose": "table_description", "value_kind": "displayed_value"},
+          {"purpose": "room_description", "value_kind": "displayed_value"},
+          {"purpose": "customer_name", "value_kind": "displayed_value"},
+          {"purpose": "address", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "delivery_charges", "value_kind": "reference", "rules": ["read_only"], "target": "raw_material_delivery_charges"},
+          {"purpose": "delivery_date", "value_kind": "civil_day"},
+          {"purpose": "pick_time", "value_kind": "time_of_day"},
+          {"purpose": "notes", "value_kind": "text"},
+          {"purpose": "delivery_notes", "value_kind": "text"},
+          {"purpose": "branch", "value_kind": "reference", "target": "organization.branch", "binding": "shared_model"},
+          {"purpose": "customer_primary_address", "value_kind": "displayed_value", "rules": ["hidden_from_form"]},
+          {"purpose": "data_26", "value_kind": "text"},
+          {"purpose": "delivery_branch", "value_kind": "boolean"},
+          {"purpose": "is_delivery", "value_kind": "boolean"},
+          {"purpose": "charge_amount", "value_kind": "displayed_value"},
+          {"purpose": "show_in_point_of_sale", "value_kind": "boolean"},
+          {"purpose": "ordered_time", "value_kind": "date_and_time"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false],
+          ["restaurant_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false],
+          ["restaurant_user", 0, ["read", "write", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  }
+]

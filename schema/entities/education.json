@@ -1,0 +1,1212 @@
+[
+  {
+    "entity": "education.academic_term",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year", "required": true},
+      {"field": "term_name", "type": "short_text", "required": true},
+      {"field": "term_start_date", "type": "calendar_date", "required": true},
+      {"field": "term_end_date", "type": "calendar_date", "required": true},
+      {"field": "title", "type": "short_text", "unique": true}
+    ]
+  },
+  {
+    "entity": "education.academic_year",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "academic_year_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "year_start_date", "type": "calendar_date", "required": true},
+      {"field": "year_end_date", "type": "calendar_date", "required": true}
+    ]
+  },
+  {
+    "entity": "education.article",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "instructor", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "unique": true},
+      {"field": "author", "type": "short_text"},
+      {"field": "content", "type": "formatted_text"},
+      {"field": "publish_date", "type": "calendar_date"}
+    ]
+  },
+  {
+    "entity": "education.assessment_criteria",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "assessment_criteria", "type": "short_text", "required": true},
+      {"field": "assessment_criteria_group_identifier", "type": "entity_reference", "target": "education.assessment_criteria_group"}
+    ]
+  },
+  {
+    "entity": "education.assessment_criteria_group",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "assessment_criteria_group", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "education.assessment_group",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "assessment_group_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "is_group", "type": "boolean", "default": "0"},
+      {"field": "parent_assessment_group_identifier", "type": "entity_reference", "target": "education.assessment_group", "required": true},
+      {"field": "hierarchy_left_boundary", "type": "integer"},
+      {"field": "hierarchy_right_boundary", "type": "integer"},
+      {"field": "previous_parent_identifier", "type": "entity_reference", "target": "education.assessment_group"}
+    ]
+  },
+  {
+    "entity": "education.assessment_plan",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "student_group_identifier", "type": "entity_reference", "target": "education.student_group", "required": true},
+      {"field": "assessment_name", "type": "short_text"},
+      {"field": "assessment_group_identifier", "type": "entity_reference", "target": "education.assessment_group", "required": true},
+      {"field": "grading_scale_identifier", "type": "entity_reference", "target": "education.grading_scale", "required": true},
+      {"field": "course_identifier", "type": "entity_reference", "target": "education.course", "required": true},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program"},
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year"},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "schedule_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "room_identifier", "type": "entity_reference", "target": "education.room"},
+      {"field": "examiner_identifier", "type": "entity_reference", "target": "education.instructor"},
+      {"field": "examiner_name", "type": "short_text", "form_read_only": true},
+      {"field": "from_time", "type": "time_of_day", "required": true},
+      {"field": "to_time", "type": "time_of_day", "required": true},
+      {"field": "supervisor_identifier", "type": "entity_reference", "target": "education.instructor"},
+      {"field": "supervisor_name", "type": "short_text", "form_read_only": true},
+      {"field": "maximum_assessment_score", "type": "decimal", "required": true},
+      {"field": "assessment_criteria_rows", "type": "owned_collection", "target": "education.assessment_plan_criteria", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "education.assessment_plan", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.assessment_plan_criteria",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "assessment_criteria_identifier", "type": "entity_reference", "target": "education.assessment_criteria", "required": true},
+      {"field": "maximum_score", "type": "decimal", "required": true}
+    ]
+  },
+  {
+    "entity": "education.assessment_result",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "student", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "guardian", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "assessment_plan_identifier", "type": "entity_reference", "target": "education.assessment_plan", "required": true},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program"},
+      {"field": "course_identifier", "type": "entity_reference", "target": "education.course"},
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year"},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student", "required": true},
+      {"field": "student_name", "type": "short_text", "form_read_only": true},
+      {"field": "student_group_identifier", "type": "entity_reference", "target": "education.student_group"},
+      {"field": "assessment_group_identifier", "type": "entity_reference", "target": "education.assessment_group"},
+      {"field": "grading_scale_identifier", "type": "entity_reference", "target": "education.grading_scale", "form_read_only": true},
+      {"field": "details_rows", "type": "owned_collection", "target": "education.assessment_result_detail", "required": true},
+      {"field": "maximum_score", "type": "decimal", "form_read_only": true},
+      {"field": "total_score", "type": "decimal", "form_read_only": true},
+      {"field": "grade", "type": "short_text", "form_read_only": true},
+      {"field": "comment", "type": "text"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "education.assessment_result", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.assessment_result_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "assessment_criteria_identifier", "type": "entity_reference", "target": "education.assessment_criteria", "required": true, "form_read_only": true},
+      {"field": "maximum_score", "type": "decimal", "form_read_only": true},
+      {"field": "score", "type": "decimal", "required": true},
+      {"field": "grade", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.assessment_result_tool",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create"]},
+      {"role": "instructor", "level": 0, "allows": ["read", "write", "create"]}
+    ],
+    "fields": [
+      {"field": "assessment_plan_identifier", "type": "entity_reference", "target": "education.assessment_plan", "required": true},
+      {"field": "student_group_identifier", "type": "entity_reference", "target": "education.student_group", "required": true, "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "result structured markup"}
+    ]
+  },
+  {
+    "entity": "education.course",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "instructor", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "education_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "course_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "department_identifier", "type": "entity_reference", "target": "organization.department"},
+      {"field": "topics_rows", "type": "owned_collection", "target": "education.course_topic"},
+      {"field": "hero_image", "type": "image_file_reference"},
+      {"field": "default_grading_scale_identifier", "type": "entity_reference", "target": "education.grading_scale"},
+      {"field": "assessment_criteria_rows", "type": "owned_collection", "target": "education.course_assessment_criteria"},
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "education.course_activity",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "instructor", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "enrollment_identifier", "type": "entity_reference", "target": "education.course_enrollment", "required": true},
+      {"field": "course", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "student", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "content_type", "type": "enumeration", "required": true, "values": ["", "Article", "Video"]},
+      {"field": "content_identifier", "type": "selected_entity_reference", "target_selected_by": "content_type", "required": true},
+      {"field": "activity_date", "type": "date_and_time", "required": true}
+    ]
+  },
+  {
+    "entity": "education.course_assessment_criteria",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "assessment_criteria_identifier", "type": "entity_reference", "target": "education.assessment_criteria", "required": true},
+      {"field": "weightage", "type": "percentage", "required": true}
+    ]
+  },
+  {
+    "entity": "education.course_enrollment",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "instructor", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "program_enrollment_identifier", "type": "entity_reference", "target": "education.program_enrollment", "required": true},
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student", "required": true},
+      {"field": "course_identifier", "type": "entity_reference", "target": "education.course", "required": true},
+      {"field": "enrollment_date", "type": "calendar_date", "required": true},
+      {"field": "student_name", "type": "short_text", "form_read_only": true},
+      {"field": "program", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.course_schedule",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "student", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "guardian", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "student_group_identifier", "type": "entity_reference", "target": "education.student_group", "required": true},
+      {"field": "instructor_identifier", "type": "entity_reference", "target": "education.instructor", "required": true},
+      {"field": "instructor_name", "type": "display_value", "form_read_only": true},
+      {"field": "numbering_series", "type": "enumeration", "values": ["course schedule numbering prefix + four-digit year + configured sequence"]},
+      {"field": "course_identifier", "type": "entity_reference", "target": "education.course", "required": true},
+      {"field": "color", "type": "color"},
+      {"field": "schedule_date", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "room_identifier", "type": "entity_reference", "target": "education.room", "required": true},
+      {"field": "from_time", "type": "time_of_day", "required": true},
+      {"field": "to_time", "type": "time_of_day", "required": true},
+      {"field": "title", "type": "short_text"},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program", "form_read_only": true},
+      {"field": "class_schedule_color", "type": "enumeration", "values": ["blue", "green", "red", "orange", "yellow", "teal", "violet", "cyan", "amber", "pink", "purple"], "default": "blue"}
+    ]
+  },
+  {
+    "entity": "education.course_scheduling_tool",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create"]}
+    ],
+    "fields": [
+      {"field": "student_group_identifier", "type": "entity_reference", "target": "education.student_group", "required": true},
+      {"field": "course_identifier", "type": "entity_reference", "target": "education.course", "required": true},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program", "form_read_only": true},
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year", "form_read_only": true},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term", "form_read_only": true},
+      {"field": "instructor_identifier", "type": "entity_reference", "target": "education.instructor", "required": true},
+      {"field": "instructor_name", "type": "display_value", "form_read_only": true},
+      {"field": "room_identifier", "type": "entity_reference", "target": "education.room", "required": true},
+      {"field": "from_time", "type": "time_of_day", "required": true},
+      {"field": "course_start_date", "type": "calendar_date", "required": true},
+      {"field": "reschedule", "type": "boolean", "default": "0"},
+      {"field": "to_time", "type": "time_of_day", "required": true},
+      {"field": "course_end_date", "type": "calendar_date", "required": true},
+      {"field": "class_schedule_color", "type": "enumeration", "values": ["blue", "green", "red", "orange", "yellow", "teal", "violet", "cyan", "amber", "pink", "purple"]}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "days structured markup"}
+    ]
+  },
+  {
+    "entity": "education.course_topic",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "topic_identifier", "type": "entity_reference", "target": "education.topic"},
+      {"field": "topic_name", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "education.education_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]},
+      {"role": "education_manager", "level": 0, "allows": ["read", "write", "create", "delete", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "current_academic_year_identifier", "type": "entity_reference", "target": "education.academic_year"},
+      {"field": "current_academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "attendance_freeze_date", "type": "calendar_date"},
+      {"field": "validate_batch", "type": "boolean", "default": "0"},
+      {"field": "validate_course", "type": "boolean", "default": "0"},
+      {"field": "academic_term_required", "type": "boolean", "default": "0"},
+      {"field": "instructor_created_by", "type": "enumeration", "values": ["Full Name", "Naming Series", "Employee Number"], "default": "Full Name"},
+      {"field": "user_creation_skip", "type": "boolean", "default": "0"},
+      {"field": "auto_submit_sales_invoice", "type": "boolean", "default": "0"},
+      {"field": "attendance_based_on_course_schedule", "type": "boolean", "default": "0"},
+      {"field": "domestic_checkout_provider_key", "type": "short_text"},
+      {"field": "domestic_checkout_provider_secret", "type": "protected_value"},
+      {"field": "school_college_name_abbreviation", "type": "short_text"},
+      {"field": "school_college_logo", "type": "image_file_reference"},
+      {"field": "sales_invoice_posting_date_fee_schedule", "type": "boolean", "default": "1"},
+      {"field": "create_sales_order", "type": "boolean", "default": "0"},
+      {"field": "auto_submit_sales_order", "type": "boolean", "default": "0"},
+      {"field": "sales_order_transaction_date_fee_schedule", "type": "boolean", "default": "1"}
+    ]
+  },
+  {
+    "entity": "education.fee_category",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "category_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "description", "type": "text"},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true},
+      {"field": "item_defaults_rows", "type": "owned_collection", "target": "education.fee_category_default"}
+    ]
+  },
+  {
+    "entity": "education.fee_category_default",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "selling_cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "income_account_identifier", "type": "entity_reference", "target": "accounting.account"}
+    ]
+  },
+  {
+    "entity": "education.fee_component",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "fees_category_identifier", "type": "entity_reference", "target": "education.fee_category", "required": true},
+      {"field": "description", "type": "text"},
+      {"field": "amount", "type": "monetary_amount", "required": true},
+      {"field": "item_identifier", "type": "entity_reference", "target": "inventory.item", "form_read_only": true},
+      {"field": "discount", "type": "percentage", "default": "0"},
+      {"field": "total", "type": "decimal", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.fee_schedule",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "amend", "report", "export", "import", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "fee_structure_identifier", "type": "entity_reference", "target": "education.fee_structure", "required": true},
+      {"field": "due_date", "type": "calendar_date", "required": true},
+      {"field": "numbering_series", "type": "enumeration", "values": ["fee schedule numbering prefix + four-digit year + configured sequence"]},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["Draft", "Cancelled", "Invoice Pending", "Order Pending", "In Process", "Invoice Created", "Order Created", "Failed"]},
+      {"field": "send_email", "type": "boolean", "default": "0"},
+      {"field": "student_category_identifier", "type": "entity_reference", "target": "education.student_category", "form_read_only": true},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program", "form_read_only": true},
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year", "required": true},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "form_read_only": true},
+      {"field": "student_groups_rows", "type": "owned_collection", "target": "education.fee_schedule_student_group", "required": true},
+      {"field": "components_rows", "type": "owned_collection", "target": "education.fee_component"},
+      {"field": "total_amount", "type": "monetary_amount", "form_read_only": true, "default": "0"},
+      {"field": "grand_total", "type": "monetary_amount", "form_read_only": true},
+      {"field": "grand_total_in_words", "type": "short_text", "form_read_only": true},
+      {"field": "letter_head_identifier", "type": "entity_reference", "target": "document_output.letter_head", "editable_after_posting": true},
+      {"field": "select_print_heading_identifier", "type": "entity_reference", "target": "document_output.print_heading", "editable_after_posting": true},
+      {"field": "receivable_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "education.fee_schedule", "form_read_only": true},
+      {"field": "error_log", "type": "text"},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}}
+    ]
+  },
+  {
+    "entity": "education.fee_schedule_details",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "month", "type": "short_text"},
+      {"field": "due_date", "type": "calendar_date"},
+      {"field": "amount", "type": "decimal"}
+    ]
+  },
+  {
+    "entity": "education.fee_schedule_program",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program", "required": true},
+      {"field": "student_batch_identifier", "type": "entity_reference", "target": "education.student_batch_name", "required": true},
+      {"field": "total_students", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.fee_schedule_student_group",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "student_group_identifier", "type": "entity_reference", "target": "education.student_group", "required": true},
+      {"field": "total_students", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.fee_structure",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "amend", "report", "export", "import", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "values": ["fee structure numbering prefix + four-digit year + configured sequence"]},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program", "required": true},
+      {"field": "student_category_identifier", "type": "entity_reference", "target": "education.student_category"},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year", "required": true},
+      {"field": "components_rows", "type": "owned_collection", "target": "education.fee_component", "required": true},
+      {"field": "total_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "receivable_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "education.fee_structure", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.fees",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "report", "export", "print", "email", "share"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "enumeration", "values": ["fees numbering prefix + four-digit year + configured sequence"]},
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student", "required": true},
+      {"field": "student_name", "type": "short_text", "form_read_only": true},
+      {"field": "fee_schedule_identifier", "type": "entity_reference", "target": "education.fee_schedule", "form_read_only": true},
+      {"field": "include_payment", "type": "boolean", "default": "0"},
+      {"field": "send_payment_request", "type": "boolean", "default": "0"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "posting_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "posting_time", "type": "time_of_day"},
+      {"field": "set_posting_time", "type": "boolean", "default": "0"},
+      {"field": "due_date", "type": "calendar_date", "required": true},
+      {"field": "program_enrollment_identifier", "type": "entity_reference", "target": "education.program_enrollment", "required": true},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program", "form_read_only": true},
+      {"field": "student_batch_identifier", "type": "entity_reference", "target": "education.student_batch_name"},
+      {"field": "student_category_identifier", "type": "entity_reference", "target": "education.student_category"},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "form_read_only": true},
+      {"field": "fee_structure_identifier", "type": "entity_reference", "target": "education.fee_structure", "required": true},
+      {"field": "components_rows", "type": "owned_collection", "target": "education.fee_component", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "education.fees", "form_read_only": true},
+      {"field": "grand_total", "type": "monetary_amount", "form_read_only": true, "default": "0"},
+      {"field": "grand_total_in_words", "type": "short_text", "form_read_only": true},
+      {"field": "outstanding_amount", "type": "monetary_amount", "form_read_only": true, "default": "0"},
+      {"field": "letter_head_identifier", "type": "entity_reference", "target": "document_output.letter_head", "editable_after_posting": true},
+      {"field": "select_print_heading_identifier", "type": "entity_reference", "target": "document_output.print_heading", "editable_after_posting": true},
+      {"field": "receivable_account_identifier", "type": "entity_reference", "target": "accounting.account", "required": true},
+      {"field": "income_account_identifier", "type": "entity_reference", "target": "accounting.account"},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "contact_email", "type": "short_text", "editable_after_posting": true}
+    ]
+  },
+  {
+    "entity": "education.grading_scale",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "grading_scale_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "intervals_rows", "type": "owned_collection", "target": "education.grading_scale_interval", "required": true},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "education.grading_scale", "form_read_only": true},
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "education.grading_scale_interval",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "grade_code", "type": "short_text", "required": true},
+      {"field": "threshold", "type": "percentage", "required": true, "precision": "1", "default": "0"},
+      {"field": "grade_description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "education.guardian",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "guardian", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "guardian_name", "type": "short_text", "required": true},
+      {"field": "email_address", "type": "short_text"},
+      {"field": "mobile_number", "type": "short_text"},
+      {"field": "alternate_number", "type": "short_text"},
+      {"field": "date_of_birth", "type": "calendar_date"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "education", "type": "short_text"},
+      {"field": "occupation", "type": "short_text"},
+      {"field": "designation", "type": "short_text"},
+      {"field": "work_address", "type": "text"},
+      {"field": "image", "type": "image_file_reference"},
+      {"field": "students_rows", "type": "owned_collection", "target": "education.guardian_student", "form_read_only": true},
+      {"field": "interests_rows", "type": "owned_collection", "target": "education.guardian_interest"},
+      {"field": "nationality", "type": "short_text"},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender"},
+      {"field": "blood_group", "type": "enumeration", "values": ["", "A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]}
+    ]
+  },
+  {
+    "entity": "education.guardian_interest",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "interest", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "education.guardian_student",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student", "form_read_only": true},
+      {"field": "student_name", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.instructor",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "instructor", "level": 0, "allows": ["read", "report", "print", "email"]},
+      {"role": "education_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "instructor_name", "type": "short_text", "required": true},
+      {"field": "employee_identifier", "type": "entity_reference", "target": "organization.employee"},
+      {"field": "numbering_series", "type": "enumeration", "values": ["instructor numbering prefix + four-digit year + configured sequence"]},
+      {"field": "department_identifier", "type": "entity_reference", "target": "organization.department"},
+      {"field": "image", "type": "image_file_reference"},
+      {"field": "instructor_log_rows", "type": "owned_collection", "target": "education.instructor_log"},
+      {"field": "status", "type": "enumeration", "values": ["Active", "Left"], "default": "Active"},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender"}
+    ]
+  },
+  {
+    "entity": "education.instructor_log",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year", "required": true},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "department_identifier", "type": "entity_reference", "target": "organization.department"},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program", "required": true},
+      {"field": "course_identifier", "type": "entity_reference", "target": "education.course"},
+      {"field": "student_group_identifier", "type": "entity_reference", "target": "education.student_group"},
+      {"field": "other_details", "type": "text"}
+    ]
+  },
+  {
+    "entity": "education.options",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "option", "type": "text"},
+      {"field": "is_correct", "type": "boolean"}
+    ]
+  },
+  {
+    "entity": "education.payment_record",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student", "form_read_only": true},
+      {"field": "order_identifier", "type": "short_text", "form_read_only": true},
+      {"field": "payment_identifier", "type": "short_text", "form_read_only": true},
+      {"field": "signature", "type": "short_text", "form_read_only": true},
+      {"field": "status", "type": "short_text", "form_read_only": true},
+      {"field": "mobile", "type": "short_text", "form_read_only": true},
+      {"field": "email", "type": "short_text", "form_read_only": true},
+      {"field": "address_line_1", "type": "short_text", "form_read_only": true},
+      {"field": "address_line_2", "type": "short_text", "form_read_only": true},
+      {"field": "pincode", "type": "short_text", "form_read_only": true},
+      {"field": "city", "type": "short_text", "form_read_only": true},
+      {"field": "state", "type": "short_text", "form_read_only": true},
+      {"field": "country", "type": "short_text", "form_read_only": true},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "currency", "type": "short_text", "form_read_only": true},
+      {"field": "against_invoice_identifier", "type": "entity_reference", "target": "accounting.sales_invoice", "form_read_only": true},
+      {"field": "failure_description", "type": "text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.program",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "instructor", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "student", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "guardian", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "program_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "department_identifier", "type": "entity_reference", "target": "organization.department"},
+      {"field": "program_abbreviation", "type": "short_text"},
+      {"field": "courses_rows", "type": "owned_collection", "target": "education.program_course"},
+      {"field": "hero_image", "type": "image_file_reference"}
+    ]
+  },
+  {
+    "entity": "education.program_course",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "course_identifier", "type": "entity_reference", "target": "education.course", "required": true},
+      {"field": "course_name", "type": "short_text", "form_read_only": true},
+      {"field": "required", "type": "boolean", "default": "1"}
+    ]
+  },
+  {
+    "entity": "education.program_enrollment",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "student", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "guardian", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student", "required": true},
+      {"field": "student_name", "type": "display_value", "form_read_only": true},
+      {"field": "student_category_identifier", "type": "entity_reference", "target": "education.student_category"},
+      {"field": "student_batch_name_identifier", "type": "entity_reference", "target": "education.student_batch_name", "editable_after_posting": true},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program", "required": true},
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year", "required": true},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "enrollment_date", "type": "calendar_date", "required": true, "default": {"context_default": "effective_date"}},
+      {"field": "boarding_student", "type": "boolean", "default": "0"},
+      {"field": "courses_rows", "type": "owned_collection", "target": "education.program_enrollment_course", "editable_after_posting": true},
+      {"field": "fees_rows", "type": "owned_collection", "target": "education.program_fee"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "education.program_enrollment", "form_read_only": true},
+      {"field": "image", "type": "image_file_reference"},
+      {"field": "school_house_identifier", "type": "entity_reference", "target": "education.school_house", "editable_after_posting": true}
+    ]
+  },
+  {
+    "entity": "education.program_enrollment_course",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "course_identifier", "type": "entity_reference", "target": "education.course", "required": true},
+      {"field": "course_name", "type": "short_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.program_enrollment_fee",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "fee_structure_identifier", "type": "entity_reference", "target": "education.fee_structure"},
+      {"field": "due_date", "type": "calendar_date"},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.program_enrollment_tool",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "education_manager", "level": 0, "allows": ["read", "write", "create"]}
+    ],
+    "fields": [
+      {"field": "get_students_from", "type": "enumeration", "required": true, "values": ["", "Student Applicant", "Program Enrollment"]},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program", "required": true},
+      {"field": "student_batch_identifier", "type": "entity_reference", "target": "education.student_batch_name"},
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year", "required": true},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "students_rows", "type": "owned_collection", "target": "education.program_enrollment_tool_student"},
+      {"field": "new_program_identifier", "type": "entity_reference", "target": "education.program"},
+      {"field": "new_student_batch_identifier", "type": "entity_reference", "target": "education.student_batch_name"},
+      {"field": "new_academic_year_identifier", "type": "entity_reference", "target": "education.academic_year"},
+      {"field": "new_academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "enrollment_date", "type": "calendar_date"}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "get students"},
+      {"control": "action", "purpose": "enroll students"}
+    ]
+  },
+  {
+    "entity": "education.program_enrollment_tool_student",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "student_applicant_identifier", "type": "entity_reference", "target": "education.student_applicant"},
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student"},
+      {"field": "student_name", "type": "short_text", "form_read_only": true},
+      {"field": "student_batch_name_identifier", "type": "entity_reference", "target": "education.student_batch_name"},
+      {"field": "student_category_identifier", "type": "entity_reference", "target": "education.student_category", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.program_fee",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "student_category_identifier", "type": "entity_reference", "target": "education.student_category"},
+      {"field": "due_date", "type": "calendar_date"},
+      {"field": "amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "fee_schedule_identifier", "type": "entity_reference", "target": "education.fee_schedule", "required": true}
+    ]
+  },
+  {
+    "entity": "education.question",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "instructor", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "question", "type": "formatted_text", "required": true},
+      {"field": "options_rows", "type": "owned_collection", "target": "education.options", "required": true},
+      {"field": "question_type", "type": "enumeration", "form_read_only": true, "values": ["", "Single Correct Answer", "Multiple Correct Answer"]}
+    ]
+  },
+  {
+    "entity": "education.quiz",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "instructor", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true, "unique": true},
+      {"field": "question_rows", "type": "owned_collection", "target": "education.quiz_question", "required": true},
+      {"field": "passing_score", "type": "decimal", "required": true, "default": "75"},
+      {"field": "maximum_attempts", "type": "integer", "required": true, "default": "1"},
+      {"field": "grading_basis", "type": "enumeration", "values": ["Latest Highest Score", "Latest Attempt"], "default": "Latest Highest Score"},
+      {"field": "is_time_bound", "type": "boolean", "default": "0"},
+      {"field": "duration", "type": "duration"}
+    ]
+  },
+  {
+    "entity": "education.quiz_activity",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "instructor", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "enrollment_identifier", "type": "entity_reference", "target": "education.course_enrollment"},
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student", "form_read_only": true},
+      {"field": "course_identifier", "type": "entity_reference", "target": "education.course", "form_read_only": true},
+      {"field": "quiz_identifier", "type": "entity_reference", "target": "education.quiz"},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "values": ["", "Pass", "Fail"]},
+      {"field": "result_rows", "type": "owned_collection", "target": "education.quiz_result"},
+      {"field": "activity_date", "type": "short_text"},
+      {"field": "score", "type": "short_text"},
+      {"field": "time_taken", "type": "duration"}
+    ]
+  },
+  {
+    "entity": "education.quiz_question",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "question_link_identifier", "type": "entity_reference", "target": "education.question", "required": true},
+      {"field": "question", "type": "formatted_text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.quiz_result",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "question_identifier", "type": "entity_reference", "target": "education.question", "required": true, "form_read_only": true},
+      {"field": "selected_option", "type": "short_text", "form_read_only": true},
+      {"field": "quiz_result", "type": "enumeration", "required": true, "form_read_only": true, "values": ["", "Correct", "Wrong"]}
+    ]
+  },
+  {
+    "entity": "education.room",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "room_name", "type": "short_text", "required": true},
+      {"field": "room_number", "type": "short_text"},
+      {"field": "seating_capacity", "type": "short_text"}
+    ]
+  },
+  {
+    "entity": "education.school_house",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "house_name", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "education.student",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "instructor", "level": 0, "allows": ["read"]},
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]},
+      {"role": "student", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "guardian", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "first_name", "type": "short_text", "required": true},
+      {"field": "middle_name", "type": "short_text"},
+      {"field": "last_name", "type": "short_text"},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user"},
+      {"field": "numbering_series", "type": "enumeration", "values": ["student numbering prefix + four-digit year + configured sequence"]},
+      {"field": "student_email_identifier", "type": "short_text", "required": true, "unique": true},
+      {"field": "student_mobile_number", "type": "short_text"},
+      {"field": "joining_date", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "image", "type": "image_file_reference"},
+      {"field": "date_of_birth", "type": "calendar_date"},
+      {"field": "blood_group", "type": "enumeration", "values": ["", "A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender"},
+      {"field": "nationality", "type": "short_text"},
+      {"field": "student_applicant_identifier", "type": "entity_reference", "target": "education.student_applicant", "form_read_only": true},
+      {"field": "address_line_1", "type": "short_text"},
+      {"field": "address_line_2", "type": "short_text"},
+      {"field": "pincode", "type": "short_text"},
+      {"field": "city", "type": "short_text"},
+      {"field": "state", "type": "short_text"},
+      {"field": "country_identifier", "type": "entity_reference", "target": "geography.country"},
+      {"field": "guardians_rows", "type": "owned_collection", "target": "education.student_guardian"},
+      {"field": "siblings_rows", "type": "owned_collection", "target": "education.student_sibling"},
+      {"field": "date_of_leaving", "type": "calendar_date"},
+      {"field": "leaving_certificate_number", "type": "short_text"},
+      {"field": "reason_for_leaving", "type": "text"},
+      {"field": "student_name", "type": "short_text"},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "form_read_only": true},
+      {"field": "customer_group_identifier", "type": "entity_reference", "target": "organization.customer_group"}
+    ]
+  },
+  {
+    "entity": "education.student_admission",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text"},
+      {"field": "route", "type": "short_text", "unique": true},
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year", "required": true},
+      {"field": "admission_start_date", "type": "calendar_date"},
+      {"field": "admission_end_date", "type": "calendar_date"},
+      {"field": "published", "type": "boolean", "default": "0"},
+      {"field": "program_details_rows", "type": "owned_collection", "target": "education.student_admission_program"},
+      {"field": "introduction", "type": "formatted_text"},
+      {"field": "enable_admission_application", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "education.student_admission_program",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program"},
+      {"field": "application_fee", "type": "monetary_amount"},
+      {"field": "applicant_numbering_series", "type": "short_text"},
+      {"field": "minimum_age", "type": "integer"},
+      {"field": "maximum_age", "type": "integer"},
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "education.student_applicant",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "import", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "first_name", "type": "short_text", "required": true},
+      {"field": "middle_name", "type": "short_text"},
+      {"field": "last_name", "type": "short_text"},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program", "required": true},
+      {"field": "paid", "type": "boolean", "default": "0"},
+      {"field": "numbering_series", "type": "enumeration", "values": ["student applicant numbering prefix + four-digit year + configured sequence"]},
+      {"field": "application_status", "type": "enumeration", "form_read_only": true, "editable_after_posting": true, "values": ["Applied", "Approved", "Rejected", "Admitted"]},
+      {"field": "application_date", "type": "calendar_date", "default": {"context_default": "effective_date"}},
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year", "required": true},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "student_admission_identifier", "type": "entity_reference", "target": "education.student_admission"},
+      {"field": "image", "type": "image_file_reference"},
+      {"field": "date_of_birth", "type": "calendar_date"},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender"},
+      {"field": "blood_group", "type": "enumeration", "values": ["", "A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]},
+      {"field": "student_email_identifier", "type": "short_text", "unique": true},
+      {"field": "student_mobile_number", "type": "short_text"},
+      {"field": "nationality", "type": "short_text"},
+      {"field": "address_line_1", "type": "short_text"},
+      {"field": "address_line_2", "type": "short_text"},
+      {"field": "pincode", "type": "short_text"},
+      {"field": "city", "type": "short_text"},
+      {"field": "state", "type": "short_text"},
+      {"field": "guardians_rows", "type": "owned_collection", "target": "education.student_guardian"},
+      {"field": "siblings_rows", "type": "owned_collection", "target": "education.student_sibling"},
+      {"field": "title", "type": "short_text"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "education.student_applicant", "form_read_only": true},
+      {"field": "student_category_identifier", "type": "entity_reference", "target": "education.student_category"},
+      {"field": "country_identifier", "type": "entity_reference", "target": "geography.country"}
+    ]
+  },
+  {
+    "entity": "education.student_attendance",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "report", "export", "print", "email", "share"]},
+      {"role": "student", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]},
+      {"role": "guardian", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student", "required": true},
+      {"field": "course_schedule_identifier", "type": "entity_reference", "target": "education.course_schedule"},
+      {"field": "date", "type": "calendar_date", "required": true},
+      {"field": "student_name", "type": "display_value"},
+      {"field": "student_group_identifier", "type": "entity_reference", "target": "education.student_group"},
+      {"field": "status", "type": "enumeration", "required": true, "editable_after_posting": true, "values": ["Present", "Absent", "Leave"], "default": "Present"},
+      {"field": "leave_application_identifier", "type": "entity_reference", "target": "education.student_leave_application", "form_read_only": true},
+      {"field": "numbering_series", "type": "enumeration", "values": ["student attendance numbering prefix + four-digit year + configured sequence"]},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "education.student_attendance", "form_read_only": true},
+      {"field": "student_mobile_number", "type": "display_value"},
+      {"field": "link_nvfk_identifier", "type": "entity_reference", "target": "education.program"}
+    ]
+  },
+  {
+    "entity": "education.student_attendance_tool",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "instructor", "level": 0, "allows": ["read", "write", "create"]},
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create"]}
+    ],
+    "fields": [
+      {"field": "based_on", "type": "enumeration", "values": ["Student Group", "Course Schedule"]},
+      {"field": "group_based_on", "type": "enumeration", "values": ["Batch", "Course", "Activity"], "default": "Batch"},
+      {"field": "student_group_identifier", "type": "entity_reference", "target": "education.student_group", "required": true},
+      {"field": "course_schedule_identifier", "type": "entity_reference", "target": "education.course_schedule", "required": true},
+      {"field": "date", "type": "calendar_date", "required": true},
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year", "form_read_only": true},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "students structured markup"}
+    ]
+  },
+  {
+    "entity": "education.student_batch_name",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "batch_name", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "education.student_category",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "category", "type": "short_text", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "education.student_group",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "instructor", "level": 0, "allows": ["read"]},
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year", "required": true},
+      {"field": "group_based_on", "type": "enumeration", "required": true, "values": ["", "Batch", "Course", "Activity"]},
+      {"field": "student_group_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "maximum_strength", "type": "integer"},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program"},
+      {"field": "batch_identifier", "type": "entity_reference", "target": "education.student_batch_name"},
+      {"field": "course_identifier", "type": "entity_reference", "target": "education.course"},
+      {"field": "disabled", "type": "boolean", "default": "0"},
+      {"field": "students_rows", "type": "owned_collection", "target": "education.student_group_student", "editable_after_posting": true},
+      {"field": "instructors_rows", "type": "owned_collection", "target": "education.student_group_instructor"},
+      {"field": "student_category_identifier", "type": "entity_reference", "target": "education.student_category"}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "get students"}
+    ]
+  },
+  {
+    "entity": "education.student_group_creation_tool",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "education_manager", "level": 0, "allows": ["read", "write", "create"]}
+    ],
+    "fields": [
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year", "required": true},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program", "required": true},
+      {"field": "separate_groups", "type": "boolean"},
+      {"field": "courses_rows", "type": "owned_collection", "target": "education.student_group_creation_tool_course", "required": true}
+    ],
+    "presentation": [
+      {"control": "action", "purpose": "get courses"}
+    ]
+  },
+  {
+    "entity": "education.student_group_creation_tool_course",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "group_based_on", "type": "enumeration", "required": true, "values": ["", "Batch", "Course"]},
+      {"field": "course_identifier", "type": "entity_reference", "target": "education.course"},
+      {"field": "batch_identifier", "type": "entity_reference", "target": "education.student_batch_name"},
+      {"field": "student_group_name", "type": "short_text", "required": true},
+      {"field": "course_code", "type": "display_value", "form_read_only": true},
+      {"field": "maximum_strength", "type": "integer"}
+    ]
+  },
+  {
+    "entity": "education.student_group_instructor",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "instructor_identifier", "type": "entity_reference", "target": "education.instructor", "required": true},
+      {"field": "instructor_name", "type": "display_value"}
+    ]
+  },
+  {
+    "entity": "education.student_group_student",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student", "required": true},
+      {"field": "student_name", "type": "short_text", "form_read_only": true},
+      {"field": "group_roll_number", "type": "integer"},
+      {"field": "active", "type": "boolean", "default": "1"}
+    ]
+  },
+  {
+    "entity": "education.student_guardian",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "guardian_identifier", "type": "entity_reference", "target": "education.guardian", "required": true},
+      {"field": "guardian_name", "type": "short_text", "required": true, "form_read_only": true},
+      {"field": "relation", "type": "enumeration", "values": ["", "Mother", "Father", "Others"]}
+    ]
+  },
+  {
+    "entity": "education.student_language",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "language_name", "type": "short_text", "required": true, "unique": true}
+    ]
+  },
+  {
+    "entity": "education.student_leave_application",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "grants": [
+      {"role": "instructor", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "print", "email"]},
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print", "email", "share"]},
+      {"role": "student", "level": 0, "allows": ["read", "create", "report", "export", "print", "email", "share"]},
+      {"role": "guardian", "level": 0, "allows": ["read", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student", "required": true},
+      {"field": "student_name", "type": "display_value", "form_read_only": true},
+      {"field": "from_date", "type": "calendar_date", "required": true},
+      {"field": "to_date", "type": "calendar_date", "required": true},
+      {"field": "mark_as_present", "type": "boolean", "default": "0"},
+      {"field": "reason", "type": "text"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "education.student_leave_application", "form_read_only": true},
+      {"field": "attendance_based_on", "type": "enumeration", "values": ["Student Group", "Course Schedule"], "default": "Student Group"},
+      {"field": "student_group_identifier", "type": "entity_reference", "target": "education.student_group"},
+      {"field": "course_schedule_identifier", "type": "entity_reference", "target": "education.course_schedule"},
+      {"field": "total_leave_days", "type": "decimal", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.student_log",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "academics_user", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student", "required": true},
+      {"field": "student_name", "type": "display_value"},
+      {"field": "type", "type": "enumeration", "values": ["General", "Academic", "Medical", "Achievement"]},
+      {"field": "date", "type": "calendar_date"},
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year"},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program"},
+      {"field": "student_batch_identifier", "type": "entity_reference", "target": "education.student_batch_name"},
+      {"field": "log", "type": "formatted_text"}
+    ]
+  },
+  {
+    "entity": "education.student_report_generation_tool",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create"]}
+    ],
+    "fields": [
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student", "required": true},
+      {"field": "student_name", "type": "display_value"},
+      {"field": "program_identifier", "type": "entity_reference", "target": "education.program", "required": true},
+      {"field": "student_batch_identifier", "type": "entity_reference", "target": "education.student_batch_name"},
+      {"field": "show_marks", "type": "boolean", "default": "0"},
+      {"field": "add_letterhead", "type": "boolean", "default": "1"},
+      {"field": "assessment_group_identifier", "type": "entity_reference", "target": "education.assessment_group", "required": true},
+      {"field": "academic_year_identifier", "type": "entity_reference", "target": "education.academic_year", "required": true},
+      {"field": "academic_term_identifier", "type": "entity_reference", "target": "education.academic_term"},
+      {"field": "letter_head_identifier", "type": "entity_reference", "target": "document_output.letter_head"},
+      {"field": "parents_meeting", "type": "short_text"},
+      {"field": "parents_attendance", "type": "short_text"},
+      {"field": "terms_identifier", "type": "entity_reference", "target": "organization.terms_and_conditions"},
+      {"field": "assessment_terms", "type": "text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "education.student_sibling",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "studying_in_same_institute", "type": "enumeration", "values": ["NO", "YES"]},
+      {"field": "full_name", "type": "short_text"},
+      {"field": "gender_identifier", "type": "entity_reference", "target": "contacts.gender"},
+      {"field": "student_identifier", "type": "entity_reference", "target": "education.student"},
+      {"field": "institution", "type": "short_text"},
+      {"field": "program", "type": "short_text"},
+      {"field": "date_of_birth", "type": "calendar_date"}
+    ]
+  },
+  {
+    "entity": "education.student_siblings",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "display_name", "type": "short_text", "required": true},
+      {"field": "gender", "type": "enumeration", "values": ["", "Male", "Female"]},
+      {"field": "date_of_birth", "type": "calendar_date"}
+    ]
+  },
+  {
+    "entity": "education.topic",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "administrator", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]},
+      {"role": "instructor", "level": 0, "allows": ["read", "write", "create", "delete", "report", "export", "print", "email", "share"]}
+    ],
+    "fields": [
+      {"field": "topic_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "topic_content_rows", "type": "owned_collection", "target": "education.topic_content"},
+      {"field": "hero_image", "type": "image_file_reference"},
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "education.topic_content",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "content_type", "type": "enumeration", "required": true, "values": ["", "Article", "Video", "Quiz"]},
+      {"field": "content_identifier", "type": "selected_entity_reference", "target_selected_by": "content_type", "required": true}
+    ]
+  }
+]

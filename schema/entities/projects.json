@@ -1,0 +1,406 @@
+[
+  {
+    "entity": "projects.activity_cost",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "grants": [
+      {"role": "projects_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "activity_type_identifier", "type": "entity_reference", "target": "projects.activity_type", "required": true},
+      {"field": "employee_identifier", "type": "entity_reference", "target": "organization.employee"},
+      {"field": "employee_name", "type": "short_text", "form_read_only": true, "copy_from": ["employee_identifier", "employee_name"]},
+      {"field": "department_identifier", "type": "entity_reference", "target": "organization.department", "form_read_only": true, "copy_from": ["employee_identifier", "department_identifier"]},
+      {"field": "billing_rate", "type": "monetary_amount", "default": "0"},
+      {"field": "costing_rate", "type": "monetary_amount", "default": "0"},
+      {"field": "title", "type": "short_text", "form_read_only": true, "form_hidden": true, "omit_on_copy": true}
+    ]
+  },
+  {
+    "entity": "projects.activity_type",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]},
+      {"role": "projects_user", "level": 0, "allows": ["create", "email", "print", "read", "report", "share", "write"]},
+      {"role": "employee", "level": 0, "allows": ["read"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["select"]},
+      {"role": "human_resources_user", "level": 0, "allows": ["select"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "activity_type", "type": "short_text", "required": true, "unique": true},
+      {"field": "costing_rate", "type": "monetary_amount"},
+      {"field": "billing_rate", "type": "monetary_amount"},
+      {"field": "disabled", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "projects.dependent_task",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "task_identifier", "type": "entity_reference", "target": "projects.task"}
+    ]
+  },
+  {
+    "entity": "projects.project",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "maximum_attachments": 4,
+    "grants": [
+      {"role": "projects_manager", "level": 1, "allows": ["delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "projects_user", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 1, "allows": ["read", "report"]},
+      {"role": "projects_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "employee", "level": 0, "allows": ["email", "export", "print", "report", "select", "share"]},
+      {"role": "human_resources_user", "level": 0, "allows": ["select"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["select"]},
+      {"role": "accounts_manager", "level": 0, "allows": ["select"]},
+      {"role": "accounts_user", "level": 0, "allows": ["select"]},
+      {"role": "delivery_manager", "level": 0, "allows": ["select"]},
+      {"role": "delivery_user", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_manager", "level": 0, "allows": ["select"]},
+      {"role": "maintenance_user", "level": 0, "allows": ["select"]},
+      {"role": "manufacturing_manager", "level": 0, "allows": ["select"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["select"]},
+      {"role": "purchase_manager", "level": 0, "allows": ["select"]},
+      {"role": "purchase_master_manager", "level": 0, "allows": ["select"]},
+      {"role": "purchase_user", "level": 0, "allows": ["select"]},
+      {"role": "quality_manager", "level": 0, "allows": ["select"]},
+      {"role": "sales_manager", "level": 0, "allows": ["select"]},
+      {"role": "sales_master_manager", "level": 0, "allows": ["select"]},
+      {"role": "sales_user", "level": 0, "allows": ["select"]},
+      {"role": "stock_manager", "level": 0, "allows": ["select"]},
+      {"role": "stock_user", "level": 0, "allows": ["select"]},
+      {"role": "support_team", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "project_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "status", "type": "enumeration", "omit_on_copy": true, "searchable": true, "values": ["Open", "On hold", "Completed", "Cancelled"], "default": "Open"},
+      {"field": "project_type_identifier", "type": "entity_reference", "target": "projects.project_type"},
+      {"field": "is_active", "type": "enumeration", "values": ["Yes", "No"]},
+      {"field": "percent_complete_method", "type": "enumeration", "values": ["Manual", "Task Completion", "Task Progress", "Task Weight"], "default": "Task Completion"},
+      {"field": "percent_complete", "type": "percentage", "omit_on_copy": true, "read_only_when": ["coercive_unequal", ["current_field", "percent_complete_method"], ["literal", "Manual"]]},
+      {"field": "project_template_identifier", "type": "entity_reference", "target": "projects.project_template", "write_once": true},
+      {"field": "expected_start_date", "type": "calendar_date"},
+      {"field": "expected_end_date", "type": "calendar_date"},
+      {"field": "priority", "type": "enumeration", "values": ["Low", "Medium", "High"], "default": "Medium"},
+      {"field": "department_identifier", "type": "entity_reference", "target": "organization.department"},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer", "omit_on_copy": true, "searchable": true},
+      {"field": "sales_order_identifier", "type": "entity_reference", "target": "sales.sales_order", "omit_on_copy": true},
+      {"field": "users_rows", "type": "owned_collection", "target": "projects.project_user", "access_level": 1},
+      {"field": "copied_from", "type": "short_text", "form_read_only": true, "form_hidden": true, "access_level": 1},
+      {"field": "notes", "type": "formatted_text"},
+      {"field": "actual_start_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "actual_time", "type": "decimal", "form_read_only": true},
+      {"field": "actual_end_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "estimated_costing", "type": "monetary_amount", "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_costing_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "total_purchase_cost", "type": "monetary_amount", "form_read_only": true},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "required": true},
+      {"field": "total_sales_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "total_billable_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "total_billed_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "total_consumed_material_cost", "type": "monetary_amount", "form_read_only": true},
+      {"field": "cost_center_identifier", "type": "entity_reference", "target": "accounting.cost_center"},
+      {"field": "gross_margin", "type": "monetary_amount", "form_read_only": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "gross_margin_percentage", "type": "percentage", "form_read_only": true},
+      {"field": "collect_progress", "type": "boolean", "searchable": true, "default": "0"},
+      {"field": "holiday_list_identifier", "type": "entity_reference", "target": "organization.holiday_list", "visible_when": ["field_has_value", "collect_progress"]},
+      {"field": "frequency", "type": "enumeration", "values": ["Hourly", "Twice Daily", "Daily", "Weekly"], "visible_when": ["coercive_equal", ["current_field", "collect_progress"], ["literal", true]]},
+      {"field": "from_time", "type": "time_of_day", "visible_when": ["and", ["coercive_equal", ["current_field", "frequency"], ["literal", "Hourly"]], ["current_field", "collect_progress"]]},
+      {"field": "to_time", "type": "time_of_day", "visible_when": ["and", ["coercive_equal", ["current_field", "frequency"], ["literal", "Hourly"]], ["current_field", "collect_progress"]]},
+      {"field": "first_email", "type": "time_of_day", "visible_when": ["and", ["coercive_equal", ["current_field", "frequency"], ["literal", "Twice Daily"]], ["coercive_equal", ["current_field", "collect_progress"], ["literal", true]]]},
+      {"field": "second_email", "type": "time_of_day", "visible_when": ["and", ["coercive_equal", ["current_field", "frequency"], ["literal", "Twice Daily"]], ["coercive_equal", ["current_field", "collect_progress"], ["literal", true]]]},
+      {"field": "daily_time_to_send", "type": "time_of_day", "visible_when": ["and", ["coercive_equal", ["current_field", "frequency"], ["literal", "Daily"]], ["coercive_equal", ["current_field", "collect_progress"], ["literal", true]]]},
+      {"field": "day_to_send", "type": "enumeration", "values": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "visible_when": ["and", ["coercive_equal", ["current_field", "frequency"], ["literal", "Weekly"]], ["coercive_equal", ["current_field", "collect_progress"], ["literal", true]]]},
+      {"field": "weekly_time_to_send", "type": "time_of_day", "visible_when": ["and", ["coercive_equal", ["current_field", "frequency"], ["literal", "Weekly"]], ["coercive_equal", ["current_field", "collect_progress"], ["literal", true]]]},
+      {"field": "message", "type": "text", "visible_when": ["field_has_value", "collect_progress"], "required_when": ["field_has_value", "collect_progress"]},
+      {"field": "numbering_series", "type": "enumeration", "required": true, "write_once": true, "omit_on_copy": true, "values": ["project numbering prefix + 4-digit sequence"]},
+      {"field": "subject", "type": "short_text", "visible_when": ["field_has_value", "collect_progress"], "required_when": ["field_has_value", "collect_progress"]}
+    ],
+    "presentation": [
+      {"control": "tab", "purpose": "Overview"},
+      {"control": "interactive_control", "purpose": "Overview Dashboard", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"control": "tab", "purpose": "Details"},
+      {"control": "section", "purpose": "Notes"},
+      {"control": "section", "purpose": "Timeline"},
+      {"control": "section", "purpose": "Costing and Billing"},
+      {"control": "section", "purpose": "Margin"},
+      {"control": "tab", "purpose": "Costing"},
+      {"control": "interactive_control", "purpose": "Costing Dashboard", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"control": "tab", "purpose": "Budgets"},
+      {"control": "formatted_information", "purpose": "Budgets", "visible_when": ["not", ["current_field", "is_new_record"]]},
+      {"control": "tab", "purpose": "Progress updates"},
+      {"control": "tab", "purpose": "Customer"},
+      {"control": "tab", "purpose": "Connections"},
+      {"control": "tab", "purpose": "More Info"},
+      {"control": "tab", "purpose": "Tasks"},
+      {"control": "formatted_information", "purpose": "Tasks"},
+      {"control": "section", "purpose": "Accounting"}
+    ]
+  },
+  {
+    "entity": "projects.project_template",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "projects_manager", "level": 0, "allows": ["create", "read", "select", "write"]},
+      {"role": "projects_user", "level": 0, "allows": ["read", "select"]}
+    ],
+    "fields": [
+      {"field": "project_type_identifier", "type": "entity_reference", "target": "projects.project_type"},
+      {"field": "tasks_rows", "type": "owned_collection", "target": "projects.project_template_task", "required": true},
+      {"field": "disabled", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "projects.project_template_task",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "task_identifier", "type": "entity_reference", "target": "projects.task", "required": true},
+      {"field": "subject", "type": "display_value", "copy_from": ["task_identifier", "subject"]}
+    ]
+  },
+  {
+    "entity": "projects.project_type",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "projects_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "projects_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "project_type", "type": "short_text", "required": true, "unique": true},
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "projects.project_update",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "projects_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "numbering_series", "type": "short_text", "form_hidden": true},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project", "required": true},
+      {"field": "sent", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "date", "type": "calendar_date", "form_read_only": true, "searchable": true},
+      {"field": "time", "type": "time_of_day", "form_read_only": true},
+      {"field": "users_rows", "type": "owned_collection", "target": "projects.project_user"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "projects.project_update", "form_read_only": true, "omit_on_copy": true}
+    ]
+  },
+  {
+    "entity": "projects.project_user",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true, "searchable": true},
+      {"field": "email", "type": "display_value", "copy_from": ["user_identifier", "email"]},
+      {"field": "image", "type": "display_value", "form_hidden": true, "copy_from": ["user_identifier", "user_image"]},
+      {"field": "full_name", "type": "display_value", "copy_from": ["user_identifier", "full_name"]},
+      {"field": "welcome_email_sent", "type": "boolean", "default": "0"},
+      {"field": "view_attachments", "type": "boolean", "default": "0"},
+      {"field": "hide_timesheets", "type": "boolean", "default": "0"},
+      {"field": "project_status", "type": "text", "visible_when": ["coercive_equal", ["member", ["context", "owning_record"], "entity_type"], ["literal", "Project Update"]]}
+    ]
+  },
+  {
+    "entity": "projects.projects_settings",
+    "kind": "singleton_settings",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "print", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "ignore_user_time_overlap", "type": "boolean", "default": "0"},
+      {"field": "ignore_employee_time_overlap", "type": "boolean", "default": "0"},
+      {"field": "fetch_timesheet_in_sales_invoice", "type": "boolean", "default": "0"},
+      {"field": "ignore_workstation_time_overlap", "type": "boolean", "configuration_variant": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Timesheets"}
+    ]
+  },
+  {
+    "entity": "projects.task",
+    "kind": "independent_record",
+    "import_supported": true,
+    "hierarchy_parent": "parent_task_identifier",
+    "maximum_attachments": 5,
+    "grants": [
+      {"role": "projects_user", "level": 0, "allows": ["create", "delete", "email", "print", "read", "report", "share", "write"]},
+      {"role": "human_resources_user", "level": 0, "allows": ["select"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["create", "delete", "email", "export", "read", "share", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["select"]},
+      {"role": "employee", "level": 0, "allows": ["select"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "subject", "type": "short_text", "required": true, "searchable": true},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project", "searchable": true},
+      {"field": "issue_identifier", "type": "entity_reference", "target": "customer_support.issue"},
+      {"field": "type_identifier", "type": "entity_reference", "target": "projects.task_type"},
+      {"field": "is_group", "type": "boolean", "default": "0"},
+      {"field": "status", "type": "enumeration", "omit_on_copy": true, "values": ["Open", "Working", "Pending Review", "Overdue", "Template", "Completed", "Cancelled"]},
+      {"field": "priority", "type": "enumeration", "searchable": true, "values": ["Low", "Medium", "High", "Urgent"]},
+      {"field": "color", "type": "color"},
+      {"field": "parent_task_identifier", "type": "entity_reference", "target": "projects.task", "searchable": true, "omit_target_user_filter": true},
+      {"field": "exp_start_date", "type": "date_and_time"},
+      {"field": "expected_time", "type": "decimal", "default": "0"},
+      {"field": "task_weight", "type": "decimal", "nonnegative": true},
+      {"field": "exp_end_date", "type": "date_and_time", "searchable": true},
+      {"field": "progress", "type": "percentage", "omit_on_copy": true},
+      {"field": "is_milestone", "type": "boolean", "default": "0"},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "depends_on_rows", "type": "owned_collection", "target": "projects.task_depends_on"},
+      {"field": "depends_on_tasks", "type": "expression_or_structured_text", "form_read_only": true, "form_hidden": true},
+      {"field": "act_start_date", "type": "calendar_date", "form_read_only": true, "omit_on_copy": true},
+      {"field": "actual_time", "type": "decimal", "form_read_only": true, "omit_on_copy": true},
+      {"field": "act_end_date", "type": "calendar_date", "form_read_only": true, "omit_on_copy": true},
+      {"field": "total_costing_amount", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true, "currency": {"through": "company_identifier", "on_entity": "organization.company", "field": "default_currency_identifier"}},
+      {"field": "total_billing_amount", "type": "monetary_amount", "form_read_only": true, "omit_on_copy": true},
+      {"field": "review_date", "type": "calendar_date", "visible_when": ["or", ["coercive_equal", ["current_field", "status"], ["literal", "Completed"]], ["coercive_equal", ["current_field", "status"], ["literal", "Pending Review"]]]},
+      {"field": "closing_date", "type": "calendar_date", "visible_when": ["coercive_equal", ["current_field", "status"], ["literal", "Completed"]]},
+      {"field": "department_identifier", "type": "entity_reference", "target": "organization.department"},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company", "copy_from": ["project_identifier", "company_identifier"]},
+      {"field": "hierarchy_left_boundary", "type": "integer", "form_read_only": true, "form_hidden": true},
+      {"field": "hierarchy_right_boundary", "type": "integer", "form_read_only": true, "form_hidden": true},
+      {"field": "previous_parent_identifier", "type": "short_text", "form_read_only": true, "form_hidden": true, "omit_target_user_filter": true},
+      {"field": "completed_by_identifier", "type": "entity_reference", "target": "information_management.user", "omit_on_copy": true, "visible_when": ["coercive_equal", ["current_field", "status"], ["literal", "Completed"]]},
+      {"field": "is_template", "type": "boolean", "default": "0"},
+      {"field": "start", "type": "integer", "visible_when": ["field_has_value", "is_template"]},
+      {"field": "duration", "type": "integer", "visible_when": ["field_has_value", "is_template"]},
+      {"field": "completed_on", "type": "calendar_date", "visible_when": ["coercive_equal", ["current_field", "status"], ["literal", "Completed"]], "required_when": ["coercive_equal", ["current_field", "status"], ["literal", "Completed"]]},
+      {"field": "template_task", "type": "short_text", "form_hidden": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Timeline", "expanded_when": ["field_has_value", "exp_start_date"]},
+      {"control": "section", "purpose": "Details"},
+      {"control": "section", "purpose": "Costing"},
+      {"control": "section", "purpose": "Additional Info"},
+      {"control": "tab", "purpose": "Dependencies"},
+      {"control": "tab", "purpose": "More Info"}
+    ]
+  },
+  {
+    "entity": "projects.task_depends_on",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "task_identifier", "type": "entity_reference", "target": "projects.task"},
+      {"field": "subject", "type": "text", "form_read_only": true, "copy_from": ["task_identifier", "subject"], "copy_only_when_empty": true},
+      {"field": "project", "type": "text", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "projects.task_type",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "projects_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "projects_user", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["create", "delete", "read", "write"]}
+    ],
+    "fields": [
+      {"field": "weight", "type": "decimal", "nonnegative": true},
+      {"field": "description", "type": "text"}
+    ]
+  },
+  {
+    "entity": "projects.timesheet",
+    "kind": "independent_record",
+    "posting_lifecycle": true,
+    "import_supported": true,
+    "grants": [
+      {"role": "projects_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "manufacturing_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "employee", "level": 0, "allows": ["create", "read", "write"]},
+      {"role": "accounts_user", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "read", "report", "submit", "write"]},
+      {"role": "accounts_user", "level": 1, "allows": ["read", "write"]},
+      {"role": "human_resources_user", "level": 0, "allows": ["amend", "cancel", "create", "email", "export", "print", "read", "report", "share", "submit", "write"]},
+      {"role": "human_resources_manager", "level": 0, "allows": ["amend", "cancel", "create", "delete", "email", "export", "print", "read", "report", "share", "submit", "write"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "form_hidden": true, "omit_on_copy": true, "editable_after_posting": true},
+      {"field": "numbering_series", "type": "enumeration", "required": true, "write_once": true, "values": ["timesheet numbering prefix + four-digit year + configured sequence"]},
+      {"field": "company_identifier", "type": "entity_reference", "target": "organization.company"},
+      {"field": "sales_invoice_identifier", "type": "entity_reference", "target": "accounting.sales_invoice", "form_read_only": true, "omit_on_copy": true},
+      {"field": "status", "type": "enumeration", "form_read_only": true, "omit_on_copy": true, "values": ["Draft", "Submitted", "Partially Billed", "Billed", "Payslip", "Completed", "Cancelled"], "default": "Draft"},
+      {"field": "employee_identifier", "type": "entity_reference", "target": "organization.employee"},
+      {"field": "employee_name", "type": "short_text", "form_read_only": true, "copy_from": ["employee_identifier", "employee_name"], "visible_when": ["field_has_value", "employee_identifier"]},
+      {"field": "department_identifier", "type": "entity_reference", "target": "organization.department", "form_read_only": true, "copy_from": ["employee_identifier", "department_identifier"]},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "form_read_only": true},
+      {"field": "start_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "end_date", "type": "calendar_date", "form_read_only": true},
+      {"field": "time_logs_rows", "type": "owned_collection", "target": "projects.timesheet_detail", "required": true},
+      {"field": "total_hours", "type": "decimal", "form_read_only": true, "editable_after_posting": true, "default": "0"},
+      {"field": "total_billable_hours", "type": "decimal", "form_read_only": true, "editable_after_posting": true},
+      {"field": "total_billed_hours", "type": "decimal", "form_read_only": true, "editable_after_posting": true},
+      {"field": "total_costing_amount", "type": "monetary_amount", "form_read_only": true, "editable_after_posting": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "total_billable_amount", "type": "monetary_amount", "form_read_only": true, "editable_after_posting": true, "default": "0", "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "total_billed_amount", "type": "monetary_amount", "form_read_only": true, "editable_after_posting": true, "currency": {"record_or_parent_field": "currency_identifier"}},
+      {"field": "billed_percentage", "type": "percentage", "form_read_only": true, "omit_on_copy": true, "editable_after_posting": true},
+      {"field": "note", "type": "formatted_text"},
+      {"field": "superseded_document_identifier", "type": "entity_reference", "target": "projects.timesheet", "form_read_only": true, "omit_on_copy": true, "omit_target_user_filter": true},
+      {"field": "parent_project_identifier", "type": "entity_reference", "target": "projects.project"},
+      {"field": "customer_identifier", "type": "entity_reference", "target": "sales.customer"},
+      {"field": "currency_identifier", "type": "entity_reference", "target": "geography.currency", "copy_from": ["customer_identifier", "default_currency_identifier"], "copy_only_when_empty": true},
+      {"field": "company_currency_total_costing_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "company_currency_total_billable_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "company_currency_total_billed_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "exchange_rate", "type": "decimal", "default": "1"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Employee Detail"},
+      {"control": "section", "purpose": "Billing Details"},
+      {"control": "tab", "purpose": "Billing"}
+    ]
+  },
+  {
+    "entity": "projects.timesheet_detail",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "activity_type_identifier", "type": "entity_reference", "target": "projects.activity_type"},
+      {"field": "from_time", "type": "date_and_time"},
+      {"field": "expected_hours", "type": "decimal"},
+      {"field": "hours", "type": "decimal"},
+      {"field": "to_time", "type": "date_and_time"},
+      {"field": "completed", "type": "boolean", "default": "0"},
+      {"field": "project_identifier", "type": "entity_reference", "target": "projects.project", "read_only_when": ["member", ["context", "owning_record"], "parent_project"]},
+      {"field": "task_identifier", "type": "entity_reference", "target": "projects.task"},
+      {"field": "billing_hours", "type": "decimal", "access_level": 1, "visible_when": ["field_has_value", "is_billable"]},
+      {"field": "billing_rate", "type": "monetary_amount", "access_level": 1, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "billing_amount", "type": "monetary_amount", "form_read_only": true, "access_level": 1, "default": "0", "currency": {"record_or_parent_field": "currency"}},
+      {"field": "costing_rate", "type": "monetary_amount", "access_level": 1, "currency": {"record_or_parent_field": "currency"}},
+      {"field": "costing_amount", "type": "monetary_amount", "form_read_only": true, "access_level": 1, "default": "0", "currency": {"record_or_parent_field": "currency"}},
+      {"field": "sales_invoice_identifier", "type": "entity_reference", "target": "accounting.sales_invoice", "form_read_only": true, "omit_on_copy": true, "editable_after_posting": true},
+      {"field": "is_billable", "type": "boolean", "default": "0"},
+      {"field": "project_name", "type": "short_text", "form_read_only": true, "copy_from": ["project_identifier", "project_name"]},
+      {"field": "description", "type": "text"},
+      {"field": "company_currency_billing_rate", "type": "monetary_amount", "form_read_only": true},
+      {"field": "company_currency_billing_amount", "type": "monetary_amount", "form_read_only": true},
+      {"field": "company_currency_costing_rate", "type": "monetary_amount", "form_read_only": true},
+      {"field": "company_currency_costing_amount", "type": "monetary_amount", "form_read_only": true}
+    ],
+    "presentation": [
+      {"control": "section", "visible_when": ["field_has_value", "is_billable"]}
+    ]
+  }
+]

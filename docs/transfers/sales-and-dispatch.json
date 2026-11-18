@@ -1,0 +1,612 @@
+[
+  {
+    "name": "Dispatch stock from a customer invoice",
+    "source": "accounting.sales_invoice",
+    "destination": "inventory.delivery_note",
+    "decision": "Select rows with invoiced quantity above delivered quantity. Exclude supplier-delivered rows, inward-subcontract rows and rows already referring to a delivery line. Calculate remaining stock units as remaining invoice units times conversion factor. Calculate transaction and company amounts with their respective rates.",
+    "calculated_after_mapping": [
+      {
+        "target_entity": "inventory.delivery_note_item",
+        "target_field": "quantity",
+        "rule": "Invoiced quantity less delivered quantity."
+      },
+      {
+        "target_entity": "inventory.delivery_note_item",
+        "target_field": "stock_quantity",
+        "rule": "Remaining invoice quantity × invoice row conversion factor."
+      },
+      {
+        "target_entity": "inventory.delivery_note_item",
+        "target_field": "company_currency_amount",
+        "rule": "Remaining invoice quantity × company-currency invoice unit rate."
+      }
+    ],
+    "record_mappings": [
+      {
+        "source_entity": "accounting.sales_invoice",
+        "target_entity": "inventory.delivery_note",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.sales_invoice_item",
+        "target_entity": "inventory.delivery_note_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "sales_invoice_line"
+          ],
+          [
+            "owning_record_identifier",
+            "against_sales_invoice_identifier"
+          ],
+          [
+            "serial_number",
+            "serial_number"
+          ],
+          [
+            "sales_order_identifier",
+            "against_sales_order_identifier"
+          ],
+          [
+            "sales_order_line",
+            "sales_order_line"
+          ],
+          [
+            "cost_center_identifier",
+            "cost_center_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.sales_taxes_and_charges",
+        "target_entity": "accounting.sales_taxes_and_charges",
+        "collection_policy": "Reset destination collection before copying selected source rows."
+      },
+      {
+        "source_entity": "sales.sales_team",
+        "target_entity": "sales.sales_team",
+        "explicit_field_transfers": [
+          [
+            "incentives",
+            "incentives"
+          ]
+        ],
+        "collection_policy": "Only add rows when the destination collection is empty."
+      }
+    ]
+  },
+  {
+    "name": "Commit a customer quotation to an order",
+    "source": "sales.quotation",
+    "destination": "sales.sales_order",
+    "decision": "Resolve the customer for the quotation party. Exclude unselected alternatives by default and honour explicit row selection. The permitted open quantity and any unit-price-only lines determine order rows. Recalculate stock units and retain applicable blanket price terms, sales partner and commission context.",
+    "record_mappings": [
+      {
+        "source_entity": "sales.quotation",
+        "target_entity": "sales.sales_order",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "excluded_from_default_copy": [
+          "payment_terms_template_identifier"
+        ]
+      },
+      {
+        "source_entity": "sales.quotation_item",
+        "target_entity": "sales.sales_order_item",
+        "explicit_field_transfers": [
+          [
+            "owning_record_identifier",
+            "prevdoc_record_identifier"
+          ],
+          [
+            "record_identifier",
+            "quotation_item"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.sales_taxes_and_charges",
+        "target_entity": "accounting.sales_taxes_and_charges",
+        "collection_policy": "Reset destination collection before copying selected source rows."
+      },
+      {
+        "source_entity": "sales.sales_team",
+        "target_entity": "sales.sales_team",
+        "collection_policy": "Only add rows when the destination collection is empty."
+      }
+    ]
+  },
+  {
+    "name": "Bill a customer quotation directly",
+    "source": "sales.quotation",
+    "destination": "accounting.sales_invoice",
+    "decision": "Resolve the customer and map selected ordinary product rows. Alternative quotation rows are excluded. Calculate stock-unit quantity as quoted quantity times its conversion factor. Currency, tax and billing rules belong to the invoice.",
+    "record_mappings": [
+      {
+        "source_entity": "sales.quotation",
+        "target_entity": "accounting.sales_invoice",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "sales.quotation_item",
+        "target_entity": "accounting.sales_invoice_item"
+      },
+      {
+        "source_entity": "accounting.sales_taxes_and_charges",
+        "target_entity": "accounting.sales_taxes_and_charges",
+        "collection_policy": "Reset destination collection before copying selected source rows."
+      },
+      {
+        "source_entity": "sales.sales_team",
+        "target_entity": "sales.sales_team",
+        "collection_policy": "Only add rows when the destination collection is empty."
+      }
+    ]
+  },
+  {
+    "name": "Dispatch a customer order",
+    "source": "sales.sales_order",
+    "destination": "inventory.delivery_note",
+    "decision": "Exclude supplier-delivered and otherwise ineligible rows. Subtract delivered quantity and quantities already mapped into the current draft. Unit-price-only rows use a row-identity guard. Where physical reservations govern fulfilment, split the source row by its reserved warehouse and convert reserved stock units back to delivery units.",
+    "calculated_after_mapping": [
+      {
+        "target_entity": "inventory.delivery_note_item",
+        "target_field": "quantity",
+        "rule": "For an ordinary line, ordered quantity less delivered quantity less units already mapped from the same source row into the destination."
+      },
+      {
+        "target_entity": "inventory.delivery_note_item",
+        "target_field": "company_currency_amount",
+        "rule": "Remaining units × order row company-currency rate. For a reservation-specific split, re-evaluate the split quantity in its transaction unit."
+      }
+    ],
+    "record_mappings": [
+      {
+        "source_entity": "sales.sales_order",
+        "target_entity": "inventory.delivery_note",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.sales_taxes_and_charges",
+        "target_entity": "accounting.sales_taxes_and_charges",
+        "collection_policy": "Reset destination collection before copying selected source rows."
+      },
+      {
+        "source_entity": "sales.sales_team",
+        "target_entity": "sales.sales_team",
+        "collection_policy": "Only add rows when the destination collection is empty."
+      },
+      {
+        "source_entity": "sales.sales_order_item",
+        "target_entity": "inventory.delivery_note_item",
+        "explicit_field_transfers": [
+          [
+            "rate",
+            "rate"
+          ],
+          [
+            "record_identifier",
+            "sales_order_line"
+          ],
+          [
+            "owning_record_identifier",
+            "against_sales_order_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Bill a customer order",
+    "source": "sales.sales_order",
+    "destination": "accounting.sales_invoice",
+    "decision": "Use the order line's effective returns, delivered units, invoiced quantity, currently mapped quantity and amount tolerance. A quantity-complete but monetarily underbilled row may qualify. Resolve the customer's receivable account, deferred revenue applicability and cost centre. Preserve the difference between a unit-price-only row and a fully billed ordinary row.",
+    "calculated_after_mapping": [
+      {
+        "target_entity": "accounting.sales_invoice_item",
+        "target_field": "company_currency_amount",
+        "rule": "Proposed billable transaction amount × source order exchange rate."
+      },
+      {
+        "target_entity": "accounting.sales_invoice_item",
+        "target_field": "amount",
+        "rule": "When billing by outstanding value, original row amount less effective billed amount."
+      }
+    ],
+    "record_mappings": [
+      {
+        "source_entity": "sales.sales_order",
+        "target_entity": "accounting.sales_invoice",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "party_account_currency_identifier",
+            "party_account_currency_identifier"
+          ]
+        ],
+        "excluded_from_default_copy": [
+          "payment_terms_template_identifier"
+        ]
+      },
+      {
+        "source_entity": "sales.sales_order_item",
+        "target_entity": "accounting.sales_invoice_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "sales_order_line"
+          ],
+          [
+            "owning_record_identifier",
+            "sales_order_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.sales_taxes_and_charges",
+        "target_entity": "accounting.sales_taxes_and_charges",
+        "collection_policy": "Reset destination collection before copying selected source rows."
+      },
+      {
+        "source_entity": "sales.sales_team",
+        "target_entity": "sales.sales_team",
+        "collection_policy": "Only add rows when the destination collection is empty."
+      }
+    ]
+  },
+  {
+    "name": "Pick against a customer order",
+    "source": "sales.sales_order",
+    "destination": "inventory.pick_list",
+    "decision": "Prepare a delivery pick from still-open items and component rows. Use transaction-to-stock conversion. Preserve the original order line and each packed component occurrence to calculate complete bundle quantities even when component identities repeat.",
+    "record_mappings": [
+      {
+        "source_entity": "sales.sales_order",
+        "target_entity": "inventory.pick_list",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "default_warehouse_identifier",
+            "parent_warehouse_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "sales.sales_order_item",
+        "target_entity": "inventory.pick_list_item",
+        "explicit_field_transfers": [
+          [
+            "owning_record_identifier",
+            "sales_order_identifier"
+          ],
+          [
+            "record_identifier",
+            "sales_order_item"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.packed_item",
+        "target_entity": "inventory.pick_list_item",
+        "explicit_field_transfers": [
+          [
+            "owning_record_identifier",
+            "sales_order_identifier"
+          ],
+          [
+            "parent_detail_record_identifier",
+            "sales_order_item"
+          ],
+          [
+            "record_identifier",
+            "product_bundle_item"
+          ]
+        ],
+        "excluded_from_default_copy": [
+          "picked_quantity"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Bill a customer delivery",
+    "source": "inventory.delivery_note",
+    "destination": "accounting.sales_invoice",
+    "decision": "Select still-billable rows with their delivery and sales-order identities. Allow a zero-price or value-completion branch where applicable. Deduct effective returns and already billed or mapped quantities. The invoice extends the billable quantity at the document and company currency rates.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.delivery_note",
+        "target_entity": "accounting.sales_invoice",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "is_return",
+            "is_return"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.delivery_note_item",
+        "target_entity": "accounting.sales_invoice_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "delivery_note_line"
+          ],
+          [
+            "owning_record_identifier",
+            "delivery_note_identifier"
+          ],
+          [
+            "sales_order_line",
+            "sales_order_line"
+          ],
+          [
+            "against_sales_order_identifier",
+            "sales_order_identifier"
+          ],
+          [
+            "cost_center_identifier",
+            "cost_center_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.sales_taxes_and_charges",
+        "target_entity": "accounting.sales_taxes_and_charges"
+      },
+      {
+        "source_entity": "sales.sales_team",
+        "target_entity": "sales.sales_team",
+        "explicit_field_transfers": [
+          [
+            "incentives",
+            "incentives"
+          ]
+        ],
+        "collection_policy": "Only add rows when the destination collection is empty."
+      }
+    ]
+  },
+  {
+    "name": "Attach a delivery to a trip stop",
+    "source": "inventory.delivery_note",
+    "destination": "inventory.delivery_trip",
+    "decision": "Create or extend a delivery trip by adding a stop. A draft delivery is eligible for planning and a cancelled delivery is refused. The stop uses the shipping address in preference to the customer address. Submitting the trip requires its linked deliveries to be submitted.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.delivery_note",
+        "target_entity": "inventory.delivery_stop",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "delivery_note_identifier"
+          ],
+          [
+            "contact_person_identifier",
+            "contact_identifier"
+          ],
+          [
+            "contact_display",
+            "customer_contact"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.delivery_note",
+        "target_entity": "inventory.delivery_trip",
+        "explicit_field_transfers": [
+          [
+            "company_identifier",
+            "company_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Pack a draft delivery",
+    "source": "inventory.delivery_note",
+    "destination": "inventory.packing_slip",
+    "decision": "Require a draft delivery. For ordinary items use delivery quantity less already packed. Where a bundle is active use packed component rows as the source. An active bundle parent is excluded from ordinary packing. Track each delivery or packed row separately for cumulative packing and cancellation.",
+    "calculated_after_mapping": [
+      {
+        "target_entity": "inventory.packing_slip_item",
+        "target_field": "quantity",
+        "rule": "Ordinary row quantity less packed quantity, or the packable component remainder for a product bundle."
+      }
+    ],
+    "record_mappings": [
+      {
+        "source_entity": "inventory.delivery_note",
+        "target_entity": "inventory.packing_slip",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "draft"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "delivery_note_identifier"
+          ],
+          [
+            "letter_head_identifier",
+            "letter_head_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.delivery_note_item",
+        "target_entity": "inventory.packing_slip_item",
+        "explicit_field_transfers": [
+          [
+            "item_identifier",
+            "item_identifier"
+          ],
+          [
+            "item_name",
+            "item_name"
+          ],
+          [
+            "batch_number_identifier",
+            "batch_number_identifier"
+          ],
+          [
+            "description",
+            "description"
+          ],
+          [
+            "quantity",
+            "quantity"
+          ],
+          [
+            "unit_of_measure_identifier",
+            "stock_unit_of_measure_identifier"
+          ],
+          [
+            "record_identifier",
+            "delivery_note_line"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.packed_item",
+        "target_entity": "inventory.packing_slip_item",
+        "explicit_field_transfers": [
+          [
+            "item_identifier",
+            "item_identifier"
+          ],
+          [
+            "item_name",
+            "item_name"
+          ],
+          [
+            "batch_number_identifier",
+            "batch_number_identifier"
+          ],
+          [
+            "description",
+            "description"
+          ],
+          [
+            "quantity",
+            "quantity"
+          ],
+          [
+            "record_identifier",
+            "delivery_note_packed_item_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Prepare a carrier shipment from a delivery",
+    "source": "inventory.delivery_note",
+    "destination": "inventory.shipment",
+    "decision": "Append the delivery to the shipment. Use the dispatching company and selected sender contact at pickup. Prefer the delivery's shipping address for destination, falling back to the customer address. Carrier booking, label issuance and physical delivery are separate events.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.delivery_note",
+        "target_entity": "inventory.shipment",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ],
+          [
+            "is_return",
+            "equals",
+            0
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "grand_total",
+            "value_of_goods"
+          ],
+          [
+            "company_identifier",
+            "pickup_company_identifier"
+          ],
+          [
+            "company_address_identifier",
+            "pickup_address_name_identifier"
+          ],
+          [
+            "company_address_display",
+            "pickup_address"
+          ],
+          [
+            "customer_identifier",
+            "delivery_customer_identifier"
+          ],
+          [
+            "contact_person_identifier",
+            "delivery_contact_name_identifier"
+          ],
+          [
+            "contact_email",
+            "delivery_contact_email"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.delivery_note",
+        "target_entity": "inventory.shipment_delivery_note",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "delivery_note_identifier"
+          ]
+        ]
+      }
+    ]
+  }
+]

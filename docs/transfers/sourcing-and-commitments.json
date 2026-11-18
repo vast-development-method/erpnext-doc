@@ -1,0 +1,680 @@
+[
+  {
+    "name": "Prepare a supplier response to a request for quotation",
+    "source": "procurement.request_for_quotation",
+    "destination": "procurement.supplier_quotation",
+    "decision": "Resolve the responding supplier, use its company-specific account currency unless supplied and apply its buying price list or the buying default. Each offered line retains the request and request-line identity. Portal submission also checks invitee and contact rights before saving a draft.",
+    "record_mappings": [
+      {
+        "source_entity": "procurement.request_for_quotation",
+        "target_entity": "procurement.supplier_quotation",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "opportunity_identifier",
+            "opportunity_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "procurement.request_for_quotation_item",
+        "target_entity": "procurement.supplier_quotation_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "request_for_quotation_item"
+          ],
+          [
+            "owning_record_identifier",
+            "request_for_quotation_identifier"
+          ],
+          [
+            "project_name_identifier",
+            "project_identifier"
+          ],
+          [
+            "cost_center_identifier",
+            "cost_center_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Invite quotations for a supplier's requested products",
+    "source": "inventory.material_request",
+    "destination": "procurement.request_for_quotation",
+    "decision": "Select purchasing requisitions and only product rows included in the supplier item set. Preserve transaction units and the cost centre alongside the original request and row identities.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.material_request",
+        "target_entity": "procurement.request_for_quotation",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ],
+          [
+            "material_request_type",
+            "equals",
+            "Purchase"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.material_request_item",
+        "target_entity": "procurement.request_for_quotation_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "material_request_item"
+          ],
+          [
+            "owning_record_identifier",
+            "material_request_identifier"
+          ],
+          [
+            "unit_of_measure_identifier",
+            "unit_of_measure_identifier"
+          ],
+          [
+            "cost_center_identifier",
+            "cost_center_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Order a supplier quotation",
+    "source": "procurement.supplier_quotation",
+    "destination": "procurement.purchase_order",
+    "decision": "A selected ordinary row contributes the open quantity remaining to order. A unit-price row with zero quoted quantity can also qualify. Exclude a row already mapped into the target. Cap proposed order quantity below at zero and extend it by the source conversion factor for stock quantity. The purchase order has its own transaction date.",
+    "calculated_after_mapping": [
+      {
+        "target_entity": "procurement.purchase_order_item",
+        "target_field": "quantity",
+        "rule": "Maximum of outstanding quoted quantity and zero."
+      },
+      {
+        "target_entity": "procurement.purchase_order_item",
+        "target_field": "stock_quantity",
+        "rule": "New order quantity × original quotation unit factor."
+      }
+    ],
+    "record_mappings": [
+      {
+        "source_entity": "procurement.supplier_quotation",
+        "target_entity": "procurement.purchase_order",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "excluded_from_default_copy": [
+          "transaction_date"
+        ]
+      },
+      {
+        "source_entity": "procurement.supplier_quotation_item",
+        "target_entity": "procurement.purchase_order_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "supplier_quotation_item_identifier"
+          ],
+          [
+            "owning_record_identifier",
+            "supplier_quotation_identifier"
+          ],
+          [
+            "material_request_identifier",
+            "material_request_identifier"
+          ],
+          [
+            "material_request_item",
+            "material_request_item"
+          ],
+          [
+            "sales_order_identifier",
+            "sales_order_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.purchase_taxes_and_charges",
+        "target_entity": "accounting.purchase_taxes_and_charges",
+        "collection_policy": "Reset destination collection before copying selected source rows."
+      }
+    ]
+  },
+  {
+    "name": "Prepare a customer quotation from supplier prices",
+    "source": "procurement.supplier_quotation",
+    "destination": "sales.quotation",
+    "decision": "Keep the supplier quotation as the commercial precursor. When populating an empty destination collection include only products enabled for sale. Remove inapplicable terms as the transaction changes from buying to selling.",
+    "record_mappings": [
+      {
+        "source_entity": "procurement.supplier_quotation",
+        "target_entity": "sales.quotation",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "supplier_quotation_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "procurement.supplier_quotation_item",
+        "target_entity": "sales.quotation_item",
+        "collection_policy": "Only add rows when the destination collection is empty."
+      }
+    ]
+  },
+  {
+    "name": "Open a supplier evaluation period",
+    "source": "procurement.supplier_scorecard",
+    "destination": "procurement.supplier_scorecard_period",
+    "decision": "Capture the supplier scorecard's scoring criteria and their effective measurements on the new period. The period must pass its date overlap, total-weight and score checks before a submitted assessment contributes to supplier standing.",
+    "record_mappings": [
+      {
+        "source_entity": "procurement.supplier_scorecard",
+        "target_entity": "procurement.supplier_scorecard_period"
+      },
+      {
+        "source_entity": "procurement.supplier_scorecard_scoring_criteria",
+        "target_entity": "procurement.supplier_scorecard_scoring_criteria"
+      }
+    ]
+  },
+  {
+    "name": "Source an opportunity through supplier enquiries",
+    "source": "sales_relationships.opportunity",
+    "destination": "procurement.request_for_quotation",
+    "decision": "Calculate the requested product’s unit factor for the enquiry. Keep source context when allocating enquiry lines. Treat additional source-row fields as durable only where present on the saved destination.",
+    "record_mappings": [
+      {
+        "source_entity": "sales_relationships.opportunity",
+        "target_entity": "procurement.request_for_quotation"
+      },
+      {
+        "source_entity": "sales_relationships.opportunity_item",
+        "target_entity": "procurement.request_for_quotation_item",
+        "explicit_field_transfers": [
+          [
+            "unit_of_measure_identifier",
+            "unit_of_measure_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Prepare a supplier offer from an opportunity",
+    "source": "sales_relationships.opportunity",
+    "destination": "procurement.supplier_quotation",
+    "decision": "Connect the supplier offer to the opportunity. The explicitly selected opportunity item unit enters the supplier quotation's stock-unit field. The buyer must still select the supplier and validate the resulting offer.",
+    "record_mappings": [
+      {
+        "source_entity": "sales_relationships.opportunity",
+        "target_entity": "procurement.supplier_quotation",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "opportunity_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "sales_relationships.opportunity_item",
+        "target_entity": "procurement.supplier_quotation_item",
+        "explicit_field_transfers": [
+          [
+            "unit_of_measure_identifier",
+            "stock_unit_of_measure_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Request supply against sales order lines",
+    "source": "sales.sales_order",
+    "destination": "inventory.material_request",
+    "decision": "For ordinary rows subtract requested stock quantity converted to order units and positive delivered quantity. For bundle components subtract requests against the packed row and the positive delivered parent quantity scaled by components per unit. Keep the component identity. Refresh physical stock and price for the destination and remove commercial terms inappropriate to a requisition.",
+    "record_mappings": [
+      {
+        "source_entity": "sales.sales_order",
+        "target_entity": "inventory.material_request",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.packed_item",
+        "target_entity": "inventory.material_request_item",
+        "explicit_field_transfers": [
+          [
+            "owning_record_identifier",
+            "sales_order_identifier"
+          ],
+          [
+            "unit_of_measure_identifier",
+            "stock_unit_of_measure_identifier"
+          ],
+          [
+            "record_identifier",
+            "packed_item"
+          ]
+        ]
+      },
+      {
+        "source_entity": "sales.sales_order_item",
+        "target_entity": "inventory.material_request_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "sales_order_item"
+          ],
+          [
+            "owning_record_identifier",
+            "sales_order_identifier"
+          ],
+          [
+            "delivery_date",
+            "schedule_date"
+          ],
+          [
+            "bill_of_materials_number_identifier",
+            "bill_of_materials_number_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "sales.sales_order",
+        "target_entity": "inventory.material_request_item",
+        "explicit_field_transfers": [
+          [
+            "project_identifier",
+            "project_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Procure outstanding sales-order demand",
+    "source": "sales.sales_order",
+    "destination": "procurement.purchase_order",
+    "decision": "Use the selected supplier's buying currency and an appropriate buying exchange rate. For ordinary rows use their remaining ordering quantities, and for bundle rows use the component still to order. Clear sales discounts, shipping terms and inherited payment schedules. Supplier drop-ship contact and location data apply only to the eligible branch.",
+    "record_mappings": [
+      {
+        "source_entity": "sales.sales_order",
+        "target_entity": "procurement.purchase_order",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "sales.sales_order_item",
+        "target_entity": "procurement.purchase_order_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "sales_order_item"
+          ],
+          [
+            "owning_record_identifier",
+            "sales_order_identifier"
+          ],
+          [
+            "stock_unit_of_measure_identifier",
+            "stock_unit_of_measure_identifier"
+          ],
+          [
+            "unit_of_measure_identifier",
+            "unit_of_measure_identifier"
+          ],
+          [
+            "unit_conversion_factor",
+            "unit_conversion_factor"
+          ],
+          [
+            "delivery_date",
+            "schedule_date"
+          ]
+        ],
+        "excluded_from_default_copy": [
+          "rate",
+          "price_list_rate",
+          "item_tax_template_identifier",
+          "discount_percentage",
+          "discount_amount",
+          "mapped_additional_discount_amount",
+          "pricing_rules",
+          "margin_type",
+          "margin_rate_or_amount"
+        ]
+      },
+      {
+        "source_entity": "inventory.packed_item",
+        "target_entity": "procurement.purchase_order_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "sales_order_packed_item"
+          ],
+          [
+            "owning_record_identifier",
+            "sales_order_identifier"
+          ],
+          [
+            "unit_of_measure_identifier",
+            "unit_of_measure_identifier"
+          ],
+          [
+            "unit_conversion_factor",
+            "unit_conversion_factor"
+          ],
+          [
+            "parent_item_identifier",
+            "product_bundle_identifier"
+          ],
+          [
+            "rate",
+            "rate"
+          ]
+        ],
+        "excluded_from_default_copy": [
+          "price_list_rate",
+          "item_tax_template_identifier",
+          "discount_percentage",
+          "discount_amount",
+          "pricing_rules"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Purchase materials requested by a business unit",
+    "source": "inventory.material_request",
+    "destination": "procurement.purchase_order",
+    "decision": "Require a purchasing or subcontracting request. Select rows whose ordered stock remains below required stock. Supplier and selection filters narrow the eligible set. For subcontracting map the requested item and quantity as finished goods, while ordinary purchasing takes the transaction and stock units. Re-resolve buying prices on the destination.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.material_request",
+        "target_entity": "procurement.purchase_order",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ],
+          [
+            "material_request_type",
+            "one of",
+            [
+              "Purchase",
+              "Subcontracting"
+            ]
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.material_request_item",
+        "target_entity": "procurement.purchase_order_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "material_request_item"
+          ],
+          [
+            "owning_record_identifier",
+            "material_request_identifier"
+          ],
+          [
+            "sales_order_identifier",
+            "sales_order_identifier"
+          ],
+          [
+            "sales_order_item",
+            "sales_order_item"
+          ],
+          [
+            "work_in_progress_composite_asset_identifier",
+            "work_in_progress_composite_asset_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Seek prices for a purchase requisition",
+    "source": "inventory.material_request",
+    "destination": "procurement.request_for_quotation",
+    "decision": "Accept a submitted purchase request. Derive requested transaction units as remaining unordered stock units divided by the target conversion factor. Carry the project, cost centre and source row so that supplier quotations can trace back to the demand.",
+    "calculated_after_mapping": [
+      {
+        "target_entity": "procurement.request_for_quotation_item",
+        "target_field": "quantity",
+        "rule": "Requested stock units less ordered stock units, divided by the destination conversion factor."
+      },
+      {
+        "target_entity": "procurement.request_for_quotation_item",
+        "target_field": "stock_quantity",
+        "rule": "Enquiry quantity × destination conversion factor."
+      }
+    ],
+    "record_mappings": [
+      {
+        "source_entity": "inventory.material_request",
+        "target_entity": "procurement.request_for_quotation",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ],
+          [
+            "material_request_type",
+            "equals",
+            "Purchase"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.material_request_item",
+        "target_entity": "procurement.request_for_quotation_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "material_request_item"
+          ],
+          [
+            "owning_record_identifier",
+            "material_request_identifier"
+          ],
+          [
+            "project_identifier",
+            "project_name_identifier"
+          ],
+          [
+            "cost_center_identifier",
+            "cost_center_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Build a purchase order for a chosen supplier",
+    "source": "inventory.material_request",
+    "destination": "procurement.purchase_order",
+    "decision": "Select eligible requests/items for that supplier and open lines whose ordered quantity is below the request quantity. Set the chosen supplier on the target and resolve delivery dates from its lines.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.material_request",
+        "target_entity": "procurement.purchase_order"
+      },
+      {
+        "source_entity": "inventory.material_request_item",
+        "target_entity": "procurement.purchase_order_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "material_request_item"
+          ],
+          [
+            "owning_record_identifier",
+            "material_request_identifier"
+          ],
+          [
+            "unit_of_measure_identifier",
+            "stock_unit_of_measure_identifier"
+          ],
+          [
+            "unit_of_measure_identifier",
+            "unit_of_measure_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Create a supplier offer for requested goods",
+    "source": "inventory.material_request",
+    "destination": "procurement.supplier_quotation",
+    "decision": "Accept a submitted purchase request and rows whose ordered or received progress is below requested stock quantity. Keep the original demand and any originating sales order available for comparison.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.material_request",
+        "target_entity": "procurement.supplier_quotation",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ],
+          [
+            "material_request_type",
+            "equals",
+            "Purchase"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.material_request_item",
+        "target_entity": "procurement.supplier_quotation_item",
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "material_request_item"
+          ],
+          [
+            "owning_record_identifier",
+            "material_request_identifier"
+          ],
+          [
+            "sales_order_identifier",
+            "sales_order_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Draw against a blanket agreement for sales order",
+    "source": "manufacturing.blanket_order",
+    "destination": "sales.sales_order",
+    "decision": "A selling agreement can produce a customer quotation or sales order. A purchasing agreement can produce a purchase order. Accept a zero-quantity price agreement or a row with a positive remaining quantity. Propose max(agreed less ordered, zero), attach the agreed rate and resolve current product units and descriptions. A customer quotation identifies the agreement customer as its party.",
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.blanket_order",
+        "target_entity": "sales.sales_order"
+      },
+      {
+        "source_entity": "manufacturing.blanket_order_item",
+        "target_entity": "sales.sales_order_item",
+        "explicit_field_transfers": [
+          [
+            "rate",
+            "blanket_order_rate"
+          ],
+          [
+            "owning_record_identifier",
+            "blanket_order_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Draw against a blanket agreement for purchase order",
+    "source": "manufacturing.blanket_order",
+    "destination": "procurement.purchase_order",
+    "decision": "A selling agreement can produce a customer quotation or sales order. A purchasing agreement can produce a purchase order. Accept a zero-quantity price agreement or a row with a positive remaining quantity. Propose max(agreed less ordered, zero), attach the agreed rate and resolve current product units and descriptions. A customer quotation identifies the agreement customer as its party.",
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.blanket_order",
+        "target_entity": "procurement.purchase_order"
+      },
+      {
+        "source_entity": "manufacturing.blanket_order_item",
+        "target_entity": "procurement.purchase_order_item",
+        "explicit_field_transfers": [
+          [
+            "rate",
+            "blanket_order_rate"
+          ],
+          [
+            "owning_record_identifier",
+            "blanket_order_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Draw against a blanket agreement for quotation",
+    "source": "manufacturing.blanket_order",
+    "destination": "sales.quotation",
+    "decision": "A selling agreement can produce a customer quotation or sales order. A purchasing agreement can produce a purchase order. Accept a zero-quantity price agreement or a row with a positive remaining quantity. Propose max(agreed less ordered, zero), attach the agreed rate and resolve current product units and descriptions. A customer quotation identifies the agreement customer as its party.",
+    "record_mappings": [
+      {
+        "source_entity": "manufacturing.blanket_order",
+        "target_entity": "sales.quotation"
+      },
+      {
+        "source_entity": "manufacturing.blanket_order_item",
+        "target_entity": "sales.quotation_item",
+        "explicit_field_transfers": [
+          [
+            "rate",
+            "blanket_order_rate"
+          ],
+          [
+            "owning_record_identifier",
+            "blanket_order_identifier"
+          ]
+        ]
+      }
+    ]
+  }
+]

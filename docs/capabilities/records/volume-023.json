@@ -1,0 +1,1281 @@
+[
+  {
+    "capability": "Gate compliance and discrepancies",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "gate",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "gate_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "location", "value_kind": "reference", "rules": ["required"], "target": "gate_pass_location"},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "allowed_direction", "value_kind": "choice", "choices": ["both", "in", "out"]},
+          {"purpose": "default_security_officer", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "opens_at", "value_kind": "time_of_day"},
+          {"purpose": "closes_at", "value_kind": "time_of_day"},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["gate_pass_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["gate_pass_user", 0, ["read", "report", "print"], false],
+          ["gate_pass_operator", 0, ["read"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "gate_pass",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required"], "choices": ["assigned_sequence_with_year"]},
+          {"purpose": "direction", "value_kind": "choice", "rules": ["required"], "choices": ["in", "out"]},
+          {"purpose": "gate_pass_type", "value_kind": "choice", "rules": ["required"], "choices": ["material", "returnable_material", "non_stock", "visitor", "vehicle_only"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "purpose", "value_kind": "reference", "target": "gate_pass_purpose"},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["draft", "at_gate", "inside", "partially_processed", "completed", "pending_return", "partially_returned", "returned", "overdue_return", "closed", "cancelled"]},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "posting_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "location", "value_kind": "reference", "target": "gate_pass_location"},
+          {"purpose": "gate", "value_kind": "reference", "target": "gate"},
+          {"purpose": "cost_center", "value_kind": "reference", "target": "accounting.cost_center", "binding": "shared_model"},
+          {"purpose": "security_officer", "value_kind": "reference", "target": "organization.employee", "binding": "shared_model"},
+          {"purpose": "security_officer_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "entry_datetime", "value_kind": "date_and_time", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "exit_datetime", "value_kind": "date_and_time", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "turnaround_minutes", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "timestamps_amended", "value_kind": "boolean", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "party_type", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "party", "value_kind": "variable_record_reference", "record_class_field": "party_type"},
+          {"purpose": "party_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "party_display_name", "value_kind": "text"},
+          {"purpose": "address", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "address_display", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "contact_person", "value_kind": "reference", "target": "contacts.contact", "binding": "shared_model"},
+          {"purpose": "contact_mobile", "value_kind": "text"},
+          {"purpose": "reference_number", "value_kind": "text"},
+          {"purpose": "reference_date", "value_kind": "civil_day"},
+          {"purpose": "source_type", "value_kind": "reference", "rules": ["read_only"], "target": "gate_pass_source"},
+          {"purpose": "source_record_class", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "source_document", "value_kind": "variable_record_reference", "rules": ["read_only"], "record_class_field": "source_record_class"},
+          {"purpose": "is_multi_source", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "source_sub_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "source_document_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "tracking_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "vehicle_number", "value_kind": "text"},
+          {"purpose": "vehicle_type", "value_kind": "choice", "choices": ["unselected", "truck", "trailer", "container", "tempo", "car", "two_wheeler", "hand_cart", "courier", "other"]},
+          {"purpose": "transporter", "value_kind": "reference", "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "driver_name", "value_kind": "text"},
+          {"purpose": "driver_contact", "value_kind": "text"},
+          {"purpose": "driver_license", "value_kind": "text"},
+          {"purpose": "lr_number", "value_kind": "text"},
+          {"purpose": "lr_date", "value_kind": "civil_day"},
+          {"purpose": "eway_bill_number", "value_kind": "text"},
+          {"purpose": "gross_weight", "value_kind": "decimal"},
+          {"purpose": "tare_weight", "value_kind": "decimal"},
+          {"purpose": "net_weight", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "weight_unit_of_measure", "value_kind": "reference", "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "items", "value_kind": "owned_rows", "target": "gate_pass_item"},
+          {"purpose": "total_quantity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "total_packages", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "total_accepted_quantity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "total_amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "compliance_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["not_applicable", "pending", "passed", "failed"]},
+          {"purpose": "compliance_checks", "value_kind": "owned_rows", "rules": ["read_only", "hidden_from_form"], "target": "gate_pass_compliance_check"},
+          {"purpose": "compliance_checked_on", "value_kind": "date_and_time", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "compliance_override_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "compliance_override_reason", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "has_discrepancy", "value_kind": "boolean", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "total_shortage_quantity", "value_kind": "decimal", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "total_damaged_quantity", "value_kind": "decimal", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "total_rejected_quantity", "value_kind": "decimal", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "discrepancy_notes", "value_kind": "text", "rules": ["editable_after_submission"]},
+          {"purpose": "discrepancy_photo", "value_kind": "image_reference", "rules": ["editable_after_submission"]},
+          {"purpose": "discrepancy_reported_by", "value_kind": "reference", "rules": ["read_only", "editable_after_submission"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "discrepancy_reported_on", "value_kind": "date_and_time", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "is_returnable", "value_kind": "boolean"},
+          {"purpose": "expected_return_date", "value_kind": "civil_day"},
+          {"purpose": "actual_return_date", "value_kind": "civil_day", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "return_status", "value_kind": "choice", "rules": ["read_only", "editable_after_submission"], "choices": ["not_applicable", "pending", "partially_returned", "returned", "overdue"]},
+          {"purpose": "returned_quantity", "value_kind": "decimal", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "packaging_condition", "value_kind": "choice", "choices": ["unselected", "good", "damaged", "partially_damaged"]},
+          {"purpose": "documentation_status", "value_kind": "choice", "choices": ["unselected", "complete", "incomplete"]},
+          {"purpose": "inspection_remarks", "value_kind": "text"},
+          {"purpose": "documents", "value_kind": "owned_rows", "target": "gate_pass_document"},
+          {"purpose": "vehicle_photo", "value_kind": "image_reference"},
+          {"purpose": "goods_photo", "value_kind": "image_reference"},
+          {"purpose": "document_photo", "value_kind": "image_reference"},
+          {"purpose": "charges", "value_kind": "owned_rows", "target": "gate_pass_charge"},
+          {"purpose": "total_charges", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "processed_quantity", "value_kind": "decimal", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "per_processed", "value_kind": "percentage", "rules": ["read_only", "editable_after_submission"]},
+          {"purpose": "enforcement_mode", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "references", "value_kind": "owned_rows", "rules": ["read_only"], "target": "gate_pass_reference"},
+          {"purpose": "remarks", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only"], "target": "gate_pass"}
+        ],
+        "role_grants": [
+          ["gate_pass_operator", 0, ["read", "write", "create", "submit", "report", "share", "print", "email"], false],
+          ["gate_pass_user", 0, ["read", "write", "create", "submit", "report", "export", "share", "print", "email"], false],
+          ["gate_pass_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false],
+          ["gate_pass_auditor", 0, ["read", "report", "export", "print"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "gate_pass_allowed_party_type",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "party_type", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "gate_pass_charge",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "charge_type", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "is_mandatory", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "amount", "value_kind": "money"},
+          {"purpose": "paid_by", "value_kind": "choice", "choices": ["company", "party", "transporter"]},
+          {"purpose": "remarks", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "gate_pass_charge_type",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "charge_type", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "default_amount", "value_kind": "money"},
+          {"purpose": "is_mandatory", "value_kind": "boolean"},
+          {"purpose": "applies_to_direction", "value_kind": "choice", "choices": ["both", "in", "out"]},
+          {"purpose": "paid_by", "value_kind": "choice", "choices": ["company", "party", "transporter"]},
+          {"purpose": "active_indicator", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "gate_pass_compliance_check",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "label", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "current_status", "value_kind": "choice", "rules": ["read_only"], "choices": ["not_applicable", "not_required", "pending", "generated", "failed", "provider_unavailable"]},
+          {"purpose": "document_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "document_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "check_code", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "message", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "remediation", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "detail_resource_address", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "document_value", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "threshold_amount", "value_kind": "money", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "gate_pass_compliance_rule",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "check_code", "value_kind": "choice", "rules": ["required"], "choices": ["in_e_invoice", "in_e_way_bill"]},
+          {"purpose": "label", "value_kind": "text"},
+          {"purpose": "required_when", "value_kind": "choice", "rules": ["required"], "choices": ["from_provider", "always", "above_threshold", "never"]},
+          {"purpose": "action", "value_kind": "choice", "rules": ["required"], "choices": ["block", "warn", "ignore"]},
+          {"purpose": "threshold_source", "value_kind": "choice", "choices": ["from_provider", "fixed_amount"]},
+          {"purpose": "threshold_amount", "value_kind": "money"},
+          {"purpose": "bypass_roles", "value_kind": "owned_selection_rows", "target": "gate_pass_rule_bypass_role"},
+          {"purpose": "require_override_reason", "value_kind": "boolean"},
+          {"purpose": "recheck_on_submit", "value_kind": "boolean"}
+        ]
+      },
+      {
+        "concept": "gate_pass_discrepancy_reason",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "reason", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "category", "value_kind": "choice", "rules": ["required"], "choices": ["shortage", "damage", "rejection", "documentation", "other"]},
+          {"purpose": "liable_party", "value_kind": "choice", "choices": ["unknown", "supplier", "transporter", "internal", "customer"]},
+          {"purpose": "requires_photo", "value_kind": "boolean"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["gate_pass_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["gate_pass_user", 0, ["read", "report", "print"], false],
+          ["gate_pass_operator", 0, ["read"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "gate_pass_document",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "is_mandatory", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "attachment", "value_kind": "file_reference"},
+          {"purpose": "document_number", "value_kind": "text"},
+          {"purpose": "document_date", "value_kind": "civil_day"},
+          {"purpose": "verified", "value_kind": "boolean"},
+          {"purpose": "remarks", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "gate_pass_event_log",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "gate_pass", "value_kind": "reference", "rules": ["required", "read_only", "indexed_for_search"], "target": "gate_pass"},
+          {"purpose": "event", "value_kind": "choice", "rules": ["required", "read_only"], "choices": ["created", "submitted", "entered", "exited", "target_created", "target_cancelled", "timestamp_amended", "discrepancy_recorded", "return_recorded", "closed", "cancelled", "amended", "rule_warned", "validation_failed", "compliance_overridden", "attachment_removed", "target_creation_failed"]},
+          {"purpose": "event_datetime", "value_kind": "date_and_time", "rules": ["required", "read_only"]},
+          {"purpose": "user", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "reference_name", "value_kind": "variable_record_reference", "rules": ["read_only"], "record_class_field": "reference_record_class"},
+          {"purpose": "rule_code", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "trace_identifier", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "field_changed", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "old_value", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "new_value", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "quantity_delta", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "message", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "reason", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "values_structured_data", "value_kind": "expression_or_structured_text", "rules": ["read_only"]},
+          {"purpose": "error_log", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.error_log", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["gate_pass_manager", 0, ["read", "report", "export", "print"], false],
+          ["gate_pass_auditor", 0, ["read", "report", "export", "print"], false],
+          ["gate_pass_user", 0, ["read", "report"], false],
+          ["system_manager", 0, ["read", "report", "export", "print"], false]
+        ]
+      },
+      {
+        "concept": "gate_pass_field_rule",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document", "value_kind": "choice", "rules": ["required"], "choices": ["gate_pass", "gate_pass_item"]},
+          {"purpose": "field_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "is_mandatory", "value_kind": "boolean"},
+          {"purpose": "is_hidden", "value_kind": "boolean"},
+          {"purpose": "is_read_only", "value_kind": "boolean"},
+          {"purpose": "action", "value_kind": "choice", "choices": ["block", "warn", "ignore"]},
+          {"purpose": "applies_to_direction", "value_kind": "choice", "choices": ["both", "in", "out"]},
+          {"purpose": "applies_to_gate_pass_type", "value_kind": "choice", "choices": ["unselected", "material", "returnable_material", "non_stock", "visitor", "vehicle_only"]},
+          {"purpose": "applies_to_source_type", "value_kind": "reference", "target": "gate_pass_source"},
+          {"purpose": "label", "value_kind": "text"},
+          {"purpose": "default_value", "value_kind": "text"},
+          {"purpose": "depends_on", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "gate_pass_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "product_identifier", "value_kind": "reference", "rules": ["indexed_for_search"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text"},
+          {"purpose": "is_non_stock", "value_kind": "boolean"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "source_quantity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "already_passed_quantity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "pending_quantity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "quantity", "value_kind": "decimal", "rules": ["required", "nonnegative"]},
+          {"purpose": "unit_of_measure", "value_kind": "reference", "rules": ["required"], "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "conversion_factor", "value_kind": "decimal"},
+          {"purpose": "inventory_unit_of_measure", "value_kind": "reference", "rules": ["read_only"], "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "stock_quantity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "accepted_quantity", "value_kind": "decimal", "rules": ["nonnegative"]},
+          {"purpose": "shortage_quantity", "value_kind": "decimal", "rules": ["nonnegative"]},
+          {"purpose": "damaged_quantity", "value_kind": "decimal", "rules": ["nonnegative"]},
+          {"purpose": "rejected_quantity", "value_kind": "decimal", "rules": ["nonnegative"]},
+          {"purpose": "discrepancy_reason", "value_kind": "reference", "target": "gate_pass_discrepancy_reason"},
+          {"purpose": "rejected_warehouse", "value_kind": "reference", "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "warehouse", "value_kind": "reference", "rules": ["read_only"], "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "bill_of_materials", "value_kind": "reference", "target": "manufacturing.bill_of_materials", "binding": "shared_model"},
+          {"purpose": "packages", "value_kind": "whole_number"},
+          {"purpose": "batch_number", "value_kind": "reference", "target": "inventory.batch", "binding": "shared_model"},
+          {"purpose": "serial_number", "value_kind": "text"},
+          {"purpose": "rate", "value_kind": "money"},
+          {"purpose": "amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "source_record_class", "value_kind": "reference", "rules": ["read_only", "hidden_from_form"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "source_document", "value_kind": "variable_record_reference", "rules": ["read_only", "hidden_from_form"], "record_class_field": "source_record_class"},
+          {"purpose": "source_row", "value_kind": "text", "rules": ["read_only", "hidden_from_form", "indexed_for_search"]},
+          {"purpose": "processed_quantity", "value_kind": "decimal", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "returned_quantity", "value_kind": "decimal", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "remarks", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "gate_pass_location",
+        "characteristics": ["hierarchical_record"],
+        "attributes": [
+          {"purpose": "location_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "parent_gate_pass_location", "value_kind": "reference", "rules": ["bypasses_value_selection_restrictions"], "target": "gate_pass_location"},
+          {"purpose": "is_group", "value_kind": "boolean"},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "address", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "hierarchy_left_boundary", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "hierarchy_right_boundary", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "old_parent", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]}
+        ],
+        "role_grants": [
+          ["gate_pass_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["gate_pass_user", 0, ["read", "report", "print"], false],
+          ["gate_pass_operator", 0, ["read"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "gate_pass_purpose",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "purpose", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "applies_to_direction", "value_kind": "choice", "choices": ["both", "in", "out"]},
+          {"purpose": "default_gate_pass_type", "value_kind": "choice", "choices": ["unselected", "material", "returnable_material", "non_stock", "visitor", "vehicle_only"]},
+          {"purpose": "active_indicator", "value_kind": "boolean"},
+          {"purpose": "description", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["gate_pass_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["gate_pass_user", 0, ["read", "report", "print"], false],
+          ["gate_pass_operator", 0, ["read"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "gate_pass_reference",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "reference_name", "value_kind": "variable_record_reference", "rules": ["read_only"], "record_class_field": "reference_record_class"},
+          {"purpose": "quantity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "link_type", "value_kind": "choice", "rules": ["read_only"], "choices": ["target", "return_leg"]},
+          {"purpose": "reference_row", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "target_row", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "created_on", "value_kind": "date_and_time", "rules": ["read_only"]},
+          {"purpose": "created_by", "value_kind": "reference", "rules": ["read_only"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "document_lifecycle_state_snapshot", "value_kind": "whole_number", "rules": ["read_only", "hidden_from_form"]}
+        ]
+      },
+      {
+        "concept": "gate_pass_role",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "role", "value_kind": "reference", "rules": ["required"], "target": "information_management.role", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "gate_pass_rule",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "rule_code", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "rule_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "action", "value_kind": "choice", "rules": ["required"], "choices": ["block", "warn", "ignore"]},
+          {"purpose": "category", "value_kind": "choice", "rules": ["read_only"], "choices": ["document", "party_source", "quantity", "discrepancy", "compliance", "attachments_checks", "lifecycle", "downstream_enforcement"]},
+          {"purpose": "threshold", "value_kind": "decimal"},
+          {"purpose": "applies_to_direction", "value_kind": "choice", "choices": ["both", "in", "out"]},
+          {"purpose": "applies_to_gate_pass_type", "value_kind": "choice", "choices": ["unselected", "material", "returnable_material", "non_stock", "visitor", "vehicle_only"]},
+          {"purpose": "bypass_roles", "value_kind": "owned_selection_rows", "target": "gate_pass_rule_bypass_role"},
+          {"purpose": "require_override_reason", "value_kind": "boolean"},
+          {"purpose": "description", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "message", "value_kind": "text"},
+          {"purpose": "default_action", "value_kind": "text", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "can_ignore", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "is_hard", "value_kind": "boolean", "rules": ["read_only", "hidden_from_form"]}
+        ]
+      },
+      {
+        "concept": "gate_pass_rule_bypass_role",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "role", "value_kind": "reference", "rules": ["required"], "target": "information_management.role", "binding": "shared_model"}
+        ]
+      },
+      {
+        "concept": "gate_pass_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "enforcement_preset", "value_kind": "choice", "choices": ["advisory", "balanced", "strict", "custom"]},
+          {"purpose": "enforce_from_date", "value_kind": "civil_day"},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "numbering_rule", "value_kind": "text"},
+          {"purpose": "separate_series_by_direction", "value_kind": "boolean"},
+          {"purpose": "numbering_rule_in", "value_kind": "text"},
+          {"purpose": "numbering_rule_out", "value_kind": "text"},
+          {"purpose": "allow_backdated", "value_kind": "boolean"},
+          {"purpose": "allow_future_dated", "value_kind": "boolean"},
+          {"purpose": "allowed_party_types", "value_kind": "owned_selection_rows", "target": "gate_pass_allowed_party_type"},
+          {"purpose": "default_party_type", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "allow_gate_pass_without_party", "value_kind": "boolean"},
+          {"purpose": "allow_gate_pass_without_items", "value_kind": "boolean"},
+          {"purpose": "allow_non_stock_items", "value_kind": "boolean"},
+          {"purpose": "hide_fully_passed_documents", "value_kind": "boolean"},
+          {"purpose": "group_by_fields", "value_kind": "text"},
+          {"purpose": "require_location", "value_kind": "boolean"},
+          {"purpose": "require_gate", "value_kind": "boolean"},
+          {"purpose": "require_vehicle", "value_kind": "boolean"},
+          {"purpose": "require_driver", "value_kind": "boolean"},
+          {"purpose": "require_reference_number", "value_kind": "boolean"},
+          {"purpose": "require_packaging_check", "value_kind": "boolean"},
+          {"purpose": "require_documentation_check", "value_kind": "boolean"},
+          {"purpose": "require_vehicle_photo", "value_kind": "boolean"},
+          {"purpose": "enable_returnable", "value_kind": "boolean"},
+          {"purpose": "enable_discrepancy", "value_kind": "boolean"},
+          {"purpose": "enable_compliance_checks", "value_kind": "boolean"},
+          {"purpose": "enable_eway_bill", "value_kind": "boolean"},
+          {"purpose": "enable_charges", "value_kind": "boolean"},
+          {"purpose": "enable_valuation", "value_kind": "boolean"},
+          {"purpose": "enable_weighbridge", "value_kind": "boolean"},
+          {"purpose": "enable_batch_serial", "value_kind": "boolean"},
+          {"purpose": "enable_cost_center", "value_kind": "boolean"},
+          {"purpose": "enable_security_officer", "value_kind": "boolean"},
+          {"purpose": "enable_machine_readable_code_code", "value_kind": "boolean"},
+          {"purpose": "enable_packages", "value_kind": "boolean"},
+          {"purpose": "enable_tracking_identifier", "value_kind": "boolean"},
+          {"purpose": "tracking_identifier_unique", "value_kind": "boolean"},
+          {"purpose": "tracking_identifier_template", "value_kind": "expression_or_structured_text"},
+          {"purpose": "tracking_identifier_inherit_field", "value_kind": "text"},
+          {"purpose": "default_return_days", "value_kind": "whole_number"},
+          {"purpose": "auto_close_on_full_return", "value_kind": "boolean"},
+          {"purpose": "overdue_reminder_days_before", "value_kind": "whole_number"},
+          {"purpose": "overdue_escalation_roles", "value_kind": "owned_selection_rows", "target": "gate_pass_role"},
+          {"purpose": "allow_post_submit_discrepancy", "value_kind": "boolean"},
+          {"purpose": "post_submit_discrepancy_roles", "value_kind": "owned_selection_rows", "target": "gate_pass_role"},
+          {"purpose": "default_rejected_warehouse", "value_kind": "reference", "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "shortage_handling", "value_kind": "choice", "choices": ["not_received", "book_as_rejected"]},
+          {"purpose": "block_on_provider_failure", "value_kind": "boolean"},
+          {"purpose": "compliance_override_roles", "value_kind": "owned_selection_rows", "target": "gate_pass_role"},
+          {"purpose": "show_compliance_on_print", "value_kind": "boolean"},
+          {"purpose": "enable_auto_draft_creation", "value_kind": "boolean"},
+          {"purpose": "auto_draft_notify", "value_kind": "boolean"},
+          {"purpose": "auto_draft_expiry_days", "value_kind": "whole_number"},
+          {"purpose": "cancellation_policy", "value_kind": "choice", "choices": ["block_if_linked_documents_exist", "cascade_cancel_targets", "allow_and_unlink"]},
+          {"purpose": "allow_amend", "value_kind": "boolean"},
+          {"purpose": "lock_attachments_on_submit", "value_kind": "boolean"},
+          {"purpose": "attachment_unlock_roles", "value_kind": "owned_selection_rows", "target": "gate_pass_role"},
+          {"purpose": "timestamp_edit_roles", "value_kind": "owned_selection_rows", "target": "gate_pass_role"},
+          {"purpose": "restrict_by_source_role", "value_kind": "boolean"},
+          {"purpose": "restrict_by_location", "value_kind": "boolean"},
+          {"purpose": "restrict_by_gate", "value_kind": "boolean"},
+          {"purpose": "restrict_by_company", "value_kind": "boolean"},
+          {"purpose": "notify_on_submit", "value_kind": "boolean"},
+          {"purpose": "notify_roles", "value_kind": "owned_selection_rows", "target": "gate_pass_role"},
+          {"purpose": "notify_on_block", "value_kind": "boolean"},
+          {"purpose": "notify_overdue_returns", "value_kind": "boolean"},
+          {"purpose": "email_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "enable_business_messaging", "value_kind": "boolean"},
+          {"purpose": "rules", "value_kind": "owned_rows", "target": "gate_pass_rule"},
+          {"purpose": "field_rules", "value_kind": "owned_rows", "target": "gate_pass_field_rule"},
+          {"purpose": "charge_types", "value_kind": "owned_rows", "target": "gate_pass_charge_type"},
+          {"purpose": "ledger_lock_timeout_seconds", "value_kind": "whole_number"},
+          {"purpose": "log_level", "value_kind": "choice", "choices": ["errors_only", "standard", "verbose"]},
+          {"purpose": "event_log_retention_days", "value_kind": "whole_number"}
+        ],
+        "role_grants": [
+          ["gate_pass_manager", 0, ["read", "write", "report", "share", "print", "email"], false],
+          ["system_manager", 0, ["read", "write", "report", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "gate_pass_source",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "source_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "flow_code", "value_kind": "text", "rules": ["required", "unique", "write_once"]},
+          {"purpose": "button_label", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "direction", "value_kind": "choice", "rules": ["required"], "choices": ["in", "out"]},
+          {"purpose": "sequence", "value_kind": "whole_number"},
+          {"purpose": "is_standard", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "source_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "sub_type", "value_kind": "text"},
+          {"purpose": "source_filters", "value_kind": "expression_or_structured_text"},
+          {"purpose": "allowed_statuses", "value_kind": "text"},
+          {"purpose": "child_table", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "item_field", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "quantity_field", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "consumed_field", "value_kind": "text"},
+          {"purpose": "unit_of_measure_field", "value_kind": "text"},
+          {"purpose": "rate_field", "value_kind": "text"},
+          {"purpose": "warehouse_field", "value_kind": "text"},
+          {"purpose": "bill_of_materials_field", "value_kind": "text"},
+          {"purpose": "pending_formula", "value_kind": "choice", "rules": ["required"], "choices": ["quantity_consumed", "quantity_maximum_received_consumed", "abs_quantity_consumed", "quantity"]},
+          {"purpose": "field_map", "value_kind": "owned_rows", "target": "gate_pass_source_field_map"},
+          {"purpose": "party_type", "value_kind": "choice", "rules": ["required"], "choices": ["supplier", "customer", "company", "from_field"]},
+          {"purpose": "party_field", "value_kind": "text"},
+          {"purpose": "party_filters", "value_kind": "expression_or_structured_text"},
+          {"purpose": "allow_row_selection", "value_kind": "boolean"},
+          {"purpose": "row_columns", "value_kind": "text"},
+          {"purpose": "dialog_fields", "value_kind": "expression_or_structured_text"},
+          {"purpose": "allowed_roles", "value_kind": "owned_selection_rows", "target": "gate_pass_role"},
+          {"purpose": "quantity_policy", "value_kind": "choice", "rules": ["required"], "choices": ["editable", "prefilled_editable", "editable_within_tolerance", "locked_to_source"]},
+          {"purpose": "allow_over_quantity", "value_kind": "boolean"},
+          {"purpose": "over_quantity_allowance_percentage", "value_kind": "percentage"},
+          {"purpose": "allow_zero_quantity_rows", "value_kind": "boolean"},
+          {"purpose": "allow_discrepancy", "value_kind": "boolean"},
+          {"purpose": "target_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "target_creation_mode", "value_kind": "choice", "choices": ["none", "auto_on_submit", "manual_button", "from_target_form"]},
+          {"purpose": "target_mapper", "value_kind": "text"},
+          {"purpose": "copy_attachments_to_target", "value_kind": "boolean"},
+          {"purpose": "enforce_on_target", "value_kind": "choice", "choices": ["not_required", "required", "forbidden"]},
+          {"purpose": "block_native_target_button", "value_kind": "boolean"},
+          {"purpose": "auto_create_draft", "value_kind": "boolean"},
+          {"purpose": "auto_create_assign_to_role", "value_kind": "reference", "target": "information_management.role", "binding": "shared_model"},
+          {"purpose": "auto_create_condition", "value_kind": "expression_or_structured_text"},
+          {"purpose": "checklist", "value_kind": "owned_rows", "target": "gate_pass_source_checklist"},
+          {"purpose": "compliance_rules", "value_kind": "owned_rows", "target": "gate_pass_compliance_rule"},
+          {"purpose": "rule_overrides", "value_kind": "owned_rows", "target": "gate_pass_source_rule_override"},
+          {"purpose": "description", "value_kind": "formatted_text"}
+        ],
+        "role_grants": [
+          ["gate_pass_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["gate_pass_user", 0, ["read"], false],
+          ["gate_pass_operator", 0, ["read"], false],
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "gate_pass_source_checklist",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "document_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "is_mandatory", "value_kind": "boolean"},
+          {"purpose": "action", "value_kind": "choice", "choices": ["block", "warn", "ignore"]},
+          {"purpose": "allow_multiple", "value_kind": "boolean"},
+          {"purpose": "applies_to_direction", "value_kind": "choice", "choices": ["both", "in", "out"]},
+          {"purpose": "description", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "gate_pass_source_field_map",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "level", "value_kind": "choice", "rules": ["required"], "choices": ["header", "row"]},
+          {"purpose": "source_field", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "target_field", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "is_mandatory", "value_kind": "boolean"},
+          {"purpose": "default_value", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "gate_pass_source_rule_override",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "rule_code", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "action", "value_kind": "choice", "rules": ["required"], "choices": ["block", "warn", "ignore"]},
+          {"purpose": "threshold", "value_kind": "decimal"},
+          {"purpose": "require_override_reason", "value_kind": "boolean"}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Gate dispatch and returns",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "gate_pass",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "numbering_rule", "value_kind": "choice", "rules": ["required"], "choices": ["assigned_sequence_of_4_digits"]},
+          {"purpose": "entry_type", "value_kind": "choice", "rules": ["required", "read_only"], "choices": ["unselected", "gate_in", "gate_out"]},
+          {"purpose": "gate_pass_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "gate_pass_time", "value_kind": "time_of_day", "rules": ["read_only"]},
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "document_reference", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "reference_number", "value_kind": "variable_record_reference", "rules": ["required", "editable_after_submission"], "record_class_field": "document_reference"},
+          {"purpose": "manual_return_flow", "value_kind": "boolean"},
+          {"purpose": "outbound_material_transfer", "value_kind": "reference", "rules": ["editable_after_submission", "indexed_for_search"], "target": "inventory.stock_entry", "binding": "shared_model"},
+          {"purpose": "return_material_transfer", "value_kind": "reference", "rules": ["editable_after_submission", "indexed_for_search"], "target": "inventory.stock_entry", "binding": "shared_model"},
+          {"purpose": "supplier", "value_kind": "reference", "rules": ["read_only"], "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "supplier_delivery_note", "value_kind": "text"},
+          {"purpose": "address_display", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "vehicle_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "driver_name", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "driver_contact", "value_kind": "telephone_number"},
+          {"purpose": "security_guard_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "gate_entry_date", "value_kind": "civil_day", "rules": ["read_only"]},
+          {"purpose": "gate_entry_time", "value_kind": "time_of_day", "rules": ["read_only"]},
+          {"purpose": "e_invoice_status", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "e_invoice_reference", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "e_waybill_status", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "e_waybill_number", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "gate_pass_table", "value_kind": "owned_rows", "rules": ["hidden_from_form"], "target": "gate_pass_table"},
+          {"purpose": "has_discrepancy", "value_kind": "boolean"},
+          {"purpose": "lost_quantity", "value_kind": "decimal"},
+          {"purpose": "damaged_quantity", "value_kind": "decimal"},
+          {"purpose": "discrepancy_notes", "value_kind": "text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "gate_pass"},
+          {"purpose": "purchase_receipt", "value_kind": "reference", "rules": ["read_only", "editable_after_submission", "indexed_for_search"], "target": "inventory.purchase_receipt", "binding": "shared_model"},
+          {"purpose": "subcontracting_receipt", "value_kind": "reference", "rules": ["read_only", "editable_after_submission", "indexed_for_search"], "target": "subcontracting.subcontracting_receipt", "binding": "shared_model"},
+          {"purpose": "stock_entry", "value_kind": "reference", "rules": ["read_only", "editable_after_submission", "indexed_for_search"], "target": "inventory.stock_entry", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["select", "read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "gate_pass_table",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "product_identifier", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "description", "value_kind": "formatted_text"},
+          {"purpose": "unit_of_measure", "value_kind": "reference", "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "ordered_quantity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "received_quantity", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "dispatched_quantity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "pending_quantity", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "is_rate_contract", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "rate", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "amount", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "inventory_unit_of_measure", "value_kind": "reference", "rules": ["read_only"], "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "conversion_factor", "value_kind": "decimal", "rules": ["read_only"]},
+          {"purpose": "warehouse", "value_kind": "reference", "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "rejected_warehouse", "value_kind": "reference", "target": "inventory.warehouse", "binding": "shared_model"},
+          {"purpose": "expense_account", "value_kind": "reference", "target": "accounting.account", "binding": "shared_model"},
+          {"purpose": "cost_center", "value_kind": "reference", "target": "accounting.cost_center", "binding": "shared_model"},
+          {"purpose": "project", "value_kind": "reference", "target": "projects.project", "binding": "shared_model"},
+          {"purpose": "schedule_date", "value_kind": "civil_day"},
+          {"purpose": "bill_of_materials", "value_kind": "reference", "rules": ["read_only"], "target": "manufacturing.bill_of_materials", "binding": "shared_model"},
+          {"purpose": "include_exploded_items", "value_kind": "boolean", "rules": ["read_only"]},
+          {"purpose": "order_item_name", "value_kind": "text", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "gate_pass_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "gate_pass_type", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "gate_pass_details", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "German accounting export",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "german_accounting_exchange_settings",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "client", "value_kind": "reference", "rules": ["required", "unique"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "client_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "consultant", "value_kind": "reference", "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "consultant_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "account_number_length", "value_kind": "whole_number", "rules": ["required"]},
+          {"purpose": "temporary_against_account_number", "value_kind": "text", "rules": ["required", "available_in_short_form"]},
+          {"purpose": "opening_against_account_number", "value_kind": "text"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["accounts_user", 0, ["read", "create", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "hosted_accounting_exchange_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "enabled", "value_kind": "boolean"},
+          {"purpose": "german_accounting_exchange_voucher_configuration", "value_kind": "owned_rows", "target": "german_accounting_exchange_voucher_configuration"},
+          {"purpose": "sender", "value_kind": "reference", "target": "mail.email_account", "binding": "shared_model"},
+          {"purpose": "default_print_language", "value_kind": "reference", "target": "information_management.language", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "german_accounting_exchange_voucher_configuration",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "voucher_type", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "print_format", "value_kind": "reference", "target": "document_output.print_format", "binding": "shared_model"},
+          {"purpose": "recipient", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "attach_print", "value_kind": "boolean"},
+          {"purpose": "attach_files", "value_kind": "boolean"},
+          {"purpose": "filters", "value_kind": "expression_or_structured_text", "rules": ["read_only", "hidden_from_form"]}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Group appointments and availability",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "appointment_group",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "members", "value_kind": "owned_rows", "rules": ["required"], "target": "members"},
+          {"purpose": "duration_for_event", "value_kind": "elapsed_time", "rules": ["required"]},
+          {"purpose": "inbound_event_notification", "value_kind": "text"},
+          {"purpose": "group_name", "value_kind": "text", "rules": ["required", "unique"]},
+          {"purpose": "minimum_notice_before_event", "value_kind": "whole_number"},
+          {"purpose": "event_availability_window", "value_kind": "text"},
+          {"purpose": "limit_booking_frequency", "value_kind": "whole_number"},
+          {"purpose": "minimum_buffer_time", "value_kind": "elapsed_time"},
+          {"purpose": "meet_link", "value_kind": "text"},
+          {"purpose": "response_email_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "event_creator", "value_kind": "reference", "rules": ["required"], "target": "service_integrations.hosted_personal_productivity_calendar", "binding": "shared_model"},
+          {"purpose": "schedule_only_once", "value_kind": "boolean"},
+          {"purpose": "event_organizer", "value_kind": "reference", "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "email_address_to_send", "value_kind": "text"},
+          {"purpose": "minimum_slot_threshold", "value_kind": "whole_number"},
+          {"purpose": "send_email_alerts", "value_kind": "boolean"},
+          {"purpose": "available_slots_data", "value_kind": "structured_value", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "slots_data_updated_at", "value_kind": "date_and_time", "rules": ["read_only", "hidden_from_form"]},
+          {"purpose": "linked_record_class", "value_kind": "reference", "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "meet_provider", "value_kind": "choice", "choices": ["none", "custom", "video_conference", "workspace_service_meet"]},
+          {"purpose": "availability_email_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "allow_rescheduling", "value_kind": "boolean"},
+          {"purpose": "minimum_notice_for_reschedule", "value_kind": "whole_number", "rules": ["nonnegative"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["desk_user", 0, ["read", "write", "create", "delete", "report", "share", "print", "email"], true]
+        ]
+      },
+      {
+        "concept": "appointment_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "default_personal_email_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "default_group_email_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "default_availability_alerts_email_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"},
+          {"purpose": "enable_video_conference", "value_kind": "boolean"},
+          {"purpose": "video_conference_account_identifier", "value_kind": "text"},
+          {"purpose": "video_conference_client_identifier", "value_kind": "text"},
+          {"purpose": "video_conference_client_secret", "value_kind": "protected_text"},
+          {"purpose": "video_conference_access_token", "value_kind": "protected_text", "rules": ["hidden_from_form"]},
+          {"purpose": "personal_organisers_email_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "appointment_slot_duration",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "duration", "value_kind": "elapsed_time", "rules": ["required"]},
+          {"purpose": "minimum_buffer_time", "value_kind": "elapsed_time"},
+          {"purpose": "availability_window", "value_kind": "whole_number"},
+          {"purpose": "limit_booking_frequency", "value_kind": "whole_number"},
+          {"purpose": "title", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "minimum_notice_before_event", "value_kind": "whole_number"},
+          {"purpose": "allow_rescheduling", "value_kind": "boolean"},
+          {"purpose": "minimum_notice_for_reschedule", "value_kind": "whole_number", "rules": ["nonnegative"]}
+        ]
+      },
+      {
+        "concept": "appointment_time_slot",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "day", "value_kind": "choice", "rules": ["required"], "choices": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]},
+          {"purpose": "start_time", "value_kind": "time_of_day", "rules": ["required"]},
+          {"purpose": "end_time", "value_kind": "time_of_day", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "event_record_class_link",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "reference_record_class", "value_kind": "reference", "rules": ["required"], "target": "information_management.entity_type", "binding": "shared_model"},
+          {"purpose": "reference_record_identifier", "value_kind": "variable_record_reference", "rules": ["required"], "record_class_field": "reference_record_class"},
+          {"purpose": "event_record_class_link_value", "value_kind": "text"}
+        ]
+      },
+      {
+        "concept": "members",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required"], "target": "user_appointment_availability"},
+          {"purpose": "is_mandatory", "value_kind": "boolean", "rules": ["required"]}
+        ]
+      },
+      {
+        "concept": "user_appointment_availability",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "user", "value_kind": "reference", "rules": ["required", "unique"], "target": "information_management.user", "binding": "shared_model"},
+          {"purpose": "appointment_time_slot", "value_kind": "owned_rows", "target": "appointment_time_slot"},
+          {"purpose": "external_calendar", "value_kind": "reference", "rules": ["required"], "target": "service_integrations.hosted_personal_productivity_calendar", "binding": "shared_model"},
+          {"purpose": "enable_scheduling", "value_kind": "boolean"},
+          {"purpose": "slug", "value_kind": "text"},
+          {"purpose": "off_message", "value_kind": "text", "rules": ["hidden_from_form"]},
+          {"purpose": "available_durations", "value_kind": "owned_rows", "target": "appointment_slot_duration"},
+          {"purpose": "meeting_provider", "value_kind": "choice", "choices": ["none", "custom", "video_conference", "workspace_service_meet"]},
+          {"purpose": "meeting_link", "value_kind": "text"},
+          {"purpose": "response_email_template", "value_kind": "reference", "target": "mail.email_template", "binding": "shared_model"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false],
+          ["desk_user", 0, ["select", "read", "write", "create", "delete", "report", "export", "share", "print", "email"], true],
+          ["desk_user", 0, ["select"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Holiday calendars",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "country_holiday",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "country", "value_kind": "reference", "rules": ["required", "read_only"], "target": "geography.country", "binding": "shared_model"},
+          {"purpose": "year", "value_kind": "whole_number", "rules": ["read_only"]},
+          {"purpose": "applicable_date", "value_kind": "civil_day", "rules": ["required", "read_only"]},
+          {"purpose": "day", "value_kind": "choice", "rules": ["read_only"], "choices": ["unselected", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]},
+          {"purpose": "description", "value_kind": "text", "rules": ["required", "read_only"]},
+          {"purpose": "holiday_type", "value_kind": "reference", "rules": ["required", "read_only"], "target": "holiday_type"}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "holiday_type",
+        "characteristics": [],
+        "attributes": [
+          {"purpose": "title", "value_kind": "text", "rules": ["required", "unique"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "report", "export", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Holiday calendars",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "holiday_list", "purpose": "add_country_specific_holidays_field_group", "value_kind": "field_group", "placement": "get_weekly_off_dates"},
+      {"on": "holiday_list", "purpose": "country", "value_kind": "reference", "placement": "add_country_specific_holidays_field_group"},
+      {"on": "holiday_list", "purpose": "holiday_type", "value_kind": "reference", "placement": "country"},
+      {"on": "holiday_list", "purpose": "add_country_holidays", "value_kind": "action_control", "placement": "holiday_type"}
+    ]
+  },
+  {
+    "capability": "Image-to-address transcription",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "image_text_capture_integration",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "image_text_capture_settings",
+        "characteristics": ["one_configuration_record"],
+        "attributes": [
+          {"purpose": "hosted_language_model_text_generation_service_key", "value_kind": "protected_text", "rules": ["required"]},
+          {"purpose": "vision_client_email", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "vision_project_identifier", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "vision_token_resource_identifier", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "vision_private_key", "value_kind": "long_text", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "share", "print", "email"], false]
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Image-to-address transcription",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "contact", "purpose": "upload_image", "value_kind": "image_reference", "placement": "contact_section"},
+      {"on": "lead", "purpose": "upload_business_card", "value_kind": "image_reference", "placement": "numbering_rule"}
+    ]
+  },
+  {
+    "capability": "Import letters of credit",
+    "configuration": 1,
+    "entity_contracts": [
+      {
+        "concept": "import_letter_of_credit",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "company", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "date_of_issue", "value_kind": "civil_day"},
+          {"purpose": "date_and_place_of_expiry", "value_kind": "civil_day"},
+          {"purpose": "beneficiary", "value_kind": "reference", "rules": ["required"], "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "issuing_bank", "value_kind": "reference", "rules": ["required"], "target": "accounting.bank", "binding": "shared_model"},
+          {"purpose": "beneficiary_bank", "value_kind": "reference", "rules": ["required"], "target": "accounting.bank", "binding": "shared_model"},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["required"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "form_of_documentary_credit", "value_kind": "choice", "choices": ["unselected", "revocable", "irrevocable", "standby", "irrevocable_transferable", "irrevocable_standby", "irrevocable_trans_standby"]},
+          {"purpose": "applicable_rules", "value_kind": "choice", "choices": ["unselected", "ucp_latest_version", "ucp_600", "eucp_latest_version", "eucp_2_0", "isp_latest_version", "urdg_latest_version", "othr"]},
+          {"purpose": "drafts_at", "value_kind": "reference", "target": "accounting.payment_term", "binding": "shared_model"},
+          {"purpose": "port_of_loading", "value_kind": "text"},
+          {"purpose": "place_of_taking_in_charge", "value_kind": "text"},
+          {"purpose": "latest_date_of_shipment", "value_kind": "civil_day"},
+          {"purpose": "transshipment", "value_kind": "choice", "choices": ["unselected", "allowed", "not_allowed"]},
+          {"purpose": "items", "value_kind": "owned_rows", "rules": ["required"], "target": "import_letter_of_credit_item"},
+          {"purpose": "documents_required", "value_kind": "formatted_text"},
+          {"purpose": "additional_conditions", "value_kind": "formatted_text"},
+          {"purpose": "instructions_to_bank", "value_kind": "formatted_text"},
+          {"purpose": "sender_to_receiver_information", "value_kind": "formatted_text"},
+          {"purpose": "narrative", "value_kind": "formatted_text"},
+          {"purpose": "charges", "value_kind": "text"},
+          {"purpose": "period_for_presentation", "value_kind": "text"},
+          {"purpose": "confirmation_instructions", "value_kind": "choice", "choices": ["unselected", "without", "may_add", "confirm"]},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "import_letter_of_credit"},
+          {"purpose": "applicant", "value_kind": "reference", "rules": ["required"], "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "percentage_credit_amount_tolerance", "value_kind": "text"},
+          {"purpose": "partial_shipments", "value_kind": "choice", "choices": ["unselected", "allowed", "not_allowed"]},
+          {"purpose": "letter_of_credit_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "available_with", "value_kind": "text"},
+          {"purpose": "applicant_address", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "beneficiary_address", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "incoterm", "value_kind": "reference", "target": "organization.incoterm", "binding": "shared_model"},
+          {"purpose": "mode_of_transport", "value_kind": "choice", "choices": ["unselected", "sea", "air", "road", "rail", "multimodal"]},
+          {"purpose": "final_destination", "value_kind": "text"},
+          {"purpose": "proforma_invoice", "value_kind": "reference", "rules": ["required"], "target": "proforma_invoice"},
+          {"purpose": "purchase_order", "value_kind": "reference", "target": "procurement.purchase_order", "binding": "shared_model"},
+          {"purpose": "letter_of_credit_margin", "value_kind": "percentage", "rules": ["required", "nonnegative"]},
+          {"purpose": "total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "base_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "grand_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "company_currency_grand_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "rounded_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "base_rounded_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "in_words", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "base_in_words", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "conversion_rate", "value_kind": "decimal"},
+          {"purpose": "total_quantity", "value_kind": "decimal", "rules": ["read_only"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "import_letter_of_credit_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "product_identifier", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "brand", "value_kind": "reference", "target": "organization.brand", "binding": "shared_model"},
+          {"purpose": "harmonized_commodity_code", "value_kind": "text"},
+          {"purpose": "quantity", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "unit_of_measure", "value_kind": "reference", "rules": ["required"], "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "rate", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "base_rate", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "base_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "packing_type", "value_kind": "text"},
+          {"purpose": "packing_details", "value_kind": "text"},
+          {"purpose": "total_quantity", "value_kind": "decimal"},
+          {"purpose": "total_volume_weight", "value_kind": "decimal"},
+          {"purpose": "rate_per_carton", "value_kind": "money"},
+          {"purpose": "total_amount_usd", "value_kind": "money", "rules": ["read_only"]}
+        ]
+      },
+      {
+        "concept": "proforma_invoice",
+        "characteristics": ["supports_submission"],
+        "attributes": [
+          {"purpose": "purchase_invoice_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "purchase_invoice_date", "value_kind": "civil_day", "rules": ["required"]},
+          {"purpose": "purchase_invoice_validity_date", "value_kind": "civil_day"},
+          {"purpose": "supplier", "value_kind": "reference", "rules": ["required"], "target": "procurement.supplier", "binding": "shared_model"},
+          {"purpose": "supplier_name", "value_kind": "text"},
+          {"purpose": "supplier_address", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "address_display", "value_kind": "text"},
+          {"purpose": "supplier_contact", "value_kind": "reference", "target": "contacts.contact", "binding": "shared_model"},
+          {"purpose": "supplier_phone_number", "value_kind": "text"},
+          {"purpose": "supplier_email", "value_kind": "text"},
+          {"purpose": "bank_address", "value_kind": "text"},
+          {"purpose": "account_number_international_bank_account_number", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "swift_code", "value_kind": "text", "rules": ["required"]},
+          {"purpose": "buyer", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "buyer_name", "value_kind": "text"},
+          {"purpose": "buyer_address", "value_kind": "reference", "target": "contacts.address", "binding": "shared_model"},
+          {"purpose": "buyer_address_display", "value_kind": "text"},
+          {"purpose": "buyer_contact", "value_kind": "reference", "target": "contacts.contact", "binding": "shared_model"},
+          {"purpose": "buyer_phone_number", "value_kind": "text"},
+          {"purpose": "buyer_email", "value_kind": "text"},
+          {"purpose": "currency", "value_kind": "reference", "rules": ["required"], "target": "geography.currency", "binding": "shared_model"},
+          {"purpose": "conversion_rate", "value_kind": "decimal"},
+          {"purpose": "payment_terms", "value_kind": "reference", "rules": ["required"], "target": "accounting.payment_term", "binding": "shared_model"},
+          {"purpose": "incoterm", "value_kind": "reference", "target": "organization.incoterm", "binding": "shared_model"},
+          {"purpose": "delivery_terms", "value_kind": "text"},
+          {"purpose": "port_of_loading", "value_kind": "text"},
+          {"purpose": "port_of_discharge", "value_kind": "text"},
+          {"purpose": "country_of_final_destination", "value_kind": "reference", "target": "geography.country", "binding": "shared_model"},
+          {"purpose": "mode_of_transport", "value_kind": "choice", "choices": ["unselected", "sea", "air", "road", "rail", "multimodal"]},
+          {"purpose": "transshipment", "value_kind": "choice", "choices": ["unselected", "allowed", "not_allowed"]},
+          {"purpose": "partial_shipment", "value_kind": "choice", "choices": ["unselected", "allowed", "not_allowed"]},
+          {"purpose": "purchase_order", "value_kind": "reference", "target": "procurement.purchase_order", "binding": "shared_model"},
+          {"purpose": "items", "value_kind": "owned_rows", "rules": ["required"], "target": "proforma_invoice_item"},
+          {"purpose": "total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "base_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "grand_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "company_currency_grand_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "rounded_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "base_rounded_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "in_words", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "base_in_words", "value_kind": "text", "rules": ["read_only"]},
+          {"purpose": "terms_and_conditions", "value_kind": "reference", "target": "organization.terms_and_conditions", "binding": "shared_model"},
+          {"purpose": "terms", "value_kind": "formatted_text"},
+          {"purpose": "amended_from", "value_kind": "reference", "rules": ["read_only", "indexed_for_search"], "target": "proforma_invoice"},
+          {"purpose": "bank", "value_kind": "reference", "rules": ["required"], "target": "accounting.bank", "binding": "shared_model"},
+          {"purpose": "company", "value_kind": "reference", "target": "organization.company", "binding": "shared_model"},
+          {"purpose": "posting_date", "value_kind": "civil_day", "rules": ["required"]}
+        ],
+        "role_grants": [
+          ["system_manager", 0, ["read", "write", "create", "delete", "submit", "report", "export", "share", "print", "email"], false]
+        ]
+      },
+      {
+        "concept": "proforma_invoice_item",
+        "characteristics": ["owned_row"],
+        "attributes": [
+          {"purpose": "product_identifier", "value_kind": "reference", "rules": ["required"], "target": "inventory.item", "binding": "shared_model"},
+          {"purpose": "item_name", "value_kind": "text"},
+          {"purpose": "description", "value_kind": "text"},
+          {"purpose": "brand", "value_kind": "reference", "target": "organization.brand", "binding": "shared_model"},
+          {"purpose": "harmonized_commodity_code", "value_kind": "text"},
+          {"purpose": "quantity", "value_kind": "decimal", "rules": ["required"]},
+          {"purpose": "unit_of_measure", "value_kind": "reference", "rules": ["required"], "target": "organization.unit_of_measure", "binding": "shared_model"},
+          {"purpose": "rate", "value_kind": "money", "rules": ["required"]},
+          {"purpose": "base_rate", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "base_total", "value_kind": "money", "rules": ["read_only"]},
+          {"purpose": "packing_type", "value_kind": "text"},
+          {"purpose": "packing_details", "value_kind": "text"},
+          {"purpose": "total_quantity", "value_kind": "decimal"},
+          {"purpose": "total_volume_weight", "value_kind": "decimal"},
+          {"purpose": "rate_per_carton", "value_kind": "money"},
+          {"purpose": "total_amount_usd", "value_kind": "money", "rules": ["read_only"]}
+        ]
+      }
+    ]
+  },
+  {
+    "capability": "Import letters of credit",
+    "configuration": 1,
+    "additional_fields": [
+      {"on": "journal_entry", "purpose": "import_letter_of_credit", "value_kind": "reference", "placement": "reversal_of"},
+      {"on": "journal_entry", "purpose": "import_letter_of_credit_amount", "value_kind": "money", "placement": "import_letter_of_credit"},
+      {"on": "journal_entry", "purpose": "letter_of_credit_margin", "value_kind": "percentage", "placement": "tax_withholding_category"},
+      {"on": "journal_entry", "purpose": "letter_of_credit_margin_amount", "value_kind": "money", "placement": "letter_of_credit_margin", "rules": ["read_only"]},
+      {"on": "landed_cost_voucher", "purpose": "letter_of_credit_number", "value_kind": "text", "placement": "import_letter_of_credit"},
+      {"on": "landed_cost_voucher", "purpose": "import_letter_of_credit", "value_kind": "reference", "placement": "posting_date"},
+      {"on": "supplier_invoice", "purpose": "account_number_international_bank_account_number", "value_kind": "text", "placement": "field_column_for_account_number_international_bank_account_number"},
+      {"on": "supplier_invoice", "purpose": "bank", "value_kind": "reference", "placement": "supplier_bank_information_field_group"},
+      {"on": "supplier_invoice", "purpose": "bank_address", "value_kind": "text", "placement": "account_number_international_bank_account_number"},
+      {"on": "supplier_invoice", "purpose": "buyer", "value_kind": "reference", "placement": "field_group_for_buyer"},
+      {"on": "supplier_invoice", "purpose": "buyer_address", "value_kind": "reference", "placement": "field_column_for_buyer_address"},
+      {"on": "supplier_invoice", "purpose": "field_group_for_buyer", "value_kind": "field_group", "placement": "address_and_contact_tab"},
+      {"on": "supplier_invoice", "purpose": "buyer_contact", "value_kind": "reference", "placement": "buyer_name"},
+      {"on": "supplier_invoice", "purpose": "buyer_email", "value_kind": "text", "placement": "buyer_phone_number"},
+      {"on": "supplier_invoice", "purpose": "buyer_full_address", "value_kind": "text", "placement": "buyer_address"},
+      {"on": "supplier_invoice", "purpose": "buyer_name", "value_kind": "text", "placement": "buyer"},
+      {"on": "supplier_invoice", "purpose": "buyer_phone_number", "value_kind": "text", "placement": "buyer_contact"},
+      {"on": "supplier_invoice", "purpose": "field_column_for_account_number_international_bank_account_number", "value_kind": "field_column", "placement": "swift_code"},
+      {"on": "supplier_invoice", "purpose": "field_column_for_country_of_final_destination", "value_kind": "field_column", "placement": "shipment_deadline"},
+      {"on": "supplier_invoice", "purpose": "field_column_for_buyer_address", "value_kind": "field_column", "placement": "buyer_email"},
+      {"on": "supplier_invoice", "purpose": "field_column_for_purchase_invoice_date", "value_kind": "field_column", "placement": "purchase_invoice_number"},
+      {"on": "supplier_invoice", "purpose": "field_column_for_partial_shipment", "value_kind": "field_column", "placement": "mode_of_transport"},
+      {"on": "supplier_invoice", "purpose": "field_column_for_delivery_terms", "value_kind": "field_column", "placement": "tolerance_on_total_purchase_invoice_value"},
+      {"on": "supplier_invoice", "purpose": "country_of_final_destination", "value_kind": "reference", "placement": "field_column_for_country_of_final_destination"},
+      {"on": "supplier_invoice", "purpose": "delivery_terms", "value_kind": "text", "placement": "field_column_for_delivery_terms"},
+      {"on": "supplier_invoice", "purpose": "import_letter_of_credit", "value_kind": "reference", "placement": "apply_tax_deducted_at_source"},
+      {"on": "supplier_invoice", "purpose": "page_group_after_supplied_items", "value_kind": "page_group", "placement": "supplied_items"},
+      {"on": "supplier_invoice", "purpose": "letter_of_credit_number", "value_kind": "text", "placement": "import_letter_of_credit", "rules": ["read_only"]},
+      {"on": "supplier_invoice", "purpose": "mode_of_transport", "value_kind": "choice", "placement": "country_of_final_destination"},
+      {"on": "supplier_invoice", "purpose": "partial_shipment", "value_kind": "choice", "placement": "field_column_for_partial_shipment"},
+      {"on": "supplier_invoice", "purpose": "payment_terms", "value_kind": "reference", "placement": "trade_commercial_details_field_group"},
+      {"on": "supplier_invoice", "purpose": "purchase_invoice_date", "value_kind": "civil_day", "placement": "field_column_for_purchase_invoice_date", "rules": ["read_only"]},
+      {"on": "supplier_invoice", "purpose": "purchase_invoice_number", "value_kind": "text", "placement": "proforma_invoice", "rules": ["read_only"]},
+      {"on": "supplier_invoice", "purpose": "port_of_loading", "value_kind": "text", "placement": "shipment_details_field_group"},
+      {"on": "supplier_invoice", "purpose": "proforma_invoice", "value_kind": "reference", "placement": "field_group_for_proforma_invoice"},
+      {"on": "supplier_invoice", "purpose": "purchase_type", "value_kind": "choice", "placement": "numbering_rule", "rules": ["required"]},
+      {"on": "supplier_invoice", "purpose": "field_group_for_proforma_invoice", "value_kind": "field_group", "placement": "page_group_after_supplied_items"},
+      {"on": "supplier_invoice", "purpose": "shipment_deadline", "value_kind": "civil_day", "placement": "port_of_loading"},
+      {"on": "supplier_invoice", "purpose": "shipment_details_field_group", "value_kind": "field_group", "placement": "delivery_terms"},
+      {"on": "supplier_invoice", "purpose": "supplier_bank_information_field_group", "value_kind": "field_group", "placement": "purchase_invoice_date"},
+      {"on": "supplier_invoice", "purpose": "swift_code", "value_kind": "text", "placement": "bank"},
+      {"on": "supplier_invoice", "purpose": "tolerance_on_total_purchase_invoice_value", "value_kind": "decimal", "placement": "payment_terms"},
+      {"on": "supplier_invoice", "purpose": "trade_commercial_details_field_group", "value_kind": "field_group", "placement": "bank_address"},
+      {"on": "supplier_invoice", "purpose": "transshipment", "value_kind": "choice", "placement": "partial_shipment"},
+      {"on": "supplier_invoice_item", "purpose": "col_break_import_item_field_column", "value_kind": "field_column", "placement": "total_quantity"},
+      {"on": "supplier_invoice_item", "purpose": "country_of_origin", "value_kind": "reference", "placement": "harmonized_commodity_code"},
+      {"on": "supplier_invoice_item", "purpose": "harmonized_commodity_code", "value_kind": "text", "placement": "section_import_item_details_field_group"},
+      {"on": "supplier_invoice_item", "purpose": "packing_type", "value_kind": "text", "placement": "country_of_origin"},
+      {"on": "supplier_invoice_item", "purpose": "rate_per_carton", "value_kind": "money", "placement": "total_volume_weight"},
+      {"on": "supplier_invoice_item", "purpose": "section_import_item_details_field_group", "value_kind": "field_group", "placement": "item_name"},
+      {"on": "supplier_invoice_item", "purpose": "total_amount_usd", "value_kind": "money", "placement": "rate_per_carton", "rules": ["read_only"]},
+      {"on": "supplier_invoice_item", "purpose": "total_quantity", "value_kind": "decimal", "placement": "packing_type"},
+      {"on": "supplier_invoice_item", "purpose": "total_volume_weight", "value_kind": "decimal", "placement": "col_break_import_item_field_column"},
+      {"on": "purchase_order", "purpose": "account_number_international_bank_account_number", "value_kind": "text", "placement": "col_bank_1_field_column"},
+      {"on": "purchase_order", "purpose": "bank", "value_kind": "reference", "placement": "field_group_for_bank"},
+      {"on": "purchase_order", "purpose": "bank_address", "value_kind": "text", "placement": "account_number_international_bank_account_number"},
+      {"on": "purchase_order", "purpose": "field_group_for_bank", "value_kind": "field_group", "placement": "letter_of_credit_number"},
+      {"on": "purchase_order", "purpose": "buyer", "value_kind": "reference", "placement": "field_group_for_buyer"},
+      {"on": "purchase_order", "purpose": "buyer_full_address", "value_kind": "text", "placement": "buyer_address"},
+      {"on": "purchase_order", "purpose": "buyer_email", "value_kind": "text", "placement": "buyer_phone_number"},
+      {"on": "purchase_order", "purpose": "field_group_for_buyer", "value_kind": "field_group", "placement": "address_and_contact_tab"},
+      {"on": "purchase_order", "purpose": "buyer_name", "value_kind": "text", "placement": "buyer"},
+      {"on": "purchase_order", "purpose": "buyer_phone_number", "value_kind": "text", "placement": "buyer_contact"},
+      {"on": "purchase_order", "purpose": "col_bank_1_field_column", "value_kind": "field_column", "placement": "swift_code"},
+      {"on": "purchase_order", "purpose": "col_break_import_1_field_column", "value_kind": "field_column", "placement": "import_letter_of_credit"},
+      {"on": "purchase_order", "purpose": "col_buyer_1_field_column", "value_kind": "field_column", "placement": "buyer_email"},
+      {"on": "purchase_order", "purpose": "col_shipment_1_field_column", "value_kind": "field_column", "placement": "shipment_deadline"},
+      {"on": "purchase_order", "purpose": "col_shipment_2_field_column", "value_kind": "field_column", "placement": "mode_of_transport"},
+      {"on": "purchase_order", "purpose": "col_trade_1_field_column", "value_kind": "field_column", "placement": "tolerance_percent"},
+      {"on": "purchase_order", "purpose": "country_of_final_destination", "value_kind": "reference", "placement": "col_shipment_1_field_column"},
+      {"on": "purchase_order", "purpose": "buyer_address", "value_kind": "reference", "placement": "col_buyer_1_field_column"},
+      {"on": "purchase_order", "purpose": "buyer_contact", "value_kind": "reference", "placement": "buyer_name"},
+      {"on": "purchase_order", "purpose": "import_letter_of_credit", "value_kind": "reference", "placement": "field_group_for_import_letter_of_credit", "rules": ["editable_after_submission"]},
+      {"on": "purchase_order", "purpose": "letter_of_credit_number", "value_kind": "text", "placement": "col_break_import_1_field_column", "rules": ["editable_after_submission"]},
+      {"on": "purchase_order", "purpose": "payment_terms", "value_kind": "reference", "placement": "field_group_for_payment_terms"},
+      {"on": "purchase_order", "purpose": "delivery_terms", "value_kind": "text", "placement": "col_trade_1_field_column"},
+      {"on": "purchase_order", "purpose": "page_group_after_item_wise_tax_details", "value_kind": "page_group", "placement": "item_wise_tax_details"},
+      {"on": "purchase_order", "purpose": "mode_of_transport", "value_kind": "choice", "placement": "country_of_final_destination"},
+      {"on": "purchase_order", "purpose": "partial_shipment", "value_kind": "choice", "placement": "transshipment"},
+      {"on": "purchase_order", "purpose": "port_of_loading", "value_kind": "text", "placement": "field_group_for_port_of_loading"},
+      {"on": "purchase_order", "purpose": "purchase_type", "value_kind": "choice", "placement": "numbering_rule"},
+      {"on": "purchase_order", "purpose": "field_group_for_import_letter_of_credit", "value_kind": "field_group", "placement": "page_group_after_item_wise_tax_details"},
+      {"on": "purchase_order", "purpose": "shipment_deadline", "value_kind": "civil_day", "placement": "port_of_loading"},
+      {"on": "purchase_order", "purpose": "field_group_for_port_of_loading", "value_kind": "field_group", "placement": "delivery_terms"},
+      {"on": "purchase_order", "purpose": "swift_code", "value_kind": "text", "placement": "bank"},
+      {"on": "purchase_order", "purpose": "field_group_for_payment_terms", "value_kind": "field_group", "placement": "bank_address"},
+      {"on": "purchase_order", "purpose": "transshipment", "value_kind": "choice", "placement": "col_shipment_2_field_column"},
+      {"on": "purchase_order_item", "purpose": "harmonized_commodity_code", "value_kind": "text", "placement": "item_group"},
+      {"on": "purchase_receipt", "purpose": "account_number_international_bank_account_number", "value_kind": "text", "placement": "field_column_for_account_number_international_bank_account_number"},
+      {"on": "purchase_receipt", "purpose": "bank", "value_kind": "reference", "placement": "supplier_bank_information_field_group"},
+      {"on": "purchase_receipt", "purpose": "bank_address", "value_kind": "text", "placement": "account_number_international_bank_account_number"},
+      {"on": "purchase_receipt", "purpose": "buyer", "value_kind": "reference", "placement": "field_group_for_buyer"},
+      {"on": "purchase_receipt", "purpose": "buyer_address", "value_kind": "reference", "placement": "field_column_for_buyer_address"},
+      {"on": "purchase_receipt", "purpose": "field_group_for_buyer", "value_kind": "field_group", "placement": "address_and_contact_tab"},
+      {"on": "purchase_receipt", "purpose": "buyer_contact", "value_kind": "reference", "placement": "buyer_name"},
+      {"on": "purchase_receipt", "purpose": "buyer_email", "value_kind": "text", "placement": "buyer_phone_number"},
+      {"on": "purchase_receipt", "purpose": "buyer_full_address", "value_kind": "text", "placement": "buyer_address"},
+      {"on": "purchase_receipt", "purpose": "buyer_name", "value_kind": "text", "placement": "buyer"},
+      {"on": "purchase_receipt", "purpose": "buyer_phone_number", "value_kind": "text", "placement": "buyer_contact"},
+      {"on": "purchase_receipt", "purpose": "field_column_for_account_number_international_bank_account_number", "value_kind": "field_column", "placement": "swift_code"},
+      {"on": "purchase_receipt", "purpose": "field_column_for_transshipment", "value_kind": "field_column", "placement": "mode_of_transport"},
+      {"on": "purchase_receipt", "purpose": "field_column_for_country_of_final_destination", "value_kind": "field_column", "placement": "shipment_deadline"},
+      {"on": "purchase_receipt", "purpose": "field_column_for_delivery_terms", "value_kind": "field_column", "placement": "tolerance_on_total_purchase_invoice_value"},
+      {"on": "purchase_receipt", "purpose": "country_of_final_destination", "value_kind": "reference", "placement": "field_column_for_country_of_final_destination"},
+      {"on": "purchase_receipt", "purpose": "field_column_for_buyer_address", "value_kind": "field_column", "placement": "buyer_email"},
+      {"on": "purchase_receipt", "purpose": "delivery_terms", "value_kind": "text", "placement": "field_column_for_delivery_terms"},
+      {"on": "purchase_receipt", "purpose": "import_letter_of_credit", "value_kind": "reference", "placement": "set_posting_time"},
+      {"on": "purchase_receipt", "purpose": "page_group_after_supplied_items", "value_kind": "page_group", "placement": "supplied_items"},
+      {"on": "purchase_receipt", "purpose": "letter_of_credit_number", "value_kind": "text", "placement": "import_letter_of_credit"},
+      {"on": "purchase_receipt", "purpose": "mode_of_transport", "value_kind": "choice", "placement": "country_of_final_destination"},
+      {"on": "purchase_receipt", "purpose": "partial_shipment", "value_kind": "choice", "placement": "transshipment"},
+      {"on": "purchase_receipt", "purpose": "payment_terms", "value_kind": "reference", "placement": "trade_commercial_details_field_group"},
+      {"on": "purchase_receipt", "purpose": "port_of_loading", "value_kind": "text", "placement": "shipment_details_field_group"},
+      {"on": "purchase_receipt", "purpose": "supplier_invoice", "value_kind": "reference", "placement": "return_against"},
+      {"on": "purchase_receipt", "purpose": "purchase_type", "value_kind": "choice", "placement": "numbering_rule", "rules": ["required"]},
+      {"on": "purchase_receipt", "purpose": "shipment_deadline", "value_kind": "civil_day", "placement": "port_of_loading"},
+      {"on": "purchase_receipt", "purpose": "shipment_details_field_group", "value_kind": "field_group", "placement": "delivery_terms"},
+      {"on": "purchase_receipt", "purpose": "supplier_bank_information_field_group", "value_kind": "field_group", "placement": "page_group_after_supplied_items"},
+      {"on": "purchase_receipt", "purpose": "swift_code", "value_kind": "text", "placement": "bank"},
+      {"on": "purchase_receipt", "purpose": "tolerance_on_total_purchase_invoice_value", "value_kind": "decimal", "placement": "payment_terms"},
+      {"on": "purchase_receipt", "purpose": "trade_commercial_details_field_group", "value_kind": "field_group", "placement": "bank_address"},
+      {"on": "purchase_receipt", "purpose": "transshipment", "value_kind": "choice", "placement": "field_column_for_transshipment"},
+      {"on": "purchase_receipt_item", "purpose": "col_break_import_item_field_column", "value_kind": "field_column", "placement": "packing_type"},
+      {"on": "purchase_receipt_item", "purpose": "country_of_origin", "value_kind": "reference", "placement": "harmonized_commodity_code"},
+      {"on": "purchase_receipt_item", "purpose": "harmonized_commodity_code", "value_kind": "text", "placement": "section_import_item_details_field_group"},
+      {"on": "purchase_receipt_item", "purpose": "packing_type", "value_kind": "text", "placement": "country_of_origin"},
+      {"on": "purchase_receipt_item", "purpose": "rate_per_carton", "value_kind": "money", "placement": "total_volume_weight"},
+      {"on": "purchase_receipt_item", "purpose": "section_import_item_details_field_group", "value_kind": "field_group", "placement": "image_view"},
+      {"on": "purchase_receipt_item", "purpose": "total_volume_weight", "value_kind": "decimal", "placement": "col_break_import_item_field_column"}
+    ]
+  },
+  {
+    "capability": "Import letters of credit",
+    "configuration": 1,
+    "additional_role_grants": [
+      ["purchase_order", "import_letter_of_credit_user", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share"], false],
+      ["supplier_invoice", "import_letter_of_credit_user", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export"], false],
+      ["proforma_invoice", "import_letter_of_credit_user", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print"], false],
+      ["import_letter_of_credit", "import_letter_of_credit_user", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print"], false],
+      ["journal_entry", "import_letter_of_credit_user", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print"], false],
+      ["purchase_receipt", "import_letter_of_credit_user", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share"], false],
+      ["landed_cost_voucher", "import_letter_of_credit_user", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "share", "print"], false],
+      ["purchase_order", "import_letter_of_credit_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "import", "print"], false],
+      ["supplier_invoice", "import_letter_of_credit_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "import", "share", "print"], false],
+      ["proforma_invoice", "import_letter_of_credit_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print"], false],
+      ["import_letter_of_credit", "import_letter_of_credit_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print"], false],
+      ["journal_entry", "import_letter_of_credit_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "import", "share", "print"], false],
+      ["purchase_receipt", "import_letter_of_credit_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print"], false],
+      ["landed_cost_voucher", "import_letter_of_credit_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export"], false],
+      ["payment_entry", "import_letter_of_credit_user", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "export"], false],
+      ["payment_entry", "import_letter_of_credit_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "report", "export", "print"], false],
+      ["material_request", "import_letter_of_credit_user", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "export"], false],
+      ["material_request", "import_letter_of_credit_manager", 0, ["read", "write", "create", "delete", "submit", "cancel", "amend", "export"], false]
+    ]
+  },
+  {
+    "capability": "Import letters of credit",
+    "configuration": 1,
+    "rule_addresses": [
+      ["journal_entry", "voucher_type", "options", null],
+      ["journal_entry", null, "field_order", "text"],
+      ["journal_entry", "numbering_rule", "options", "text"],
+      ["journal_entry", null, "field_order", "text"],
+      ["journal_entry", "voucher_type", "options", null],
+      ["landed_cost_voucher", null, "field_order", "text"],
+      ["supplier_invoice", "accounting_dimensions_section", "hidden", "boolean"],
+      ["supplier_invoice", "base_rounded_total", "hidden", "boolean"],
+      ["supplier_invoice", "base_rounded_total", "print_hide", "boolean"],
+      ["supplier_invoice", "disable_rounded_total", "default", "text"],
+      ["supplier_invoice", "in_words", "hidden", "boolean"],
+      ["supplier_invoice", "in_words", "print_hide", "boolean"],
+      ["supplier_invoice", null, "default_print_format", "reference"],
+      ["supplier_invoice", null, "field_order", "text"],
+      ["supplier_invoice", "numbering_rule", "options", "choice"],
+      ["supplier_invoice", "rounded_total", "hidden", "boolean"],
+      ["supplier_invoice", "rounded_total", "print_hide", "boolean"],
+      ["supplier_invoice", "scan_barcode", "hidden", "boolean"],
+      ["supplier_invoice", "subscription_section", "hidden", "boolean"],
+      ["supplier_invoice_item", "accounting_dimensions_section", "hidden", "boolean"],
+      ["supplier_invoice_item", "from_warehouse", "hidden", "boolean"],
+      ["supplier_invoice_item", null, "field_order", "text"],
+      ["purchase_order", "accounting_dimensions_section", "hidden", "boolean"],
+      ["purchase_order", "base_rounded_total", "hidden", "boolean"],
+      ["purchase_order", "base_rounded_total", "print_hide", "boolean"],
+      ["purchase_order", "disable_rounded_total", "default", "text"],
+      ["purchase_order", "in_words", "hidden", "boolean"],
+      ["purchase_order", "in_words", "print_hide", "boolean"],
+      ["purchase_order", null, "default_print_format", "reference"],
+      ["purchase_order", null, "field_order", "text"],
+      ["purchase_order", "numbering_rule", "options", "text"],
+      ["purchase_order", "rounded_total", "hidden", "boolean"],
+      ["purchase_order", "rounded_total", "print_hide", "boolean"],
+      ["purchase_order", "scan_barcode", "hidden", "boolean"],
+      ["purchase_order_item", "accounting_dimensions_section", "hidden", "boolean"],
+      ["purchase_order_item", null, "field_order", "text"],
+      ["purchase_receipt", "accounting_dimensions_section", "hidden", "boolean"],
+      ["purchase_receipt", "base_rounded_total", "hidden", "boolean"],
+      ["purchase_receipt", "base_rounded_total", "print_hide", "boolean"],
+      ["purchase_receipt", "disable_rounded_total", "default", "text"],
+      ["purchase_receipt", "in_words", "hidden", "boolean"],
+      ["purchase_receipt", "in_words", "print_hide", "boolean"],
+      ["purchase_receipt", null, "field_order", "text"],
+      ["purchase_receipt", "numbering_rule", "options", "text"],
+      ["purchase_receipt", "provisional_expense_account", "hidden", "boolean"],
+      ["purchase_receipt", "rounded_total", "hidden", "boolean"],
+      ["purchase_receipt", "rounded_total", "print_hide", "boolean"],
+      ["purchase_receipt", "scan_barcode", "hidden", "boolean"],
+      ["purchase_receipt_item", "accounting_dimensions_section", "hidden", "boolean"],
+      ["purchase_receipt_item", "barcode", "hidden", "boolean"],
+      ["purchase_receipt_item", "from_warehouse", "hidden", "boolean"],
+      ["purchase_receipt_item", null, "field_order", "text"],
+      ["purchase_taxes_and_charges", "accounting_dimensions_section", "hidden", "boolean"]
+    ]
+  }
+]

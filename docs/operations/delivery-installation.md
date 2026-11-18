@@ -1,0 +1,14 @@
+# Installing delivered goods at a customer
+
+An installation note records service performed on a customer's delivered goods. It has company, customer, installation date and optional time, customer address/contact, optional project, status and at least one installation row. Each linked row identifies the delivery and its exact child row, product, quantity and applicable serial identities. Recording installation changes service progress. The earlier delivery already carries custody, stock cost and commercial progress.
+
+| Action | Eligibility and result |
+|---|---|
+| Prepare from a delivery | Require a submitted delivery. Generate a row only when delivered quantity minus effective returned quantity exceeds quantity already installed. Proposed quantity is that remaining difference, in the original delivery unit. Where the delivery row has an explicit serial list, omit returned serials from the proposal. |
+| Save a draft | Require at least one installation row. Each supplied delivery detail must belong to the named submitted delivery. Customer and company must match the note and product must match the linked line. The installation date may equal the delivery posting date but cannot precede it. Repeated references to one delivery row remain distinct installation details with one cumulative ceiling. |
+| Submit | Recheck current delivery and net quantity. Serialized products require serials. A nonserial product rejects a nonempty serial list. Supplied serials must exist, agree with product and quantity and, where the delivery row has its serial list, be members of that list. Update the delivery row's installed quantity, the delivery's installation percentage and its installation status. Mark the installation submitted. |
+| Cancel | Remove the note's effective contribution from the linked delivery progress, recompute the header and mark the note cancelled. Cancellation remains possible when a subsequent goods return would preclude a *new* installation. A return and an installation cancellation each retain their own event identity. |
+
+For a delivery of five units followed by a return of two, the first installation proposal is three. Once two have been installed, the next proposal is one. A draft for five created before a full return can no longer submit. A nonstock product line is also subject to the installation quantity ceiling. If two customers received the same product, substituting the other customer's delivery row fails even when quantities and dates would otherwise fit.
+
+The sales operator role may create, submit, cancel and amend installation notes under its company and record grants. Read-only service or reporting access cannot change delivered quantities. Labor billing, replacement parts, warranty claims and follow-up visits each require their own authorised records. An installation is not an implicit second invoice or stock issue.

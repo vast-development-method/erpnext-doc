@@ -1,0 +1,194 @@
+[
+  {
+    "entity": "application_design.application_design_assistant_message",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "studio_user", "level": 0, "allows": ["create", "delete", "read", "write"]}
+    ],
+    "fields": [
+      {"field": "session_identifier", "type": "entity_reference", "target": "application_design.application_design_assistant_session", "required": true, "searchable": true},
+      {"field": "role", "type": "enumeration", "required": true, "values": ["user", "assistant"]},
+      {"field": "message_type", "type": "enumeration", "values": ["chat", "clarification", "status"], "default": "chat"},
+      {"field": "status", "type": "short_text"},
+      {"field": "content", "type": "long_text"},
+      {"field": "task_type", "type": "short_text"},
+      {"field": "component_identifier", "type": "short_text"},
+      {"field": "metadata_structured_data", "type": "long_text"}
+    ]
+  },
+  {
+    "entity": "application_design.application_design_assistant_session",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "studio_user", "level": 0, "allows": ["create", "delete", "read", "write"]}
+    ],
+    "fields": [
+      {"field": "page_identifier", "type": "entity_reference", "target": "application_design.studio_page", "required": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true},
+      {"field": "selected_model", "type": "short_text"},
+      {"field": "last_task_type", "type": "short_text"},
+      {"field": "is_running", "type": "boolean", "default": "0"},
+      {"field": "last_interaction_on", "type": "date_and_time", "form_read_only": true}
+    ]
+  },
+  {
+    "entity": "application_design.studio_application",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "studio_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "route", "type": "short_text"},
+      {"field": "application_home_identifier", "type": "entity_reference", "target": "application_design.studio_page"},
+      {"field": "favicon", "type": "image_file_reference"},
+      {"field": "application_name", "type": "short_text", "unique": true},
+      {"field": "application_title", "type": "short_text", "required": true},
+      {"field": "is_standard", "type": "boolean", "default": "0"},
+      {"field": "application_application", "type": "enumeration", "visible_when": ["field_has_value", "is_standard"], "required_when": ["field_has_value", "is_standard"]},
+      {"field": "folder_name", "type": "short_text", "computed": true, "form_read_only": true, "form_hidden": true}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Export"}
+    ]
+  },
+  {
+    "entity": "application_design.studio_application_file",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "studio_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "studio_application_identifier", "type": "entity_reference", "target": "application_design.studio_application", "required": true, "searchable": true},
+      {"field": "file_path", "type": "short_text", "required": true, "maximum_length": 255},
+      {"field": "content", "type": "expression_or_structured_text"}
+    ]
+  },
+  {
+    "entity": "application_design.studio_component",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "studio_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "component_name", "type": "short_text"},
+      {"field": "component_identifier", "type": "short_text", "form_read_only": true, "omit_on_copy": true},
+      {"field": "inputs_rows", "type": "owned_collection", "target": "application_design.studio_component_input", "form_read_only": true},
+      {"field": "block", "type": "long_text"},
+      {"field": "is_disabled", "type": "boolean", "default": "0"},
+      {"field": "is_standard", "type": "boolean", "form_read_only": true, "omit_on_copy": true, "default": "0"},
+      {"field": "script", "type": "expression_or_structured_text"},
+      {"field": "studio_application_identifier", "type": "entity_reference", "target": "application_design.studio_application", "write_once": true, "searchable": true}
+    ],
+    "presentation": [
+      {"control": "tab", "purpose": "Interface"}
+    ]
+  },
+  {
+    "entity": "application_design.studio_component_input",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "input_name", "type": "short_text", "required": true},
+      {"field": "type", "type": "short_text", "required": true},
+      {"field": "description", "type": "text"},
+      {"field": "options", "type": "text"},
+      {"field": "required", "type": "boolean", "default": "0"},
+      {"field": "default", "type": "expression_or_structured_text"}
+    ]
+  },
+  {
+    "entity": "application_design.studio_page",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "studio_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "page_name", "type": "short_text", "unique": true},
+      {"field": "page_title", "type": "short_text"},
+      {"field": "tab_title", "type": "short_text"},
+      {"field": "route", "type": "short_text"},
+      {"field": "blocks", "type": "long_text"},
+      {"field": "published", "type": "boolean", "default": "0"},
+      {"field": "allow_guest", "type": "boolean", "default": "0"},
+      {"field": "draft_blocks", "type": "long_text"},
+      {"field": "resources_rows", "type": "owned_collection", "target": "application_design.studio_page_resource"},
+      {"field": "variables_rows", "type": "owned_collection", "target": "application_design.studio_page_variable"},
+      {"field": "studio_application_identifier", "type": "entity_reference", "target": "application_design.studio_application", "searchable": true},
+      {"field": "script", "type": "expression_or_structured_text"},
+      {"field": "is_standard", "type": "boolean", "form_read_only": true, "default": "0", "copy_from": ["studio_application_identifier", "is_standard"]},
+      {"field": "application_application", "type": "enumeration", "form_read_only": true, "copy_from": ["studio_application_identifier", "application_application"], "visible_when": ["field_has_value", "is_standard"], "required_when": ["field_has_value", "is_standard"]}
+    ],
+    "presentation": [
+      {"control": "tab", "purpose": "Data"},
+      {"control": "tab", "purpose": "Scripts"},
+      {"control": "tab", "purpose": "Export"}
+    ]
+  },
+  {
+    "entity": "application_design.studio_page_resource",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "resource_type", "type": "enumeration", "required": true, "values": ["Document List", "Document", "API Resource"]},
+      {"field": "fields", "type": "structured_value"},
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "document_name", "type": "short_text", "visible_when": ["not", ["current_field", "fetch_document_using_filters"]]},
+      {"field": "resource_address", "type": "short_text"},
+      {"field": "method", "type": "enumeration", "values": ["GET", "POST", "PUT", "DELETE"], "default": "GET"},
+      {"field": "params", "type": "structured_value"},
+      {"field": "transform", "type": "expression_or_structured_text"},
+      {"field": "filters", "type": "structured_value"},
+      {"field": "limit", "type": "integer", "visible_when": ["coercive_equal", ["current_field", "resource_type"], ["literal", "Document List"]]},
+      {"field": "whitelisted_methods", "type": "structured_value"},
+      {"field": "fetch_document_using_filters", "type": "boolean", "default": "0"},
+      {"field": "resource_name", "type": "short_text", "required": true},
+      {"field": "sort_field", "type": "short_text"},
+      {"field": "sort_order", "type": "enumeration", "values": ["", "ASC", "DESC"]},
+      {"field": "on_success", "type": "expression_or_structured_text"},
+      {"field": "on_error", "type": "expression_or_structured_text"},
+      {"field": "auto", "type": "boolean", "default": "1"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Document Resource"},
+      {"control": "section", "purpose": "API Resource"}
+    ]
+  },
+  {
+    "entity": "application_design.studio_page_variable",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "variable_name", "type": "short_text", "required": true},
+      {"field": "variable_type", "type": "enumeration", "values": ["String", "Number", "Boolean", "Object"]},
+      {"field": "initial_value", "type": "expression_or_structured_text"}
+    ]
+  },
+  {
+    "entity": "application_design.studio_settings",
+    "kind": "singleton_settings",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read", "write"]}
+    ],
+    "fields": [
+      {"field": "ai_service_interface_key", "type": "protected_value"}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "AI Settings"}
+    ]
+  }
+]

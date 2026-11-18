@@ -1,0 +1,416 @@
+[
+  {
+    "entity": "mail.auto_email_report",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "report_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "report_identifier", "type": "entity_reference", "target": "information_management.report", "required": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true, "default": "User"},
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "report_type", "type": "display_value", "copy_from": ["report_identifier", "report_type"]},
+      {"field": "send_if_data", "type": "boolean", "default": "1"},
+      {"field": "data_modified_till", "type": "integer", "visible_when": ["coercive_equal", ["current_field", "report_type"], ["literal", "Report Builder"]]},
+      {"field": "number_of_rows", "type": "integer", "default": "100", "visible_when": ["coercive_equal", ["current_field", "report_type"], ["literal", "Report Builder"]]},
+      {"field": "filters", "type": "text", "form_hidden": true},
+      {"field": "filter_meta", "type": "text", "form_read_only": true, "form_hidden": true},
+      {"field": "from_date_field", "type": "enumeration"},
+      {"field": "to_date_field", "type": "enumeration"},
+      {"field": "dynamic_date_period", "type": "enumeration", "values": ["", "Daily", "Weekly", "Monthly", "Quarterly", "Half Yearly", "Yearly"]},
+      {"field": "email_to", "type": "text", "required": true},
+      {"field": "day_of_week", "type": "enumeration", "values": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "default": "Monday", "visible_when": ["coercive_equal", ["current_field", "frequency"], ["literal", "Weekly"]]},
+      {"field": "frequency", "type": "enumeration", "required": true, "values": ["Daily", "Weekdays", "Weekly", "Monthly"]},
+      {"field": "format", "type": "enumeration", "required": true, "values": ["HTML", "XLSX", "CSV", "PDF"]},
+      {"field": "description", "type": "formatted_text"},
+      {"field": "reference_report", "type": "short_text", "form_read_only": true, "form_hidden": true, "copy_from": ["report_identifier", "reference_report"]},
+      {"field": "sender_identifier", "type": "entity_reference", "target": "mail.email_account"},
+      {"field": "use_first_day_of_period", "type": "boolean", "default": "0", "visible_when": ["coercive_unequal", ["current_field", "dynamic_date_period"], ["literal", "Daily"]]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Filter Data"},
+      {"control": "section", "purpose": "Report Filters", "visible_when": ["strict_unequal", ["current_field", "report_type"], ["literal", "Report Builder"]]},
+      {"control": "formatted_information", "purpose": "Filters Display"},
+      {"control": "section", "purpose": "Dynamic Report Filters", "visible_when": ["strict_unequal", ["current_field", "report_type"], ["literal", "Report Builder"]]},
+      {"control": "section", "purpose": "Email Settings"},
+      {"control": "section", "purpose": "Message"}
+    ]
+  },
+  {
+    "entity": "mail.document_follow",
+    "kind": "independent_record",
+    "form_read_only": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]},
+      {"role": "desk_user", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "searchable": true},
+      {"field": "reference_record_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier", "required": true, "searchable": true},
+      {"field": "user_identifier", "type": "entity_reference", "target": "information_management.user", "required": true, "searchable": true}
+    ]
+  },
+  {
+    "entity": "mail.email_account",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "read", "write"]},
+      {"role": "inbox_user", "level": 0, "allows": ["read"]},
+      {"role": "report_manager", "level": 0, "allows": ["select"]}
+    ],
+    "fields": [
+      {"field": "email_identifier", "type": "short_text", "required": true},
+      {"field": "login_identifier_is_different", "type": "boolean", "default": "0", "visible_when": ["and", ["coercive_unequal", ["current_field", "service"], ["literal", "Integrated mail"]], ["not", ["current_field", "backend_application_flow"]]]},
+      {"field": "login_identifier", "type": "short_text", "visible_when": ["field_has_value", "login_identifier_is_different"]},
+      {"field": "password", "type": "protected_value", "visible_when": ["and", ["strict_equal", ["current_field", "authentication_method"], ["literal", "Basic"]], ["coercive_unequal", ["current_field", "service"], ["literal", "Integrated mail"]]]},
+      {"field": "awaiting_password", "type": "boolean", "default": "0", "visible_when": ["and", ["strict_equal", ["current_field", "authentication_method"], ["literal", "Basic"]], ["coercive_unequal", ["current_field", "service"], ["literal", "Integrated mail"]]]},
+      {"field": "ascii_encode_password", "type": "boolean", "default": "0", "visible_when": ["and", ["strict_equal", ["current_field", "authentication_method"], ["literal", "Basic"]], ["coercive_unequal", ["current_field", "service"], ["literal", "Integrated mail"]]]},
+      {"field": "email_account_name", "type": "short_text", "unique": true},
+      {"field": "domain_identifier", "type": "entity_reference", "target": "mail.email_domain", "searchable": true, "visible_when": ["not", ["current_field", "service"]]},
+      {"field": "service", "type": "enumeration", "values": ["", "Integrated mail", "hosted personal mailbox", "transactional mail provider", "event mail provider", "webmail service", "office mailbox", "regional mailbox"], "visible_when": ["not", ["current_field", "domain_identifier"]]},
+      {"field": "enable_incoming", "type": "boolean", "default": "0"},
+      {"field": "use_mailbox_access", "type": "boolean", "default": "0", "copy_from": ["domain_identifier", "use_mailbox_access"]},
+      {"field": "email_server", "type": "short_text", "copy_from": ["domain_identifier", "email_server"]},
+      {"field": "use_secure_sockets_layer", "type": "boolean", "default": "0", "copy_from": ["domain_identifier", "use_secure_sockets_layer"]},
+      {"field": "attachment_limit", "type": "integer", "copy_from": ["domain_identifier", "attachment_limit"]},
+      {"field": "append_to_identifier", "type": "entity_reference", "target": "information_management.entity_type", "visible_when": ["not", ["current_field", "use_mailbox_access"]]},
+      {"field": "default_incoming", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "enable_incoming"]},
+      {"field": "email_sync_option", "type": "enumeration", "values": ["ALL", "UNSEEN"], "default": "UNSEEN", "visible_when": ["field_has_value", "use_mailbox_access"]},
+      {"field": "initial_sync_count", "type": "enumeration", "values": ["100", "250", "500"], "default": "250", "visible_when": ["field_has_value", "use_mailbox_access"]},
+      {"field": "notify_if_unreplied", "type": "boolean", "default": "0"},
+      {"field": "unreplied_for_minutes", "type": "integer", "default": "30", "visible_when": ["field_has_value", "notify_if_unreplied"]},
+      {"field": "send_notification_to", "type": "text", "visible_when": ["field_has_value", "notify_if_unreplied"], "required_when": ["field_has_value", "notify_if_unreplied"]},
+      {"field": "enable_outgoing", "type": "boolean", "default": "0"},
+      {"field": "outbound_mail_server", "type": "short_text", "copy_from": ["domain_identifier", "outbound_mail_server"]},
+      {"field": "use_transport_layer_security", "type": "boolean", "default": "0", "copy_from": ["domain_identifier", "use_transport_layer_security"]},
+      {"field": "outbound_mail_port", "type": "short_text", "copy_from": ["domain_identifier", "outbound_mail_port"]},
+      {"field": "default_outgoing", "type": "boolean", "default": "0"},
+      {"field": "always_use_account_email_identifier_as_sender", "type": "boolean", "default": "0"},
+      {"field": "always_use_account_name_as_sender_name", "type": "boolean", "default": "0"},
+      {"field": "send_unsubscribe_message", "type": "boolean", "default": "1"},
+      {"field": "track_email_status", "type": "boolean", "default": "1"},
+      {"field": "no_outbound_mail_authentication", "type": "boolean", "default": "0"},
+      {"field": "add_signature", "type": "boolean", "default": "0"},
+      {"field": "signature", "type": "formatted_text", "visible_when": ["field_has_value", "add_signature"]},
+      {"field": "enable_auto_reply", "type": "boolean", "default": "0"},
+      {"field": "auto_reply_message", "type": "formatted_text", "visible_when": ["field_has_value", "enable_auto_reply"]},
+      {"field": "footer", "type": "formatted_text"},
+      {"field": "uidvalidity", "type": "short_text", "form_hidden": true, "omit_on_copy": true},
+      {"field": "uidnext", "type": "integer", "form_hidden": true, "omit_on_copy": true},
+      {"field": "no_failed", "type": "integer", "form_read_only": true, "form_hidden": true, "omit_on_copy": true},
+      {"field": "enable_automatic_linking", "type": "boolean", "default": "0"},
+      {"field": "incoming_port", "type": "short_text", "copy_from": ["domain_identifier", "incoming_port"]},
+      {"field": "append_emails_to_sent_folder", "type": "boolean", "default": "0", "visible_when": ["and", ["and", ["and", ["not", ["current_field", "domain_identifier"]], ["current_field", "enable_outgoing"]], ["current_field", "enable_incoming"]], ["current_field", "use_mailbox_access"]]},
+      {"field": "use_secure_sockets_layer_for_outgoing", "type": "boolean", "default": "0", "copy_from": ["domain_identifier", "use_secure_sockets_layer_for_outgoing"]},
+      {"field": "create_contact", "type": "boolean", "default": "1"},
+      {"field": "brand_logo", "type": "image_file_reference"},
+      {"field": "mailbox_access_folder_rows", "type": "owned_collection", "target": "mail.mailbox_access_folder", "visible_when": ["field_has_value", "use_mailbox_access"]},
+      {"field": "authentication_method", "type": "enumeration", "values": ["Basic", "OAuth"], "default": "Basic"},
+      {"field": "use_starttls", "type": "boolean", "default": "0", "copy_from": ["domain_identifier", "use_starttls"], "visible_when": ["and", ["current_field", "use_mailbox_access"], ["not", ["current_field", "use_secure_sockets_layer"]]]},
+      {"field": "connected_application_identifier", "type": "entity_reference", "target": "service_integrations.connected_application", "visible_when": ["strict_equal", ["current_field", "authentication_method"], ["literal", "OAuth"]], "required_when": ["strict_equal", ["current_field", "authentication_method"], ["literal", "OAuth"]]},
+      {"field": "connected_user_identifier", "type": "entity_reference", "target": "information_management.user", "visible_when": ["and", ["strict_equal", ["current_field", "authentication_method"], ["literal", "OAuth"]], ["not", ["current_field", "backend_application_flow"]]], "required_when": ["and", ["strict_equal", ["current_field", "authentication_method"], ["literal", "OAuth"]], ["not", ["current_field", "backend_application_flow"]]]},
+      {"field": "validate_secure_sockets_layer_certificate", "type": "boolean", "default": "1", "copy_from": ["domain_identifier", "use_secure_sockets_layer"], "visible_when": ["field_has_value", "use_secure_sockets_layer"]},
+      {"field": "integrated_mail_site", "type": "short_text", "default": "configured service address", "visible_when": ["coercive_equal", ["current_field", "service"], ["literal", "Integrated mail"]], "required_when": ["coercive_equal", ["current_field", "service"], ["literal", "Integrated mail"]]},
+      {"field": "service_interface_key", "type": "short_text", "visible_when": ["and", ["coercive_equal", ["current_field", "service"], ["literal", "Integrated mail"]], ["coercive_equal", ["current_field", "authentication_method"], ["literal", "Basic"]]], "required_when": ["and", ["coercive_equal", ["current_field", "service"], ["literal", "Integrated mail"]], ["coercive_equal", ["current_field", "authentication_method"], ["literal", "Basic"]]]},
+      {"field": "service_interface_secret", "type": "protected_value", "visible_when": ["and", ["coercive_equal", ["current_field", "service"], ["literal", "Integrated mail"]], ["coercive_equal", ["current_field", "authentication_method"], ["literal", "Basic"]]], "required_when": ["and", ["coercive_equal", ["current_field", "service"], ["literal", "Integrated mail"]], ["coercive_equal", ["current_field", "authentication_method"], ["literal", "Basic"]]]},
+      {"field": "backend_application_flow", "type": "boolean", "default": "0", "visible_when": ["strict_equal", ["current_field", "authentication_method"], ["literal", "OAuth"]]},
+      {"field": "sent_folder_name", "type": "short_text", "copy_from": ["domain_identifier", "sent_folder_name"], "visible_when": ["and", ["and", ["and", ["not", ["current_field", "domain_identifier"]], ["current_field", "enable_outgoing"]], ["current_field", "enable_incoming"]], ["current_field", "use_mailbox_access"]]},
+      {"field": "always_blind_copy_recipients", "type": "short_text"},
+      {"field": "last_received_at", "type": "date_and_time", "visible_when": ["coercive_equal", ["current_field", "service"], ["literal", "Integrated mail"]]},
+      {"field": "add_x_original_from", "type": "boolean", "default": "1"},
+      {"field": "add_reply_to_header", "type": "boolean", "default": "1"},
+      {"field": "reply_to_addresses_rows", "type": "owned_collection", "target": "mail.reply_to_address", "visible_when": ["current_field", "add_reply_to_header"]},
+      {"field": "dsn_notify_type", "type": "enumeration", "values": ["", "SUCCESS", "FAILURE", "DELAY", "SUCCESS,FAILURE", "SUCCESS,FAILURE,DELAY", "NEVER"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Incoming (POP/IMAP) Settings", "visible_when": ["coercive_unequal", ["current_field", "service"], ["literal", "Integrated mail"]]},
+      {"control": "section", "purpose": "Outgoing (SMTP) Settings", "visible_when": ["coercive_unequal", ["current_field", "service"], ["literal", "Integrated mail"]]},
+      {"control": "section", "purpose": "Signature", "expanded_when": ["field_has_value", "add_signature"]},
+      {"control": "section", "purpose": "Auto Reply", "visible_when": ["field_has_value", "enable_incoming"], "expanded_when": ["field_has_value", "enable_auto_reply"]},
+      {"control": "section", "purpose": "Footer", "expanded_when": ["coercive_unequal", ["call", ["context", "plain_text"], ["or", ["current_field", "footer"], ["literal", ""]]], ["literal", ""]]},
+      {"control": "section", "purpose": "Document Linking"},
+      {"control": "section", "purpose": "Authentication"},
+      {"control": "section", "purpose": "Account"},
+      {"control": "section", "purpose": "IMAP Details"},
+      {"control": "action", "purpose": "Authorize API Access", "visible_when": ["and", ["and", ["and", ["strict_equal", ["current_field", "authentication_method"], ["literal", "OAuth"]], ["current_field", "connected_application_identifier"]], ["current_field", "connected_user_identifier"]], ["not", ["current_field", "backend_application_flow"]]]},
+      {"control": "tab", "purpose": "Incoming", "visible_when": ["field_has_value", "enable_incoming"]},
+      {"control": "tab", "purpose": "Outgoing", "visible_when": ["field_has_value", "enable_outgoing"]},
+      {"control": "action", "purpose": "Validate Integrated mail Settings", "visible_when": ["and", ["and", ["and", ["coercive_equal", ["current_field", "service"], ["literal", "Integrated mail"]], ["coercive_unequal", ["current_field", "authentication_method"], ["literal", "Basic"]]], ["not", ["current_field", "is_new_record"]]], ["not", ["current_field", "unsaved"]]]},
+      {"control": "section", "purpose": "Headers"}
+    ]
+  },
+  {
+    "entity": "mail.email_domain",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "read", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "domain_name", "type": "short_text", "required": true, "unique": true},
+      {"field": "email_server", "type": "short_text", "required": true},
+      {"field": "use_mailbox_access", "type": "boolean", "default": "0"},
+      {"field": "use_secure_sockets_layer", "type": "boolean", "default": "0"},
+      {"field": "use_starttls", "type": "boolean", "default": "0", "visible_when": ["and", ["current_field", "use_mailbox_access"], ["not", ["current_field", "use_secure_sockets_layer"]]]},
+      {"field": "attachment_limit", "type": "integer"},
+      {"field": "outbound_mail_server", "type": "short_text", "required": true},
+      {"field": "use_transport_layer_security", "type": "boolean", "default": "0"},
+      {"field": "outbound_mail_port", "type": "short_text"},
+      {"field": "incoming_port", "type": "short_text"},
+      {"field": "append_emails_to_sent_folder", "type": "boolean", "default": "0", "visible_when": ["current_field", "use_mailbox_access"]},
+      {"field": "use_secure_sockets_layer_for_outgoing", "type": "boolean", "default": "0"},
+      {"field": "validate_secure_sockets_layer_certificate", "type": "boolean", "default": "1", "visible_when": ["current_field", "use_secure_sockets_layer"]},
+      {"field": "validate_secure_sockets_layer_certificate_for_outgoing", "type": "boolean", "default": "1", "visible_when": ["current_field", "use_secure_sockets_layer"]},
+      {"field": "sent_folder_name", "type": "short_text", "default": "Sent", "visible_when": ["current_field", "append_emails_to_sent_folder"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Incoming Settings"},
+      {"control": "section", "purpose": "Outgoing Settings"}
+    ]
+  },
+  {
+    "entity": "mail.email_flag_queue",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "is_completed", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "communication", "type": "short_text"},
+      {"field": "action", "type": "enumeration", "values": ["Read", "Unread"]},
+      {"field": "email_account", "type": "short_text", "form_hidden": true},
+      {"field": "unique_identifier", "type": "short_text", "form_hidden": true}
+    ]
+  },
+  {
+    "entity": "mail.email_group",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "newsletter_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "title", "type": "short_text", "required": true, "unique": true, "omit_on_copy": true},
+      {"field": "total_subscribers", "type": "integer", "form_read_only": true, "default": "0"},
+      {"field": "confirmation_email_template_identifier", "type": "entity_reference", "target": "mail.email_template"},
+      {"field": "welcome_email_template_identifier", "type": "entity_reference", "target": "mail.email_template"},
+      {"field": "welcome_resource_address", "type": "short_text"},
+      {"field": "add_query_parameters", "type": "boolean", "default": "0", "visible_when": ["field_has_value", "welcome_resource_address"]}
+    ],
+    "presentation": [
+      {"control": "section", "purpose": "Sign Up and Confirmation"}
+    ]
+  },
+  {
+    "entity": "mail.email_group_member",
+    "kind": "independent_record",
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "newsletter_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "email_group_identifier", "type": "entity_reference", "target": "mail.email_group", "required": true, "searchable": true},
+      {"field": "email", "type": "short_text", "required": true},
+      {"field": "unsubscribed", "type": "boolean", "searchable": true, "default": "0"}
+    ]
+  },
+  {
+    "entity": "mail.email_queue",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["delete", "email", "print", "read", "report"]}
+    ],
+    "fields": [
+      {"field": "sender", "type": "short_text"},
+      {"field": "recipients_rows", "type": "owned_collection", "target": "mail.email_queue_recipient"},
+      {"field": "show_as_cc", "type": "text"},
+      {"field": "message", "type": "expression_or_structured_text"},
+      {"field": "status", "type": "enumeration", "form_hidden": true, "values": ["Not Sent", "Sending", "Sent", "Partially Sent", "Error"], "default": "Not Sent"},
+      {"field": "error", "type": "expression_or_structured_text", "visible_when": ["current_field", "error"]},
+      {"field": "message_identifier", "type": "text", "form_read_only": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "form_read_only": true},
+      {"field": "reference_name", "type": "short_text", "form_read_only": true, "searchable": true},
+      {"field": "communication_identifier", "type": "entity_reference", "target": "information_management.communication", "searchable": true},
+      {"field": "send_after", "type": "date_and_time", "form_read_only": true, "omit_on_copy": true},
+      {"field": "priority", "type": "integer", "form_read_only": true, "default": "1"},
+      {"field": "add_unsubscribe_link", "type": "boolean", "default": "1"},
+      {"field": "unsubscribe_method", "type": "short_text"},
+      {"field": "email_read_tracker_resource_address", "type": "text", "form_read_only": true},
+      {"field": "expose_recipients", "type": "short_text"},
+      {"field": "attachments", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "retry", "type": "integer", "form_read_only": true, "default": "0"},
+      {"field": "email_account_identifier", "type": "entity_reference", "target": "mail.email_account"},
+      {"field": "unsubscribe_params", "type": "expression_or_structured_text", "form_read_only": true},
+      {"field": "raw_structured_markup", "type": "boolean", "form_read_only": true, "default": "0"},
+      {"field": "redact_message_after_send", "type": "boolean", "form_read_only": true, "default": "0"}
+    ]
+  },
+  {
+    "entity": "mail.email_queue_recipient",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "recipient", "type": "short_text"},
+      {"field": "status", "type": "enumeration", "searchable": true, "values": ["", "Not Sent", "Sent"], "default": "Not Sent"},
+      {"field": "error", "type": "expression_or_structured_text"}
+    ]
+  },
+  {
+    "entity": "mail.email_rule",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["email", "export", "print", "read", "report", "share"]}
+    ],
+    "fields": [
+      {"field": "email_identifier", "type": "short_text", "unique": true},
+      {"field": "is_spam", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "mail.email_template",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "import_supported": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "desk_user", "level": 0, "allows": ["read"]},
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "import", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "subject", "type": "short_text", "required": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "response", "type": "formatted_text", "visible_when": ["not", ["current_field", "use_structured_markup"]], "required_when": ["not", ["current_field", "use_structured_markup"]]},
+      {"field": "use_structured_markup", "type": "boolean", "default": "0"},
+      {"field": "response_structured_markup", "type": "expression_or_structured_text", "visible_when": ["current_field", "use_structured_markup"]}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "Email Reply Help"}
+    ]
+  },
+  {
+    "entity": "mail.email_unsubscribe",
+    "kind": "independent_record",
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "email", "export", "print", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "email", "type": "short_text", "required": true, "searchable": true},
+      {"field": "reference_entity_type_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "reference_name_identifier", "type": "selected_entity_reference", "target_selected_by": "reference_entity_type_identifier"},
+      {"field": "global_unsubscribe", "type": "boolean", "default": "0"}
+    ]
+  },
+  {
+    "entity": "mail.mailbox_access_folder",
+    "kind": "owned_row",
+    "audit_changes": true,
+    "grants": [],
+    "fields": [
+      {"field": "folder_name", "type": "short_text", "required": true},
+      {"field": "append_to_identifier", "type": "entity_reference", "target": "information_management.entity_type"},
+      {"field": "uidvalidity", "type": "short_text", "form_hidden": true},
+      {"field": "uidnext", "type": "short_text", "form_hidden": true}
+    ]
+  },
+  {
+    "entity": "mail.notification",
+    "kind": "independent_record",
+    "renaming_permitted": true,
+    "audit_changes": true,
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["create", "delete", "export", "read", "report", "share", "write"]}
+    ],
+    "fields": [
+      {"field": "enabled", "type": "boolean", "default": "1"},
+      {"field": "channel", "type": "enumeration", "required": true, "write_once": true, "values": ["Email", "team messaging", "System Notification", "SMS"], "default": "Email", "visible_when": ["not", ["current_field", "disable_channel"]]},
+      {"field": "team_messaging_webhook_resource_address_identifier", "type": "entity_reference", "target": "service_integrations.team_messaging_webhook_resource_address", "visible_when": ["coercive_equal", ["current_field", "channel"], ["literal", "team messaging"]], "required_when": ["coercive_equal", ["current_field", "channel"], ["literal", "team messaging"]]},
+      {"field": "filters", "type": "expression_or_structured_text", "form_read_only": true, "form_hidden": true},
+      {"field": "subject", "type": "short_text", "visible_when": ["and", ["call", ["context", "contains_value"], ["list", ["literal", "Email"], ["literal", "team messaging"], ["literal", "System Notification"]], ["current_field", "channel"]], ["not", ["current_field", "email_template_identifier"]]], "required_when": ["and", ["call", ["context", "contains_value"], ["list", ["literal", "Email"], ["literal", "team messaging"], ["literal", "System Notification"]], ["current_field", "channel"]], ["not", ["current_field", "email_template_identifier"]]]},
+      {"field": "document_type_identifier", "type": "entity_reference", "target": "information_management.entity_type", "required": true, "searchable": true},
+      {"field": "is_standard", "type": "boolean", "omit_on_copy": true, "default": "0"},
+      {"field": "module_identifier", "type": "entity_reference", "target": "information_management.module_def", "visible_when": ["field_has_value", "is_standard"]},
+      {"field": "event", "type": "enumeration", "required": true, "searchable": true, "values": ["", "New", "Save", "Submit", "Cancel", "Days After", "Days Before", "Minutes After", "Minutes Before", "Value Change", "Method", "Custom"]},
+      {"field": "method", "type": "short_text", "visible_when": ["coercive_equal", ["current_field", "event"], ["literal", "Method"]]},
+      {"field": "date_changed", "type": "enumeration", "visible_when": ["and", ["current_field", "document_type_identifier"], ["or", ["coercive_equal", ["current_field", "event"], ["literal", "Days After"]], ["coercive_equal", ["current_field", "event"], ["literal", "Days Before"]]]]},
+      {"field": "days_in_advance", "type": "integer", "default": "0", "visible_when": ["and", ["current_field", "document_type_identifier"], ["or", ["coercive_equal", ["current_field", "event"], ["literal", "Days After"]], ["coercive_equal", ["current_field", "event"], ["literal", "Days Before"]]]]},
+      {"field": "value_changed", "type": "enumeration", "visible_when": ["and", ["current_field", "document_type_identifier"], ["coercive_equal", ["current_field", "event"], ["literal", "Value Change"]]]},
+      {"field": "sender_identifier", "type": "entity_reference", "target": "mail.email_account", "visible_when": ["coercive_equal", ["current_field", "channel"], ["literal", "Email"]]},
+      {"field": "sender_email", "type": "short_text", "form_read_only": true},
+      {"field": "condition", "type": "expression_or_structured_text", "visible_when": ["strict_equal", ["current_field", "condition_type"], ["literal", "Rule expression"]]},
+      {"field": "set_property_after_alert", "type": "enumeration"},
+      {"field": "property_value", "type": "short_text"},
+      {"field": "recipients_rows", "type": "owned_collection", "target": "mail.notification_recipient", "required_when": ["and", ["strict_unequal", ["current_field", "channel"], ["literal", "team messaging"]], ["not", ["current_field", "send_to_all_assignees"]]]},
+      {"field": "email_template_identifier", "type": "entity_reference", "target": "mail.email_template", "visible_when": ["coercive_equal", ["current_field", "channel"], ["literal", "Email"]]},
+      {"field": "message", "type": "expression_or_structured_text", "default": "Add your message here", "visible_when": ["not", ["current_field", "email_template_identifier"]]},
+      {"field": "attach_print", "type": "boolean", "default": "0"},
+      {"field": "print_format_identifier", "type": "entity_reference", "target": "document_output.print_format", "visible_when": ["field_has_value", "attach_print"]},
+      {"field": "send_system_notification", "type": "boolean", "default": "0", "visible_when": ["strict_unequal", ["current_field", "channel"], ["literal", "System Notification"]]},
+      {"field": "notification_type_identifier", "type": "entity_reference", "target": "operator_workspace.notification_type", "default": "Alert", "visible_when": ["or", ["strict_equal", ["current_field", "channel"], ["literal", "System Notification"]], ["current_field", "send_system_notification"]]},
+      {"field": "send_to_all_assignees", "type": "boolean", "default": "0", "visible_when": ["coercive_equal", ["current_field", "channel"], ["literal", "Email"]]},
+      {"field": "message_type", "type": "enumeration", "values": ["Markdown", "HTML", "Plain Text"], "default": "Markdown", "visible_when": ["field_has_value", "is_standard"]},
+      {"field": "datetime_changed", "type": "enumeration", "visible_when": ["and", ["current_field", "document_type_identifier"], ["or", ["coercive_equal", ["current_field", "event"], ["literal", "Minutes After"]], ["coercive_equal", ["current_field", "event"], ["literal", "Minutes Before"]]]]},
+      {"field": "minutes_offset", "type": "integer", "default": "0", "visible_when": ["and", ["current_field", "document_type_identifier"], ["or", ["coercive_equal", ["current_field", "event"], ["literal", "Minutes After"]], ["coercive_equal", ["current_field", "event"], ["literal", "Minutes Before"]]]]},
+      {"field": "datetime_last_run", "type": "date_and_time", "form_read_only": true, "visible_when": ["and", ["current_field", "document_type_identifier"], ["or", ["coercive_equal", ["current_field", "event"], ["literal", "Minutes After"]], ["coercive_equal", ["current_field", "event"], ["literal", "Minutes Before"]]]]},
+      {"field": "condition_type", "type": "enumeration", "values": ["Rule expression", "Filters"], "default": "Rule expression"},
+      {"field": "attach_files", "type": "enumeration", "values": ["", "From Field", "All"]},
+      {"field": "from_attach_field", "type": "enumeration", "visible_when": ["strict_equal", ["current_field", "attach_files"], ["literal", "From Field"]], "required_when": ["strict_equal", ["current_field", "attach_files"], ["literal", "From Field"]]}
+    ],
+    "presentation": [
+      {"control": "formatted_information", "purpose": "structured markup 7", "visible_when": ["strict_equal", ["current_field", "condition_type"], ["literal", "Rule expression"]]},
+      {"control": "section", "purpose": "Set Property After Alert"},
+      {"control": "section", "purpose": "Recipients", "visible_when": ["coercive_unequal", ["current_field", "channel"], ["literal", "team messaging"]]},
+      {"control": "section", "purpose": "Message"},
+      {"control": "formatted_information", "purpose": "Message Examples"},
+      {"control": "action", "purpose": "View Properties (via Customize Form)"},
+      {"control": "section", "purpose": "Attachment Settings", "expanded_when": ["field_has_value", "attach_print"]},
+      {"control": "formatted_information", "purpose": "Filters Editor", "visible_when": ["strict_equal", ["current_field", "condition_type"], ["literal", "Filters"]]},
+      {"control": "section", "purpose": "Filters"}
+    ]
+  },
+  {
+    "entity": "mail.notification_recipient",
+    "kind": "owned_row",
+    "grants": [],
+    "fields": [
+      {"field": "copy_recipients", "type": "expression_or_structured_text", "visible_when": ["coercive_equal", ["member", ["context", "owning_record"], "channel"], ["literal", "Email"]]},
+      {"field": "blind_copy_recipients", "type": "expression_or_structured_text", "visible_when": ["coercive_equal", ["member", ["context", "owning_record"], "channel"], ["literal", "Email"]]},
+      {"field": "condition", "type": "short_text"},
+      {"field": "receiver_by_document_field", "type": "enumeration"},
+      {"field": "receiver_by_role_identifier", "type": "entity_reference", "target": "information_management.role"}
+    ]
+  },
+  {
+    "entity": "mail.reply_to_address",
+    "kind": "owned_row",
+    "renaming_permitted": true,
+    "grants": [],
+    "fields": [
+      {"field": "name", "type": "short_text"},
+      {"field": "email", "type": "short_text", "required": true}
+    ]
+  },
+  {
+    "entity": "mail.unhandled_email",
+    "kind": "independent_record",
+    "grants": [
+      {"role": "system_manager", "level": 0, "allows": ["read"]}
+    ],
+    "fields": [
+      {"field": "email_account_identifier", "type": "entity_reference", "target": "mail.email_account"},
+      {"field": "unique_identifier", "type": "short_text"},
+      {"field": "reason", "type": "long_text"},
+      {"field": "message_identifier", "type": "expression_or_structured_text"},
+      {"field": "raw", "type": "expression_or_structured_text"}
+    ]
+  }
+]

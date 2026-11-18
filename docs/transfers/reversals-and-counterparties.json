@@ -1,0 +1,502 @@
+[
+  {
+    "name": "Create an order or invoice in the trading company from sales order",
+    "source": "sales.sales_order",
+    "destination": "procurement.purchase_order",
+    "decision": "Resolve the receiving company and its internal customer or supplier. Change party and tax context, re-resolve exchange rates and carry only eligible remaining units. Preserve the counterpart document and appropriate source line identifiers. Receiving an internal sales order creates a purchase order, while receiving an internal supplier-side order creates a sales order. The equivalent invoice directions use receivables and payables respectively.",
+    "record_mappings": [
+      {
+        "source_entity": "sales.sales_order",
+        "target_entity": "procurement.purchase_order",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "sales.sales_order_item",
+        "target_entity": "procurement.purchase_order_item",
+        "explicit_field_transfers": [
+          [
+            "rate",
+            "rate"
+          ],
+          [
+            "record_identifier",
+            "sales_order_item"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Create an order or invoice in the trading company from purchase order",
+    "source": "procurement.purchase_order",
+    "destination": "sales.sales_order",
+    "decision": "Resolve the receiving company and its internal customer or supplier. Change party and tax context, re-resolve exchange rates and carry only eligible remaining units. Preserve the counterpart document and appropriate source line identifiers. Receiving an internal sales order creates a purchase order, while receiving an internal supplier-side order creates a sales order. The equivalent invoice directions use receivables and payables respectively.",
+    "record_mappings": [
+      {
+        "source_entity": "procurement.purchase_order",
+        "target_entity": "sales.sales_order",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "procurement.purchase_order_item",
+        "target_entity": "sales.sales_order_item",
+        "explicit_field_transfers": [
+          [
+            "rate",
+            "rate"
+          ],
+          [
+            "owning_record_identifier",
+            "purchase_order_identifier"
+          ],
+          [
+            "record_identifier",
+            "purchase_order_item"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Create an order or invoice in the trading company from sales invoice",
+    "source": "accounting.sales_invoice",
+    "destination": "accounting.purchase_invoice",
+    "decision": "Resolve the receiving company and its internal customer or supplier. Change party and tax context, re-resolve exchange rates and carry only eligible remaining units. Preserve the counterpart document and appropriate source line identifiers. Receiving an internal sales order creates a purchase order, while receiving an internal supplier-side order creates a sales order. The equivalent invoice directions use receivables and payables respectively.",
+    "record_mappings": [
+      {
+        "source_entity": "accounting.sales_invoice",
+        "target_entity": "accounting.purchase_invoice",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.sales_invoice_item",
+        "target_entity": "accounting.purchase_invoice_item",
+        "explicit_field_transfers": [
+          [
+            "rate",
+            "rate"
+          ],
+          [
+            "record_identifier",
+            "sales_invoice_item"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Create an order or invoice in the trading company from purchase invoice",
+    "source": "accounting.purchase_invoice",
+    "destination": "accounting.sales_invoice",
+    "decision": "Resolve the receiving company and its internal customer or supplier. Change party and tax context, re-resolve exchange rates and carry only eligible remaining units. Preserve the counterpart document and appropriate source line identifiers. Receiving an internal sales order creates a purchase order, while receiving an internal supplier-side order creates a sales order. The equivalent invoice directions use receivables and payables respectively.",
+    "record_mappings": [
+      {
+        "source_entity": "accounting.purchase_invoice",
+        "target_entity": "accounting.sales_invoice",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.purchase_invoice_item",
+        "target_entity": "accounting.sales_invoice_item",
+        "explicit_field_transfers": [
+          [
+            "rate",
+            "rate"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Create the counterpart receipt or delivery from delivery note",
+    "source": "inventory.delivery_note",
+    "destination": "inventory.purchase_receipt",
+    "decision": "A submitted delivery can supply an intercompany goods receipt and a submitted goods receipt can supply the corresponding delivery. Resolve counterpart company and internal party. Deduct quantities already received or effectively returned under the applicable direction. Each company's stock and accounting events retain separate source documents.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.delivery_note",
+        "target_entity": "inventory.purchase_receipt",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.delivery_note_item",
+        "target_entity": "inventory.purchase_receipt_item",
+        "explicit_field_transfers": [
+          [
+            "target_warehouse_identifier",
+            "from_warehouse_identifier"
+          ],
+          [
+            "record_identifier",
+            "delivery_note_item"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Create the counterpart receipt or delivery from purchase receipt",
+    "source": "inventory.purchase_receipt",
+    "destination": "inventory.delivery_note",
+    "decision": "A submitted delivery can supply an intercompany goods receipt and a submitted goods receipt can supply the corresponding delivery. Resolve counterpart company and internal party. Deduct quantities already received or effectively returned under the applicable direction. Each company's stock and accounting events retain separate source documents.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.purchase_receipt",
+        "target_entity": "inventory.delivery_note",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.purchase_receipt_item",
+        "target_entity": "inventory.delivery_note_item",
+        "explicit_field_transfers": [
+          [
+            "from_warehouse_identifier",
+            "target_warehouse_identifier"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Return against an issued transaction for sales invoice",
+    "source": "accounting.sales_invoice",
+    "destination": "accounting.sales_invoice",
+    "decision": "Create a customer credit against the original sales invoice. Use negative remaining quantity and stock quantity after effective returns, retain the original sales-order, delivery and invoice line, and remove original advances. For a point-of-sale transaction deduct each tender’s share of change before reversing its net amount. Reject a consolidated point-of-sale invoice as the source of this operation.",
+    "identity": "Create a distinct target record.",
+    "record_mappings": [
+      {
+        "source_entity": "accounting.sales_invoice",
+        "target_entity": "accounting.sales_invoice",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "return_against_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.sales_invoice_item",
+        "target_entity": "accounting.sales_invoice_item",
+        "explicit_field_transfers": [
+          [
+            "serial_number",
+            "serial_number"
+          ],
+          [
+            "batch_number_identifier",
+            "batch_number_identifier"
+          ],
+          [
+            "record_identifier",
+            "sales_invoice_item"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.packed_item",
+        "target_entity": "inventory.packed_item",
+        "explicit_field_transfers": [
+          [
+            "parent_detail_record_identifier",
+            "parent_detail_record_identifier"
+          ],
+          [
+            "record_identifier",
+            "return_against_packed_item"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Return against an issued transaction for point-of-sale invoice",
+    "source": "accounting.point_of_sale_invoice",
+    "destination": "accounting.point_of_sale_invoice",
+    "decision": "Retain the original point-of-sale invoice line and refund only previously retained tender after its share of change. Negate fixed tax charges. Restrict explicit serial selections to units still returnable.",
+    "identity": "Create a distinct target record.",
+    "record_mappings": [
+      {
+        "source_entity": "accounting.point_of_sale_invoice",
+        "target_entity": "accounting.point_of_sale_invoice",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "return_against_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.point_of_sale_invoice_item",
+        "target_entity": "accounting.point_of_sale_invoice_item",
+        "explicit_field_transfers": [
+          [
+            "serial_number",
+            "serial_number"
+          ],
+          [
+            "batch_number_identifier",
+            "batch_number_identifier"
+          ],
+          [
+            "record_identifier",
+            "point_of_sale_invoice_item"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.packed_item",
+        "target_entity": "inventory.packed_item",
+        "explicit_field_transfers": [
+          [
+            "parent_detail_record_identifier",
+            "parent_detail_record_identifier"
+          ],
+          [
+            "record_identifier",
+            "return_against_packed_item"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Return against an issued transaction for purchase invoice",
+    "source": "accounting.purchase_invoice",
+    "destination": "accounting.purchase_invoice",
+    "decision": "Create the supplier-side debit note against the original invoice. Derive negative remaining received, rejected, accepted and stock quantities separately. Preserve original purchase order and receipt links, withholding selection and the original supplier invoice row. Clear inherited advances.",
+    "identity": "Create a distinct target record.",
+    "record_mappings": [
+      {
+        "source_entity": "accounting.purchase_invoice",
+        "target_entity": "accounting.purchase_invoice",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "return_against_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "accounting.purchase_invoice_item",
+        "target_entity": "accounting.purchase_invoice_item",
+        "explicit_field_transfers": [
+          [
+            "serial_number",
+            "serial_number"
+          ],
+          [
+            "batch_number_identifier",
+            "batch_number_identifier"
+          ],
+          [
+            "record_identifier",
+            "purchase_invoice_item"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Return against an issued transaction for delivery note",
+    "source": "inventory.delivery_note",
+    "destination": "inventory.delivery_note",
+    "decision": "Restore returned goods using the negative remainder of delivered transaction and stock units, after effective prior returns. Retain order and billing line context. Prefer the company’s designated sales-return warehouse when configured. Keep packed component identities tied to their original occurrence.",
+    "identity": "Create a distinct target record.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.delivery_note",
+        "target_entity": "inventory.delivery_note",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "return_against_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.delivery_note_item",
+        "target_entity": "inventory.delivery_note_item",
+        "explicit_field_transfers": [
+          [
+            "serial_number",
+            "serial_number"
+          ],
+          [
+            "batch_number_identifier",
+            "batch_number_identifier"
+          ],
+          [
+            "record_identifier",
+            "delivery_note_line"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.packed_item",
+        "target_entity": "inventory.packed_item",
+        "explicit_field_transfers": [
+          [
+            "parent_detail_record_identifier",
+            "parent_detail_record_identifier"
+          ],
+          [
+            "record_identifier",
+            "return_against_packed_item"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Return against an issued transaction for purchase receipt",
+    "source": "inventory.purchase_receipt",
+    "destination": "inventory.purchase_receipt",
+    "decision": "Return the remaining accepted stock against its original receipt row, supplier and warehouse. For the rejected-warehouse action take only remaining rejected stock, use the rejection warehouse as the issue location, clear the separate rejected quantity and tie the return to that disposition.",
+    "identity": "Create a distinct target record.",
+    "record_mappings": [
+      {
+        "source_entity": "inventory.purchase_receipt",
+        "target_entity": "inventory.purchase_receipt",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "return_against_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "inventory.purchase_receipt_item",
+        "target_entity": "inventory.purchase_receipt_item",
+        "explicit_field_transfers": [
+          [
+            "serial_number",
+            "serial_number"
+          ],
+          [
+            "batch_number_identifier",
+            "batch_number_identifier"
+          ],
+          [
+            "record_identifier",
+            "purchase_receipt_item"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Return against an issued transaction for subcontracting receipt",
+    "source": "subcontracting.subcontracting_receipt",
+    "destination": "subcontracting.subcontracting_receipt",
+    "decision": "Return output against the original subcontracting receipt line. Preserve the subcontract order row and set process loss to zero. An accepted-output return and a rejected-warehouse return use different eligible quantities. The rejected branch uses only remaining rejected stock at the rejection warehouse.",
+    "identity": "Create a distinct target record.",
+    "record_mappings": [
+      {
+        "source_entity": "subcontracting.subcontracting_receipt",
+        "target_entity": "subcontracting.subcontracting_receipt",
+        "source_requirements": [
+          [
+            "lifecycle_state",
+            "equals",
+            "posted"
+          ]
+        ],
+        "explicit_field_transfers": [
+          [
+            "record_identifier",
+            "return_against_identifier"
+          ]
+        ]
+      },
+      {
+        "source_entity": "subcontracting.subcontracting_receipt_item",
+        "target_entity": "subcontracting.subcontracting_receipt_item",
+        "explicit_field_transfers": [
+          [
+            "serial_number",
+            "serial_number"
+          ],
+          [
+            "batch_number_identifier",
+            "batch_number_identifier"
+          ],
+          [
+            "record_identifier",
+            "subcontracting_receipt_item"
+          ]
+        ]
+      }
+    ]
+  }
+]
