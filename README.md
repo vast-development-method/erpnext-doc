@@ -4,6 +4,12 @@ This repository specifies a unified enterprise application through its observabl
 
 The September reference edition follows four supplied source snapshots, including their shared application foundation. The [November rebuild specification](docs/rebuild/README.md) follows separately pinned ERPNext and Frappe v16 releases and named extension revisions. The [checkpoint reading guide](checkpoints/reading-guide.md) assembles the complete September edition and the current supplements into a single searchable directory. Current accounting, distribution, manufacturing, customer relationships, workforce, payroll, projects, support, and shared administration form one specification. Historical upgrade procedures, deprecated compatibility shims, product deployment recipes, and a prospective implementation platform are outside this boundary. An actively selectable behaviour remains in scope even if it has existed for many years.
 
+## Review the blueprint
+
+Start with the [coverage register for all 21 ERPNext modules](docs/rebuild/coverage-review/README.md). It connects each module to its business workflows, field dictionary and release changes. Open the [September reader](checkpoints/september/README.md) to browse the full narrative edition on GitHub, including [domain chapters](checkpoints/september/docs/domains/README.md) and [calculation contracts](checkpoints/september/schemas/mathematics/README.md). The [corrected operation lookup](docs/rebuild/checkpoint-corrections/README.md) resolves every one of the 33,360 September identifiers.
+
+For a transaction-level review, start with [project costs from purchase through invoice](docs/rebuild/coverage-review/project-costing.md) or [warehouse picking, packing and dispatch](docs/rebuild/warehouse-fulfilment/README.md). For a deployment with optional applications, consult the [workflow profiles for 313 pinned marketplace sources](docs/rebuild/marketplace-workflows/README.md), the [69 multilingual extension guides](docs/rebuild/marketplace-guides/README.md) and the [qualification register](docs/rebuild/qualification.json).
+
 ## Architecture at a glance
 
 ```mermaid

@@ -21,7 +21,7 @@ From the repository root, print a single named member using a shell with `cat` a
 cat checkpoints/complete-specification.tar.gz.part-* | tar -xzO schemas/operations/enterprise-decision-contracts/part-0001.json
 ```
 
-To browse or search every operation, [assemble the complete edition](../reading-guide.md). Its root contains all original paths, including the 3,140 bulk JSON members. For example, after assembly, search the operation index for a specific name or identifier. Each matching entry contains a `catalog` path relative to `schemas/operations/`. This command locates the incoming stock rate operation in the example above.
+The archived index includes 53 repeated definitions and omits 42 stock-controller decisions. The [corrected operation lookup](../../docs/rebuild/checkpoint-corrections/README.md) resolves all 33,360 distinct IDs. To inspect the original partitions, [assemble the complete edition](../reading-guide.md). Its root contains all original paths, including the 3,140 bulk JSON members. For example, after assembly, search the operation index for a specific name or identifier. Each matching entry contains a `catalog` path relative to `schemas/operations/`. This command locates the incoming stock rate operation in the example above.
 
 ```sh
 rg -l '"identifier": "operation_enterprise_stock_utils_business_behavior_get_incoming_rate"' \

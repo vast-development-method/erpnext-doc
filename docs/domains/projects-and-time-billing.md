@@ -1,5 +1,7 @@
 # Projects and time billing
 
+For the pinned November release, consult [project costs, completion and billing](../rebuild/coverage-review/project-costing.md). Task weighting and the treatment of purchased or manufactured stock differ between the editions.
+
 The internal definitions are [project](../../schemas/data/record-types/project.json), [task](../../schemas/data/record-types/task.json), [timesheet](../../schemas/data/record-types/timesheet.json) and [time row](../../schemas/data/record-types/timesheet_detail.json). Numerical definitions are in [customer and service calculations](../../schemas/mathematics/customer-and-service-calculations.json); executable acceptance inputs and expected results are in [customer and service acceptance cases](../../schemas/mathematics/customer-and-service-acceptance-cases.json). Posting consequences belong to [customer receivables](accounts-receivable.md), [supplier payables](accounts-payable.md) and [inventory](inventory-and-valuation.md).
 
 ## Business model

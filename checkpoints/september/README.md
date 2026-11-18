@@ -1,6 +1,6 @@
 # Enterprise Application Behavioural Blueprint
 
-**September reference edition.** Browse the [domain chapters](docs/domains/README.md), [machine-readable calculations](schemas/mathematics/README.md) or [guide to the full catalog](catalog-access.md). These pages follow the four development snapshots. The [November release edition](../../docs/rebuild/README.md) records its own pinned versions and observations.
+**September reference edition.** Browse the [domain chapters](docs/domains/README.md), [machine-readable calculations](schemas/mathematics/README.md) or [guide to the full catalog](catalog-access.md). These pages follow the four development snapshots. Use the [corrected operation lookup](../../docs/rebuild/checkpoint-corrections/README.md) for the complete set of distinct decision bodies. The [November release edition](../../docs/rebuild/README.md) records its own pinned versions and observations.
 
 This repository specifies a unified enterprise distribution application through its business decisions, persistent records, calculations, permissions, operational workflows and financial consequences. It is a language-neutral rebuilding specification: an implementer should obtain a rule, its data structures, its dependent decisions and its acceptance examples from this repository.
 
