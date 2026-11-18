@@ -14,7 +14,7 @@ Persist a collection attempt with invoice ID, payer, merchant account, invoice c
 
 - A French-speaking payer pays an English invoice with EUR 40 outstanding. Two clicks and a duplicate success event yield one provider charge and one EUR 40 allocation. An Afrikaans clerk can locate the same provider reference. Deliver the receipt using the payer’s effective language and retain the rendered copy.
 - A pending authorization shows translated status text. The invoice stays open until reconciled success. A later decline displays a localizable reason and records the failed attempt without reducing outstanding.
-- A JPY 900.00-equivalent whole-unit invoice requires 900 provider units when normalized to JPY 900. Switching to a German UI cannot turn this into 90,000 units. Use an explicit currency code even if the recipient’s language convention uses the same symbol for another currency.
+- An invoice for JPY 900 requires 900 provider units. Switching to a German UI cannot turn this into 90,000 units. Use an explicit currency code even if the recipient’s language convention uses the same symbol for another currency. [Provider currency units](https://docs.stripe.com/currencies#zero-decimal)
 - Locale fallback may alter the receipt wording. It cannot select a different merchant, card, currency, exchange rate or posting date.
 
 ## Remaining evidence
