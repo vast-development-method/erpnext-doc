@@ -47,4 +47,6 @@ Each rule distinguishes observed source behaviour, a derived example, and a prop
 
 The September structural baseline contains **1,044 record definitions and 16,813 declared fields**, including layout fields, child records, and settings records. Source inventory, field inventory, semantic review, numerical example checks, and execution against a running reference application are separate measures. Consult the coverage report before making an equivalence claim. Cataloging a function or a record does not establish that all of its decisions have been specified or executed.
 
+The November research adds separately pinned field dictionaries, decision tables, an extension source directory and real site observations for [financial postings](docs/rebuild/live/README.md), [inventory and production](docs/rebuild/stock-live/README.md) and [permission and transaction boundaries](docs/rebuild/platform-live/README.md). The [portable comparison](docs/rebuild/comparison/README.md) lets another implementation compare its ledger effects with those observations.
+
 The specification contains original explanatory prose and neutral structured facts. Source archives and source implementation code are not included. The unchanged repository license is [Apache License, Version 2.0](LICENSE).
