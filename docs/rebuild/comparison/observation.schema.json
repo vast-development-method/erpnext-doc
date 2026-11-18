@@ -1,0 +1,291 @@
+{
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "FIFO-linked-delivery-v1"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "enum": [
+              "OPEN",
+              "GR1",
+              "GR2",
+              "BILL",
+              "PACK",
+              "SHIP",
+              "SALE",
+              "PAY1",
+              "RET",
+              "CREDIT",
+              "PAY2",
+              "REMIT"
+            ]
+          },
+          "gl": {
+            "type": "object",
+            "propertyNames": {
+              "enum": [
+                "bank",
+                "capital",
+                "cost_of_sales",
+                "input_tax",
+                "output_tax",
+                "packed_inventory",
+                "payables",
+                "raw_inventory",
+                "receipt_clearing",
+                "receivables",
+                "sales"
+              ]
+            },
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+            },
+            "minProperties": 2
+          },
+          "stock": {
+            "type": "object",
+            "propertyNames": {
+              "enum": [
+                "raw",
+                "packed"
+              ]
+            },
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "step",
+          "gl",
+          "stock"
+        ]
+      },
+      "minItems": 12,
+      "maxItems": 12
+    },
+    "receivables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "enum": [
+              "OPEN",
+              "GR1",
+              "GR2",
+              "BILL",
+              "PACK",
+              "SHIP",
+              "SALE",
+              "PAY1",
+              "RET",
+              "CREDIT",
+              "PAY2",
+              "REMIT"
+            ]
+          },
+          "original_invoice": {
+            "type": "string",
+            "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+          },
+          "party_total": {
+            "type": "string",
+            "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+          },
+          "payment_ledger": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "enum": [
+                    "OPEN",
+                    "GR1",
+                    "GR2",
+                    "BILL",
+                    "PACK",
+                    "SHIP",
+                    "SALE",
+                    "PAY1",
+                    "RET",
+                    "CREDIT",
+                    "PAY2",
+                    "REMIT"
+                  ]
+                },
+                "against": {
+                  "enum": [
+                    "OPEN",
+                    "GR1",
+                    "GR2",
+                    "BILL",
+                    "PACK",
+                    "SHIP",
+                    "SALE",
+                    "PAY1",
+                    "RET",
+                    "CREDIT",
+                    "PAY2",
+                    "REMIT"
+                  ]
+                },
+                "amount": {
+                  "type": "string",
+                  "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "against",
+                "amount"
+              ]
+            }
+          },
+          "credit_outstanding": {
+            "type": "string",
+            "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+          },
+          "return_against": {
+            "enum": [
+              "OPEN",
+              "GR1",
+              "GR2",
+              "BILL",
+              "PACK",
+              "SHIP",
+              "SALE",
+              "PAY1",
+              "RET",
+              "CREDIT",
+              "PAY2",
+              "REMIT"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "step",
+          "original_invoice",
+          "party_total",
+          "payment_ledger"
+        ],
+        "dependentRequired": {
+          "credit_outstanding": [
+            "return_against"
+          ],
+          "return_against": [
+            "credit_outstanding"
+          ]
+        }
+      },
+      "minItems": 6,
+      "maxItems": 6
+    },
+    "closing": {
+      "type": "object",
+      "properties": {
+        "assets": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "bank": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "cost_of_sales": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "customer_outstanding": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "gross_profit": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "input_tax": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "liabilities_and_equity": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "net_sales": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "output_tax": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "packed_quantity": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "packed_value": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "raw_quantity": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "raw_value": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "supplier_outstanding": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        },
+        "unbilled_receipts": {
+          "type": "string",
+          "pattern": "^-?(0|[1-9][0-9]*)([.][0-9]+)?$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "assets",
+        "bank",
+        "cost_of_sales",
+        "customer_outstanding",
+        "gross_profit",
+        "input_tax",
+        "liabilities_and_equity",
+        "net_sales",
+        "output_tax",
+        "packed_quantity",
+        "packed_value",
+        "raw_quantity",
+        "raw_value",
+        "supplier_outstanding",
+        "unbilled_receipts"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "profile",
+    "steps",
+    "receivables",
+    "closing"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
