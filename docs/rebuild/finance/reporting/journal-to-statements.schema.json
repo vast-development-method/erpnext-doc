@@ -1,0 +1,357 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Single-book double-entry reconciliation of four financial reports",
+  "type": "object",
+  "properties": {
+    "revision": {
+      "const": "886ab6ae187244e7f1b852393384ab6019d56264"
+    },
+    "profile": {
+      "type": "object",
+      "properties": {
+        "fiscal_year_start": {
+          "type": "string",
+          "format": "date"
+        },
+        "fiscal_year_end": {
+          "type": "string",
+          "format": "date"
+        },
+        "currency": {
+          "const": "NAD"
+        },
+        "minor_units_per_major": {
+          "const": 100
+        },
+        "trial_balance": {
+          "const": "net-leaf-accounts"
+        },
+        "profit_and_loss": {
+          "const": "monthly-movement"
+        },
+        "balance_sheet": {
+          "const": "period-end"
+        },
+        "cash_flow": {
+          "const": "standard-indirect-monthly"
+        },
+        "opening_flag_policy": {
+          "const": "exclude-from-movement"
+        },
+        "company": {
+          "const": "DEMO"
+        },
+        "scope": {
+          "const": "all-finance-books-and-dimensions-visible-single-book"
+        }
+      },
+      "required": [
+        "fiscal_year_start",
+        "fiscal_year_end",
+        "currency",
+        "minor_units_per_major",
+        "trial_balance",
+        "profit_and_loss",
+        "balance_sheet",
+        "cash_flow",
+        "opening_flag_policy",
+        "company",
+        "scope"
+      ],
+      "additionalProperties": false
+    },
+    "chart": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "root": {
+            "enum": [
+              "Asset",
+              "Liability",
+              "Expense",
+              "Income",
+              "Equity"
+            ]
+          },
+          "account_type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "root",
+          "account_type"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "journals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "opening": {
+            "type": "boolean"
+          },
+          "debit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "credit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "opening",
+          "debit",
+          "credit",
+          "amount"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "expected": {
+      "type": "object",
+      "patternProperties": {
+        "^[0-9]{4}-(0[1-9]|1[0-2])$": {
+          "$ref": "#/$defs/period"
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "revision",
+    "profile",
+    "chart",
+    "journals",
+    "expected"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "trialRow": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "type": "string",
+          "minLength": 1
+        },
+        "opening_debit": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "opening_credit": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "period_debit": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "period_credit": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "closing_debit": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "closing_credit": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "account",
+        "opening_debit",
+        "opening_credit",
+        "period_debit",
+        "period_credit",
+        "closing_debit",
+        "closing_credit"
+      ],
+      "additionalProperties": false
+    },
+    "period": {
+      "type": "object",
+      "properties": {
+        "trial_balance_accounts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/trialRow"
+          },
+          "minItems": 1
+        },
+        "trial_balance_totals": {
+          "type": "object",
+          "properties": {
+            "opening_debit": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "opening_credit": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "period_debit": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "period_credit": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "closing_debit": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "closing_credit": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "opening_debit",
+            "opening_credit",
+            "period_debit",
+            "period_credit",
+            "closing_debit",
+            "closing_credit"
+          ],
+          "additionalProperties": false
+        },
+        "profit_and_loss": {
+          "type": "object",
+          "properties": {
+            "income": {
+              "type": "integer"
+            },
+            "expense": {
+              "type": "integer"
+            },
+            "net_profit": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "income",
+            "expense",
+            "net_profit"
+          ],
+          "additionalProperties": false
+        },
+        "balance_sheet": {
+          "type": "object",
+          "properties": {
+            "assets": {
+              "type": "integer"
+            },
+            "liabilities": {
+              "type": "integer"
+            },
+            "contributed_equity": {
+              "type": "integer"
+            },
+            "provisional_profit": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "assets",
+            "liabilities",
+            "contributed_equity",
+            "provisional_profit"
+          ],
+          "additionalProperties": false
+        },
+        "cash_flow": {
+          "type": "object",
+          "properties": {
+            "opening_cash": {
+              "type": "integer"
+            },
+            "profit": {
+              "type": "integer"
+            },
+            "depreciation_addback": {
+              "type": "integer"
+            },
+            "receivables": {
+              "type": "integer"
+            },
+            "payables": {
+              "type": "integer"
+            },
+            "inventory": {
+              "type": "integer"
+            },
+            "other_balance_sheet": {
+              "type": "integer"
+            },
+            "operating": {
+              "type": "integer"
+            },
+            "investing": {
+              "type": "integer"
+            },
+            "financing": {
+              "type": "integer"
+            },
+            "movement": {
+              "type": "integer"
+            },
+            "closing_cash": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "opening_cash",
+            "profit",
+            "depreciation_addback",
+            "receivables",
+            "payables",
+            "inventory",
+            "other_balance_sheet",
+            "operating",
+            "investing",
+            "financing",
+            "movement",
+            "closing_cash"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "trial_balance_accounts",
+        "trial_balance_totals",
+        "profit_and_loss",
+        "balance_sheet",
+        "cash_flow"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
