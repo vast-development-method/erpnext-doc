@@ -23,3 +23,5 @@ Store the agent’s interface language separately from the contact’s preferred
 - For a contract that charges per accepted review, two completed calls and one accepted review produce one billable unit. Reopening a review after invoicing produces a linked adjustment for approval.
 
 These are proposed acceptance conditions. Consent handling, actual workload tie-breaks, invoice rate calculation and recordings’ retention require deployment evidence. [Publisher-named repository](https://github.com/asoral/b2b_marketing)
+
+The publisher also preserved an illustrated Campaign Designer walkthrough and identifies calling-provider fees in a README in a separate cargo repository. Its screenshots and instructions corroborate the marketing workflow. The package in that repository identifies itself as a cargo app. [Archived publisher walkthrough](https://github.com/asoral/mm_cargo/blob/e35c3ffff274335d72e49280aa2b2f37f5d7fcb0/README.md#L44)
