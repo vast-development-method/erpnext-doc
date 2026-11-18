@@ -1,0 +1,3526 @@
+{
+  "catalog_name": "Accounting event and boundary acceptance cases",
+  "catalog_version": "1.0",
+  "purpose": "Self-contained financial reconstruction tests with fully stated journal events, expected balances, decimal arithmetic and explicit compatibility decisions",
+  "numeric_encoding": "All monetary amounts, rates and measured quantities are decimal strings; counts and precision values are integers",
+  "account_binding": "Account-role labels bind to configured leaf accounts within the stated company. Labels do not prescribe account numbers or physical database identifiers.",
+  "opening_balance_scope": "Opening balances include only accounts needed by a case. Omitted accounts begin at zero for this local sequence; examples are not asserted to be a complete company opening trial balance.",
+  "closing_balance_sign": "Positive means debit excess; negative means credit excess. These are ledger signs, not report display conventions.",
+  "execution_status": {
+    "original_application_suite": "not executed",
+    "independent_exact_decimal_verification": "all journal events balance; all declared closing balances and arithmetic assertions checked",
+    "scope": "Mathematical consistency and reconstruction acceptance inputs, not proof of complete operational deployment"
+  },
+  "assertion_operations": {
+    "add": "sum all operands",
+    "subtract": "first operand less each subsequent operand",
+    "multiply": "product of all operands",
+    "divide": "first operand divided by each subsequent operand",
+    "multiply_divide": "first operand multiplied by second operand, divided by third operand",
+    "round": "round the first operand to declared precision"
+  },
+  "assertion_rounding": "When precision is supplied, round final expression to that many places using stated method or profile half away from zero; without precision compare exact decimal result",
+  "cases": [
+    {
+      "case_identifier": "receipt_bill_partial_payment_and_return",
+      "name": "Receipt, invoice, partial payment and supplier stock return",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/accounts-payable.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "perpetual moving-average inventory; no other movements; combined supplier stock return and linked credit",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Receive ten units",
+          "postings": [
+            {
+              "account_role": "Inventory",
+              "debit": "120.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Received but unbilled",
+              "debit": "0.00",
+              "credit": "120.00"
+            }
+          ],
+          "stock_quantity_change": "10",
+          "stock_value_change": "120.00"
+        },
+        {
+          "event_name": "Record supplier invoice",
+          "postings": [
+            {
+              "account_role": "Received but unbilled",
+              "debit": "120.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Supplier payable",
+              "debit": "0.00",
+              "credit": "120.00"
+            }
+          ],
+          "supplier_outstanding_after_event": "120.00"
+        },
+        {
+          "event_name": "Pay part of invoice",
+          "postings": [
+            {
+              "account_role": "Supplier payable",
+              "debit": "50.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Bank",
+              "debit": "0.00",
+              "credit": "50.00"
+            }
+          ],
+          "supplier_outstanding_after_event": "70.00"
+        },
+        {
+          "event_name": "Return two units with linked supplier credit",
+          "postings": [
+            {
+              "account_role": "Supplier payable",
+              "debit": "24.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Inventory",
+              "debit": "0.00",
+              "credit": "24.00"
+            }
+          ],
+          "stock_quantity_change": "-2",
+          "stock_value_change": "-24.00",
+          "supplier_outstanding_after_event": "46.00"
+        }
+      ],
+      "expected_closing_balances": {
+        "Inventory": "96.00",
+        "Received but unbilled": "0.00",
+        "Supplier payable": "-46.00",
+        "Bank": "-50.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "remaining quantity",
+          "operation": "subtract",
+          "operands": [
+            "10",
+            "2"
+          ],
+          "expected": "8"
+        },
+        {
+          "name": "remaining stock value",
+          "operation": "multiply",
+          "operands": [
+            "8",
+            "12.00"
+          ],
+          "expected": "96.00"
+        }
+      ],
+      "expected_observations": {
+        "supplier_amount_owed": "46.00",
+        "warehouse_quantity": "8",
+        "physical_stock_return_required": true,
+        "separate_return_documents_allowed_when_aggregate_effects_match": true
+      }
+    },
+    {
+      "case_identifier": "standard_cost_receipt_billed_once",
+      "name": "Standard-cost purchase variance occurs once",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/accounts-payable.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "perpetual standard cost; stock updated only by receipt",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Receive ten units at standard ten and purchase twelve",
+          "postings": [
+            {
+              "account_role": "Inventory",
+              "debit": "100.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Purchase price variance",
+              "debit": "20.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Received but unbilled",
+              "debit": "0.00",
+              "credit": "120.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Bill already received goods without stock update",
+          "postings": [
+            {
+              "account_role": "Received but unbilled",
+              "debit": "120.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Supplier payable",
+              "debit": "0.00",
+              "credit": "120.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Inventory": "100.00",
+        "Purchase price variance": "20.00",
+        "Received but unbilled": "0.00",
+        "Supplier payable": "-120.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "purchase variance",
+          "operation": "subtract",
+          "operands": [
+            "120.00",
+            "100.00"
+          ],
+          "expected": "20.00"
+        }
+      ],
+      "expected_observations": {
+        "invoice_variance_postings": 0,
+        "supplier_amount_owed": "120.00"
+      }
+    },
+    {
+      "case_identifier": "partial_service_accrual_billing",
+      "name": "Six units billed from ten-unit provisional service receipt",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/accounts-payable.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book",
+        "nonstock_provisional_accounting": true
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Accrue ten service units at twenty",
+          "postings": [
+            {
+              "account_role": "Service expense",
+              "debit": "200.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Provisional service liability",
+              "debit": "0.00",
+              "credit": "200.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Reverse accrued portion for six units",
+          "postings": [
+            {
+              "account_role": "Provisional service liability",
+              "debit": "120.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Service expense",
+              "debit": "0.00",
+              "credit": "120.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Invoice six units at twenty two",
+          "postings": [
+            {
+              "account_role": "Service expense",
+              "debit": "132.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Supplier payable",
+              "debit": "0.00",
+              "credit": "132.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Service expense": "212.00",
+        "Provisional service liability": "-80.00",
+        "Supplier payable": "-132.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "accrual reversal",
+          "operation": "multiply",
+          "operands": [
+            "6",
+            "20.00"
+          ],
+          "expected": "120.00"
+        },
+        {
+          "name": "invoice expense",
+          "operation": "multiply",
+          "operands": [
+            "6",
+            "22.00"
+          ],
+          "expected": "132.00"
+        }
+      ],
+      "expected_observations": {
+        "remaining_unbilled_service_quantity": "4",
+        "supplier_amount_owed": "132.00"
+      }
+    },
+    {
+      "case_identifier": "customer_partial_payment_credit_and_reversal",
+      "name": "Customer receipt cancelled after a partial credit",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/accounts-receivable.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "fifteen percent sales tax; no stock update",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Invoice sale with tax",
+          "postings": [
+            {
+              "account_role": "Customer receivable",
+              "debit": "1150.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Sales income",
+              "debit": "0.00",
+              "credit": "1000.00"
+            },
+            {
+              "account_role": "Sales tax liability",
+              "debit": "0.00",
+              "credit": "150.00"
+            }
+          ],
+          "customer_outstanding_after_event": "1150.00"
+        },
+        {
+          "event_name": "Receive six hundred",
+          "postings": [
+            {
+              "account_role": "Bank",
+              "debit": "600.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Customer receivable",
+              "debit": "0.00",
+              "credit": "600.00"
+            }
+          ],
+          "customer_outstanding_after_event": "550.00"
+        },
+        {
+          "event_name": "Credit two hundred net and thirty tax",
+          "postings": [
+            {
+              "account_role": "Sales income",
+              "debit": "200.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Sales tax liability",
+              "debit": "30.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Customer receivable",
+              "debit": "0.00",
+              "credit": "230.00"
+            }
+          ],
+          "customer_outstanding_after_event": "320.00"
+        },
+        {
+          "event_name": "Reverse the receipt only",
+          "postings": [
+            {
+              "account_role": "Customer receivable",
+              "debit": "600.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Bank",
+              "debit": "0.00",
+              "credit": "600.00"
+            }
+          ],
+          "customer_outstanding_after_event": "920.00"
+        }
+      ],
+      "expected_closing_balances": {
+        "Customer receivable": "920.00",
+        "Sales income": "-800.00",
+        "Sales tax liability": "-120.00",
+        "Bank": "0.00"
+      },
+      "arithmetic_assertions": [],
+      "expected_observations": {
+        "invoice_and_credit_remain_effective": true,
+        "original_receipt_remains_in_history": true,
+        "customer_amount_owed": "920.00"
+      }
+    },
+    {
+      "case_identifier": "foreign_customer_receipt_and_realized_gain",
+      "name": "Foreign customer receipt clears historical company value",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/treasury-and-reconciliation.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Foreign currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book",
+        "party_account_currency": "Foreign currency"
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Invoice one hundred foreign units at fifty",
+          "postings": [
+            {
+              "account_role": "Customer receivable",
+              "debit": "5000.00",
+              "credit": "0.00",
+              "account_currency_debit": "100.00",
+              "account_currency_credit": "0.00"
+            },
+            {
+              "account_role": "Sales income",
+              "debit": "0.00",
+              "credit": "5000.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Receive at fifty five",
+          "postings": [
+            {
+              "account_role": "Bank",
+              "debit": "5500.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Customer receivable",
+              "debit": "0.00",
+              "credit": "5500.00",
+              "account_currency_debit": "0.00",
+              "account_currency_credit": "100.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Record linked realized exchange gain",
+          "postings": [
+            {
+              "account_role": "Customer receivable",
+              "debit": "500.00",
+              "credit": "0.00",
+              "account_currency_debit": "0.00",
+              "account_currency_credit": "0.00"
+            },
+            {
+              "account_role": "Realized exchange gain",
+              "debit": "0.00",
+              "credit": "500.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Customer receivable": "0.00",
+        "Sales income": "-5000.00",
+        "Bank": "5500.00",
+        "Realized exchange gain": "-500.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "historical company claim",
+          "operation": "multiply",
+          "operands": [
+            "100",
+            "50"
+          ],
+          "expected": "5000.00"
+        },
+        {
+          "name": "company cash receipt",
+          "operation": "multiply",
+          "operands": [
+            "100",
+            "55"
+          ],
+          "expected": "5500.00"
+        },
+        {
+          "name": "exchange gain",
+          "operation": "subtract",
+          "operands": [
+            "5500.00",
+            "5000.00"
+          ],
+          "expected": "500.00"
+        }
+      ],
+      "expected_observations": {
+        "foreign_customer_outstanding": "0.00",
+        "customer_company_balance": "0.00",
+        "foreign_exchange_journal_quantity": "0.00"
+      }
+    },
+    {
+      "case_identifier": "foreign_supplier_payment_and_realized_loss",
+      "name": "Foreign supplier payment clears historical payable",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/treasury-and-reconciliation.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Foreign currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book",
+        "party_account_currency": "Foreign currency"
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Supplier invoice at eighteen",
+          "postings": [
+            {
+              "account_role": "Purchase expense",
+              "debit": "1800.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Supplier payable",
+              "debit": "0.00",
+              "credit": "1800.00",
+              "account_currency_debit": "0.00",
+              "account_currency_credit": "100.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Pay at nineteen",
+          "postings": [
+            {
+              "account_role": "Supplier payable",
+              "debit": "1900.00",
+              "credit": "0.00",
+              "account_currency_debit": "100.00",
+              "account_currency_credit": "0.00"
+            },
+            {
+              "account_role": "Bank",
+              "debit": "0.00",
+              "credit": "1900.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Recognize realized exchange loss",
+          "postings": [
+            {
+              "account_role": "Realized exchange loss",
+              "debit": "100.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Supplier payable",
+              "debit": "0.00",
+              "credit": "100.00",
+              "account_currency_debit": "0.00",
+              "account_currency_credit": "0.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Purchase expense": "1800.00",
+        "Supplier payable": "0.00",
+        "Bank": "-1900.00",
+        "Realized exchange loss": "100.00"
+      },
+      "arithmetic_assertions": [],
+      "expected_observations": {
+        "foreign_supplier_outstanding": "0.00"
+      }
+    },
+    {
+      "case_identifier": "customer_advance_later_applied",
+      "name": "Customer advance application does not duplicate bank",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/treasury-and-reconciliation.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book",
+        "separate_advance_accounts": true
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Receive advance",
+          "postings": [
+            {
+              "account_role": "Bank",
+              "debit": "300.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Customer advance liability",
+              "debit": "0.00",
+              "credit": "300.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Invoice two hundred",
+          "postings": [
+            {
+              "account_role": "Customer receivable",
+              "debit": "200.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Sales income",
+              "debit": "0.00",
+              "credit": "200.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Apply part of advance",
+          "postings": [
+            {
+              "account_role": "Customer advance liability",
+              "debit": "200.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Customer receivable",
+              "debit": "0.00",
+              "credit": "200.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Bank": "300.00",
+        "Customer advance liability": "-100.00",
+        "Customer receivable": "0.00",
+        "Sales income": "-200.00"
+      },
+      "arithmetic_assertions": [],
+      "expected_observations": {
+        "unapplied_customer_advance": "100.00",
+        "customer_invoice_outstanding": "0.00",
+        "bank_events": 1
+      }
+    },
+    {
+      "case_identifier": "supplier_advance_application_reversed",
+      "name": "Reversing one supplier advance application retains original payment",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/treasury-and-reconciliation.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book",
+        "separate_advance_accounts": true
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Pay supplier advance",
+          "postings": [
+            {
+              "account_role": "Supplier advance asset",
+              "debit": "450.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Bank",
+              "debit": "0.00",
+              "credit": "450.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Record supplier invoice",
+          "postings": [
+            {
+              "account_role": "Expense",
+              "debit": "250.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Supplier payable",
+              "debit": "0.00",
+              "credit": "250.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Apply advance",
+          "postings": [
+            {
+              "account_role": "Supplier payable",
+              "debit": "250.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Supplier advance asset",
+              "debit": "0.00",
+              "credit": "250.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Reverse advance application",
+          "postings": [
+            {
+              "account_role": "Supplier advance asset",
+              "debit": "250.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Supplier payable",
+              "debit": "0.00",
+              "credit": "250.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Supplier advance asset": "450.00",
+        "Bank": "-450.00",
+        "Expense": "250.00",
+        "Supplier payable": "-250.00"
+      },
+      "arithmetic_assertions": [],
+      "expected_observations": {
+        "unallocated_supplier_advance": "450.00",
+        "supplier_invoice_outstanding": "250.00",
+        "bank_events": 1
+      }
+    },
+    {
+      "case_identifier": "supplier_withholding_and_separate_remittance",
+      "name": "Supplier payment and withheld tax settle separate creditors",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/accounts-payable.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "fifteen percent deductible input tax; ten percent withholding on net; threshold already met",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Record invoice with withholding",
+          "postings": [
+            {
+              "account_role": "Expense",
+              "debit": "1000.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Input tax",
+              "debit": "150.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Withholding liability",
+              "debit": "0.00",
+              "credit": "100.00"
+            },
+            {
+              "account_role": "Supplier payable",
+              "debit": "0.00",
+              "credit": "1050.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Pay supplier net",
+          "postings": [
+            {
+              "account_role": "Supplier payable",
+              "debit": "1050.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Bank",
+              "debit": "0.00",
+              "credit": "1050.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Remit withholding",
+          "postings": [
+            {
+              "account_role": "Withholding liability",
+              "debit": "100.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Bank",
+              "debit": "0.00",
+              "credit": "100.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Expense": "1000.00",
+        "Input tax": "150.00",
+        "Withholding liability": "0.00",
+        "Supplier payable": "0.00",
+        "Bank": "-1150.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "supplier net obligation",
+          "operation": "subtract",
+          "operands": [
+            "1150.00",
+            "100.00"
+          ],
+          "expected": "1050.00"
+        }
+      ],
+      "expected_observations": {
+        "supplier_settled": "1050.00",
+        "tax_authority_settled": "100.00"
+      }
+    },
+    {
+      "case_identifier": "supplier_early_payment_discount_with_tax_split",
+      "name": "Early payment discount retains full reference allocation",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/accounts-payable.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "eighteen percent input tax; early discount tax split enabled",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Record taxed supplier invoice",
+          "postings": [
+            {
+              "account_role": "Purchase expense",
+              "debit": "250.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Input tax",
+              "debit": "45.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Supplier payable",
+              "debit": "0.00",
+              "credit": "295.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Settle under ten percent early-payment discount",
+          "postings": [
+            {
+              "account_role": "Supplier payable",
+              "debit": "295.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Bank",
+              "debit": "0.00",
+              "credit": "265.50"
+            },
+            {
+              "account_role": "Settlement discount income",
+              "debit": "0.00",
+              "credit": "25.00"
+            },
+            {
+              "account_role": "Input tax",
+              "debit": "0.00",
+              "credit": "4.50"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Purchase expense": "250.00",
+        "Input tax": "40.50",
+        "Supplier payable": "0.00",
+        "Bank": "-265.50",
+        "Settlement discount income": "-25.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "discount on full obligation",
+          "operation": "multiply",
+          "operands": [
+            "295.00",
+            "0.10"
+          ],
+          "expected": "29.50"
+        },
+        {
+          "name": "bank amount",
+          "operation": "subtract",
+          "operands": [
+            "295.00",
+            "29.50"
+          ],
+          "expected": "265.50"
+        }
+      ],
+      "expected_observations": {
+        "full_invoice_allocation": "295.00",
+        "supplier_outstanding": "0.00"
+      }
+    },
+    {
+      "case_identifier": "internal_bank_transfer_fee_and_exchange",
+      "name": "Transfer separately identifies fee and exchange loss",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/treasury-and-reconciliation.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book",
+        "source_account_currency": "Foreign currency",
+        "source_amount": "100.00",
+        "source_conversion_rate": "50"
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Transfer funds",
+          "postings": [
+            {
+              "account_role": "Source bank",
+              "debit": "0.00",
+              "credit": "5000.00"
+            },
+            {
+              "account_role": "Destination bank",
+              "debit": "4500.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Bank charge",
+              "debit": "100.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Exchange loss",
+              "debit": "400.00",
+              "credit": "0.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Source bank": "-5000.00",
+        "Destination bank": "4500.00",
+        "Bank charge": "100.00",
+        "Exchange loss": "400.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "unexplained transfer remainder",
+          "operation": "subtract",
+          "operands": [
+            "5000.00",
+            "4500.00",
+            "100.00"
+          ],
+          "expected": "400.00"
+        }
+      ],
+      "expected_observations": {
+        "party_claim_created": false,
+        "difference_amount": "0.00"
+      }
+    },
+    {
+      "case_identifier": "daily_deferred_income_with_final_residual",
+      "name": "Daily service recognition closes exact remaining deferred value",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/deferred-recognition-and-financial-control.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Record deferred service invoice",
+          "postings": [
+            {
+              "account_role": "Customer receivable",
+              "debit": "1000.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Deferred income",
+              "debit": "0.00",
+              "credit": "1000.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Recognize January",
+          "postings": [
+            {
+              "account_role": "Deferred income",
+              "debit": "344.44",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Service income",
+              "debit": "0.00",
+              "credit": "344.44"
+            }
+          ],
+          "service_interval": {
+            "start": "2025-01-01",
+            "end": "2025-01-31"
+          }
+        },
+        {
+          "event_name": "Recognize February",
+          "postings": [
+            {
+              "account_role": "Deferred income",
+              "debit": "311.11",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Service income",
+              "debit": "0.00",
+              "credit": "311.11"
+            }
+          ],
+          "service_interval": {
+            "start": "2025-02-01",
+            "end": "2025-02-28"
+          }
+        },
+        {
+          "event_name": "Recognize final March residual",
+          "postings": [
+            {
+              "account_role": "Deferred income",
+              "debit": "344.45",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Service income",
+              "debit": "0.00",
+              "credit": "344.45"
+            }
+          ],
+          "service_interval": {
+            "start": "2025-03-01",
+            "end": "2025-03-31"
+          }
+        }
+      ],
+      "expected_closing_balances": {
+        "Customer receivable": "1000.00",
+        "Deferred income": "0.00",
+        "Service income": "-1000.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "January inclusive days ratio",
+          "operation": "multiply_divide",
+          "operands": [
+            "1000.00",
+            "31",
+            "90"
+          ],
+          "expected": "344.44",
+          "precision": 2
+        },
+        {
+          "name": "February inclusive days ratio",
+          "operation": "multiply_divide",
+          "operands": [
+            "1000.00",
+            "28",
+            "90"
+          ],
+          "expected": "311.11",
+          "precision": 2
+        },
+        {
+          "name": "last interval residual",
+          "operation": "subtract",
+          "operands": [
+            "1000.00",
+            "344.44",
+            "311.11"
+          ],
+          "expected": "344.45"
+        }
+      ],
+      "expected_observations": {
+        "unpaid_customer_claim": "1000.00",
+        "total_recognized": "1000.00"
+      }
+    },
+    {
+      "case_identifier": "asset_depreciation_and_sale_gain",
+      "name": "Depreciated asset disposal removes cost and accumulated depreciation",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/assets-and-depreciation.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Acquire asset",
+          "postings": [
+            {
+              "account_role": "Fixed asset cost",
+              "debit": "12000.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Supplier payable",
+              "debit": "0.00",
+              "credit": "12000.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Record total depreciation before disposal",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "8000.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "8000.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Sell asset for four thousand five hundred",
+          "postings": [
+            {
+              "account_role": "Customer receivable",
+              "debit": "4500.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "8000.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Fixed asset cost",
+              "debit": "0.00",
+              "credit": "12000.00"
+            },
+            {
+              "account_role": "Asset disposal gain",
+              "debit": "0.00",
+              "credit": "500.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Fixed asset cost": "0.00",
+        "Supplier payable": "-12000.00",
+        "Depreciation expense": "8000.00",
+        "Accumulated depreciation": "0.00",
+        "Customer receivable": "4500.00",
+        "Asset disposal gain": "-500.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "carrying value before disposal",
+          "operation": "subtract",
+          "operands": [
+            "12000.00",
+            "8000.00"
+          ],
+          "expected": "4000.00"
+        },
+        {
+          "name": "disposal gain",
+          "operation": "subtract",
+          "operands": [
+            "4500.00",
+            "4000.00"
+          ],
+          "expected": "500.00"
+        }
+      ],
+      "expected_observations": {
+        "asset_removed_from_active_financial_position": true,
+        "supplier_invoice_still_unpaid": true
+      }
+    },
+    {
+      "case_identifier": "asset_scrap_without_proceeds",
+      "name": "Scrap recognizes remaining carrying value as loss",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/assets-and-depreciation.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {
+        "Fixed asset cost": "12000.00",
+        "Accumulated depreciation": "-8000.00"
+      },
+      "events": [
+        {
+          "event_name": "Scrap asset",
+          "postings": [
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "8000.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Asset disposal loss",
+              "debit": "4000.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Fixed asset cost",
+              "debit": "0.00",
+              "credit": "12000.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Fixed asset cost": "0.00",
+        "Accumulated depreciation": "0.00",
+        "Asset disposal loss": "4000.00"
+      },
+      "arithmetic_assertions": [],
+      "expected_observations": {
+        "sale_receivable_created": false,
+        "residual_asset_carrying_value": "0.00"
+      }
+    },
+    {
+      "case_identifier": "capitalized_repair_reclassifies_existing_expense",
+      "name": "Capitalize invoice and material repair expense exactly once",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/assets-and-depreciation.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "perpetual inventory; balances state movement from pre-repair position",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book",
+        "capitalize_repair_cost": true
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Invoice repair service",
+          "postings": [
+            {
+              "account_role": "Repair service expense",
+              "debit": "300.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Supplier payable",
+              "debit": "0.00",
+              "credit": "300.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Issue repair materials",
+          "postings": [
+            {
+              "account_role": "Repair material expense",
+              "debit": "200.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Inventory",
+              "debit": "0.00",
+              "credit": "200.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Capitalize repair",
+          "postings": [
+            {
+              "account_role": "Fixed asset cost",
+              "debit": "500.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Repair service expense",
+              "debit": "0.00",
+              "credit": "300.00"
+            },
+            {
+              "account_role": "Repair material expense",
+              "debit": "0.00",
+              "credit": "200.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Repair service expense": "0.00",
+        "Supplier payable": "-300.00",
+        "Repair material expense": "0.00",
+        "Inventory": "-200.00",
+        "Fixed asset cost": "500.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "capitalized total",
+          "operation": "add",
+          "operands": [
+            "300.00",
+            "200.00"
+          ],
+          "expected": "500.00"
+        }
+      ],
+      "expected_observations": {
+        "inventory_credit_events": 1,
+        "supplier_amount_owed": "300.00",
+        "additional_asset_cost": "500.00"
+      }
+    },
+    {
+      "case_identifier": "asset_value_decrease",
+      "name": "Decrease carrying value through a selected difference account",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/assets-and-depreciation.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {
+        "Fixed asset cost": "10000.00"
+      },
+      "events": [
+        {
+          "event_name": "Recognize asset value decrease",
+          "postings": [
+            {
+              "account_role": "Asset value loss",
+              "debit": "1500.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Fixed asset cost",
+              "debit": "0.00",
+              "credit": "1500.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Fixed asset cost": "8500.00",
+        "Asset value loss": "1500.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "signed adjustment",
+          "operation": "subtract",
+          "operands": [
+            "8500.00",
+            "10000.00"
+          ],
+          "expected": "-1500.00"
+        }
+      ],
+      "expected_observations": {
+        "new_carrying_value": "8500.00",
+        "future_schedule_regeneration_required": true
+      }
+    },
+    {
+      "case_identifier": "customer_unrealized_revaluation_and_reversal",
+      "name": "Customer revaluation changes company value without settlement",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/treasury-and-reconciliation.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book",
+        "party_account_currency": "Foreign currency",
+        "foreign_opening_claim": "100.00"
+      },
+      "opening_balances": {
+        "Customer receivable": "1800.00"
+      },
+      "events": [
+        {
+          "event_name": "Revalue at nineteen",
+          "postings": [
+            {
+              "account_role": "Customer receivable",
+              "debit": "100.00",
+              "credit": "0.00",
+              "account_currency_debit": "0.00",
+              "account_currency_credit": "0.00"
+            },
+            {
+              "account_role": "Unrealized exchange gain",
+              "debit": "0.00",
+              "credit": "100.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Reverse revaluation",
+          "postings": [
+            {
+              "account_role": "Unrealized exchange gain",
+              "debit": "100.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Customer receivable",
+              "debit": "0.00",
+              "credit": "100.00",
+              "account_currency_debit": "0.00",
+              "account_currency_credit": "0.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Customer receivable": "1800.00",
+        "Unrealized exchange gain": "0.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "revalued claim",
+          "operation": "multiply",
+          "operands": [
+            "100.00",
+            "19"
+          ],
+          "expected": "1900.00"
+        }
+      ],
+      "expected_observations": {
+        "foreign_claim_after_revaluation": "100.00",
+        "foreign_claim_after_reversal": "100.00",
+        "cash_effect": "0.00"
+      }
+    },
+    {
+      "case_identifier": "supplier_unrealized_revaluation",
+      "name": "Foreign supplier revaluation increases company liability",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/treasury-and-reconciliation.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book",
+        "party_account_currency": "Foreign currency",
+        "foreign_opening_debt": "100.00"
+      },
+      "opening_balances": {
+        "Supplier payable": "-1800.00"
+      },
+      "events": [
+        {
+          "event_name": "Revalue supplier debt",
+          "postings": [
+            {
+              "account_role": "Unrealized exchange loss",
+              "debit": "100.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Supplier payable",
+              "debit": "0.00",
+              "credit": "100.00",
+              "account_currency_debit": "0.00",
+              "account_currency_credit": "0.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Supplier payable": "-1900.00",
+        "Unrealized exchange loss": "100.00"
+      },
+      "arithmetic_assertions": [],
+      "expected_observations": {
+        "foreign_supplier_amount_owed": "100.00",
+        "supplier_claim_settled": false
+      }
+    },
+    {
+      "case_identifier": "financial_period_profit_close",
+      "name": "Close revenue and expense to equity",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/financial-accounting.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {
+        "Sales income": "-1000.00",
+        "Operating expense": "700.00"
+      },
+      "events": [
+        {
+          "event_name": "Close current income and expense",
+          "postings": [
+            {
+              "account_role": "Sales income",
+              "debit": "1000.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Operating expense",
+              "debit": "0.00",
+              "credit": "700.00"
+            },
+            {
+              "account_role": "Retained result",
+              "debit": "0.00",
+              "credit": "300.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Sales income": "0.00",
+        "Operating expense": "0.00",
+        "Retained result": "-300.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "period profit",
+          "operation": "subtract",
+          "operands": [
+            "1000.00",
+            "700.00"
+          ],
+          "expected": "300.00"
+        }
+      ],
+      "expected_observations": {
+        "close_marked_complete_only_after_posting": true
+      }
+    },
+    {
+      "case_identifier": "financial_period_loss_close",
+      "name": "Close loss as debit to retained result",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/financial-accounting.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {
+        "Sales income": "-700.00",
+        "Operating expense": "1000.00"
+      },
+      "events": [
+        {
+          "event_name": "Close current loss",
+          "postings": [
+            {
+              "account_role": "Sales income",
+              "debit": "700.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Operating expense",
+              "debit": "0.00",
+              "credit": "1000.00"
+            },
+            {
+              "account_role": "Retained result",
+              "debit": "300.00",
+              "credit": "0.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Sales income": "0.00",
+        "Operating expense": "0.00",
+        "Retained result": "300.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "period result",
+          "operation": "subtract",
+          "operands": [
+            "700.00",
+            "1000.00"
+          ],
+          "expected": "-300.00"
+        }
+      ],
+      "expected_observations": {}
+    },
+    {
+      "case_identifier": "bank_statement_partial_clearance_and_unlink",
+      "name": "Statement matching never reposts already recorded cash",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/treasury-and-reconciliation.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {
+        "Customer receivable": "100.00"
+      },
+      "events": [
+        {
+          "event_name": "Record customer receipt",
+          "postings": [
+            {
+              "account_role": "Bank",
+              "debit": "100.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Customer receivable",
+              "debit": "0.00",
+              "credit": "100.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Match first deposit of sixty",
+          "postings": [],
+          "statement_allocated_amount": "60.00",
+          "statement_remaining": "0.00",
+          "voucher_remaining_to_clear": "40.00",
+          "voucher_fully_cleared": false
+        },
+        {
+          "event_name": "Match second deposit of forty",
+          "postings": [],
+          "statement_allocated_amount": "40.00",
+          "statement_remaining": "0.00",
+          "voucher_remaining_to_clear": "0.00",
+          "voucher_fully_cleared": true
+        },
+        {
+          "event_name": "Remove second statement match",
+          "postings": [],
+          "statement_allocated_amount": "0.00",
+          "statement_remaining": "40.00",
+          "voucher_remaining_to_clear": "40.00",
+          "voucher_fully_cleared": false
+        }
+      ],
+      "expected_closing_balances": {
+        "Bank": "100.00",
+        "Customer receivable": "0.00"
+      },
+      "arithmetic_assertions": [],
+      "expected_observations": {
+        "bank_posting_events": 1,
+        "customer_invoice_stays_paid": true,
+        "unsupported_clearance_removed": true
+      }
+    },
+    {
+      "case_identifier": "journal_rounding_repair",
+      "name": "Within-allowance imbalance becomes explicit rounding movement",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/financial-accounting.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Post rounded journal",
+          "postings": [
+            {
+              "account_role": "Expense",
+              "debit": "100.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Payable",
+              "debit": "0.00",
+              "credit": "99.98"
+            },
+            {
+              "account_role": "Rounding difference",
+              "debit": "0.00",
+              "credit": "0.02"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Expense": "100.00",
+        "Payable": "-99.98",
+        "Rounding difference": "-0.02"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "proposed imbalance",
+          "operation": "subtract",
+          "operands": [
+            "100.00",
+            "99.98"
+          ],
+          "expected": "0.02"
+        },
+        {
+          "name": "journal allowance at two places",
+          "operation": "divide",
+          "operands": [
+            "5",
+            "100"
+          ],
+          "expected": "0.05"
+        }
+      ],
+      "expected_observations": {
+        "repair_visible": true,
+        "submitted": true
+      }
+    },
+    {
+      "case_identifier": "withholding_certificate_and_normal_rate",
+      "name": "Certificate splits taxable base into two rates",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [],
+      "expected_closing_balances": {},
+      "arithmetic_assertions": [
+        {
+          "name": "certificate tax",
+          "operation": "multiply_divide",
+          "operands": [
+            "400.00",
+            "2",
+            "100"
+          ],
+          "expected": "8.00",
+          "precision": 2
+        },
+        {
+          "name": "ordinary taxable value",
+          "operation": "subtract",
+          "operands": [
+            "1000.00",
+            "400.00"
+          ],
+          "expected": "600.00"
+        },
+        {
+          "name": "ordinary tax",
+          "operation": "multiply_divide",
+          "operands": [
+            "600.00",
+            "10",
+            "100"
+          ],
+          "expected": "60.00",
+          "precision": 2
+        },
+        {
+          "name": "total current withholding",
+          "operation": "add",
+          "operands": [
+            "8.00",
+            "60.00"
+          ],
+          "expected": "68.00"
+        }
+      ],
+      "expected_observations": {
+        "certificate_taxable_allowance_consumed": "400.00",
+        "ordinary_taxable_value": "600.00",
+        "current_withholding": "68.00",
+        "threshold_previously_crossed": true
+      }
+    },
+    {
+      "case_identifier": "withholding_prior_tax_matches_current_value",
+      "name": "Prior withholding is matched without deducting cash twice",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [],
+      "expected_closing_balances": {},
+      "arithmetic_assertions": [
+        {
+          "name": "matched taxable value",
+          "operation": "multiply_divide",
+          "operands": [
+            "100",
+            "30.00",
+            "10"
+          ],
+          "expected": "300.00",
+          "precision": 2
+        },
+        {
+          "name": "unmatched current taxable",
+          "operation": "subtract",
+          "operands": [
+            "1000.00",
+            "300.00"
+          ],
+          "expected": "700.00"
+        },
+        {
+          "name": "additional tax now",
+          "operation": "multiply_divide",
+          "operands": [
+            "700.00",
+            "10",
+            "100"
+          ],
+          "expected": "70.00",
+          "precision": 2
+        }
+      ],
+      "expected_observations": {
+        "prior_withholding_used": "30.00",
+        "additional_withholding": "70.00",
+        "taxable_identity_and_withholding_identity_preserved": true,
+        "prior_event_eligibility_must_be_satisfied": true
+      }
+    },
+    {
+      "case_identifier": "withholding_threshold_recovers_history",
+      "name": "Threshold crossing recovers prior untaxed value",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [],
+      "expected_closing_balances": {},
+      "arithmetic_assertions": [
+        {
+          "name": "cumulative taxable",
+          "operation": "add",
+          "operands": [
+            "700.00",
+            "300.00"
+          ],
+          "expected": "1000.00"
+        },
+        {
+          "name": "historical withholding recovered",
+          "operation": "multiply_divide",
+          "operands": [
+            "700.00",
+            "10",
+            "100"
+          ],
+          "expected": "70.00",
+          "precision": 2
+        },
+        {
+          "name": "current taxable withholding",
+          "operation": "multiply_divide",
+          "operands": [
+            "300.00",
+            "10",
+            "100"
+          ],
+          "expected": "30.00",
+          "precision": 2
+        },
+        {
+          "name": "total current deduction",
+          "operation": "add",
+          "operands": [
+            "70.00",
+            "30.00"
+          ],
+          "expected": "100.00"
+        }
+      ],
+      "expected_observations": {
+        "cumulative_threshold": "1000.00",
+        "single_threshold_disabled": true,
+        "tax_on_excess_only": false,
+        "current_taxable_identity_retains": "300.00",
+        "prior_taxable_identity_retains": "700.00"
+      }
+    },
+    {
+      "case_identifier": "fixed_actual_tax_final_row_residual",
+      "name": "Fixed charge allocations exactly retain document charge",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [],
+      "expected_closing_balances": {},
+      "arithmetic_assertions": [
+        {
+          "name": "first equal charge share",
+          "operation": "divide",
+          "operands": [
+            "10.00",
+            "3"
+          ],
+          "expected": "3.33",
+          "precision": 2
+        },
+        {
+          "name": "last-row residual",
+          "operation": "subtract",
+          "operands": [
+            "10.00",
+            "3.33",
+            "3.33"
+          ],
+          "expected": "3.34"
+        },
+        {
+          "name": "allocated charge total",
+          "operation": "add",
+          "operands": [
+            "3.33",
+            "3.33",
+            "3.34"
+          ],
+          "expected": "10.00"
+        }
+      ],
+      "expected_observations": {
+        "item_allocations": [
+          "3.33",
+          "3.33",
+          "3.34"
+        ],
+        "document_actual_charge": "10.00"
+      }
+    },
+    {
+      "case_identifier": "tax_rounding_stage_changes_result",
+      "name": "Item-row and tax-total rounding have distinct outcomes",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [],
+      "expected_closing_balances": {},
+      "arithmetic_assertions": [
+        {
+          "name": "single unrounded item tax",
+          "operation": "multiply_divide",
+          "operands": [
+            "0.05",
+            "10",
+            "100"
+          ],
+          "expected": "0.005"
+        },
+        {
+          "name": "item half-away tax",
+          "operation": "round",
+          "operands": [
+            "0.005"
+          ],
+          "expected": "0.01",
+          "precision": 2
+        },
+        {
+          "name": "three rounded item taxes",
+          "operation": "multiply",
+          "operands": [
+            "0.01",
+            "3"
+          ],
+          "expected": "0.03"
+        },
+        {
+          "name": "total before rounding",
+          "operation": "multiply",
+          "operands": [
+            "0.005",
+            "3"
+          ],
+          "expected": "0.015"
+        },
+        {
+          "name": "rounded accumulated total",
+          "operation": "round",
+          "operands": [
+            "0.015"
+          ],
+          "expected": "0.02",
+          "precision": 2
+        },
+        {
+          "name": "item half-even tax",
+          "operation": "round",
+          "operands": [
+            "0.005"
+          ],
+          "expected": "0.00",
+          "precision": 2,
+          "rounding_method": "half to even"
+        }
+      ],
+      "expected_observations": {
+        "half_away_item_rounding_total": "0.03",
+        "half_away_total_rounding_result": "0.02",
+        "half_even_item_rounding_total": "0.00"
+      }
+    },
+    {
+      "case_identifier": "deferred_final_month_cutoff_boundary",
+      "name": "Observed final-marker cutoff can recognize early residual",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/deferred-recognition-and-financial-control.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [],
+      "expected_closing_balances": {},
+      "arithmetic_assertions": [
+        {
+          "name": "already recognized",
+          "operation": "add",
+          "operands": [
+            "310.00",
+            "280.00"
+          ],
+          "expected": "590.00"
+        },
+        {
+          "name": "observed final residual through March fifteenth",
+          "operation": "subtract",
+          "operands": [
+            "900.00",
+            "590.00"
+          ],
+          "expected": "310.00"
+        },
+        {
+          "name": "proposed daily-through-cutoff value",
+          "operation": "multiply_divide",
+          "operands": [
+            "900.00",
+            "15",
+            "90"
+          ],
+          "expected": "150.00",
+          "precision": 2
+        }
+      ],
+      "expected_observations": {
+        "service_interval": {
+          "start": "2025-01-01",
+          "end": "2025-03-31"
+        },
+        "cutoff": "2025-03-15",
+        "observed_compatibility_policy_recognizes": "310.00",
+        "proposed_through_cutoff_policy_recognizes": "150.00",
+        "policy_decision_required": true
+      }
+    },
+    {
+      "case_identifier": "asset_adjustment_residual_cancellation_boundary",
+      "name": "Observed residual cancellation sign differs from restoration",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/assets-and-depreciation.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence unless explicitly listed",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [],
+      "expected_closing_balances": {},
+      "arithmetic_assertions": [
+        {
+          "name": "residual increase on submission",
+          "operation": "multiply_divide",
+          "operands": [
+            "1000.00",
+            "10",
+            "100"
+          ],
+          "expected": "100.00"
+        },
+        {
+          "name": "residual after submission",
+          "operation": "add",
+          "operands": [
+            "1000.00",
+            "100.00"
+          ],
+          "expected": "1100.00"
+        },
+        {
+          "name": "negative cancellation difference",
+          "operation": "multiply",
+          "operands": [
+            "1000.00",
+            "-1"
+          ],
+          "expected": "-1000.00"
+        },
+        {
+          "name": "observed double sign during residual cancellation",
+          "operation": "multiply",
+          "operands": [
+            "-1000.00",
+            "0.10",
+            "-1"
+          ],
+          "expected": "100.00"
+        },
+        {
+          "name": "observed residual after cancellation",
+          "operation": "add",
+          "operands": [
+            "1100.00",
+            "100.00"
+          ],
+          "expected": "1200.00"
+        },
+        {
+          "name": "proposed correctly restored residual",
+          "operation": "subtract",
+          "operands": [
+            "1100.00",
+            "100.00"
+          ],
+          "expected": "1000.00"
+        }
+      ],
+      "expected_observations": {
+        "observed_compatibility_residual_after_cancellation": "1200.00",
+        "proposed_corrected_residual_after_cancellation": "1000.00",
+        "carrying_value_restores_under_both_policies": true,
+        "policy_decision_required": true
+      }
+    },
+    {
+      "case_identifier": "receipt_and_invoice_currency_difference",
+      "name": "Receipt historical clearing rate differs from invoice rate",
+      "basis": "Derived financial acceptance example from the locally specified business rules",
+      "specification_links": [
+        "../../docs/domains/accounts-payable.md"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Foreign currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "receipt cost preserved; incoming-rate adjustment from bill disabled",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [
+        {
+          "event_name": "Receive at rate eighteen",
+          "postings": [
+            {
+              "account_role": "Inventory",
+              "debit": "900.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Received but unbilled",
+              "debit": "0.00",
+              "credit": "900.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Invoice at rate nineteen",
+          "postings": [
+            {
+              "account_role": "Received but unbilled",
+              "debit": "950.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Supplier payable",
+              "debit": "0.00",
+              "credit": "950.00"
+            }
+          ]
+        },
+        {
+          "event_name": "Resolve receipt exchange difference",
+          "postings": [
+            {
+              "account_role": "Exchange loss",
+              "debit": "50.00",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Received but unbilled",
+              "debit": "0.00",
+              "credit": "50.00"
+            }
+          ]
+        }
+      ],
+      "expected_closing_balances": {
+        "Inventory": "900.00",
+        "Received but unbilled": "0.00",
+        "Supplier payable": "-950.00",
+        "Exchange loss": "50.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "receipt foreign amount",
+          "operation": "multiply",
+          "operands": [
+            "10",
+            "5"
+          ],
+          "expected": "50.00"
+        },
+        {
+          "name": "receipt company amount",
+          "operation": "multiply",
+          "operands": [
+            "50",
+            "18"
+          ],
+          "expected": "900.00"
+        },
+        {
+          "name": "invoice company amount",
+          "operation": "multiply",
+          "operands": [
+            "50",
+            "19"
+          ],
+          "expected": "950.00"
+        },
+        {
+          "name": "signed clearing discrepancy",
+          "operation": "multiply",
+          "operands": [
+            "50",
+            "-1"
+          ],
+          "expected": "-50.00"
+        }
+      ],
+      "expected_observations": {}
+    },
+    {
+      "case_identifier": "complete_daily_depreciation_leap_year_schedule",
+      "name": "Every schedule row across leap and nonleap financial years",
+      "basis": "Complete inspected schedule expectation independently recalculated; each proposed journal posts one schedule row",
+      "specification_links": [
+        "../../docs/domains/assets-and-depreciation.md#straight-line-method"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "none unless explicitly listed",
+        "stock_policy": "no stock consequence",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book",
+        "depreciation_method": "straight line with financial-year day denominator",
+        "available_for_use": "2020-01-01",
+        "residual_value": "0.00"
+      },
+      "opening_balances": {
+        "Fixed asset cost": "100000.00"
+      },
+      "events": [
+        {
+          "event_name": "Post depreciation 2020-01-31",
+          "posting_date": "2020-01-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4234.97",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4234.97"
+            }
+          ],
+          "expected_accumulated_depreciation": "4234.97",
+          "expected_carrying_value": "95765.03"
+        },
+        {
+          "event_name": "Post depreciation 2020-02-29",
+          "posting_date": "2020-02-29",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "3961.75",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "3961.75"
+            }
+          ],
+          "expected_accumulated_depreciation": "8196.72",
+          "expected_carrying_value": "91803.28"
+        },
+        {
+          "event_name": "Post depreciation 2020-03-31",
+          "posting_date": "2020-03-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4234.97",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4234.97"
+            }
+          ],
+          "expected_accumulated_depreciation": "12431.69",
+          "expected_carrying_value": "87568.31"
+        },
+        {
+          "event_name": "Post depreciation 2020-04-30",
+          "posting_date": "2020-04-30",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4098.36",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4098.36"
+            }
+          ],
+          "expected_accumulated_depreciation": "16530.05",
+          "expected_carrying_value": "83469.95"
+        },
+        {
+          "event_name": "Post depreciation 2020-05-31",
+          "posting_date": "2020-05-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4234.97",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4234.97"
+            }
+          ],
+          "expected_accumulated_depreciation": "20765.02",
+          "expected_carrying_value": "79234.98"
+        },
+        {
+          "event_name": "Post depreciation 2020-06-30",
+          "posting_date": "2020-06-30",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4098.36",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4098.36"
+            }
+          ],
+          "expected_accumulated_depreciation": "24863.38",
+          "expected_carrying_value": "75136.62"
+        },
+        {
+          "event_name": "Post depreciation 2020-07-31",
+          "posting_date": "2020-07-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4234.97",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4234.97"
+            }
+          ],
+          "expected_accumulated_depreciation": "29098.35",
+          "expected_carrying_value": "70901.65"
+        },
+        {
+          "event_name": "Post depreciation 2020-08-31",
+          "posting_date": "2020-08-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4234.97",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4234.97"
+            }
+          ],
+          "expected_accumulated_depreciation": "33333.32",
+          "expected_carrying_value": "66666.68"
+        },
+        {
+          "event_name": "Post depreciation 2020-09-30",
+          "posting_date": "2020-09-30",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4098.36",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4098.36"
+            }
+          ],
+          "expected_accumulated_depreciation": "37431.68",
+          "expected_carrying_value": "62568.32"
+        },
+        {
+          "event_name": "Post depreciation 2020-10-31",
+          "posting_date": "2020-10-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4234.97",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4234.97"
+            }
+          ],
+          "expected_accumulated_depreciation": "41666.65",
+          "expected_carrying_value": "58333.35"
+        },
+        {
+          "event_name": "Post depreciation 2020-11-30",
+          "posting_date": "2020-11-30",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4098.36",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4098.36"
+            }
+          ],
+          "expected_accumulated_depreciation": "45765.01",
+          "expected_carrying_value": "54234.99"
+        },
+        {
+          "event_name": "Post depreciation 2020-12-31",
+          "posting_date": "2020-12-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4234.97",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4234.97"
+            }
+          ],
+          "expected_accumulated_depreciation": "49999.98",
+          "expected_carrying_value": "50000.02"
+        },
+        {
+          "event_name": "Post depreciation 2021-01-31",
+          "posting_date": "2021-01-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4246.58",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4246.58"
+            }
+          ],
+          "expected_accumulated_depreciation": "54246.56",
+          "expected_carrying_value": "45753.44"
+        },
+        {
+          "event_name": "Post depreciation 2021-02-28",
+          "posting_date": "2021-02-28",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "3835.62",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "3835.62"
+            }
+          ],
+          "expected_accumulated_depreciation": "58082.18",
+          "expected_carrying_value": "41917.82"
+        },
+        {
+          "event_name": "Post depreciation 2021-03-31",
+          "posting_date": "2021-03-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4246.58",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4246.58"
+            }
+          ],
+          "expected_accumulated_depreciation": "62328.76",
+          "expected_carrying_value": "37671.24"
+        },
+        {
+          "event_name": "Post depreciation 2021-04-30",
+          "posting_date": "2021-04-30",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4109.59",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4109.59"
+            }
+          ],
+          "expected_accumulated_depreciation": "66438.35",
+          "expected_carrying_value": "33561.65"
+        },
+        {
+          "event_name": "Post depreciation 2021-05-31",
+          "posting_date": "2021-05-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4246.58",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4246.58"
+            }
+          ],
+          "expected_accumulated_depreciation": "70684.93",
+          "expected_carrying_value": "29315.07"
+        },
+        {
+          "event_name": "Post depreciation 2021-06-30",
+          "posting_date": "2021-06-30",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4109.59",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4109.59"
+            }
+          ],
+          "expected_accumulated_depreciation": "74794.52",
+          "expected_carrying_value": "25205.48"
+        },
+        {
+          "event_name": "Post depreciation 2021-07-31",
+          "posting_date": "2021-07-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4246.58",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4246.58"
+            }
+          ],
+          "expected_accumulated_depreciation": "79041.10",
+          "expected_carrying_value": "20958.90"
+        },
+        {
+          "event_name": "Post depreciation 2021-08-31",
+          "posting_date": "2021-08-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4246.58",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4246.58"
+            }
+          ],
+          "expected_accumulated_depreciation": "83287.68",
+          "expected_carrying_value": "16712.32"
+        },
+        {
+          "event_name": "Post depreciation 2021-09-30",
+          "posting_date": "2021-09-30",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4109.59",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4109.59"
+            }
+          ],
+          "expected_accumulated_depreciation": "87397.27",
+          "expected_carrying_value": "12602.73"
+        },
+        {
+          "event_name": "Post depreciation 2021-10-31",
+          "posting_date": "2021-10-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4246.58",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4246.58"
+            }
+          ],
+          "expected_accumulated_depreciation": "91643.85",
+          "expected_carrying_value": "8356.15"
+        },
+        {
+          "event_name": "Post depreciation 2021-11-30",
+          "posting_date": "2021-11-30",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4109.59",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4109.59"
+            }
+          ],
+          "expected_accumulated_depreciation": "95753.44",
+          "expected_carrying_value": "4246.56"
+        },
+        {
+          "event_name": "Post depreciation 2021-12-31",
+          "posting_date": "2021-12-31",
+          "postings": [
+            {
+              "account_role": "Depreciation expense",
+              "debit": "4246.56",
+              "credit": "0.00"
+            },
+            {
+              "account_role": "Accumulated depreciation",
+              "debit": "0.00",
+              "credit": "4246.56"
+            }
+          ],
+          "expected_accumulated_depreciation": "100000.00",
+          "expected_carrying_value": "0.00"
+        }
+      ],
+      "expected_closing_balances": {
+        "Fixed asset cost": "100000.00",
+        "Depreciation expense": "100000.00",
+        "Accumulated depreciation": "-100000.00"
+      },
+      "arithmetic_assertions": [
+        {
+          "name": "Prorated schedule 2020-01-31",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "31",
+            "366"
+          ],
+          "expected": "4234.97",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2020-02-29",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "29",
+            "366"
+          ],
+          "expected": "3961.75",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2020-03-31",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "31",
+            "366"
+          ],
+          "expected": "4234.97",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2020-04-30",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "30",
+            "366"
+          ],
+          "expected": "4098.36",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2020-05-31",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "31",
+            "366"
+          ],
+          "expected": "4234.97",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2020-06-30",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "30",
+            "366"
+          ],
+          "expected": "4098.36",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2020-07-31",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "31",
+            "366"
+          ],
+          "expected": "4234.97",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2020-08-31",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "31",
+            "366"
+          ],
+          "expected": "4234.97",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2020-09-30",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "30",
+            "366"
+          ],
+          "expected": "4098.36",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2020-10-31",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "31",
+            "366"
+          ],
+          "expected": "4234.97",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2020-11-30",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "30",
+            "366"
+          ],
+          "expected": "4098.36",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2020-12-31",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "31",
+            "366"
+          ],
+          "expected": "4234.97",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2021-01-31",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "31",
+            "365"
+          ],
+          "expected": "4246.58",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2021-02-28",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "28",
+            "365"
+          ],
+          "expected": "3835.62",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2021-03-31",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "31",
+            "365"
+          ],
+          "expected": "4246.58",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2021-04-30",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "30",
+            "365"
+          ],
+          "expected": "4109.59",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2021-05-31",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "31",
+            "365"
+          ],
+          "expected": "4246.58",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2021-06-30",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "30",
+            "365"
+          ],
+          "expected": "4109.59",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2021-07-31",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "31",
+            "365"
+          ],
+          "expected": "4246.58",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2021-08-31",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "31",
+            "365"
+          ],
+          "expected": "4246.58",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2021-09-30",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "30",
+            "365"
+          ],
+          "expected": "4109.59",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2021-10-31",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "31",
+            "365"
+          ],
+          "expected": "4246.58",
+          "precision": 2
+        },
+        {
+          "name": "Prorated schedule 2021-11-30",
+          "operation": "multiply_divide",
+          "operands": [
+            "50000.00",
+            "30",
+            "365"
+          ],
+          "expected": "4109.59",
+          "precision": 2
+        },
+        {
+          "name": "Final residual",
+          "operation": "subtract",
+          "operands": [
+            "100000.00",
+            "95753.44"
+          ],
+          "expected": "4246.56"
+        }
+      ],
+      "expected_observations": {
+        "total_schedule_rows": 24,
+        "final_carrying_value": "0.00",
+        "forecast_rows_do_not_post_until_explicit_posting_operation": true
+      }
+    },
+    {
+      "case_identifier": "inclusive_per_unit_and_compound_tax",
+      "name": "Included per-unit charge participates in dependent percentage tax",
+      "basis": "Derived exact arithmetic from included-tax slope and intercept rule",
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md#exact-rounding-examples"
+      ],
+      "profile": {
+        "company": "Example company",
+        "company_currency": "Company currency",
+        "transaction_currency": "Company currency",
+        "amount_precision": 2,
+        "rounding_method": "half away from zero",
+        "taxes": "included charge two per unit and ten percent on net plus included per-unit charge",
+        "stock_policy": "none; purely commercial amount calculation",
+        "cancellation_policy": "history preserved by reversing entries",
+        "financial_book": "default company book"
+      },
+      "opening_balances": {},
+      "events": [],
+      "expected_closing_balances": {},
+      "arithmetic_assertions": [
+        {
+          "name": "Total per-unit charge",
+          "operation": "multiply",
+          "operands": [
+            "6",
+            "2.00"
+          ],
+          "expected": "12.00"
+        },
+        {
+          "name": "Total intercept",
+          "operation": "multiply",
+          "operands": [
+            "6",
+            "2.20"
+          ],
+          "expected": "13.20"
+        },
+        {
+          "name": "Printed amount less intercept",
+          "operation": "subtract",
+          "operands": [
+            "138.00",
+            "13.20"
+          ],
+          "expected": "124.80"
+        },
+        {
+          "name": "Tax-exclusive rounded net",
+          "operation": "divide",
+          "operands": [
+            "124.80",
+            "1.10"
+          ],
+          "expected": "113.45",
+          "precision": 2
+        },
+        {
+          "name": "Dependent rounded tax",
+          "operation": "subtract",
+          "operands": [
+            "138.00",
+            "113.45",
+            "12.00"
+          ],
+          "expected": "12.55"
+        },
+        {
+          "name": "Reconciled printed amount",
+          "operation": "add",
+          "operands": [
+            "113.45",
+            "12.00",
+            "12.55"
+          ],
+          "expected": "138.00"
+        }
+      ],
+      "expected_observations": {
+        "commercial_quantity": "6",
+        "printed_amount": "138.00",
+        "tax_exclusive_net": "113.45",
+        "per_unit_charge": "12.00",
+        "dependent_tax": "12.55"
+      }
+    }
+  ],
+  "rejection_and_compatibility_cases": [
+    {
+      "case_identifier": "journal_imbalance_over_allowance",
+      "given": {
+        "voucher_kind": "payment",
+        "precision": 2,
+        "debit": "100.00",
+        "credit": "99.94"
+      },
+      "predicate": "absolute rounded imbalance strictly greater than allowance",
+      "arithmetic_assertions": [
+        {
+          "name": "difference",
+          "operation": "subtract",
+          "operands": [
+            "100.00",
+            "99.94"
+          ],
+          "expected": "0.06"
+        },
+        {
+          "name": "allowance",
+          "operation": "divide",
+          "operands": [
+            "5",
+            "100"
+          ],
+          "expected": "0.05"
+        }
+      ],
+      "expected": {
+        "accepted": false,
+        "new_effective_ledger_rows": 0,
+        "new_effective_settlement_rows": 0
+      }
+    },
+    {
+      "case_identifier": "positive_invoice_overallocation",
+      "given": {
+        "current_outstanding": "250.00",
+        "requested_allocation": "350.00",
+        "bank_payment": "350.00"
+      },
+      "predicate": "positive allocation greater than current positive outstanding",
+      "expected": {
+        "accepted": false,
+        "maximum_invoice_allocation": "250.00",
+        "excess_money_can_remain_advance": "100.00"
+      }
+    },
+    {
+      "case_identifier": "negative_claim_overallocation",
+      "given": {
+        "current_outstanding": "-250.00",
+        "requested_allocation": "-250.01"
+      },
+      "predicate": "negative allocation less than current negative outstanding",
+      "expected": {
+        "accepted": false
+      }
+    },
+    {
+      "case_identifier": "supplier_hold_through_release_date",
+      "given": {
+        "today": "2026-09-10",
+        "release_date": "2026-09-10",
+        "hold_type": "payments",
+        "hold_flag": true
+      },
+      "predicate": "relevant supplier hold with today on or before release date",
+      "expected": {
+        "ordinary_payment_validation_accepts": false
+      }
+    },
+    {
+      "case_identifier": "invoice_hold_date_and_flag_differ",
+      "given": {
+        "today": "2026-09-10",
+        "release_date": "2026-09-10",
+        "invoice_hold_flag": true
+      },
+      "predicate": "generation checks date strictly after today; explicit reference validation checks remaining hold flag",
+      "expected": {
+        "generation_date_test_says_blocked": false,
+        "explicit_payment_reference_accepts": false,
+        "required_resolution": "Clear invoice hold through authorized release command"
+      }
+    },
+    {
+      "case_identifier": "two_allocations_compete_for_final_outstanding",
+      "basis": "required replacement consistency property; no isolation guarantee claimed from arithmetic inspection",
+      "given": {
+        "outstanding_before": "100.00",
+        "first_requested": "100.00",
+        "second_requested": "100.00"
+      },
+      "predicate": "both requests target same company, party, account and claim version",
+      "expected": {
+        "at_most_one_full_allocation_commits": true,
+        "total_effective_allocations": "100.00",
+        "second_operation_revalidates_or_conflicts": true,
+        "unexplained_negative_outstanding": false
+      }
+    },
+    {
+      "case_identifier": "supplier_number_uniqueness_cross_company_boundary",
+      "given": {
+        "uniqueness_enabled": true,
+        "same_supplier": true,
+        "same_nonempty_bill_number": true,
+        "different_company": true,
+        "existing_posting_inside_new_invoice_financial_year": true,
+        "existing_invoice_cancelled": false
+      },
+      "predicate": "reviewed duplicate query does not filter company",
+      "expected": {
+        "accepted": false,
+        "company_scoped_alternative_requires_policy_change": true
+      }
+    },
+    {
+      "case_identifier": "zero_asset_adjustment",
+      "basis": "proposed replacement validation policy; zero-difference success not established by reviewed path",
+      "given": {
+        "current_value": "1000.00",
+        "new_value": "1000.00"
+      },
+      "predicate": "zero difference has neither positive nor negative journal-construction branch",
+      "expected": {
+        "selected_replacement_policy": "Reject before journal construction as no financial change",
+        "new_effective_ledger_rows": 0
+      }
+    },
+    {
+      "case_identifier": "bank_excluded_fee_over_deposit",
+      "given": {
+        "deposit": "10.00",
+        "withdrawal": "0.00",
+        "excluded_fee": "11.00"
+      },
+      "predicate": "normalized deposit would be negative",
+      "expected": {
+        "accepted": false,
+        "financial_postings": []
+      }
+    },
+    {
+      "case_identifier": "blocked_invoice_hold_creation",
+      "given": {
+        "invoice_kind": "return",
+        "outstanding": "100.00",
+        "lifecycle": "submitted"
+      },
+      "predicate": "return invoice cannot be placed on individual hold",
+      "expected": {
+        "accepted": false,
+        "hold_flag_changed": false
+      }
+    }
+  ],
+  "acceptance_obligations": [
+    "Every event balances company-currency debits and credits",
+    "Compare each named account rather than only total balance",
+    "Preserve invoice, allocation, stock and financial-book identities while binding local account roles",
+    "Run operational concurrency and rollback tests in the replacement before claiming enterprise readiness",
+    "Keep observed compatibility and proposed corrected policy expectations distinct"
+  ]
+}

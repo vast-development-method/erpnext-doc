@@ -1,0 +1,931 @@
+{
+  "catalog_name": "Customer and service acceptance cases",
+  "catalog_contract": {
+    "purpose": "Portable business fixtures. Inputs and expected results are sufficient to recreate tests without inspecting external implementation material.",
+    "money": "Exact decimal strings; all amounts within a fixture share a currency unless explicitly stated.",
+    "dates": "Full calendar dates; timestamps use the stated local clock basis.",
+    "classification": "Compatibility requirements preserve described decisions. Additional robustness requirements are deliberately identified.",
+    "execution": "No application runtime is claimed. Local independent arithmetic verification does not imply that stateful integration tests passed."
+  },
+  "cases": [
+    {
+      "case_identifier": "restricted-master-visible-but-ineligible",
+      "specification_reference": "../../docs/domains/company-and-master-governance.md#formal-eligibility-predicates",
+      "classification": "compatibility_requirement",
+      "operation": "Inspect master, then use it in a transaction",
+      "inputs": {
+        "master_restricted": true,
+        "master_companies": [
+          "Company East"
+        ],
+        "actor_companies": [
+          "Company East",
+          "Company West"
+        ],
+        "transaction_company": "Company West"
+      },
+      "expected": {
+        "visible_by_company_helper": true,
+        "transaction_eligible": false
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "company-restriction-removal-protected",
+      "specification_reference": "../../docs/domains/company-and-master-governance.md#formal-eligibility-predicates",
+      "classification": "compatibility_requirement",
+      "operation": "Disable master company restriction",
+      "inputs": {
+        "old_companies": [
+          "Company East",
+          "Company West"
+        ],
+        "actor_companies": [
+          "Company East"
+        ]
+      },
+      "expected": {
+        "outcome": "reject",
+        "reason": "Removing Company West is outside actor membership-change authority."
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "no-company-user-restriction",
+      "specification_reference": "../../docs/domains/company-and-master-governance.md#visibility",
+      "classification": "compatibility_requirement",
+      "operation": "Check restricted master visibility",
+      "inputs": {
+        "master_restricted": true,
+        "master_companies": [
+          "Company West"
+        ],
+        "actor_company_restriction": null
+      },
+      "expected": {
+        "helper_allows_visibility": true,
+        "ordinary_record_permission_still_required": true
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "company-currency-submitted-quotation",
+      "specification_reference": "../../docs/domains/company-and-master-governance.md#changes-constrained-by-existing-history",
+      "classification": "compatibility_requirement",
+      "operation": "Change company default currency",
+      "inputs": {
+        "existing_submitted_quotation": true,
+        "old_currency": "Currency One",
+        "new_currency": "Currency Two"
+      },
+      "expected": {
+        "outcome": "reject",
+        "reason": "Submitted commercial document prevents default-currency change."
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "company-foreign-default-account",
+      "specification_reference": "../../docs/domains/company-and-master-governance.md#default-account-and-warehouse-validation",
+      "classification": "compatibility_requirement",
+      "operation": "Save company bank default",
+      "inputs": {
+        "company": "Company East",
+        "account_company": "Company West",
+        "account_disabled": false,
+        "account_group": false
+      },
+      "expected": {
+        "outcome": "reject"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "company-unbilled-account-change",
+      "specification_reference": "../../docs/domains/company-and-master-governance.md#changes-constrained-by-existing-history",
+      "classification": "compatibility_requirement",
+      "operation": "Replace delivered-but-unbilled account",
+      "inputs": {
+        "delivery_submitted": true,
+        "ledger_not_cancelled": true,
+        "delivery_billed_percentage": "40",
+        "delivery_status": "Partially Billed",
+        "old_clearing_value": "600",
+        "unbilled_value": "360"
+      },
+      "expected": {
+        "outcome": "reject",
+        "ledger_unchanged": true
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "lead-conversion-reuses-electronic-mail-contact",
+      "specification_reference": "../../docs/domains/customer-relationships-and-sales.md#conversion-contract",
+      "classification": "compatibility_requirement",
+      "operation": "Convert lead",
+      "inputs": {
+        "lead_has_write_permission": true,
+        "existing_contact_matches_electronic_mail": true,
+        "telephone_differs": true
+      },
+      "expected": {
+        "reuse_existing_contact": true,
+        "retain_lead_reference": true,
+        "project_existing_contact_details": true
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "shared-telephone-not-person-identity",
+      "specification_reference": "../../docs/domains/customer-relationships-and-sales.md#lead-capture-and-validation",
+      "classification": "compatibility_requirement",
+      "operation": "Resolve conversion contact",
+      "inputs": {
+        "telephone_matches": true,
+        "electronic_mail_matches": false
+      },
+      "expected": {
+        "reuse_contact_on_telephone_alone": false
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "conversion-permission-denial",
+      "specification_reference": "../../docs/domains/customer-relationships-and-sales.md#conversion-contract",
+      "classification": "compatibility_requirement",
+      "operation": "Convert lead",
+      "inputs": {
+        "lead_has_write_permission": false,
+        "trusted_internal_bypass": false
+      },
+      "expected": {
+        "outcome": "reject",
+        "created_contact_count": 0,
+        "created_organisation_count": 0,
+        "created_opportunity_count": 0,
+        "lead_converted_marker_changed": false
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "multiple-primary-opportunity-contacts",
+      "specification_reference": "../../docs/domains/customer-relationships-and-sales.md#ownership-sharing-and-contact-projections",
+      "classification": "compatibility_requirement",
+      "operation": "Save contact selections",
+      "inputs": {
+        "contacts": [
+          {
+            "identity": "Person One",
+            "primary": true
+          },
+          {
+            "identity": "Person Two",
+            "primary": true
+          }
+        ]
+      },
+      "expected": {
+        "outcome": "reject"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "lost-other-reason-requires-notes",
+      "specification_reference": "../../docs/domains/customer-relationships-and-sales.md#lead-capture-and-validation",
+      "classification": "compatibility_requirement",
+      "operation": "Change qualification stage",
+      "inputs": {
+        "stage_category": "lost",
+        "reason": "Other",
+        "notes": ""
+      },
+      "expected": {
+        "outcome": "reject"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "commercial-product-full-discount",
+      "specification_reference": "../../docs/domains/customer-relationships-and-sales.md#product-pricing-versus-forecast-value",
+      "classification": "compatibility_requirement",
+      "operation": "Recalculate product estimate",
+      "inputs": {
+        "quantity": "12",
+        "rate": "25",
+        "discount_percentage": "100"
+      },
+      "expected": {
+        "gross_amount": "300",
+        "discount_amount": "300",
+        "net_amount": "0",
+        "net_total": "0"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "commercial-forecast-full-discount-fallback",
+      "specification_reference": "../../docs/domains/customer-relationships-and-sales.md#product-pricing-versus-forecast-value",
+      "classification": "compatibility_requirement",
+      "operation": "Automatically refresh existing expected value",
+      "inputs": {
+        "automatic_refresh": true,
+        "previous_expected_value": "200",
+        "net_total": "0",
+        "gross_total": "300"
+      },
+      "expected": {
+        "expected_value": "300",
+        "net_total": "0"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "commercial-forecast-lost-contribution",
+      "specification_reference": "../../docs/domains/customer-relationships-and-sales.md#monetary-calculations-and-forecasts",
+      "classification": "compatibility_requirement",
+      "operation": "Aggregate monthly forecast",
+      "inputs": {
+        "stage_category": "lost",
+        "expected_value": "10000",
+        "probability_percentage": "40",
+        "exchange_rate": "1.2"
+      },
+      "expected": {
+        "forecast_contribution": "12000",
+        "actual_contribution": "0"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "campaign-boundary-inclusive-end",
+      "specification_reference": "../../docs/domains/customer-relationships-and-sales.md#campaign-schedules-and-recipient-state",
+      "classification": "compatibility_requirement",
+      "operation": "Calculate enrolment date state",
+      "inputs": {
+        "start_date": "2026-09-10",
+        "delays_days": [
+          0,
+          3,
+          7
+        ],
+        "current_date": "2026-09-17"
+      },
+      "expected": {
+        "end_date": "2026-09-17",
+        "status": "In progress"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "campaign-missed-day-not-caught-up",
+      "specification_reference": "../../docs/domains/customer-relationships-and-sales.md#campaign-schedules-and-recipient-state",
+      "classification": "compatibility_requirement",
+      "operation": "Run campaign scheduler",
+      "inputs": {
+        "start_date": "2026-09-10",
+        "entry_delay_days": 3,
+        "current_date": "2026-09-14",
+        "enrolment_status": "In progress"
+      },
+      "expected": {
+        "entry_selected": false
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "project-cancelled-task-counts-as-complete",
+      "specification_reference": "../../docs/domains/projects-and-time-billing.md#project-completion-mathematics",
+      "classification": "compatibility_requirement",
+      "operation": "Calculate task-count completion",
+      "inputs": {
+        "completed": 2,
+        "cancelled": 1,
+        "total": 4
+      },
+      "expected": {
+        "completion_percentage": "75"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "project-equal-weight-intermediate-rounding",
+      "specification_reference": "../../docs/domains/projects-and-time-billing.md#project-completion-mathematics",
+      "classification": "compatibility_requirement",
+      "operation": "Calculate weighted completion",
+      "inputs": {
+        "progress": [
+          "100",
+          "100",
+          "100"
+        ],
+        "weights": [
+          "1",
+          "1",
+          "1"
+        ]
+      },
+      "expected": {
+        "rounded_weight_shares": [
+          "0.33",
+          "0.33",
+          "0.33"
+        ],
+        "completion_percentage": "99",
+        "derived_project_state": "Open"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "project-zero-weight-completion",
+      "specification_reference": "../../docs/domains/projects-and-time-billing.md#project-completion-mathematics",
+      "classification": "compatibility_requirement",
+      "operation": "Calculate weighted completion",
+      "inputs": {
+        "progress": [
+          "100",
+          "50"
+        ],
+        "weights": [
+          "0",
+          "0"
+        ]
+      },
+      "expected": {
+        "completion_percentage": "0"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "task-unfinished-dependency",
+      "specification_reference": "../../docs/domains/projects-and-time-billing.md#task-integrity-and-completion",
+      "classification": "compatibility_requirement",
+      "operation": "Complete task",
+      "inputs": {
+        "dependency_states": [
+          "Completed",
+          "Working"
+        ]
+      },
+      "expected": {
+        "outcome": "reject"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "task-cancelled-dependency",
+      "specification_reference": "../../docs/domains/projects-and-time-billing.md#task-integrity-and-completion",
+      "classification": "compatibility_requirement",
+      "operation": "Complete task",
+      "inputs": {
+        "dependency_states": [
+          "Completed",
+          "Cancelled"
+        ],
+        "other_validation_passes": true
+      },
+      "expected": {
+        "outcome": "allow",
+        "task_progress": "100"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "task-reschedule-strict-boundary",
+      "specification_reference": "../../docs/domains/projects-and-time-billing.md#scheduling-sharing-and-operation-acceptance",
+      "classification": "compatibility_requirement",
+      "operation": "Reschedule dependent task",
+      "inputs": {
+        "prerequisite_end": "2026-09-12",
+        "dependent_beginning": "2026-09-12",
+        "dependent_ending": "2026-09-17",
+        "dependent_state": "Open"
+      },
+      "expected": {
+        "rescheduled": false
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "task-reschedule-preserves-date-difference",
+      "specification_reference": "../../docs/domains/projects-and-time-billing.md#scheduling-sharing-and-operation-acceptance",
+      "classification": "compatibility_requirement",
+      "operation": "Reschedule dependent task",
+      "inputs": {
+        "prerequisite_end": "2026-09-12",
+        "dependent_beginning": "2026-09-10",
+        "dependent_ending": "2026-09-15",
+        "dependent_state": "Open"
+      },
+      "expected": {
+        "beginning": "2026-09-13",
+        "ending": "2026-09-18"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "time-adjacent-intervals",
+      "specification_reference": "../../docs/domains/projects-and-time-billing.md#interval-and-amount-invariants",
+      "classification": "compatibility_requirement",
+      "operation": "Check same-user overlap",
+      "inputs": {
+        "first": [
+          "2026-09-10T09:00:00",
+          "2026-09-10T10:00:00"
+        ],
+        "second": [
+          "2026-09-10T10:00:00",
+          "2026-09-10T11:00:00"
+        ],
+        "user_check_enabled": true
+      },
+      "expected": {
+        "overlap": false
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "time-excess-billing-hours-warning",
+      "specification_reference": "../../docs/domains/projects-and-time-billing.md#time-recording-and-validation",
+      "classification": "compatibility_requirement",
+      "operation": "Calculate time row",
+      "inputs": {
+        "actual_hours": "2.5",
+        "billing_hours": "3",
+        "costing_rate": "40",
+        "billing_rate": "80"
+      },
+      "expected": {
+        "costing_amount": "100",
+        "billing_amount": "240",
+        "warning": true,
+        "rejected_for_excess_billing_hours": false
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "time-zero-price-billing-progress",
+      "specification_reference": "../../docs/domains/projects-and-time-billing.md#invoice-linkage-and-remaining-value-allocation",
+      "classification": "compatibility_requirement",
+      "operation": "Calculate billed percentage",
+      "inputs": {
+        "billable_amount": "0",
+        "billed_amount": "0",
+        "billable_hours": "8",
+        "billed_hours": "2"
+      },
+      "expected": {
+        "billed_percentage": "25"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "time-invoice-remaining-rate",
+      "specification_reference": "../../docs/domains/projects-and-time-billing.md#invoice-linkage-and-remaining-value-allocation",
+      "classification": "compatibility_requirement",
+      "operation": "Create remaining invoice",
+      "inputs": {
+        "billable_hours": "10",
+        "billed_hours": "4",
+        "billable_amount": "1000",
+        "billed_amount": "360"
+      },
+      "expected": {
+        "remaining_hours": "6",
+        "remaining_amount": "640",
+        "rate_fraction": {
+          "numerator": "320",
+          "denominator": "3"
+        }
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "project-parent-child-attribution",
+      "specification_reference": "../../docs/domains/projects-and-time-billing.md#project-aggregation-matrix",
+      "classification": "compatibility_requirement",
+      "operation": "Recalculate billed project value",
+      "inputs": {
+        "parent_project": "Project West",
+        "rows": [
+          {
+            "project": "Project East",
+            "net_amount": "100"
+          },
+          {
+            "project": null,
+            "net_amount": "200"
+          }
+        ]
+      },
+      "expected": {
+        "Project East": "100",
+        "Project West": "200"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "service-weekend-and-holiday-deadline",
+      "specification_reference": "../../docs/domains/service-and-support.md#precise-calendar-algorithm",
+      "classification": "compatibility_requirement",
+      "operation": "Compute conversation response deadline",
+      "inputs": {
+        "start": "2026-09-11T16:30:00",
+        "target_seconds": 7200,
+        "weekdays": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "opening": "09:00:00",
+        "closing": "17:00:00",
+        "holidays": [
+          "2026-09-14"
+        ]
+      },
+      "expected": {
+        "deadline": "2026-09-15T10:30:00"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "service-deadline-equality-fulfilled",
+      "specification_reference": "../../docs/domains/service-and-support.md#conversation-first-and-rolling-response",
+      "classification": "compatibility_requirement",
+      "operation": "Classify first reply",
+      "inputs": {
+        "deadline": "2026-09-15T10:30:00",
+        "responded_at": "2026-09-15T10:30:00"
+      },
+      "expected": {
+        "result": "fulfilled"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "service-origin-at-closing",
+      "specification_reference": "../../docs/domains/service-and-support.md#precise-calendar-algorithm",
+      "classification": "compatibility_requirement",
+      "operation": "Compute response deadline",
+      "inputs": {
+        "start": "2026-09-10T17:00:00",
+        "target_seconds": 3600,
+        "next_service_date": "2026-09-11",
+        "opening": "09:00:00",
+        "closing": "17:00:00"
+      },
+      "expected": {
+        "deadline": "2026-09-11T10:00:00"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "service-zero-duration-preserved",
+      "specification_reference": "../../docs/domains/service-and-support.md#business-calendar-mathematics",
+      "classification": "compatibility_requirement",
+      "operation": "Compute conversation response deadline",
+      "inputs": {
+        "start": "2026-09-10T18:00:00",
+        "target_seconds": 0
+      },
+      "expected": {
+        "deadline": "2026-09-10T18:00:00"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "service-empty-calendar-rejection",
+      "specification_reference": "../../docs/domains/service-and-support.md#precise-calendar-algorithm",
+      "classification": "additional_robustness_requirement",
+      "operation": "Validate positive-duration calendar",
+      "inputs": {
+        "target_seconds": 3600,
+        "weekday_windows": {}
+      },
+      "expected": {
+        "outcome": "configuration_error",
+        "must_not_loop_indefinitely": true
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "service-hold-wall-clock-extension",
+      "specification_reference": "../../docs/domains/service-and-support.md#hold-and-reopen-worked-sequence",
+      "classification": "compatibility_requirement",
+      "operation": "Apply accumulated hold",
+      "inputs": {
+        "calendar_deadline": "2026-09-15T10:30:00",
+        "hold_seconds": 7200
+      },
+      "expected": {
+        "resolution_deadline": "2026-09-15T12:30:00"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "service-reopened-hold-accumulation",
+      "specification_reference": "../../docs/domains/service-and-support.md#hold-and-reopen-worked-sequence",
+      "classification": "compatibility_requirement",
+      "operation": "Reopen resolved issue",
+      "inputs": {
+        "resolved_at": "2026-09-14T15:00:00",
+        "reopened_at": "2026-09-15T10:00:00",
+        "old_hold_seconds": 0
+      },
+      "expected": {
+        "new_hold_seconds": 68400,
+        "resolution_timestamp": null
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "issue-first-reply-outside-window-one-second",
+      "specification_reference": "../../docs/domains/service-and-support.md#issue-first-response-compatibility-calculation",
+      "classification": "compatibility_requirement",
+      "operation": "Measure issue first response",
+      "inputs": {
+        "created_at": "2026-09-10T18:00:00",
+        "responded_at": "2026-09-10T19:00:00",
+        "weekday_configured": true,
+        "opening": "09:00:00",
+        "closing": "17:00:00"
+      },
+      "expected": {
+        "issue_first_response_seconds": "1",
+        "conversation_elapsed_seconds": "0"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "issue-split-uses-communication-date",
+      "specification_reference": "../../docs/domains/service-and-support.md#split-portal-and-communication-acceptance",
+      "classification": "compatibility_requirement",
+      "operation": "Split issue timeline",
+      "inputs": {
+        "split_date": "2026-09-10T12:00:00",
+        "communications": [
+          {
+            "identity": "Late arrival",
+            "communication_date": "2026-09-09T12:00:00",
+            "creation_date": "2026-09-12T12:00:00"
+          },
+          {
+            "identity": "Equal boundary",
+            "communication_date": "2026-09-10T12:00:00",
+            "creation_date": "2026-09-10T12:00:00"
+          }
+        ]
+      },
+      "expected": {
+        "remain_on_original": [
+          "Late arrival"
+        ],
+        "move_to_new": [
+          "Equal boundary"
+        ]
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "maintenance-holiday-moves-backward",
+      "specification_reference": "../../docs/domains/service-and-support.md#maintenance-schedule-generation-details",
+      "classification": "compatibility_requirement",
+      "operation": "Adjust scheduled date",
+      "inputs": {
+        "nominal_date": "2026-09-21",
+        "holidays": [
+          "2026-09-21"
+        ],
+        "coverage_end": "2026-10-01"
+      },
+      "expected": {
+        "adjusted_date": "2026-09-20"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "maintenance-cancellation-restores-pending",
+      "specification_reference": "../../docs/domains/service-and-support.md#maintenance-schedule-generation-details",
+      "classification": "compatibility_requirement",
+      "operation": "Cancel submitted maintenance visit",
+      "inputs": {
+        "detail_status": "Fully Completed",
+        "actual_date": "2026-09-20"
+      },
+      "expected": {
+        "detail_status": "Pending",
+        "actual_date": null
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "warranty-cancellation-blocked-by-draft-visit",
+      "specification_reference": "../../docs/domains/service-and-support.md#warranty-and-installation",
+      "classification": "compatibility_requirement",
+      "operation": "Cancel warranty case",
+      "inputs": {
+        "linked_maintenance_visit_state": "Draft"
+      },
+      "expected": {
+        "outcome": "reject",
+        "reason": "A noncancelled linked visit exists."
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "supplier-import-inherits-prior-row-quantity",
+      "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#supplier-import-row-derivation-and-partial-failure",
+      "classification": "compatibility_requirement",
+      "operation": "Prepare successive supplier invoice rows",
+      "inputs": {
+        "previous_quantity": "3",
+        "previous_unit": "Box",
+        "unit_rate": "5",
+        "line_total": "5",
+        "quantity": null,
+        "unit": null
+      },
+      "expected": {
+        "prepared_quantity": "3",
+        "prepared_unit": "Box",
+        "prepared_amount": "15"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "supplier-import-adjusts-first-payment-only",
+      "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#supplier-import-row-derivation-and-partial-failure",
+      "classification": "compatibility_requirement",
+      "operation": "Reconcile imported installments",
+      "inputs": {
+        "imported_installments": [
+          "60",
+          "60"
+        ],
+        "invoice_grand_total": "110"
+      },
+      "expected": {
+        "imported_grand_total": "120",
+        "installments": [
+          "50",
+          "60"
+        ]
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "supplier-import-correct-rollback-boundary",
+      "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#supplier-import-row-derivation-and-partial-failure",
+      "classification": "compatibility_requirement",
+      "operation": "Fail purchase-invoice creation after supplier preparation",
+      "inputs": {
+        "supplier_newly_created": true,
+        "invoice_creation_raises": true
+      },
+      "expected": {
+        "invoice_creation_rolled_back": true,
+        "supplier_creation_inside_same_rollback": false,
+        "continue_later_invoice_definitions": true
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "supplier-import-preparation-failure-not-contained",
+      "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#supplier-import-row-derivation-and-partial-failure",
+      "classification": "compatibility_requirement",
+      "operation": "Reject missing supplier invoice number before creation rollback point",
+      "inputs": {
+        "invoice_number": ""
+      },
+      "expected": {
+        "outcome": "failure_before_local_rollback",
+        "guaranteed_continue_later_headers": false
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "regional-included-tax-unit-price",
+      "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#export-numerical-and-selection-rules",
+      "classification": "compatibility_requirement",
+      "operation": "Prepare electronic invoice unit price",
+      "inputs": {
+        "has_inclusive_tax": true,
+        "tax_percentage": "15",
+        "price_list_rate": "115",
+        "amount_margin": "11.5"
+      },
+      "expected": {
+        "unit_price": "100",
+        "amount_margin": "10"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "regional-credit-magnitude-formatting",
+      "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#export-numerical-and-selection-rules",
+      "classification": "compatibility_requirement",
+      "operation": "Format credit-note amounts",
+      "inputs": {
+        "document_category": "TD04",
+        "quantity": "-2",
+        "amount": "-100",
+        "precision": 2
+      },
+      "expected": {
+        "quantity": "2.00",
+        "amount": "100.00",
+        "internal_signed_values_changed": false
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "regional-zero-rate-explicit-marker",
+      "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#report-arithmetic-and-presentation-boundaries",
+      "classification": "compatibility_requirement",
+      "operation": "Include item in South African zero-rate audit bucket",
+      "inputs": {
+        "tax_rate": "0",
+        "tax_amount": "0",
+        "taxable_amount": "200",
+        "explicit_zero_rated_marker": false
+      },
+      "expected": {
+        "included": false
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "certificate-touching-dates-overlap",
+      "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#reduced-withholding-certificates",
+      "classification": "compatibility_requirement",
+      "operation": "Compare two selected certificate intervals",
+      "inputs": {
+        "existing": [
+          "2026-01-01",
+          "2026-06-30"
+        ],
+        "proposed": [
+          "2026-06-30",
+          "2026-12-31"
+        ],
+        "same_company_supplier_category": true
+      },
+      "expected": {
+        "overlap": true,
+        "outcome": "reject"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "contract-future-beginning-without-end",
+      "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#contract-transitions-and-acceptance",
+      "classification": "compatibility_requirement",
+      "operation": "Compute signed contract activation",
+      "inputs": {
+        "signed": true,
+        "beginning": "2026-10-01",
+        "ending": null,
+        "current_date": "2026-09-10"
+      },
+      "expected": {
+        "status": "Active"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "contract-deadline-equality-not-lapsed",
+      "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#contract-transitions-and-acceptance",
+      "classification": "compatibility_requirement",
+      "operation": "Compute fulfilment",
+      "inputs": {
+        "requires_fulfilment": true,
+        "total_rows": 3,
+        "fulfilled_rows": 2,
+        "deadline": "2026-09-10",
+        "current_date": "2026-09-10"
+      },
+      "expected": {
+        "status": "Partially Fulfilled"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    },
+    {
+      "case_identifier": "contract-required-empty-checklist",
+      "specification_reference": "../../docs/domains/regional-and-specialised-capabilities.md#contract-transitions-and-acceptance",
+      "classification": "compatibility_requirement",
+      "operation": "Compute fulfilment",
+      "inputs": {
+        "requires_fulfilment": true,
+        "total_rows": 0,
+        "fulfilled_rows": 0,
+        "deadline": null
+      },
+      "expected": {
+        "status": "Unfulfilled"
+      },
+      "verification": "Specified acceptance fixture; deterministic examples independently checked where applicable; application runtime not executed."
+    }
+  ]
+}

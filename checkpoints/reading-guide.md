@@ -1,6 +1,8 @@
 # Assemble the complete blueprint for local reading
 
-A normal checkout includes a compressed checkpoint and the separately reviewable rebuild supplements. Use the following commands from the root of a full checkout of the research branch. Python 3.8 or later is used only to unpack and verify documentation. Allow about 750 MiB of free space. Windows users can use `py -3` in place of `python3`.
+Browse the [September reading edition](september/README.md) directly on GitHub. It includes all 100 Markdown chapters and catalog indexes, the business calculations and 235 original JSON files. The [catalog guide](september/catalog-access.md) shows how to locate each bulk partition or read a single member.
+
+To search all 3,476 original files together with the version-pinned [rebuild supplements](../docs/rebuild/README.md), use the following commands from the repository root. Python 3.8 or later is used only to unpack and verify documentation. Allow about 750 MiB of free space. Windows users can use `py -3` in place of `python3`.
 
 ```sh
 python3 tools/restore-blueprint ../erpnext-blueprint-expanded
@@ -14,6 +16,7 @@ Open `../erpnext-blueprint-expanded/START-HERE.md`. Choose the complete checkpoi
 | `README.md`, `docs/`, `schemas/` | All 3,476 regular files from the verified checkpoint, including its complete navigation. |
 | `docs/rebuild/` | New branch documentation, inventories, schemas and examples. |
 | `schemas/traceability/source-snapshot.json`, `schemas/source-file-distribution/` | Earlier source revisions and their artifact locators, used by supplements referring back to the archive boundary. |
+| `checkpoints/september/` | The GitHub reading edition and member inventory, at the same paths used by links in the release supplements. |
 | `START-HERE.md` | Navigation joining both sets of evidence. |
 
 The restore assembles the 17 numbered parts in order, verifies SHA-256 `bf852d1a552aeeb42579cb2972dacb156f28198bc3349c18b07efff0d88b91b7`, and checks the archive's regular-file count. It writes only to a newly created output directory outside the repository. Choose an existing parent and an unused destination name. No external service or ERP installation is needed. A second restore to an existing directory fails, even if the directory is empty. An interrupted restore can leave a partial output with a `.restore-in-progress` marker. Use a fresh destination to retry.

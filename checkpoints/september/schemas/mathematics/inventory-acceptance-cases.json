@@ -1,0 +1,994 @@
+{
+  "catalog_name": "Inventory, packaging, fulfilment, manufacturing and quality acceptance cases",
+  "catalog_version": "1.0",
+  "purpose": "Self-contained replacement-system test inputs and expected business outcomes. Decimal quantities and money are represented by exact decimal strings.",
+  "scope_assumptions": [
+    "Company currency has two decimal places unless a case overrides it.",
+    "Rates retain enough intermediate precision to reproduce rounded stock value.",
+    "Quantity units are common within each arithmetic comparison; named pack conversion is applied explicitly.",
+    "No tax, discount, exchange difference, allowance or unrelated prior movement exists unless stated.",
+    "Cases run independently from their declared initial states.",
+    "A described service action is a business operation, not an implementation function.",
+    "A concurrency target is a required replacement-system test, not a claim that simultaneous reference execution occurred."
+  ],
+  "case_count": 29,
+  "cases": [
+    {
+      "case_identifier": "mixed_commercial_pack_sequence",
+      "name": "Receive cases, deliver six packs and return three packs",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/products-units-and-packaging.md",
+      "initial_state": {
+        "stock_quantity": "0",
+        "inventory_value": "0",
+        "stock_unit": "Piece",
+        "unit_factors": {
+          "Pack of Three": "3",
+          "Pack of Six": "6",
+          "Case of Twelve": "12"
+        },
+        "valuation_method": "Moving average"
+      },
+      "operations": [
+        {
+          "action": "receive",
+          "transaction_quantity": "5",
+          "unit": "Case of Twelve",
+          "transaction_unit_price": "60",
+          "expected_stock_change": "60",
+          "expected_stock_quantity": "60",
+          "expected_inventory_value": "300"
+        },
+        {
+          "action": "deliver",
+          "transaction_quantity": "2",
+          "unit": "Pack of Six",
+          "selling_price_per_transaction_unit": "42",
+          "expected_stock_change": "-12",
+          "expected_stock_quantity": "48",
+          "expected_inventory_value": "240",
+          "expected_cost_of_goods_sold": "60",
+          "expected_sales_amount": "84"
+        },
+        {
+          "action": "accept_customer_return",
+          "transaction_quantity": "1",
+          "unit": "Pack of Three",
+          "applicable_original_cost_per_piece": "5",
+          "expected_stock_change": "3"
+        }
+      ],
+      "expected_final_state": {
+        "stock_quantity": "51",
+        "inventory_value": "255",
+        "net_stock_cost_issued": "45"
+      },
+      "required_assertions": [
+        "No movement uses package dimensions as a unit factor.",
+        "Revenue and inventory cost remain independent.",
+        "A credit is not inferred from stock cost alone."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "whole_stock_unit_rejection",
+      "name": "Reject a pack fraction creating a fractional piece",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/products-units-and-packaging.md",
+      "initial_state": {
+        "stock_unit": "Piece",
+        "stock_unit_requires_whole_quantity": true,
+        "pack_factor": "3",
+        "pack_allows_fraction": true
+      },
+      "operations": [
+        {
+          "action": "attempt_receive",
+          "transaction_quantity": "0.5"
+        }
+      ],
+      "expected_final_state": {
+        "accepted": false,
+        "calculated_stock_quantity": "1.5",
+        "effective_stock_change": "0"
+      },
+      "required_assertions": [
+        "A fractional transaction unit does not bypass the whole-number stock-unit rule."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "moving_average_receipt_and_issue",
+      "name": "Weighted receipt then ordinary issue",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "stock_quantity": "10",
+        "valuation_rate": "4",
+        "inventory_value": "40",
+        "valuation_method": "Moving average"
+      },
+      "operations": [
+        {
+          "action": "receive",
+          "quantity": "5",
+          "rate": "7",
+          "expected_stock_quantity": "15",
+          "expected_valuation_rate": "5",
+          "expected_inventory_value": "75"
+        },
+        {
+          "action": "issue",
+          "quantity": "6",
+          "expected_issue_value": "30"
+        }
+      ],
+      "expected_final_state": {
+        "stock_quantity": "9",
+        "valuation_rate": "5",
+        "inventory_value": "45"
+      },
+      "required_assertions": [
+        "Receipt value is thirty-five.",
+        "Final value plus issue cost equals seventy-five."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "moving_average_historical_supplier_return",
+      "name": "Explicit historical return rate changes remainder average",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "stock_quantity": "10",
+        "valuation_rate": "5",
+        "inventory_value": "50"
+      },
+      "operations": [
+        {
+          "action": "supplier_return",
+          "quantity": "2",
+          "explicit_outgoing_rate": "7"
+        }
+      ],
+      "expected_final_state": {
+        "stock_quantity": "8",
+        "inventory_value": "36",
+        "valuation_rate": "4.5",
+        "issued_value": "14"
+      },
+      "required_assertions": [
+        "The remaining rate is not incorrectly left at five."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "first_in_first_out_layers",
+      "name": "Ordered cost layers under first in first out",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "stock_quantity": "0",
+        "layers": [],
+        "valuation_method": "First in first out"
+      },
+      "operations": [
+        {
+          "action": "receive",
+          "quantity": "10",
+          "rate": "4"
+        },
+        {
+          "action": "receive",
+          "quantity": "5",
+          "rate": "7"
+        },
+        {
+          "action": "issue",
+          "quantity": "12"
+        }
+      ],
+      "expected_final_state": {
+        "stock_quantity": "3",
+        "inventory_value": "21",
+        "issue_cost": "54",
+        "layers": [
+          {
+            "quantity": "3",
+            "rate": "7"
+          }
+        ]
+      },
+      "required_assertions": [
+        "Issue cost plus remaining value equals seventy-five.",
+        "Equal remaining quantity does not imply equal remaining value across methods."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "last_in_first_out_layers",
+      "name": "Ordered cost layers under last in first out",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "stock_quantity": "0",
+        "layers": [],
+        "valuation_method": "Last in first out"
+      },
+      "operations": [
+        {
+          "action": "receive",
+          "quantity": "10",
+          "rate": "4"
+        },
+        {
+          "action": "receive",
+          "quantity": "5",
+          "rate": "7"
+        },
+        {
+          "action": "issue",
+          "quantity": "12"
+        }
+      ],
+      "expected_final_state": {
+        "stock_quantity": "3",
+        "inventory_value": "12",
+        "issue_cost": "63",
+        "layers": [
+          {
+            "quantity": "3",
+            "rate": "4"
+          }
+        ]
+      },
+      "required_assertions": [
+        "Issue cost plus remaining value equals seventy-five.",
+        "Equal remaining quantity does not imply equal remaining value across methods."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "first_in_first_out_explicit_rate_selection",
+      "name": "Historical return selects a matching cost layer",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "valuation_method": "First in first out",
+        "layers": [
+          {
+            "quantity": "10",
+            "rate": "4"
+          },
+          {
+            "quantity": "5",
+            "rate": "7"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "action": "supplier_return",
+          "quantity": "2",
+          "explicit_outgoing_rate": "7",
+          "purchase_return_mode": true
+        }
+      ],
+      "expected_final_state": {
+        "stock_quantity": "13",
+        "inventory_value": "61",
+        "issue_cost": "14",
+        "layers": [
+          {
+            "quantity": "10",
+            "rate": "4"
+          },
+          {
+            "quantity": "3",
+            "rate": "7"
+          }
+        ]
+      },
+      "required_assertions": [
+        "The matching-rate layer is consumed before the older different-rate layer."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "backdated_receipt_reposting",
+      "name": "Backdated receipt changes later issue and retained value",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "valuation_method": "Moving average",
+        "stock_quantity": "0"
+      },
+      "operations": [
+        {
+          "action": "receive",
+          "posting_order": 1,
+          "quantity": "10",
+          "rate": "4"
+        },
+        {
+          "action": "deliver",
+          "posting_order": 3,
+          "quantity": "6",
+          "initial_issue_cost": "24"
+        },
+        {
+          "action": "enter_backdated_receipt",
+          "posting_order": 2,
+          "quantity": "10",
+          "rate": "6"
+        },
+        {
+          "action": "complete_reposting"
+        }
+      ],
+      "expected_final_state": {
+        "stock_quantity": "14",
+        "inventory_value": "70",
+        "delivery_cost": "30",
+        "increase_in_delivery_cost": "6"
+      },
+      "required_assertions": [
+        "The backdated receipt is processed before the delivery.",
+        "The later financial stock-cost posting changes by six.",
+        "Reposting does not add duplicate receipt quantity."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "landed_cost_after_partial_delivery",
+      "name": "Split added landed cost between remaining inventory and delivered cost",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "stock_quantity": "0",
+        "valuation_method": "Moving average"
+      },
+      "operations": [
+        {
+          "action": "receive",
+          "quantity": "10",
+          "rate": "10"
+        },
+        {
+          "action": "deliver",
+          "quantity": "6"
+        },
+        {
+          "action": "allocate_landed_cost",
+          "charge": "20"
+        },
+        {
+          "action": "complete_reposting"
+        }
+      ],
+      "expected_final_state": {
+        "stock_quantity": "4",
+        "inventory_value": "48",
+        "cost_of_goods_sold": "72",
+        "inventory_value_increment": "8",
+        "cost_of_goods_sold_increment": "12"
+      },
+      "required_assertions": [
+        "The full landed-cost increment of twenty is accounted for.",
+        "The charge obligation is not recognised twice."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "landed_cost_rounding_residual",
+      "name": "Allocate residual to final landed-cost row",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "currency_precision": 2,
+        "row_bases": [
+          "1",
+          "1",
+          "1"
+        ],
+        "charges": "10"
+      },
+      "operations": [
+        {
+          "action": "allocate_by_basis_in_preserved_row_order"
+        }
+      ],
+      "expected_final_state": {
+        "allocations": [
+          "3.33",
+          "3.33",
+          "3.34"
+        ],
+        "sum_allocations": "10.00"
+      },
+      "required_assertions": [
+        "The last row receives the residual and allocation order is retained."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "manual_landed_cost_tolerance",
+      "name": "Manual tolerance is strict at two smallest currency units",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "currency_precision": 2,
+        "required_charges": "10"
+      },
+      "operations": [
+        {
+          "action": "validate_manual_total",
+          "allocated_total": "9.99",
+          "expected_acceptance": true,
+          "expected_residual_adjustment": "0.01"
+        },
+        {
+          "action": "validate_manual_total",
+          "allocated_total": "9.98",
+          "expected_acceptance": false
+        }
+      ],
+      "expected_final_state": {
+        "tolerance_boundary": "0.02",
+        "boundary_is_accepted": false
+      },
+      "required_assertions": [
+        "Both comparisons use the rounded difference.",
+        "A zero allocated total independently fails total-basis validation."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "standard_receipt_then_supplier_invoice",
+      "name": "Recognise standard purchase variance once",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "stock_quantity": "0",
+        "effective_standard_rate": "130"
+      },
+      "operations": [
+        {
+          "action": "receive",
+          "quantity": "1",
+          "purchase_unit_value": "200",
+          "expected_inventory_debit": "130",
+          "expected_variance_debit": "70",
+          "expected_received_not_billed_credit": "200"
+        },
+        {
+          "action": "invoice_without_stock_update",
+          "amount": "200",
+          "expected_received_not_billed_debit": "200",
+          "expected_payable_credit": "200"
+        }
+      ],
+      "expected_final_state": {
+        "stock_quantity": "1",
+        "inventory_value": "130",
+        "purchase_price_variance": "70",
+        "supplier_payable": "200",
+        "received_not_billed_balance": "0"
+      },
+      "required_assertions": [
+        "No second stock receipt.",
+        "No duplicate purchase price variance on receipt-clearing invoice.",
+        "Debits and credits balance separately for each operation."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "standard_revaluation",
+      "name": "Change standard rate with no quantity movement",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "stock_quantity": "10",
+        "old_standard_rate": "100",
+        "inventory_value": "1000"
+      },
+      "operations": [
+        {
+          "action": "submit_effective_standard_change",
+          "new_standard_rate": "130"
+        }
+      ],
+      "expected_final_state": {
+        "stock_quantity": "10",
+        "inventory_value": "1300",
+        "revaluation_amount": "300"
+      },
+      "required_assertions": [
+        "Posting date must satisfy standard effective-date and inventory activity restrictions."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "reservation_remaining_claim",
+      "name": "Deduct delivered, transferred and consumed portions",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "actual_stock_quantity": "20",
+        "active_reservations": [
+          {
+            "reserved_quantity": "12",
+            "delivered_quantity": "3",
+            "transferred_quantity": "2",
+            "consumed_quantity": "1"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "action": "calculate_available_quantity"
+        }
+      ],
+      "expected_final_state": {
+        "remaining_claim": "6",
+        "available_quantity": "14"
+      },
+      "required_assertions": [
+        "Projected stock is a separate planning measure."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "reservation_concurrent_last_units",
+      "name": "Two simultaneous claims cannot reserve the same final stock",
+      "case_kind": "concurrency_acceptance_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "actual_stock_quantity": "10",
+        "remaining_active_claims": "0",
+        "two_independent_order_requirements": [
+          "10",
+          "10"
+        ]
+      },
+      "operations": [
+        {
+          "action": "submit_concurrent_reservations",
+          "requested_quantities": [
+            "10",
+            "10"
+          ]
+        }
+      ],
+      "expected_final_state": {
+        "maximum_total_successful_claim": "10",
+        "minimum_unfulfilled_requirement": "10"
+      },
+      "required_assertions": [
+        "Successful reservations sum to at most ten.",
+        "The losing operation is rejected or receives an explicitly smaller allowed reservation.",
+        "The same requirement is not marked fully reserved without its actual claim."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "negative_stock_strict_tolerance",
+      "name": "Negative-stock boundary depends on configured precision",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/inventory-and-valuation.md",
+      "initial_state": {
+        "quantity_precision": 4,
+        "reserved_quantity": "0"
+      },
+      "operations": [
+        {
+          "action": "validate_resulting_quantity",
+          "resulting_quantity": "-0.0001",
+          "expected_negative_stock_guard_rejection": false
+        },
+        {
+          "action": "validate_resulting_quantity",
+          "resulting_quantity": "-0.0002",
+          "expected_negative_stock_guard_rejection": true
+        }
+      ],
+      "expected_final_state": {
+        "strict_threshold": "0.0001"
+      },
+      "required_assertions": [
+        "This fixture concerns the ordinary quantity guard only; serial ownership may independently reject."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "putaway_indivisible_six_pack",
+      "name": "Floor free capacity to whole packs",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/procurement-and-fulfilment.md",
+      "initial_state": {
+        "stock_capacity": "120",
+        "current_stock": "103",
+        "pending_stock_quantity": "30",
+        "pack_factor": "6",
+        "transaction_unit_requires_whole_quantity": true
+      },
+      "operations": [
+        {
+          "action": "allocate_putaway"
+        }
+      ],
+      "expected_final_state": {
+        "free_capacity": "17",
+        "allocated_transaction_packs": "2",
+        "allocated_stock_quantity": "12",
+        "unallocated_stock_quantity": "18",
+        "unused_capacity": "5"
+      },
+      "required_assertions": [
+        "Do not allocate a third indivisible pack."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "over_receipt_staged_mapping",
+      "name": "Use ordinary outstanding quantity before allowance",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/procurement-and-fulfilment.md",
+      "initial_state": {
+        "ordered_quantity": "100",
+        "allowance_percentage": "5"
+      },
+      "operations": [
+        {
+          "action": "map_receipt",
+          "received_quantity": "0",
+          "expected_proposal": "100"
+        },
+        {
+          "action": "map_receipt",
+          "received_quantity": "98",
+          "expected_proposal": "2"
+        },
+        {
+          "action": "map_receipt",
+          "received_quantity": "100",
+          "expected_proposal": "5"
+        },
+        {
+          "action": "map_receipt",
+          "received_quantity": "103",
+          "expected_proposal": "2"
+        }
+      ],
+      "expected_final_state": {
+        "maximum_total_received_quantity": "105"
+      },
+      "required_assertions": [
+        "Source order quantity remains one hundred."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "billable_after_return_and_replacement",
+      "name": "Replacement delivery restores billable quantity",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/procurement-and-fulfilment.md",
+      "initial_state": {
+        "ordered_quantity": "10",
+        "returned_quantity": "2",
+        "submitted_billed_quantity": "6"
+      },
+      "operations": [
+        {
+          "action": "calculate_pending_invoice",
+          "delivered_quantity": "8",
+          "expected_billable_quantity": "8",
+          "expected_pending_quantity": "2"
+        },
+        {
+          "action": "calculate_pending_invoice",
+          "delivered_quantity": "10",
+          "expected_billable_quantity": "10",
+          "expected_pending_quantity": "4"
+        }
+      ],
+      "expected_final_state": {
+        "latest_billable_quantity": "10",
+        "latest_pending_quantity": "4"
+      },
+      "required_assertions": [
+        "Subtract quantity already mapped into the same target draft in addition to submitted billing."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "recursive_recipe_explosion",
+      "name": "Preserve child-output denominator in material demand",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md",
+      "initial_state": {
+        "parent_output_quantity": "10",
+        "required_subassembly_quantity": "4",
+        "child_output_quantity": "2",
+        "child_screw_quantity": "6"
+      },
+      "operations": [
+        {
+          "action": "explode_child_recipe"
+        }
+      ],
+      "expected_final_state": {
+        "required_screws": "12"
+      },
+      "required_assertions": [
+        "Four subassemblies at three screws per subassembly require twelve screws.",
+        "The subassembly grouping is not also consumed as an extra raw-material input when exploded."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "percentage_formulation_mass_conversion",
+      "name": "Use balance component and a dimensional unit factor",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md",
+      "initial_state": {
+        "batch_quantity_kilograms": "200",
+        "concentrate_percentage": "25",
+        "water_is_balance_component": true,
+        "grams_per_kilogram": "1000"
+      },
+      "operations": [
+        {
+          "action": "calculate_formula"
+        }
+      ],
+      "expected_final_state": {
+        "water_percentage": "75",
+        "concentrate_grams": "50000",
+        "water_kilograms": "150"
+      },
+      "required_assertions": [
+        "Reject another balance component.",
+        "Reject missing mass-unit conversion.",
+        "Do not infer a mass-to-volume conversion."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "secondary_output_value_allocation",
+      "name": "Allocate own-cost and percentage outputs before extra operating cost",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md",
+      "initial_state": {
+        "consumed_material_value": "1000",
+        "own_cost_secondary_value": "100",
+        "primary_percentage": "80",
+        "secondary_percentage": "20",
+        "primary_stock_quantity": "90",
+        "additional_operating_cost": "90"
+      },
+      "operations": [
+        {
+          "action": "value_own_cost_secondary"
+        },
+        {
+          "action": "allocate_remaining_material_pool"
+        },
+        {
+          "action": "allocate_additional_cost_to_primary_output"
+        }
+      ],
+      "expected_final_state": {
+        "remaining_material_pool": "900",
+        "primary_material_value": "720",
+        "percentage_secondary_value": "180",
+        "primary_final_value": "810",
+        "primary_final_rate": "9",
+        "total_output_value": "1090"
+      },
+      "required_assertions": [
+        "Own-cost secondary deduction occurs once.",
+        "Percentage secondary receives no primary-only operation charge.",
+        "Output inventory equals consumed inventory plus allocated operation cost."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "process_loss_adjusted_yield",
+      "name": "Carry cost on actual output after process loss",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md",
+      "initial_state": {
+        "completed_quantity": "100",
+        "process_loss_quantity": "3",
+        "consumed_material_value": "970"
+      },
+      "operations": [
+        {
+          "action": "manufacture_actual_output"
+        }
+      ],
+      "expected_final_state": {
+        "finished_quantity": "97",
+        "finished_inventory_value": "970",
+        "finished_rate": "10"
+      },
+      "required_assertions": [
+        "No inventory is created for the three lost units."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "genuine_zero_cost_manufacture",
+      "name": "Add operation cost without replacing actual zero material cost",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md",
+      "initial_state": {
+        "actual_material_consumption_known": true,
+        "consumed_material_value": "0",
+        "primary_quantity": "90",
+        "additional_cost": "90",
+        "historical_finished_rate": "50"
+      },
+      "operations": [
+        {
+          "action": "manufacture"
+        }
+      ],
+      "expected_final_state": {
+        "finished_inventory_value": "90",
+        "finished_rate": "1"
+      },
+      "required_assertions": [
+        "Do not use the unrelated historical rate of fifty when consumed input value is genuinely zero."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "manufacturing_standard_variance",
+      "name": "Balance actual input against standard output",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/manufacturing-and-subcontracting.md",
+      "initial_state": {
+        "consumed_material_value": "250",
+        "operation_cost": "30",
+        "finished_standard_value": "200"
+      },
+      "operations": [
+        {
+          "action": "manufacture_at_standard"
+        }
+      ],
+      "expected_final_state": {
+        "inventory_output_debit": "200",
+        "manufacturing_variance_debit": "80",
+        "consumed_inventory_credit": "250",
+        "operation_cost_clearing_credit": "30",
+        "total_debits": "280",
+        "total_credits": "280"
+      },
+      "required_assertions": [
+        "The eighty variance is not left in a generic stock adjustment account."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "quality_range_and_mean_distinction",
+      "name": "An accepted mean does not make all readings acceptable",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/quality-and-maintenance.md",
+      "initial_state": {
+        "readings": [
+          "10",
+          "12",
+          "14"
+        ],
+        "lower_bound": "11",
+        "upper_bound": "13"
+      },
+      "operations": [
+        {
+          "action": "evaluate_all_readings_range",
+          "expected_state": "Rejected"
+        },
+        {
+          "action": "evaluate_explicit_mean_range",
+          "expected_state": "Accepted"
+        }
+      ],
+      "expected_final_state": {
+        "mean": "12",
+        "range_state": "Rejected",
+        "mean_formula_state": "Accepted"
+      },
+      "required_assertions": [
+        "Range bounds are inclusive.",
+        "Blank values are excluded from the mean denominator."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "quality_review_open_precedence",
+      "name": "Open objective precedes final review failure",
+      "case_kind": "numerical_and_state_target",
+      "definition_reference": "../../docs/domains/quality-and-maintenance.md",
+      "initial_state": {
+        "objective_states": [
+          "Failed",
+          "Open"
+        ]
+      },
+      "operations": [
+        {
+          "action": "calculate_review_state"
+        }
+      ],
+      "expected_final_state": {
+        "review_state": "Open"
+      },
+      "required_assertions": [
+        "After resolving the open objective to Passed, the review becomes Failed."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "maintenance_due_date_observed_edge",
+      "name": "End date clears a computed asset due date",
+      "case_kind": "observed_compatibility_edge",
+      "definition_reference": "../../docs/domains/quality-and-maintenance.md",
+      "initial_state": {
+        "periodicity": "Monthly",
+        "start_date": "2026-01-01",
+        "end_date": "2026-12-31"
+      },
+      "operations": [
+        {
+          "action": "calculate_next_due_date_using_observed_end_condition"
+        }
+      ],
+      "expected_final_state": {
+        "next_due_date": null,
+        "unbounded_calculated_due_date": "2026-02-01"
+      },
+      "required_assertions": [
+        "Preserve this observed compatibility case separately from a proposed bounded-recurrence correction."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    },
+    {
+      "case_identifier": "maintenance_completion_certificate_boundary",
+      "name": "Completion needs date while certificate flag does not enforce attachment in this path",
+      "case_kind": "observed_compatibility_edge",
+      "definition_reference": "../../docs/domains/quality-and-maintenance.md",
+      "initial_state": {
+        "maintenance_state": "Completed",
+        "completion_date": null,
+        "certificate_required": true,
+        "certificate_attachment": null
+      },
+      "operations": [
+        {
+          "action": "validate",
+          "expected_acceptance": false,
+          "reason": "Completion date missing"
+        },
+        {
+          "action": "set_completion_date",
+          "value": "2026-09-10"
+        },
+        {
+          "action": "validate_completion_fields",
+          "expected_acceptance": true
+        }
+      ],
+      "expected_final_state": {
+        "completion_date": "2026-09-10",
+        "certificate_attachment": null
+      },
+      "required_assertions": [
+        "Do not claim an attachment gate that this completion validation does not establish."
+      ],
+      "verification_status": "Independently checked specification fixture; complete application transaction execution not performed"
+    }
+  ]
+}
