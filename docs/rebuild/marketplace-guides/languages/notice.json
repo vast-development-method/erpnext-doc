@@ -1,0 +1,110 @@
+{
+  "kind": "proposed-rebuild-fixture",
+  "scope": "Collection notices; the tenant approves all four renditions of revision 3. The separate agreement scenario allows only its explicitly approved language.",
+  "message_key": "order.ready_for_collection",
+  "arguments": {
+    "order": "SO-1047"
+  },
+  "templates": [
+    {
+      "language": "en",
+      "revision": "3",
+      "text": "Order {order} is ready for collection."
+    },
+    {
+      "language": "af",
+      "revision": "3",
+      "text": "Bestelling {order} is gereed om afgehaal te word."
+    },
+    {
+      "language": "de",
+      "revision": "3",
+      "text": "Auftrag {order} ist abholbereit."
+    },
+    {
+      "language": "zh-Hans",
+      "revision": "3",
+      "text": "订单 {order} 已可提货。"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "recipient-language",
+      "request": {
+        "command": "issue",
+        "event_id": "evt-42",
+        "view_language": "de",
+        "recipient_language": "af",
+        "tenant_language": "en",
+        "content_class": "collection-notice"
+      },
+      "expect": {
+        "outcome": "sent",
+        "language": "af",
+        "revision": "3",
+        "text": "Bestelling SO-1047 is gereed om afgehaal te word.",
+        "outbox_rows": 1,
+        "delivery_attempts": 1
+      }
+    },
+    {
+      "id": "retry-after-ack-loss",
+      "request": {
+        "command": "retry",
+        "event_id": "evt-42",
+        "view_language": "zh-Hans",
+        "recipient_language": "de",
+        "tenant_language": "en",
+        "content_class": "collection-notice"
+      },
+      "expect": {
+        "outcome": "reuse-issued-rendition",
+        "language": "af",
+        "revision": "3",
+        "text": "Bestelling SO-1047 is gereed om afgehaal te word.",
+        "outbox_rows": 1,
+        "delivery_attempts": 2
+      }
+    },
+    {
+      "id": "new-event-new-recipient",
+      "request": {
+        "command": "issue",
+        "event_id": "evt-43",
+        "view_language": "af",
+        "recipient_language": "zh-Hans",
+        "tenant_language": "en",
+        "content_class": "collection-notice"
+      },
+      "expect": {
+        "outcome": "sent",
+        "language": "zh-Hans",
+        "revision": "3",
+        "text": "订单 SO-1047 已可提货。",
+        "outbox_rows": 1,
+        "delivery_attempts": 1
+      }
+    },
+    {
+      "id": "missing-approved-language",
+      "request": {
+        "command": "issue",
+        "event_id": "evt-44",
+        "view_language": "de",
+        "recipient_language": "ar",
+        "tenant_language": "en",
+        "content_class": "agreement",
+        "approved_languages": [
+          "de"
+        ]
+      },
+      "expect": {
+        "outcome": "rejected",
+        "code": "document.approved_language_missing",
+        "requested_language": "ar",
+        "outbox_rows": 0,
+        "delivery_attempts": 0
+      }
+    }
+  ]
+}
