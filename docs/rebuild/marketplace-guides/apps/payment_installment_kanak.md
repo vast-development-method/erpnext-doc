@@ -1,0 +1,17 @@
+# Payment Installments
+
+Kanak Infosystems lists version 15. A sales operator attaches a Payment Term Template to a Sales Order, chooses the first installment date and optionally adds a charge such as freight. On submission, the app generates the schedule and immediately creates a down-payment invoice containing the charges. A scheduler creates a separate invoice for each installment two days before its due date. The publisher describes extra charges as separate from the sales base. Its marketplace wording says an installment is marked paid on invoice creation. The storefront confirms invoice creation but supplies no evidence of a corresponding receipt or Payment Entry. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/payment_installment_kanak) · [Publisher's versioned guide](https://www.kanakinfosystems.com/frappe/apps/15.0/payment_installment_kanak)
+
+## Proposed rebuild contract
+
+Freeze the commercial basis on submission: order, currency, eligible sales base, advance share, installment count, first due date, frequency and distinct extra-charge lines. Represent schedule rows with a stable key, principal share, due date, invoice reference, paid allocations and balance. Allocate any rounding residual to a specified row. Link the advance and each scheduled invoice to that order and row. A unique invoice origin prevents duplicate creation if the scheduler retries or two workers pick up the same date. Define the site's calendar-day cut-off and a catch-up policy for missed runs.
+
+Track invoice generation and payment settlement separately. The advance covers only its agreed share of the principal plus the separately charged amount. Cash receipts, credits and reversals alter open balances through allocation. Staff can see an invoice has been issued while its full value remains outstanding. Translate the template name, charge description, reminder and customer-facing due-date label. Keep percentages, scheduled civil dates, currency and invoice origins stable when changing language.
+
+| Proposed acceptance case | Expected result |
+|---|---|
+| An order has a principal of 1,000.00, an advance of 20%, separate freight of 50.00 and three equal monthly installments from 15 January. Use a two-decimal currency and put the residual in the final row. | The immediate invoice is 250.00. The installments are 266.67, 266.67 and 266.66. Total invoiced after all runs is 1,050.00 and the sales principal remains 1,000.00. |
+| Run the scheduler twice on 13 January for the first installment, with no cash receipt. | One 266.67 invoice is linked to the 15 January row. Its paid allocation is zero and 266.67 remains outstanding. |
+| An Arabic-speaking customer receives the schedule made in a German interface and pays 100.00 against the first installment. | The same invoice and due date are shown, 166.67 remains open and the other scheduled rows retain their amounts. Reversing that allocation restores 266.67. |
+
+Core ERP defines a Payment Schedule child record. The add-on's additional schedule rows, month-end convention, charge tax treatment, cancellation route and interpretation of its paid flag require the publisher's build or a transaction trace. [Core schedule](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/accounts/doctype/payment_schedule/payment_schedule.json) · [Named app repository](https://github.com/kanakinfo/payment_installment_kanak)
