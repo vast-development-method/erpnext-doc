@@ -15,3 +15,9 @@ These five contracts extend the [accounting](../../domains/financial-accounting.
 The [financial statement reconciliation](reporting/README.md) follows one opening journal and fourteen operating, investing and financing vouchers through two monthly trial balances, income statements, balance sheets and indirect cash-flow statements. Its fixture provides the expected balances of every leaf account and the report control totals.
 
 [Posted invoice, valuation and settlement examples](posting/README.md) exercise 26 tax and currency scenarios against source-test expectations and derived accounting cases. They distinguish each voucher's postings, including the separate exchange journal and the stock valuation share of a purchase charge.
+
+Run the [offline verifier](verify.py) from the blueprint checkout with Python 3.10 or later. It reconstructs the 25 decision outcomes and their account movements, the 26 posting cases and their 30 named journals, 182 monthly financial-report amounts and 24 parent/subsidiary translation outputs. Monetary inputs are integer minor units. Ratios and exchange rates retain precision through the stated rounding point. The verifier covers the supplied profiles, including exact minor-unit dunning interest and nonzero stock allocation bases. [Committed document and report evidence](../live/README.md) covers a separately executed receipt-to-cash scenario.
+
+```sh
+python3 docs/rebuild/finance/verify.py
+```

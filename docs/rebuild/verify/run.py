@@ -201,7 +201,7 @@ def main():
     print("PASS", finance(read), flush=True)
     print("PASS", surfaces(ROOT, read), flush=True)
     print("PASS", extensions(read, ROOT), flush=True)
-    for tool in ("model/tools/verify.py", "configuration/compile.py", "extensions/verify.py", "integrated/verify.py"):
+    for tool in ("model/tools/verify.py", "configuration/compile.py", "extensions/verify.py", "finance/verify.py", "integrated/verify.py"):
         run(tool)
     require(shutil.which("jq"), "jq is required for commercial decision verification")
     run("business/check-fixtures.jq", ROOT / "business/acceptance.json", interpreter=["jq", "-ef"])
