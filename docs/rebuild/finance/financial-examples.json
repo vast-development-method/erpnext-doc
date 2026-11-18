@@ -1,0 +1,906 @@
+{
+  "revision": "886ab6ae187244e7f1b852393384ab6019d56264",
+  "currency": "NAD",
+  "minor_units_per_major": 100,
+  "cases": [
+    {
+      "id": "FIN-001",
+      "operation": "fund-facility",
+      "given": {
+        "pledge": 50000,
+        "charge": 2000,
+        "opening_facility_state": "Sanctioned"
+      },
+      "expected": {
+        "facility_state": "Disbursed",
+        "invoice_outstanding": 50000
+      },
+      "entries": [
+        {
+          "account": "bank",
+          "side": "debit",
+          "minor_units": 48000
+        },
+        {
+          "account": "bank-fee",
+          "side": "debit",
+          "minor_units": 2000
+        },
+        {
+          "account": "short-term-loan",
+          "side": "credit",
+          "minor_units": 50000
+        },
+        {
+          "account": "discounted-receivables",
+          "side": "debit",
+          "minor_units": 50000
+        },
+        {
+          "account": "sanctioned-receivables",
+          "side": "credit",
+          "minor_units": 50000
+        }
+      ]
+    },
+    {
+      "id": "FIN-002",
+      "operation": "collect-discounted-invoice",
+      "given": {
+        "opening_invoice_outstanding": 50000,
+        "amount": 30000,
+        "facility_state": "Disbursed"
+      },
+      "expected": {
+        "invoice_outstanding": 20000
+      },
+      "entries": [
+        {
+          "account": "bank",
+          "side": "debit",
+          "minor_units": 30000
+        },
+        {
+          "account": "discounted-receivables",
+          "side": "credit",
+          "minor_units": 30000
+        }
+      ]
+    },
+    {
+      "id": "FIN-003",
+      "operation": "settle-facility",
+      "given": {
+        "loan_principal": 50000,
+        "invoice_outstanding": 20000,
+        "today": "2026-02-01",
+        "maturity": "2026-02-02",
+        "opening_facility_state": "Disbursed"
+      },
+      "expected": {
+        "facility_state": "Settled",
+        "loan_outstanding": 0,
+        "invoice_outstanding": 20000
+      },
+      "entries": [
+        {
+          "account": "short-term-loan",
+          "side": "debit",
+          "minor_units": 50000
+        },
+        {
+          "account": "bank",
+          "side": "credit",
+          "minor_units": 50000
+        },
+        {
+          "account": "unpaid-discounted-receivables",
+          "side": "debit",
+          "minor_units": 20000
+        },
+        {
+          "account": "discounted-receivables",
+          "side": "credit",
+          "minor_units": 20000
+        }
+      ]
+    },
+    {
+      "id": "FIN-004",
+      "operation": "settle-facility",
+      "given": {
+        "loan_principal": 50000,
+        "invoice_outstanding": 20000,
+        "today": "2026-02-02",
+        "maturity": "2026-02-02",
+        "opening_facility_state": "Disbursed"
+      },
+      "expected": {
+        "facility_state": "Settled",
+        "loan_outstanding": 0,
+        "invoice_outstanding": 20000
+      },
+      "entries": [
+        {
+          "account": "short-term-loan",
+          "side": "debit",
+          "minor_units": 50000
+        },
+        {
+          "account": "bank",
+          "side": "credit",
+          "minor_units": 50000
+        }
+      ]
+    },
+    {
+      "id": "FIN-005",
+      "operation": "capitalize",
+      "given": {
+        "stock_unit_costs": [
+          10000,
+          20000
+        ],
+        "service_qty": 2,
+        "service_rate": 2000,
+        "asset_kind": "ordinary",
+        "asset_gross": 100000,
+        "asset_accumulated_depreciation": 40000,
+        "perpetual_inventory": true
+      },
+      "expected": {
+        "target_cost_increment": 94000,
+        "issued_units": 2,
+        "source_state": "Capitalized"
+      },
+      "entries": [
+        {
+          "account": "target-wip",
+          "side": "debit",
+          "minor_units": 94000
+        },
+        {
+          "account": "accumulated-depreciation",
+          "side": "debit",
+          "minor_units": 40000
+        },
+        {
+          "account": "source-fixed-asset",
+          "side": "credit",
+          "minor_units": 100000
+        },
+        {
+          "account": "inventory",
+          "side": "credit",
+          "minor_units": 30000
+        },
+        {
+          "account": "service-expense",
+          "side": "credit",
+          "minor_units": 4000
+        }
+      ]
+    },
+    {
+      "id": "FIN-006",
+      "operation": "capitalize",
+      "given": {
+        "stock_unit_costs": [
+          10000,
+          20000
+        ],
+        "service_qty": 2,
+        "service_rate": 2000,
+        "asset_kind": "ordinary",
+        "asset_gross": 100000,
+        "asset_accumulated_depreciation": 40000,
+        "perpetual_inventory": false
+      },
+      "expected": {
+        "target_cost_increment": 94000,
+        "issued_units": 2,
+        "source_state": "Capitalized"
+      },
+      "entries": [
+        {
+          "account": "target-wip",
+          "side": "debit",
+          "minor_units": 94000
+        },
+        {
+          "account": "accumulated-depreciation",
+          "side": "debit",
+          "minor_units": 40000
+        },
+        {
+          "account": "source-fixed-asset",
+          "side": "credit",
+          "minor_units": 100000
+        },
+        {
+          "account": "default-expense",
+          "side": "credit",
+          "minor_units": 30000
+        },
+        {
+          "account": "service-expense",
+          "side": "credit",
+          "minor_units": 4000
+        }
+      ]
+    },
+    {
+      "id": "FIN-007",
+      "operation": "reprice-capitalization-row",
+      "given": {
+        "previous_total": 94000,
+        "recalculated_total": 95000,
+        "opening_target_cost": 94000,
+        "target_state": "Submitted"
+      },
+      "expected": {
+        "outcome": "reject-submitted-target",
+        "ending_target_cost": 94000
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-008",
+      "operation": "prepare-overdue-notice",
+      "given": {
+        "invoice_outstanding": 60000,
+        "schedules": [
+          {
+            "id": "I-1",
+            "due_date": "2026-01-01",
+            "row_index": 1,
+            "outstanding": 50000
+          },
+          {
+            "id": "I-2",
+            "due_date": "2026-02-15",
+            "row_index": 2,
+            "outstanding": 50000
+          }
+        ],
+        "posting_date": "2026-01-11",
+        "annual_interest_basis_points": 3650,
+        "fee": 1000
+      },
+      "expected": {
+        "live_schedule_amounts": [
+          10000,
+          50000
+        ],
+        "overdue_principal": 10000,
+        "interest": 100,
+        "charge": 1100,
+        "grand_total": 11100
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-009",
+      "operation": "receive-notice-payment",
+      "given": {
+        "live_overdue_principal": 10000,
+        "unpaid_base_charges": 1100,
+        "principal_received": 10000,
+        "charge_received": 1100
+      },
+      "expected": {
+        "invoice_principal_remaining": 0,
+        "charge_remaining": 0,
+        "notice_state": "Resolved"
+      },
+      "entries": [
+        {
+          "account": "bank",
+          "side": "debit",
+          "minor_units": 11100
+        },
+        {
+          "account": "receivables",
+          "side": "credit",
+          "minor_units": 10000
+        },
+        {
+          "account": "collection-income",
+          "side": "credit",
+          "minor_units": 1100
+        }
+      ]
+    },
+    {
+      "id": "FIN-010",
+      "operation": "receive-notice-payment",
+      "given": {
+        "live_overdue_principal": 10000,
+        "unpaid_base_charges": 1100,
+        "principal_received": 10000,
+        "charge_received": 0
+      },
+      "expected": {
+        "invoice_principal_remaining": 0,
+        "charge_remaining": 1100,
+        "notice_state": "Unresolved"
+      },
+      "entries": [
+        {
+          "account": "bank",
+          "side": "debit",
+          "minor_units": 10000
+        },
+        {
+          "account": "receivables",
+          "side": "credit",
+          "minor_units": 10000
+        }
+      ]
+    },
+    {
+      "id": "FIN-011",
+      "operation": "select-tax-template",
+      "given": {
+        "posting_date": "2026-12-31",
+        "selectors": {
+          "company": "A",
+          "tax_type": "Sales",
+          "tax_category": "",
+          "customer": "CUSTOMER",
+          "billing_city": "Windhoek"
+        },
+        "rules": [
+          {
+            "id": "A",
+            "selectors": {
+              "company": "A",
+              "tax_type": "Sales",
+              "tax_category": "",
+              "customer": "CUSTOMER"
+            },
+            "priority": 100,
+            "template": "TEMPLATE-A",
+            "disabled": false,
+            "valid_from": "2026-01-01",
+            "valid_to": "2026-12-31"
+          },
+          {
+            "id": "B",
+            "selectors": {
+              "company": "A",
+              "tax_type": "Sales",
+              "tax_category": "",
+              "customer": "CUSTOMER",
+              "billing_city": "Windhoek"
+            },
+            "priority": 1,
+            "template": "TEMPLATE-B",
+            "disabled": false,
+            "valid_from": "2026-01-01",
+            "valid_to": "2026-12-31"
+          },
+          {
+            "id": "C",
+            "selectors": {
+              "company": "A",
+              "tax_type": "Sales",
+              "tax_category": "",
+              "customer": "CUSTOMER",
+              "billing_city": "Windhoek"
+            },
+            "priority": 3,
+            "template": "TEMPLATE-C",
+            "disabled": false,
+            "valid_from": "2026-01-01",
+            "valid_to": "2026-12-31"
+          }
+        ]
+      },
+      "expected": {
+        "template": "TEMPLATE-C"
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-012",
+      "operation": "select-tax-template",
+      "given": {
+        "posting_date": "2026-12-31",
+        "selectors": {
+          "company": "A",
+          "tax_type": "Sales",
+          "tax_category": "",
+          "customer": "CUSTOMER",
+          "billing_city": "Windhoek"
+        },
+        "rules": [
+          {
+            "id": "A",
+            "selectors": {
+              "company": "A",
+              "tax_type": "Sales",
+              "tax_category": "",
+              "customer": "CUSTOMER"
+            },
+            "priority": 100,
+            "template": "TEMPLATE-A",
+            "disabled": false,
+            "valid_from": "2026-01-01",
+            "valid_to": "2026-12-31"
+          },
+          {
+            "id": "B",
+            "selectors": {
+              "company": "A",
+              "tax_type": "Sales",
+              "tax_category": "",
+              "customer": "CUSTOMER",
+              "billing_city": "Windhoek"
+            },
+            "priority": 1,
+            "template": "TEMPLATE-B",
+            "disabled": false,
+            "valid_from": "2026-01-01",
+            "valid_to": "2026-12-31"
+          },
+          {
+            "id": "C",
+            "selectors": {
+              "company": "A",
+              "tax_type": "Sales",
+              "tax_category": "",
+              "customer": "CUSTOMER",
+              "billing_city": "Windhoek"
+            },
+            "priority": 3,
+            "template": "TEMPLATE-C",
+            "disabled": true,
+            "valid_from": "2026-01-01",
+            "valid_to": "2026-12-31"
+          }
+        ]
+      },
+      "expected": {
+        "template": null
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-013",
+      "operation": "select-tax-template",
+      "given": {
+        "posting_date": "2026-12-31",
+        "selectors": {
+          "company": "A",
+          "tax_type": "Sales",
+          "tax_category": "Exports",
+          "customer": "CUSTOMER",
+          "billing_city": "Windhoek"
+        },
+        "rules": [
+          {
+            "id": "A",
+            "selectors": {
+              "company": "A",
+              "tax_type": "Sales",
+              "tax_category": "",
+              "customer": "CUSTOMER"
+            },
+            "priority": 100,
+            "template": "TEMPLATE-A",
+            "disabled": false,
+            "valid_from": "2026-01-01",
+            "valid_to": "2026-12-31"
+          },
+          {
+            "id": "B",
+            "selectors": {
+              "company": "A",
+              "tax_type": "Sales",
+              "tax_category": "",
+              "customer": "CUSTOMER",
+              "billing_city": "Windhoek"
+            },
+            "priority": 1,
+            "template": "TEMPLATE-B",
+            "disabled": false,
+            "valid_from": "2026-01-01",
+            "valid_to": "2026-12-31"
+          },
+          {
+            "id": "C",
+            "selectors": {
+              "company": "A",
+              "tax_type": "Sales",
+              "tax_category": "",
+              "customer": "CUSTOMER",
+              "billing_city": "Windhoek"
+            },
+            "priority": 3,
+            "template": "TEMPLATE-C",
+            "disabled": false,
+            "valid_from": "2026-01-01",
+            "valid_to": "2026-12-31"
+          }
+        ]
+      },
+      "expected": {
+        "template": null
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-014",
+      "operation": "classify-statement",
+      "given": {
+        "company": "A",
+        "withdrawal": 15000,
+        "deposit": 0,
+        "description": "MONTHLY SERVICE FEE",
+        "submitted": true,
+        "reconciliation_state": "Unreconciled",
+        "evaluated": false,
+        "current_match": null,
+        "force": false,
+        "rules": [
+          {
+            "id": "FEE",
+            "company": "A",
+            "kind": "Withdrawal",
+            "min_amount": 10000,
+            "max_amount": 15000,
+            "description_conditions": [
+              {
+                "check": "Contains",
+                "value": "charge"
+              },
+              {
+                "check": "Ends With",
+                "value": "fee"
+              }
+            ],
+            "priority": 1
+          },
+          {
+            "id": "SERVICE",
+            "company": "A",
+            "kind": "Any",
+            "min_amount": 0,
+            "max_amount": 0,
+            "description_conditions": [
+              {
+                "check": "Contains",
+                "value": "service"
+              }
+            ],
+            "priority": 2
+          }
+        ]
+      },
+      "expected": {
+        "evaluated": true,
+        "matched_rule": "FEE",
+        "updated": true
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-015",
+      "operation": "classify-statement",
+      "given": {
+        "company": "A",
+        "withdrawal": 15000,
+        "deposit": 0,
+        "description": "MONTHLY SERVICE FEE",
+        "submitted": true,
+        "reconciliation_state": "Unreconciled",
+        "evaluated": true,
+        "current_match": "FEE",
+        "force": false,
+        "rules": [
+          {
+            "id": "FEE",
+            "company": "A",
+            "kind": "Withdrawal",
+            "min_amount": 10000,
+            "max_amount": 14999,
+            "description_conditions": [
+              {
+                "check": "Contains",
+                "value": "charge"
+              },
+              {
+                "check": "Ends With",
+                "value": "fee"
+              }
+            ],
+            "priority": 1
+          },
+          {
+            "id": "SERVICE",
+            "company": "A",
+            "kind": "Any",
+            "min_amount": 0,
+            "max_amount": 0,
+            "description_conditions": [
+              {
+                "check": "Contains",
+                "value": "service"
+              }
+            ],
+            "priority": 2
+          }
+        ]
+      },
+      "expected": {
+        "evaluated": true,
+        "matched_rule": "FEE",
+        "updated": false
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-016",
+      "operation": "classify-statement",
+      "given": {
+        "company": "A",
+        "withdrawal": 15000,
+        "deposit": 0,
+        "description": "MONTHLY SERVICE FEE",
+        "submitted": true,
+        "reconciliation_state": "Unreconciled",
+        "evaluated": true,
+        "current_match": "FEE",
+        "force": true,
+        "rules": [
+          {
+            "id": "FEE",
+            "company": "A",
+            "kind": "Withdrawal",
+            "min_amount": 10000,
+            "max_amount": 14999,
+            "description_conditions": [
+              {
+                "check": "Contains",
+                "value": "charge"
+              },
+              {
+                "check": "Ends With",
+                "value": "fee"
+              }
+            ],
+            "priority": 1
+          },
+          {
+            "id": "SERVICE",
+            "company": "A",
+            "kind": "Any",
+            "min_amount": 0,
+            "max_amount": 0,
+            "description_conditions": [
+              {
+                "check": "Contains",
+                "value": "service"
+              }
+            ],
+            "priority": 2
+          }
+        ]
+      },
+      "expected": {
+        "evaluated": true,
+        "matched_rule": "SERVICE",
+        "updated": true
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-017",
+      "operation": "settle-facility",
+      "given": {
+        "loan_principal": 50000,
+        "invoice_outstanding": 20000,
+        "today": "2026-02-03",
+        "maturity": "2026-02-02",
+        "opening_facility_state": "Disbursed"
+      },
+      "expected": {
+        "facility_state": "Settled",
+        "loan_outstanding": 0,
+        "invoice_outstanding": 20000
+      },
+      "entries": [
+        {
+          "account": "short-term-loan",
+          "side": "debit",
+          "minor_units": 50000
+        },
+        {
+          "account": "bank",
+          "side": "credit",
+          "minor_units": 50000
+        }
+      ]
+    },
+    {
+      "id": "FIN-018",
+      "operation": "capitalize",
+      "given": {
+        "stock_unit_costs": [],
+        "service_qty": 0,
+        "service_rate": 0,
+        "asset_kind": "composite-component",
+        "asset_gross": 10000,
+        "asset_accumulated_depreciation": 0,
+        "perpetual_inventory": true
+      },
+      "expected": {
+        "target_cost_increment": 10000,
+        "issued_units": 0,
+        "source_state": "Capitalized"
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-019",
+      "operation": "reprice-capitalization-row",
+      "given": {
+        "previous_total": 94000,
+        "recalculated_total": 95000,
+        "opening_target_cost": 94000,
+        "target_state": "Draft"
+      },
+      "expected": {
+        "outcome": "update-draft",
+        "ending_target_cost": 95000
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-020",
+      "operation": "reprice-capitalization-row",
+      "given": {
+        "previous_total": 94000,
+        "recalculated_total": 94000,
+        "opening_target_cost": 94000,
+        "target_state": "Submitted"
+      },
+      "expected": {
+        "outcome": "no-change",
+        "ending_target_cost": 94000
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-021",
+      "operation": "classify-statement",
+      "given": {
+        "company": "A",
+        "withdrawal": 15000,
+        "deposit": 0,
+        "description": "MONTHLY SERVICE FEE",
+        "submitted": true,
+        "reconciliation_state": "Reconciled",
+        "evaluated": true,
+        "current_match": "FEE",
+        "force": true,
+        "rules": [
+          {
+            "id": "FEE",
+            "company": "A",
+            "kind": "Withdrawal",
+            "min_amount": 10000,
+            "max_amount": 14999,
+            "description_conditions": [
+              {
+                "check": "Contains",
+                "value": "charge"
+              },
+              {
+                "check": "Ends With",
+                "value": "fee"
+              }
+            ],
+            "priority": 1
+          },
+          {
+            "id": "SERVICE",
+            "company": "A",
+            "kind": "Any",
+            "min_amount": 0,
+            "max_amount": 0,
+            "description_conditions": [
+              {
+                "check": "Contains",
+                "value": "service"
+              }
+            ],
+            "priority": 2
+          }
+        ]
+      },
+      "expected": {
+        "evaluated": true,
+        "matched_rule": "FEE",
+        "updated": false
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-022",
+      "operation": "classify-statement",
+      "given": {
+        "company": "A",
+        "withdrawal": 15000,
+        "deposit": 0,
+        "description": "MONTHLY SERVICE FEE",
+        "submitted": true,
+        "reconciliation_state": "Unreconciled",
+        "evaluated": false,
+        "current_match": null,
+        "force": false,
+        "rules": []
+      },
+      "expected": {
+        "evaluated": false,
+        "matched_rule": null,
+        "updated": false
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-023",
+      "operation": "sanction-facility",
+      "given": {
+        "invoice_outstanding": 50000,
+        "pledge": 50000,
+        "already_pledged": false
+      },
+      "expected": {
+        "outcome": "sanctioned",
+        "invoice_outstanding": 50000
+      },
+      "entries": [
+        {
+          "account": "sanctioned-receivables",
+          "side": "debit",
+          "minor_units": 50000
+        },
+        {
+          "account": "receivables",
+          "side": "credit",
+          "minor_units": 50000
+        }
+      ]
+    },
+    {
+      "id": "FIN-024",
+      "operation": "sanction-facility",
+      "given": {
+        "invoice_outstanding": 20000,
+        "pledge": 20001,
+        "already_pledged": false
+      },
+      "expected": {
+        "outcome": "reject-exceeds-claim",
+        "invoice_outstanding": 20000
+      },
+      "entries": []
+    },
+    {
+      "id": "FIN-025",
+      "operation": "sanction-facility",
+      "given": {
+        "invoice_outstanding": 50000,
+        "pledge": 50000,
+        "already_pledged": true
+      },
+      "expected": {
+        "outcome": "reject-already-pledged",
+        "invoice_outstanding": 50000
+      },
+      "entries": []
+    }
+  ]
+}
