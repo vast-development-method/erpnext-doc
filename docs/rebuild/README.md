@@ -11,17 +11,37 @@ A rebuild must preserve what each transaction does to the business. Start with t
 
 A revision can change a real business outcome. The [attendance-to-payroll trace](industry/attendance-leave-payroll.md) shows how the November code calculates the unpaid fraction of partially paid leave. The [configuration example](configuration/README.md) shows how the same release and role yield different purchasing access at two sites. Always record **source revisions, installed app order, company, effective settings, acting identity and business date** with a conformance result.
 
+## What the live site established
+
+On a disposable Namibia/NAD company, ERPNext submitted twelve linked vouchers. A fresh database connection read each committed voucher, its stock and general-ledger entries and its invoice balances. The company ended with N$940.20 at bank, N$134.80 of stock and N$82.80 gross profit. When a partial credit was submitted with stale mapped totals, the same economic postings left a N$69.00 invoice and an offsetting open credit. The [observed records](live/README.md) and [portable comparator](comparison/README.md) reproduce the difference. Six actual [report outputs](live/reports/README.md) reconcile the committed run to trial balance, balance sheet, profit and loss, receivables ageing, payables ageing and stock balance.
+
+Two other reference runs cover [20 upstream stock, manufacturing and repost tests](stock-live/README.md) and [21 platform observations](platform-live/README.md) including role-scoped reads, field publication, multi-row rollback and queue admission. The [backup and restore experiment](recovery-live/README.md) gives the recovery evidence for its own configuration. The [verification entry point](verify/README.md) checks the published fixtures, schemas, source evidence and qualified outputs without requiring a replacement implementation.
+
 ## Reading order for an implementation
 
 | Build concern | What to implement or inspect | Evidence and acceptance |
 |---|---|---|
-| 1. Metadata and tenant configuration | Stored vs virtual records, child tables, links, field ordering, dependent fields, grants, site-owned custom fields, fixtures, naming and workflows. | [Field dictionary and drift](model/README.md) · [Two effective sites](configuration/README.md) |
+| 1. Metadata and tenant configuration | Stored vs virtual records, child tables, links, field ordering, dependent fields, grants, site-owned custom fields, fixtures, naming and workflows. | [Field dictionary and drift](model/README.md) · [Two effective sites](configuration/README.md) · [Report, service, hook and test index](surfaces/README.md) |
 | 2. Shared application services | Tenant routing, document validation, approval, identity and version checks, database transactions, file access, work scheduling and reporting. | [Platform contracts, cases and source observations](platform/README.md) |
-| 3. Trading and inventory | Quotation, prices, order/fulfilment/billing progress, subscriptions, POS, replenishment, purchase receipts, stock close, subcontracting and operational quality. | [Commercial and service workflows](business/README.md) · [Procurement and warehouse](operations/README.md) |
+| 3. Trading and inventory | Quotation, prices, order/fulfilment/billing progress, subscriptions, POS, replenishment, purchase receipts, stock close, subcontracting and operational quality. | [Commercial and service workflows](business/README.md) · [Procurement and warehouse](operations/README.md) · [Valuation, returns and reposting](valuation/README.md) |
 | 4. Production and assets | Material planning, capacity, alternative components, job cards, production cost, secondary outputs, repair, capitalization and disassembly. | [Shop floor and production](production/README.md) · [Composite asset cost](finance/composite-asset-cost.md) |
 | 5. Posting, settlement and statements | Separate commercial, stock, ledger and party entries. Preserve tax bases, discount distribution, exchange differences, and reporting periods. | [Finance](finance/README.md) · [Tax and settlement](finance/posting/README.md) · [Four statements from a single journal](finance/reporting/README.md) |
 | 6. Workforce and customer handoffs | Paid/unpaid time, payroll accrual and employer costs, recruitment, advances, expenses and CRM-to-order provenance. | [Cross-application workflows](industry/README.md) |
 | 7. Integrated verification | Follow each source voucher and item row through the inventory, party and general ledgers. Compare rejected commands, returns and recovery alongside successful postings. | [Twelve-voucher conformance example](integrated/README.md) · [September acceptance strategy](../reimplementation/acceptance-strategy.md) |
+
+## Extension and topic coverage
+
+| Where to start | What the evidence covers |
+|---|---|
+| [Core and framework dictionaries](model/README.md) | 866 canonical record types, 14,412 source-declared fields, 1,538 permission rows and 2,555 field conditions at the two release pins. |
+| [Core runtime surfaces](surfaces/README.md) | 21,433 declarations, including 1,614 exposed operations and 88 scheduled handlers. The 206 report declarations include three test fixtures. |
+| [Eighteen extension profiles](extensions/README.md) | Business rules and integration boundaries for HRMS, CRM, lending, payments, education, healthcare, commerce, shipping, regional and other named applications. Declared data cover 695 record types and 9,163 fields. Each app has an independent revision and dependency range. |
+| [Five companion profiles](companion/README.md) | Helpdesk, Learning, Insights, Drive and Print Designer. The chapters distinguish an actual ERP handoff from a product that shares only the underlying framework. |
+| [Marketplace source directory](marketplace-model/README.md) | Every one of the 398 observed listings has a status. The catalog identifies 329 public source pins. After the core listing and 15 curated overlaps, 313 additional listing sources were inspected. Of those, 101 declared an ERPNext dependency, a further 111 showed selected production integration evidence, and 101 showed none under the published detection rules. The 69 unresolved revisions remain individually visible. |
+| [Official manual crosswalk](manual/README.md) | Topic titles, branches and addresses from the public documentation indexes, with matched implementation reading paths for procurement, sales returns, lending, payroll, education, CRM and background work. |
+| [Qualification register](qualification.json) | A claim, evidence paths and a remaining qualification condition against each of the 20 pre-existing rebuild gates. The gate IDs are stable across the editions. |
+
+Community visibility is a dated observation. A public default branch may differ from a marketplace install version. A declared dependency can establish a code relationship, while a live compatible installation requires the exact application set and policy profile. Private forks and site-owned customizations enter the blueprint through a captured effective-site profile and its own evidence.
 
 The contracts name inputs, decisions, state, failure conditions and effects. Identifiers taken from upstream metadata, field examples or pinned evidence identify what to map. Each schema, calculation and expected business result is usable independently of the language chosen for a replacement. The executable verifiers are optional evidence tools.
 
