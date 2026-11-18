@@ -19,7 +19,7 @@ The return validator compares the absolute rounded total, falling back to the gr
 | PAY2 | 0.00 | 69.00 | −69.00 | 0.00 |
 | REMIT | 0.00 | 69.00 | −69.00 | 0.00 |
 
-The alternative submitted all vouchers on the test database and read the same ledger tables inside one transaction before rollback. The committed run settled the supplier's 266.80 and the original sales invoice in full. It ended with bank 940.20, raw inventory 5 units valued at 70.00, packed inventory 2 units valued at 64.80, gross profit 82.80 and total assets of 1,109.80. Each output includes a hash of the exact fixture. The closing statements derive from ledger totals and posted invoice balances. This adapter does not execute a financial report UI. [Committed closing controls](observed.json)
+The alternative submitted all vouchers on the test database and read the same ledger tables inside one transaction before rollback. The committed run settled the supplier's 266.80 and the original sales invoice in full. It ended with bank 940.20, raw inventory 5 units valued at 70.00, packed inventory 2 units valued at 64.80, gross profit 82.80 and total assets of 1,109.80. Each output includes a hash of the exact fixture. The closing controls derive from ledger totals and posted invoice balances. A separate session subsequently ran six native reports over the committed site. [Committed closing controls](observed.json) · [Financial statements, ageing and Stock Balance](reports/README.md)
 
 ## Rejected requests
 
