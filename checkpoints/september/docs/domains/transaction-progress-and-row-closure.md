@@ -20,7 +20,7 @@ When closure applies to the measure, remove closed rows from the calculation bas
 
 `completion percentage = round to six decimal places (100 × sum of clamped completed magnitudes ÷ sum of expected magnitudes)`.
 
-The common status helper calls a measure not completed below 0.001 percent, fully completed at or above 99.999999 percent, and partly completed otherwise. One separate zero-value billing path uses a strict greater-than comparison for its full-billing label. Preserve this boundary distinction if reproducing that path exactly. 
+The common status helper calls a measure not completed below 0.001 percent, fully completed at or above 99.999999 percent, and partly completed otherwise. One separate zero-value billing path uses a strict greater-than comparison for its full-billing label. Preserve this boundary distinction if reproducing that path exactly.
 
 | Expected rows | Completed rows | Closed rows | Result |
 |---|---|---|---|
@@ -31,7 +31,7 @@ The common status helper calls a measure not completed below 0.001 percent, full
 | −10 and −10 | −5 and 0 | Neither | 25 percent by magnitude |
 | 0 and 0 | 0 and 0 | Neither | 0 percent without the explicit all-excluded special case |
 
-These examples are complete calculation fixtures: compare the rounded percentage and the independent closure state, rather than substituting one for the other. 
+These examples are complete calculation fixtures: compare the rounded percentage and the independent closure state, rather than substituting one for the other.
 
 ## Closing and reopening rows
 
@@ -39,17 +39,17 @@ Supported parents are sales orders, purchase orders, delivery records and purcha
 
 Before closing, each changed row must have something still pending under its parent's policy. A fully settled row cannot be closed. Parent-specific close validation runs before row flags change. After changed rows are persisted, the parent recomputes its consequences. Closing every row closes the parent. Reopening a row reopens a closed parent through its normal reopening operation; reopening a sales order therefore also reaches its normal credit-check path.
 
-Reopening the parent while every row is still closed is rejected. Amendments start with all row-closure flags cleared. Packed components follow the closure of the parent commercial row. 
+Reopening the parent while every row is still closed is rejected. Amendments start with all row-closure flags cleared. Packed components follow the closure of the parent commercial row.
 
 Closing a row changes remaining commitments and available follow-up actions. A purchase order row can release its outstanding ordered quantity; a sales order row can release reserved quantity. Neither is evidence of a physical stock movement or settlement of a monetary debt.
 
-For received but unbilled rows, closing can set the parent closed while received progress remains one hundred percent and billed progress remains zero. Closing a return row does not alter the original transaction's returned quantity. 
+For received but unbilled rows, closing can set the parent closed while received progress remains one hundred percent and billed progress remains zero. Closing a return row does not alter the original transaction's returned quantity.
 
 ## Closed rows in editing and mapping
 
 A mapping operation must omit a closed source row. A previously constructed draft referencing a row that is subsequently closed must be rejected when submitted. The guard checks current source state, not only what was true when the draft was created.
 
-When an item-edit request omits a closed row because the form hides it, omission must not delete that row. A request attempting to change a closed row must fail. A complete request that includes it unchanged is accepted. 
+When an item-edit request omits a closed row because the form hides it, omission must not delete that row. A request attempting to change a closed row must fail. A complete request that includes it unchanged is accepted.
 
 ## Over-fulfilment and overbilling
 
@@ -61,11 +61,11 @@ For a nonzero expected amount or quantity, compute:
 
 An allowance is exceeded when overflow percentage minus configured allowance is greater than 0.01 percentage points. The maximum permitted value shown to the operator is expected value multiplied by one plus allowance divided by one hundred. A configured privileged role can turn the excess into a warning. Internal-party amount checks have explicit exceptions. Pick-list progress uses zero allowance. A separate no-allowance path compares the completed value minus expected value directly with 0.01, rather than applying the percentage threshold. Its candidate lookup already selects only completed values greater than expected values; it is not an absolute-value comparison of arbitrary signed inputs.
 
-A zero per-product allowance is treated as absent and falls back to the global allowance. Therefore zero does not necessarily mean forbid all excess when the global default permits it. Allowance caches reset for each configuration block to avoid using a previous block's settings. 
+A zero per-product allowance is treated as absent and falls back to the global allowance. Therefore zero does not necessarily mean forbid all excess when the global default permits it. Allowance caches reset for each configuration block to avoid using a previous block's settings.
 
 ## Status precedence
 
-Status rules are evaluated in reverse declaration order, and the first matching rule wins. This matters when on-hold, closed, cancelled and completion conditions overlap. Do not derive status from percentages alone or impose a universal precedence across document types. For example, the sales and purchase order declarations place their manual overrides in different relative positions. 
+Status rules are evaluated in reverse declaration order, and the first matching rule wins. This matters when on-hold, closed, cancelled and completion conditions overlap. Do not derive status from percentages alone or impose a universal precedence across document types. For example, the sales and purchase order declarations place their manual overrides in different relative positions.
 
 ## Concrete status decision tables
 

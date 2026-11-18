@@ -4,6 +4,8 @@ Read [scope](overview/scope-and-baseline.md), [architecture](overview/applicatio
 
 | Entry | Content |
 |---|---|
+| [ERP module coverage](rebuild/coverage-review/README.md) | Business workflow, record counts, release differences and qualification by module |
+| [September reader](../checkpoints/september/README.md) | Historical domain chapters, calculation contracts and archived catalog navigation |
 | [November rebuild specification](rebuild/README.md) | Pinned release, field dictionary, functional decisions, extension boundaries, integrated financial examples and acceptance checks |
 | [Complete September edition](../checkpoints/reading-guide.md) | Restore the full operation, field, calculation and report catalogs into one reading tree |
 | [Data](data/README.md) | Folder navigation |
