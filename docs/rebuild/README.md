@@ -43,7 +43,7 @@ Two other reference runs cover [20 upstream stock, manufacturing and repost test
 
 Community visibility is a dated observation. A public default branch may differ from a marketplace install version. A declared dependency can establish a code relationship, while a live compatible installation requires the exact application set and policy profile. Private forks and site-owned customizations enter the blueprint through a captured effective-site profile and its own evidence.
 
-The contracts name inputs, decisions, state, failure conditions and effects. Identifiers taken from upstream metadata, field examples or pinned evidence identify what to map. Each schema, calculation and expected business result is usable independently of the language chosen for a replacement. The executable verifiers are optional evidence tools.
+The [Odoo rebuild reference](https://github.com/vast-development-method/odoo-doc) supplies the publication pattern for bounded contexts, calculations, service contracts and acceptance evidence. ERPNext, Framework and each named app supply the business decisions in this edition. The contracts name inputs, decisions, state, failure conditions and effects. Identifiers taken from upstream metadata, field examples or pinned evidence identify what to map. Each schema, calculation and expected business result is usable independently of the language chosen for a replacement. The executable verifiers are optional evidence tools.
 
 ## How to assess a claim
 
