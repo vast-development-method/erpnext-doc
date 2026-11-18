@@ -8,6 +8,8 @@ Reik fakture, kredietnotas en debietnotas afsonderlik of in ’n groep uit. Hou 
 
 Die toetsdiens antwoord met HTTP 202 op ’n ondertekende bondel: INV-001 kry ’n eksterne ID en INV-002 ’n struktuurfout. Net INV-001 wag op finale validering, INV-002 moet reggestel word en geen faktuur is finaal goedgekeur nie. Die Arabiese en Duitse aansigte behou die oorspronklike ID’s, foutkode en ondertekende versoek.
 
+Hou die groep se verwysing en elke faktuur se uitslag apart. Koppel die regstelling aan die afgekeurde reël. As ’n aanvanklik aanvaarde faktuur later validering druip, behou albei gebeurtenisse en hul tye. ’n Nuwe indiening van die ander faktuur verander geen vorige resultaat of geboekte faktuur nie.
+
 [English](../accounting.md#egyptian-electronic-tax-submission) · [Bronwaarnemings](../../../rebuild/marketplace-guides/editions/af/accounting.md#e-invoice-egypt).
 
 ## Verreken betalings teen ’n banktermynkontrak en boek die wins of verlies wanneer ’n ongebruikte gedeelte gekanselleer word

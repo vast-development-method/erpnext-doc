@@ -165,23 +165,35 @@ For an exempt deduction evaluated by formula, a weekly projection shifts the cur
 
 ## Optional loan service boundary
 
-This boundary defines only the loan information and operations consumed by payroll and separation. The salary loan row holds loan identity, loan-product identity, principal account, interest-income account, principal amount, interest amount, editable total payment and returned repayment identity. Its amounts use company currency. See [lending and loan recovery](lending.md) for the corresponding loan-side decisions.
+The [caller and provider contracts](../services/optional-settlement.md) specify payroll’s inputs, the provider’s value dates and demand allocations, and the distinct exit-settlement interface. The salary loan row holds loan identity, loan-product identity, principal account, interest-income account, principal amount, interest amount, editable total payment and returned repayment identity. Its amounts use company currency. See [lending and loan recovery](lending.md) for the corresponding loan-side decisions.
 
 | External record or operation | Minimum required contract |
 | --- | --- |
 | Loan record | Stable identity; company; applicant employee identity; submitted document state; repay-from-salary choice; open/closed business state; product identity; term-loan choice; principal and interest-income accounts |
 | Loan product record | Stable identity passed to accrual and repayment services; payroll does not infer amortization, rates or eligibility from this identity |
 | Calculate amounts | Input loan identity and valuation date equal to salary end date; output total payable amount, interest amount and payable principal amount |
-| Prepare term-loan obligations | For eligible term loans, accrue interest up to salary end and generate due demands when that capability exists; when only accrual is enabled, prepare interest alone |
-| Create repayment | Input loan, employee, company, posting date, product, normal-repayment kind, interest, principal, total payment, payroll payable account, employee-accounting choice and value date equal to salary end; output a saveable repayment record |
+| Prepare term-loan obligations | The provider prepares eligible term-loan accruals and demands through salary end. The caller’s accrual-only branch requires a different provider entry point. |
+| Create repayment | Input loan, employee, company, posting date, product, normal-repayment kind, interest, principal, total payment, payroll payable account, employee-accounting choice and value date equal to salary end. The provider inserts a draft and returns it. |
 | Save and submit repayment | Persist the returned repayment, submit it and store its identity on the salary loan row |
 | Cancel repayment | Resolve the salary loan row's repayment identity and cancel that repayment through the loan service's reversal rules |
 
-Loan selection requires submitted state, matching employee and company, salary repayment enabled and business status other than closed. When salary loan rows are empty, fetch eligible loans and add only those with nonzero payable amount. For every row, recalculate the pending amount at salary end and reject a total payment above that amount. Sum stored principal, interest and total payment independently into the slip totals. The payroll validation does not demonstrate that editing total payment proportionately recomputes principal and interest; that consistency is an explicit service acceptance case.
+Loan selection requires submitted state, matching employee and company, salary repayment enabled and business status other than closed. When salary loan rows are empty, fetch eligible loans and add only those with nonzero payable amount. For every row, recalculate the pending amount at salary end and reject a total payment above that amount. Sum stored principal, interest and total payment independently into the slip totals. On repayment validation, the provider refreshes the component amounts due and distributes the edited payment through the configured collection sequence.
 
-Salary-slip submission creates and submits nonzero loan repayments. It selects the payroll payable account from the linked batch, falling back to the company's default when there is no batch. The bank-payment builder subtracts total loan recovery from cash salary; a loan recovery must therefore not also be included as cash paid to the employee. Cancelling the slip cancels repayment records linked by its loan rows. Repeating submission after a partial failure must preserve one effective repayment per row; the origin link is the unit of deduplication.
+Salary-slip submission creates and submits nonzero loan repayments. It selects the payroll payable account from the linked batch, falling back to the company's default when there is no batch. The bank-payment builder subtracts total loan recovery from cash salary; a loan recovery must therefore not also be included as cash paid to the employee. Cancelling the slip cancels repayment records linked by its loan rows. The [recovery contract](../services/optional-settlement.md#salary-deduction-and-loan-repayment) uses the origin row to reconcile uncertain completion. The constructor itself has no salary-row idempotency argument.
 
-Final settlement additionally consumes a submitted repayment schedule with schedule-row identity, principal amount, interest amount and accrued marker. It queries pending principal, interest, payable amount and penalty information and prepares unaccrued schedule obligations as of the settlement date. Repayment and interest-accrual cancellation are selected by loan and posting date. Multiple same-date repayments therefore require transaction-level selection testing. These integration calls do not specify interest calculation, payment allocation order, amortization, impairment or loan-product policy; those remain responsibilities of a separately specified loan service.
+The exit caller expects an accrued-row marker and a single-object accrual constructor. The supplied provider declares a demand-generation marker and requires separate constructor arguments. The exit loop also reuses the final receivable’s amount for each loan and omits an explicit repayment value date. The [exit settlement comparison](../services/optional-settlement.md#exit-settlement-requires-a-different-adapter) identifies the needed per-row mapping, effective date and reversal references.
+
+## Leave and attendance on a partially paid day
+
+For ordinary full-day leave, both approved leave and attendance use one minus retained pay. At 75% retained pay the deduction is 0.25 day. At a half-day wage share of 50%, an ordinary half day deducts 0.125. On an excluded half holiday the application path scales the half-day deduction again to 0.0625. The attendance half-leave path already represents the working half and deducts 0.125. Pay can differ by basis even when the leave ledger is identical.
+
+## Future dates in a formula deduction
+
+An exempt deduction evaluated by formula needs a projected period. The weekly calculation shifts the start and end by six days per future period and the fortnightly calculation shifts them by thirteen. In the daily branch the first iteration reads a local period date before assigning it. No daily result can be issued from that path. Retain the frequency and formula on the failure. A fixed deduction or a calculation with no future period does not enter the same formula branch.
+
+## Overtime with zero standard hours
+
+Check for duplicate overtime dates. For a manual row, the configured maximum caps the duration. In the component-based rate calculation, a daily amount of 120 divided by eight standard hours gives 15 per hour before the multiplier. A row reaching this division with zero hours fails. A duration cap cannot supply the divisor. Fixed-rate overtime uses the configured hourly rate independently of component-based division. On rejection leave the overtime payment unposted.
 
 ## Linked specifications
 

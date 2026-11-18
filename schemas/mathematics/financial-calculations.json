@@ -323,7 +323,8 @@
       "input_meanings": {
         "discount_amount": "Document discount amount",
         "item_net_amount": "Current item net amount before document discount",
-        "discountable_total": "Net or eligible grand-total basis"
+        "discountable_total": "Net or eligible grand-total basis",
+        "document_net_precision": "Configured decimal places for document net at this calculation step."
       },
       "mathematical_expression": "raw_share = discount_amount × item_net_amount ÷ discountable_total; adjusted_net = item_net_amount − raw_share; correction = round(running_expected_net − running_rounded_net, document_net_precision)",
       "evaluation_order": [
@@ -412,7 +413,8 @@
       "name": "Retain the settlement rounding difference",
       "input_meanings": {
         "rounded_total": "Total after currency settlement rounding",
-        "grand_total": "Calculated commercial total"
+        "grand_total": "Calculated commercial total",
+        "adjustment_precision": "Configured decimal places for adjustment at this calculation step."
       },
       "mathematical_expression": "rounding_adjustment = round(rounded_total − grand_total, adjustment_precision)",
       "evaluation_order": [
@@ -484,7 +486,9 @@
         "paid_amount": "Source account currency amount",
         "source_conversion_rate": "Company units per source unit",
         "received_amount": "Destination account currency amount",
-        "target_conversion_rate": "Company units per destination unit"
+        "target_conversion_rate": "Company units per destination unit",
+        "paid_precision": "Configured decimal places for paid at this calculation step.",
+        "received_precision": "Configured decimal places for received at this calculation step."
       },
       "mathematical_expression": "company_paid = round(paid_amount × source_conversion_rate, paid_precision); company_received = round(received_amount × target_conversion_rate, received_precision)",
       "evaluation_order": [
@@ -504,7 +508,8 @@
       "input_meanings": {
         "allocated_amount": "Signed party account currency allocation",
         "payment_party_rate": "Source rate for receipt or target rate for payment",
-        "reference_rate": "Rate stored on the historical claim"
+        "reference_rate": "Rate stored on the historical claim",
+        "company_precision": "Configured decimal places for company at this calculation step."
       },
       "mathematical_expression": "exchange_difference = round(allocated_amount × payment_party_rate, company_precision) − round(allocated_amount × reference_rate, company_precision)",
       "evaluation_order": [
@@ -528,7 +533,8 @@
       "input_meanings": {
         "company_paid": "Source movement in company currency",
         "company_received": "Destination movement in company currency",
-        "ordinary_deductions": "Explicit deductions excluding automatically generated exchange adjustment"
+        "ordinary_deductions": "Explicit deductions excluding automatically generated exchange adjustment",
+        "deduction_precision": "Configured decimal places for deduction at this calculation step."
       },
       "mathematical_expression": "automatic_difference = round(company_paid − company_received − ordinary_deductions, deduction_precision)",
       "evaluation_order": [
@@ -573,7 +579,8 @@
       "name": "Calculate each scheduled invoice portion",
       "input_meanings": {
         "remaining_invoice_amount": "Effective total less applicable write-off and advances",
-        "portion_percentage": "Percentage assigned to this term"
+        "portion_percentage": "Percentage assigned to this term",
+        "schedule_precision": "Configured decimal places for schedule at this calculation step."
       },
       "mathematical_expression": "scheduled_amount = round(remaining_invoice_amount × portion_percentage ÷ 100, schedule_precision)",
       "evaluation_order": [
@@ -617,7 +624,8 @@
       "input_meanings": {
         "withdrawal": "Statement withdrawal",
         "deposit": "Statement deposit",
-        "allocations": "Amounts matched to posted vouchers"
+        "allocations": "Amounts matched to posted vouchers",
+        "remaining_precision": "Configured decimal places for remaining at this calculation step."
       },
       "mathematical_expression": "remaining = round(abs(withdrawal − deposit) − sum(allocations), remaining_precision)",
       "evaluation_order": [
@@ -662,7 +670,8 @@
       "input_meanings": {
         "account_balance": "Signed debit-less-credit account currency balance",
         "company_balance": "Signed existing company balance",
-        "new_rate": "Company units per foreign unit at revaluation date"
+        "new_rate": "Company units per foreign unit at revaluation date",
+        "precision": "Configured decimal places for the monetary result at this calculation step."
       },
       "mathematical_expression": "new_company_balance = account_balance × new_rate; adjustment = round(new_company_balance, precision) − round(company_balance, precision)",
       "evaluation_order": [
@@ -683,13 +692,19 @@
       "name": "Unbilled sales-order contribution to credit exposure",
       "input_meanings": {
         "company_order_grand_total": "Order total in company currency",
-        "billed_percentage": "Current billed percentage"
+        "billed_percentage": "Current billed percentage",
+        "delivered_quantity": "Delivered quantity in the order transaction unit.",
+        "ordered_quantity": "Ordered quantity in the same unit as delivery.",
+        "row_billed_amount": "Effective billed amount in the order row currency.",
+        "row_amount": "The order row amount before allocation of document gross value.",
+        "row_company_net": "Net amount of that row in company currency.",
+        "document_company_net": "Company-currency order net total."
       },
       "mathematical_expression": "order_exposure = company_order_grand_total × (100 − billed_percentage) ÷ 100",
       "evaluation_order": [
-        "Include only submitted orders with billed percentage below one hundred",
-        "Exclude closed orders",
-        "Omit entire order component when bypass policy requests it"
+        "Include submitted, nonclosed orders for the selected customer and company with billed percentage below 100.",
+        "For full order exposure use the unbilled percentage of the company-currency grand total.",
+        "Under the delivered-only policy, use the positive part of (row delivered quantity / ordered quantity − row billed amount / row amount). Multiply this share by row company net / document company net × document company grand total, then sum. Include only positive order net totals, positive row amounts and delivered row quantities."
       ],
       "conditions_and_exceptions": [],
       "recording_obligation": "Retain the approved input measurements, selected precision and policy, resulting rounded values, owning business record and any generated financial references.",
@@ -704,7 +719,7 @@
       "input_meanings": {
         "ledger_exposure": "Effective customer company debit less credit",
         "order_exposure": "Unbilled order contribution",
-        "standalone_delivery_exposure": "Eligible unbilled delivery contribution",
+        "standalone_delivery_exposure": "Company-currency gross value of undischarged stock quantities on qualifying standalone delivery rows.",
         "additional_exposure": "Positive proposed extra exposure"
       },
       "mathematical_expression": "exposure = ledger_exposure + order_exposure + standalone_delivery_exposure + max(additional_exposure, 0)",
@@ -718,7 +733,12 @@
       "evidence_status": "source calculation inspected",
       "specification_links": [
         "../../docs/domains/accounts-receivable.md"
-      ]
+      ],
+      "standalone_delivery_basis": {
+        "eligibility": "Use submitted deliveries for the customer and company with positive company net and status other than Closed or Stopped. Exclude rows linked to a sales order or sales invoice and require delivered stock quantity greater than billed plus returned stock quantities.",
+        "quantities": "Group stock quantities on submitted linked invoice rows by original delivery detail. For return invoices linked to return deliveries, resolve the original delivery detail before adding the signed quantity.",
+        "expression": "row company net × (delivered stock quantity − submitted billed stock quantity − returned stock quantity) / delivered stock quantity × delivery company grand total / delivery company net total. Sum across eligible rows."
+      }
     },
     {
       "calculation_identifier": "customer_overdue_portion",
@@ -769,7 +789,8 @@
       "input_meanings": {
         "line_net": "Total deferred amount in the selected currency context",
         "service_days": "End less start plus one",
-        "booking_days": "Interval end less interval start plus one"
+        "booking_days": "Interval end less interval start plus one",
+        "amount_precision": "Configured decimal places for amount at this calculation step."
       },
       "mathematical_expression": "recognition = round(line_net × booking_days ÷ service_days, amount_precision)",
       "evaluation_order": [
@@ -790,7 +811,8 @@
       "name": "Absorb remaining deferred amount in the final interval",
       "input_meanings": {
         "line_net": "Total deferred amount",
-        "already_recognized": "Prior effective recognized amount in same currency"
+        "already_recognized": "Prior effective recognized amount in same currency",
+        "amount_precision": "Configured decimal places for amount at this calculation step."
       },
       "mathematical_expression": "final_recognition = round(line_net − already_recognized, amount_precision)",
       "evaluation_order": [
@@ -948,7 +970,8 @@
       "input_meanings": {
         "residual_value": "Expected final carrying value",
         "current_carrying_value": "Current or initially adjusted asset value",
-        "remaining_years": "Unposted useful life including extension months"
+        "remaining_years": "Unposted useful life including extension months",
+        "rate_precision": "Configured decimal places for rate at this calculation step."
       },
       "mathematical_expression": "annual_percentage = round(100 × (1 − (residual_value ÷ current_carrying_value)^(1 ÷ remaining_years)), rate_precision)",
       "evaluation_order": [
@@ -991,7 +1014,8 @@
       "input_meanings": {
         "candidate_charge": "Charge before final residual correction",
         "candidate_remaining_value": "Carrying value after candidate charge",
-        "residual_value": "Expected final value"
+        "residual_value": "Expected final value",
+        "value_precision": "Configured decimal places for value at this calculation step."
       },
       "mathematical_expression": "corrected_charge = round(candidate_charge + candidate_remaining_value − residual_value, value_precision)",
       "evaluation_order": [
@@ -1153,7 +1177,8 @@
         "taxable_amount": "Remaining taxable value after threshold exemption and prior withholding matching",
         "certificate_remaining_taxable_allowance": "Unconsumed taxable-value allowance",
         "certificate_rate": "Percentage applying to allowance",
-        "ordinary_rate": "Percentage applying after allowance"
+        "ordinary_rate": "Percentage applying after allowance",
+        "precision": "Configured decimal places for the monetary result at this calculation step."
       },
       "mathematical_expression": "certificate_base = min(taxable_amount, certificate_remaining_taxable_allowance); ordinary_base = taxable_amount − certificate_base; withheld = round(certificate_base × certificate_rate ÷ 100, precision) + round(ordinary_base × ordinary_rate ÷ 100, precision)",
       "evaluation_order": [
@@ -1177,7 +1202,8 @@
       "input_meanings": {
         "remaining_taxable_amount": "Positive unmatched taxable amount",
         "prior_tax_rate": "Percentage on the eligible prior withholding event",
-        "prior_withholding_available": "Positive unallocated previously withheld amount"
+        "prior_withholding_available": "Positive unallocated previously withheld amount",
+        "precision": "Configured decimal places for the monetary result at this calculation step."
       },
       "mathematical_expression": "matched_tax = round(min(round(remaining_taxable_amount × prior_tax_rate ÷ 100, precision), prior_withholding_available), precision); matched_taxable = round(100 × matched_tax ÷ prior_tax_rate, precision)",
       "evaluation_order": [
@@ -2433,6 +2459,559 @@
         "../../docs/domains/taxation-and-pricing.md"
       ],
       "evidence_kind": "derived from reviewed calculation"
+    },
+    {
+      "example_identifier": "worked_reporting_currency_conversion",
+      "calculation_identifiers": [
+        "reporting_currency_conversion"
+      ],
+      "given": {
+        "company_debit": "123.45",
+        "company_credit": "0",
+        "reporting_rate": "1.027"
+      },
+      "working": "Use reporting-currency units per company unit. Multiply each side independently. This multiplication retains the resulting precision.",
+      "expected": {
+        "reporting_debit": "126.78315",
+        "reporting_credit": "0"
+      },
+      "specification_links": [
+        "../../docs/domains/financial-accounting.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_commercial_line_amount",
+      "calculation_identifiers": [
+        "commercial_line_amount"
+      ],
+      "given": {
+        "accepted_rate": "12.345",
+        "commercial_quantity": "3",
+        "amount_precision": 2,
+        "rounding": "half up"
+      },
+      "working": "3 × 12.345 = 37.035 transaction-currency units, which rounds to 37.04.",
+      "expected": {
+        "line_amount": "37.04"
+      },
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_percentage_tax",
+      "calculation_identifiers": [
+        "percentage_tax"
+      ],
+      "given": {
+        "applied_item_tax_percentage": "12.5",
+        "net_amount": "84.80",
+        "price_includes_tax": false
+      },
+      "working": "The selected exclusive net base is 84.80. Multiply by 0.125.",
+      "expected": {
+        "tax_amount": "10.60"
+      },
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_fixed_charge_allocation",
+      "calculation_identifiers": [
+        "fixed_charge_allocation"
+      ],
+      "given": {
+        "item_net_amounts": [
+          "1",
+          "1",
+          "1"
+        ],
+        "document_net_total": "3",
+        "document_charge": "10.00",
+        "precision": 2
+      },
+      "working": "Each preliminary share rounds to 3.33. Add the unallocated 0.01 to the final participating item.",
+      "expected": {
+        "item_shares": [
+          "3.33",
+          "3.33",
+          "3.34"
+        ],
+        "allocated_total": "10.00"
+      },
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_tax_on_previous_amount",
+      "calculation_identifiers": [
+        "tax_on_previous_amount"
+      ],
+      "given": {
+        "tax_percentage": "5",
+        "previous_tax_amount": "12",
+        "other_items_previous_tax_amounts": [
+          "18"
+        ]
+      },
+      "working": "5% applies to the referenced 12 for this item. Amounts from other items do not enter this calculation.",
+      "expected": {
+        "tax_amount": "0.60"
+      },
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_tax_on_quantity",
+      "calculation_identifiers": [
+        "tax_on_quantity"
+      ],
+      "given": {
+        "tax_rate_per_unit": "1.75",
+        "commercial_quantity": "4",
+        "stock_units_per_commercial_unit": "6"
+      },
+      "working": "Charge 1.75 for each of four commercial units. Converting to 24 stock units would change the tax base.",
+      "expected": {
+        "tax_amount": "7.00"
+      },
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_cash_discount_total",
+      "calculation_identifiers": [
+        "cash_discount_total"
+      ],
+      "given": {
+        "original_grand_total": "250",
+        "discount_amount": "15",
+        "original_company_grand_total": "375",
+        "company_discount_amount": "22.5"
+      },
+      "working": "Subtract the nontrade discount independently in each declared currency.",
+      "expected": {
+        "grand_total": "235",
+        "company_grand_total": "352.5"
+      },
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_cash_fraction_rounding",
+      "calculation_identifiers": [
+        "cash_fraction_rounding"
+      ],
+      "given": {
+        "amount": "10.25",
+        "fraction": "0.50",
+        "total_precision": 2
+      },
+      "working": "The remainder of 10.25 divided by 0.50 is 0.25. At this exact half fraction select the lower multiple, 10.00.",
+      "expected": {
+        "remainder": "0.25",
+        "rounded_total": "10.00"
+      },
+      "specification_links": [
+        "../../docs/domains/financial-accounting.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_rounding_adjustment",
+      "calculation_identifiers": [
+        "rounding_adjustment"
+      ],
+      "given": {
+        "rounded_total": "27.95",
+        "grand_total": "27.97",
+        "adjustment_precision": 2
+      },
+      "working": "Keep the sign of settlement total less original grand total.",
+      "expected": {
+        "rounding_adjustment": "-0.02"
+      },
+      "specification_links": [
+        "../../docs/domains/financial-accounting.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_cost_center_share",
+      "calculation_identifiers": [
+        "cost_center_share"
+      ],
+      "given": {
+        "original_amount": "83.37",
+        "allocation_percentage": "40",
+        "precision": 2
+      },
+      "working": "83.37 × 0.40 = 33.348, rounded to the ledger precision.",
+      "expected": {
+        "child_amount": "33.35"
+      },
+      "specification_links": [
+        "../../docs/domains/financial-accounting.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_bank_statement_remaining",
+      "calculation_identifiers": [
+        "bank_statement_remaining"
+      ],
+      "given": {
+        "withdrawal": "90",
+        "deposit": "0",
+        "allocations": [
+          "25",
+          "14.75"
+        ],
+        "remaining_precision": 2
+      },
+      "working": "The magnitude of the movement is 90. Allocated 39.75 leaves 50.25.",
+      "expected": {
+        "remaining": "50.25",
+        "status": "unreconciled"
+      },
+      "specification_links": [
+        "../../docs/domains/treasury-and-reconciliation.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_customer_order_exposure",
+      "calculation_identifiers": [
+        "customer_order_exposure"
+      ],
+      "given": {
+        "company_order_grand_total": "1200",
+        "billed_percentage": "62.5",
+        "submitted": true,
+        "closed": false,
+        "include_order_exposure": true
+      },
+      "working": "The open portion is 37.5%, all in company currency.",
+      "expected": {
+        "order_exposure": "450"
+      },
+      "specification_links": [
+        "../../docs/domains/accounts-receivable.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_customer_credit_exposure",
+      "calculation_identifiers": [
+        "customer_credit_exposure"
+      ],
+      "given": {
+        "ledger_exposure": "300",
+        "order_exposure": "450",
+        "standalone_delivery_exposure": "30",
+        "additional_exposure": "-10",
+        "credit_limit": "780"
+      },
+      "working": "Additional exposure contributes zero at a negative input. The 780 total equals the limit.",
+      "expected": {
+        "exposure": "780",
+        "limit_exceeded": false
+      },
+      "specification_links": [
+        "../../docs/domains/accounts-receivable.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_deferred_partial_month",
+      "calculation_identifiers": [
+        "deferred_partial_month"
+      ],
+      "given": {
+        "ordinary_month_amount": "150",
+        "booking_start": "2025-04-01",
+        "booking_end": "2025-04-10",
+        "month_start": "2025-04-01",
+        "month_end": "2025-04-30",
+        "final_interval": false
+      },
+      "working": "The differences are 9 and 29 days. Round 9/29 to 0.3 before multiplying by 150.",
+      "expected": {
+        "booking_date_difference": 9,
+        "full_month_date_difference": 29,
+        "rounded_ratio": "0.3",
+        "partial_amount": "45"
+      },
+      "specification_links": [
+        "../../docs/domains/deferred-recognition-and-financial-control.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_written_down_rate",
+      "calculation_identifiers": [
+        "written_down_rate"
+      ],
+      "given": {
+        "residual_value": "729",
+        "current_carrying_value": "1000",
+        "remaining_years": "3",
+        "rate_precision": 2
+      },
+      "working": "The cube root of 729/1000 is 0.9. One minus this factor gives a 10% annual rate.",
+      "expected": {
+        "annual_percentage": "10.00"
+      },
+      "specification_links": [
+        "../../docs/domains/assets-and-depreciation.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_direct_purchase_stock_value",
+      "calculation_identifiers": [
+        "direct_purchase_stock_value"
+      ],
+      "given": {
+        "valuation_rate": "8.127",
+        "valuation_precision": 2,
+        "commercial_quantity": "4",
+        "conversion_factor": "3",
+        "amount_precision": 2,
+        "stock_update": true,
+        "stock_ledger_value": "0",
+        "return": false
+      },
+      "working": "Round the unit rate to 8.13, then multiply by 12 stock units. A zero ledger value does not replace the ordinary non-return candidate.",
+      "expected": {
+        "candidate_stock_value": "97.56",
+        "selected_value": "97.56"
+      },
+      "specification_links": [
+        "../../docs/domains/accounts-payable.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_withholding_certificate_split",
+      "calculation_identifiers": [
+        "withholding_certificate_split"
+      ],
+      "given": {
+        "taxable_amount": "175",
+        "certificate_remaining_taxable_allowance": "100",
+        "certificate_rate": "2",
+        "ordinary_rate": "5",
+        "precision": 2
+      },
+      "working": "Apply 2% to 100 and 5% to the remaining 75. Sum the separately rounded charges.",
+      "expected": {
+        "certificate_base": "100",
+        "ordinary_base": "75",
+        "withheld": "5.75"
+      },
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_withholding_prior_tax_matching",
+      "calculation_identifiers": [
+        "withholding_prior_tax_matching"
+      ],
+      "given": {
+        "remaining_taxable_amount": "300",
+        "prior_tax_rate": "5",
+        "prior_withholding_available": "7",
+        "precision": 2
+      },
+      "working": "The 15 tax equivalent exceeds the prior withholding balance of 7. Convert the matched 7 back to its base at 5%.",
+      "expected": {
+        "matched_tax": "7",
+        "matched_taxable": "140",
+        "remaining_taxable_amount": "160"
+      },
+      "specification_links": [
+        "../../docs/domains/taxation-and-pricing.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_supplier_service_accrual_reversal",
+      "calculation_identifiers": [
+        "supplier_service_accrual_reversal"
+      ],
+      "given": {
+        "invoice_quantity": "6",
+        "receipt_quantity": "5",
+        "receipt_transaction_rate": "12",
+        "receipt_conversion_rate": "1.5"
+      },
+      "working": "The exact linked receipt caps matching at 5 units. Use its 12 transaction-currency units per unit and its 1.5 company-currency conversion rate.",
+      "expected": {
+        "reversed_accrual": "90"
+      },
+      "specification_links": [
+        "../../docs/domains/accounts-payable.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_asset_value_adjustment",
+      "calculation_identifiers": [
+        "asset_value_adjustment"
+      ],
+      "given": {
+        "new_carrying_value": "1500",
+        "previous_carrying_value": "1200"
+      },
+      "working": "The positive 300 adjusts the selected asset book upward. The sign selects the journal direction.",
+      "expected": {
+        "difference": "300"
+      },
+      "specification_links": [
+        "../../docs/domains/assets-and-depreciation.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_capitalized_repair_value",
+      "calculation_identifiers": [
+        "capitalized_repair_value"
+      ],
+      "given": {
+        "invoice_allocations": [
+          "60",
+          "20"
+        ],
+        "consumed_quantities": [
+          "2",
+          "3"
+        ],
+        "consumed_valuation_rates": [
+          "5",
+          "4"
+        ]
+      },
+      "working": "Add the two invoice allocations and the quantities times their corresponding historical issue rates.",
+      "expected": {
+        "invoice_cost": "80",
+        "consumed_material_cost": "22",
+        "capitalized_value": "102"
+      },
+      "specification_links": [
+        "../../docs/domains/assets-and-depreciation.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_claim_conservation",
+      "calculation_identifiers": [
+        "claim_conservation"
+      ],
+      "given": {
+        "original_claim": "225",
+        "debit_adjustments": [
+          "10"
+        ],
+        "credit_adjustments": [
+          "15",
+          "5"
+        ],
+        "settlements": [
+          "50",
+          "20"
+        ]
+      },
+      "working": "For the same party, account, currency and invoice, 225 + 10 − 15 − 5 − 50 − 20 = 145.",
+      "expected": {
+        "remaining_claim": "145"
+      },
+      "specification_links": [
+        "../../docs/domains/accounts-receivable.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "worked_financial_period_close",
+      "calculation_identifiers": [
+        "financial_period_close"
+      ],
+      "given": {
+        "income_credit_balance": "1300",
+        "expense_debit_balance": "1450"
+      },
+      "working": "The loss produces a debit of 150 to the closing account. The 1450 of debits equals the 1450 credit.",
+      "expected": {
+        "net_profit": "-150",
+        "closing_account_debit": "150",
+        "income_debit": "1300",
+        "expense_credit": "1450"
+      },
+      "specification_links": [
+        "../../docs/domains/financial-accounting.md"
+      ],
+      "evidence_kind": "Independent worked example of the documented rule."
+    },
+    {
+      "example_identifier": "standalone_delivery_credit_at_company_gross",
+      "calculation_identifiers": [
+        "customer_credit_exposure"
+      ],
+      "given": {
+        "row_company_net": "1800",
+        "delivered_stock_quantity": "10",
+        "submitted_billed_stock_quantity": "4",
+        "returned_stock_quantity": "2",
+        "delivery_company_grand_total": "2070",
+        "delivery_company_net_total": "1800"
+      },
+      "working": "The four undischarged units retain 4/10 × 1800 = 720 of row net. Scaling by 2070/1800 gives 828 of gross exposure.",
+      "expected": {
+        "open_stock_quantity": "4",
+        "standalone_delivery_exposure": "828"
+      },
+      "specification_links": [
+        "../../docs/domains/accounts-receivable.md"
+      ],
+      "evidence_kind": "Worked arithmetic from the documented credit-exposure selection and valuation rule."
+    },
+    {
+      "example_identifier": "delivered_only_order_credit_exposure",
+      "calculation_identifiers": [
+        "customer_order_exposure"
+      ],
+      "given": {
+        "ordered_quantity": "10",
+        "delivered_quantity": "6",
+        "row_billed_amount": "200",
+        "row_amount": "1000",
+        "row_company_net": "1000",
+        "document_company_net": "1000",
+        "document_company_grand_total": "1150"
+      },
+      "working": "Delivered share is 0.6 and already billed share is 0.2. The positive excess of 0.4 captures 460 of the order gross.",
+      "expected": {
+        "unbilled_delivered_share": "0.4",
+        "order_exposure": "460"
+      },
+      "specification_links": [
+        "../../docs/domains/accounts-receivable.md"
+      ],
+      "evidence_kind": "Worked arithmetic from the documented credit-exposure selection and valuation rule."
     }
   ],
   "acceptance_observations": [

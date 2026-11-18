@@ -8,6 +8,8 @@
 
 测试服务对同一批已签名单据返回 HTTP 202，INV-001 获得外部编号，INV-002 返回结构错误。只有 INV-001 等待最终验证，INV-002 需要修正，两张发票均不能标记为已通过最终审核；阿拉伯语和德语界面应保留原始编号、错误代码及已签名的请求。
 
+分别保存批次编号和每张发票的结果。更正版本关联到被拒的成员。若已初步受理的发票后来未通过校验，保留两个事件及其时间。重新提交另一张更正发票不会改动原先的校验轨迹或已过账发票。
+
 [English](../accounting.md#egyptian-electronic-tax-submission) · [来源说明](../../../rebuild/marketplace-guides/editions/zh-Hans/accounting.md#e-invoice-egypt).
 
 ## 将款项分配到银行远期外汇合约，并在撤销未使用的合约金额时记录损益

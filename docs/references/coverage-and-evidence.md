@@ -15,10 +15,23 @@ Use the [business chapters](../README.md) for the applicable rule and the [logic
 | Operational presentation declarations | 831 | Includes workspaces, reports, dashboards, print definitions and related surfaces. |
 | Arithmetic expression candidates | 6,049 | Each candidate needs its operands, units, precision, preconditions and side effects to serve as a calculation contract. |
 | Named calculation definitions | 184 | The catalog contains 58 financial formulas, 51 workforce calculations, 40 inventory calculations, 30 customer/service calculations and 5 progress procedures. It also contains two ordered layer-valuation procedures. |
-| Recorded arithmetic review | 142 contracts / 180 checks | This review covered a subset of the mathematical catalog. It compared input amounts and dates to expected values. The verification register separately identifies journal-balance checks and isolated decision runs. |
+| Definition and worked-case coverage | 186 / 186 | The [calculation index](../../schemas/mathematics/definition-coverage.json) links all 184 named calculations and both ordered valuation procedures to their operands and worked cases. |
+| Recorded example review | 180 earlier observations and 93 additional comparisons | The earlier aggregate reported 142 contracts. Its receipt includes journal and rounding observations. The additional document comparisons cover 72 definitions and procedures, including decisions and monetary, quantity, calendar and layer examples. |
 | Evidence anchors in the structural review | 208 | A cited source artifact identifies evidence for a particular statement. Review of one decision does not imply review of every branch in its containing file. |
 
 See the [structured coverage catalog](../../schemas/traceability/catalog-coverage.json), [mathematical verification register](../../schemas/traceability/mathematics-verification.json) and [validation results](../../schemas/traceability/validation-result.json). The [logical dictionary](../../schema/README.md) also covers optional business entities and distinguishes data fields from relationship fields. Its counts describe a different population.
+
+## Where the business decisions are documented
+
+| A reader wants to know | Local specification |
+|---|---|
+| What does an active operation do when a condition succeeds or fails? | [Operation reading directory](../../schemas/operations/business-reading/README.md). Find the operation by its business subject or stable identifier. Each entry joins the input signature, ordered local decisions, conditions, effects and applicable source binding. |
+| Where is the worked case for a named formula? | [Definition and case cross-reference](../../schemas/mathematics/definition-coverage.json). It distinguishes the earlier arithmetic review from subsequent documentation examples. |
+| Why can the same report show different columns or row totals? | [Report behaviour](../services/reports/behaviour/README.md), [dynamic outputs](../services/reports/behaviour/dynamic-output.md) and [stored query examples](../services/reports/behaviour/query-rules.md). Each report entry identifies the applicable result builder and published controls. |
+| Which decision was recovered for a previously open business topic? | The [business question index](business-rule-coverage.md) and [domain review registers](../../schemas/traceability/README.md) link the decision and applicable operating conditions to the relevant business chapter. |
+| How much is known about a third-party extension? | The [provider-by-provider evidence register](../rebuild/marketplace-guides/provider-evidence.md) gives the strongest available material, a specific remaining uncertainty and the evidence needed to establish what the publisher does. |
+
+The operation reading directory covers 23,195 applicable bindings across enterprise transactions, shared services, workforce and customer relationships. Its branch descriptions come from the inspected procedures. A call to a user-selected controller still depends on the installed controller; the [project costing case](../transactions/project-costing.md) illustrates why the distinction matters. The business chapters give worked interpretations for reviewed paths.
 
 ## Decisions and field interpretation
 
@@ -26,7 +39,7 @@ The [operation directory](../../schemas/operations/README.md) and [decision inte
 
 The [conditional field semantics](../../schemas/data/conditional-field-semantics.json) resolve 85 field-condition occurrences represented by 54 distinct expressions. These cover compound and collection predicates, optional children and section expansion. A true expansion condition opens its section. A form condition and server validation are distinct decisions.
 
-Definitions preserve field identity, order, relationship targets, defaults, naming rules and meaningful blank or punctuation values. Collection removal is a collection operation. Type alternatives in annotations describe allowed shapes. Names that would collide globally remain qualified by the owning record. The [review registers](../../schemas/traceability/README.md) identify financial, workforce, inventory, customer and foundation decisions that need independent acceptance cases.
+Definitions preserve field identity, order, relationship targets, defaults, naming rules and meaningful blank or punctuation values. Collection removal is a collection operation. Type alternatives in annotations describe allowed shapes. Names that would collide globally remain qualified by the owning record. The [review registers](../../schemas/traceability/README.md) connect the financial, workforce, inventory, customer, foundation and cross-domain rules to published decisions and worked cases. Each register also identifies observations that depend on the actual provider, deployment or implementation.
 
 ## Transaction and execution evidence
 
@@ -34,7 +47,7 @@ The [receipt-to-cash observation](../rebuild/live/README.md) records balances af
 
 The [project-cost example](../transactions/project-costing.md) distinguishes the company-currency controller from the employee-expense controller using identical time rows. Isolated calculations establish the observed outputs for those inputs. They do not establish deployment-wide hook dispatch or successful posting to a live tenant.
 
-## Remaining qualification
+## What remains dependent on the deployment
 
 A production comparison needs the selected company, accounting and inventory policies, permissions, custom fields, language and enabled optional services. Dynamic reports, provider callbacks, concurrent operations, retries and failures after remote acceptance require their own observations. A jurisdiction’s current law and the receiver’s accepted format must be established separately from a regional fixture.
 

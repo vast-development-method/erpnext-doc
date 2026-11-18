@@ -57,7 +57,7 @@ Periodicity defaults use seven days for weekly, thirty for monthly, ninety-one f
 
 Asset maintenance is a separate recurring obligation from customer service visits. It assigns maintenance or calibration tasks to team members, associates completion and due dates, and creates or updates planned or overdue log records. Due-date calculation uses daily and weekly day increments, monthly/quarterly/half-yearly month increments, and yearly/two-yearly/three-yearly year increments. It chooses the last completion date as the base when that is later than the start date.
 
-When an asset maintenance task supplies an end date, its initial schedule calculation clears the next due date even if the calculated date falls within the interval. Completion uses a separate recurrence rule, described below.
+Both initial scheduling and completion use the task’s end date. Keep a candidate due on or before that date while its base remains earlier. Clear it when the candidate is beyond the end or the base or latest completion has already reached the end. A weekly calibration begun 3 June with end date 10 June is due on 10 June. Completing it on that date schedules no 17 June occurrence. [Recurrence and reversal](traceable-stock-and-service.md#recompute-service-and-calibration-due-dates)
 
 ## Quality procedures, objectives and review decisions
 
@@ -73,19 +73,19 @@ Feedback references a user or customer. If its referenced identity is empty, the
 
 ## Customer visit completion and cancellation
 
-A maintenance visit requires at least one purpose row. Any serial identity entered in a purpose row must exist. A Scheduled visit with a linked schedule detail must fall inclusively within the start and end dates of the corresponding schedule item. When no header detail is selected, perform the equivalent date check for each linked purpose-row schedule detail. Unscheduled and Breakdown visits do not use this particular scheduled-date restriction.
+A maintenance visit requires at least one purpose row. A supplied serial must exist and meet the customer or delivery-history checks. When schedule details are linked, require a submitted schedule for the visit’s customer and company and validate the item on each referenced detail. The header detail takes precedence, otherwise inspect the details on the purpose rows. For any linked detail with a schedule-item reference, the visit date must be inside that item’s start and end dates inclusively.
 
-On submission, set the visit document state to Submitted and update linked schedule details with the visit's Partially Completed or Fully Completed state and actual visit date. On cancellation, restore those schedule details to Pending and clear the actual date. This procedure writes the selected status directly. It is not an aggregation over every visit ever associated with the schedule detail.
+On submit or cancellation, recompute each affected schedule detail from its remaining submitted visits under lock. Prefer the newest Fully Completed visit, then the newest other visit, using maintenance date and creation order. Write its completion status and date. When there is no remaining visit, set Pending and clear actual date. The visit itself receives its own Submitted or Cancelled lifecycle status.
 
 An unscheduled visit linked to a service-coverage claim updates its resolution date, responsible service person and work performed. Fully Completed closes that claim, Partially Completed makes it Work In Progress, and otherwise it remains Open. Before cancelling a visit, later submitted visits against the predecessor identity must be cancelled first, comparing maintenance date then maintenance time. The loop retains the last nonempty predecessor identity from the visit's purpose rows for this guard. Multiple different predecessors in one visit therefore require a dedicated fixture. The routine does not establish that every predecessor receives the same later-visit guard.
 
-When cancellation restores a claim, it selects another submitted Partially Completed visit by descending document identifier, not by latest maintenance timestamp, and restores that visit's resolution details. If none exists, the claim becomes Open and those details are cleared. Keep this selection behavior distinct from the chronological cancellation guard. Visit completion itself does not consume repair parts or create an invoice: those require the applicable stock and billing records.
+For an unscheduled warranty visit, if a different submitted fully completed visit already covers the claim, a nonfinal visit leaves its resolution untouched. When cancellation does restore a claim, select another submitted visit against that claim by descending document identifier, map its completion state and restore its resolution details. If none exists, set Open and clear those details. The chronological cancellation guard and this resolution selection have distinct orderings. Parts or billable work require their own stock and billing documents.
 
 ## Asset maintenance completion and certificates
 
 A maintenance log whose due date is earlier than the current date becomes Overdue unless its state is already Completed or Cancelled. A Completed log must have a completion date. A noncompleted log must not carry a completion date. Submission permits only Completed or Cancelled maintenance state.
 
-Completing a log updates the underlying maintenance task's last completion date, calculates its next due date from that completion date when changed, and resets the task to Planned. Cancelling through the log's maintenance state marks the task Cancelled. The completion recurrence call does not pass the task's end date into the due-date helper. It therefore differs from the end-date anomaly described above. After updating the task, the enclosing asset-maintenance record is saved and its future log maintenance runs.
+Completing a log advances the task from its completion date under the same end-date rule, sets the task to Planned, and saves the enclosing plan to refresh future logs. Submitting a log with business outcome Cancelled marks the task Cancelled. Cancelling a submitted completed log is a different action. Rewind only when that log drives the current task schedule. Restore the latest surviving completion and the cancelled log’s due date. [Schedule-driving log and same-day tie](traceable-stock-and-service.md#recompute-service-and-calibration-due-dates)
 
 A task's certificate-required flag is copied into the log, and the log has a certificate-attachment field. Completion validation does not require a nonempty attachment solely because that flag is set. A mandatory calibration-certificate gate would be a strengthened business rule and must be identified as such. No automatic accounting entry follows merely from recording a maintenance certificate or completing a log.
 
@@ -116,7 +116,7 @@ These cases must preserve configured policy and the raw observations separately 
 6. Inspect primary manufactured output and exempt applicable secondary rows. Material-consumption-only rows must not acquire an unintended output-inspection requirement.
 7. Generate customer visits across a holiday and verify backward adjustment and interval-end handling.
 8. Exercise quarter and half-year boundaries independently in date derivation and minimum-duration validation.
-9. For an asset maintenance task with an end date, compare initial next due date with the date calculated after completing a maintenance log.
+9. Verify the calibration due date when a candidate falls before, exactly on, and beyond the plan end. Cancel the driving log and separately cancel an older log when a later completion exists.
 
 ## Cost responsibility
 

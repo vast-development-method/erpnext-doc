@@ -72,6 +72,17 @@ Resolve document language before rendering, including customer terms, signature 
 - An Arabic version is requested after the German PDF was signed. Generate a separate Arabic document revision and obtain a new signature. The first signed copy and its verification result remain available.
 - If a non-assigned user attempts signing, or the signing service reports an unusable credential, no signed artifact is published. Retrying an email delivery resends the stored attachment without creating a second signature.
 
+#### Signing request, validation and delivery
+
+| Event | Input and resulting record | Failure or replay |
+|---|---|---|
+| Request signature | Bind company, document and revision, template and language, signer identity, unsigned PDF digest and signing-policy revision to one request ID. Keep the credential reference separate from the document and the audit log. | A changed document digest or a different signer requires another request. |
+| Signing service returns a result | Save the returned bytes under their own digest. Attach the provider’s signing reference and the signature’s covered revision to the original request. | If the service may have signed before a timeout, mark the attempt unresolved. Reconcile by request/reference or obtain the issued bytes before authorizing another signing attempt. |
+| Verify the file | Store the signed artifact digest, integrity of the covered revision, signer/certificate identity, trust-policy revision, verification time, revocation status and any later file change. | Distinguish a damaged signature from an intact signed revision with an untrusted or unevaluable chain. The issuance policy decides which result permits dispatch. |
+| Deliver the approved artifact | The outbound record binds recipient, channel, message identity and the approved artifact digest. Reopening the ERP document is unnecessary to resend its attachment. | A mail timeout affects only dispatch. A changed language on the business document requires rendering and approval of a separate artifact. |
+
+For an issuance policy requiring a trusted signature, invoice revision A is signed but the response times out. The signer service subsequently returns artifact S for the same request. Record one signed result. A validator reports intact bytes but an unknown trust chain. Keep S for investigation and withhold dispatch. If verification under the applicable trust policy later succeeds, deliver S and retain both verification results and their times. A delivery retry uses S again. There is one signing request, one signed digest and an independently counted set of delivery attempts. This is the independent contract. Product-specific certificate and provider behavior remains in the linked evidence profile.
+
 [Implementation evidence and scope](../../rebuild/marketplace-guides/apps/dsc.md).
 
 ## Multiple-signer agreement completion

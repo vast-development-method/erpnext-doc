@@ -101,6 +101,10 @@ For every asset and selected financial book, report acquisition cost, additional
 
 The complete twenty-four-row leap-year schedule is included in the `daily_depreciation_leap_year` example in [financial calculations](../calculations/README.md), including every date, day denominator, charge, accumulated depreciation and remaining carrying value. The corresponding accounting acceptance case turns those rows into individual proposed posting events and verifies the final accumulated amount independently.
 
+## Book-specific adjustment and reversal
+
+Before applying a change, select the asset, company, financial book, effective date and the active depreciation schedule. Separate already posted rows from pending depreciation. Apply the signed valuation difference to the chosen book and regenerate applicable future rows. A change from carrying value 600 to 540 is a 60 reduction. Cancelling the adjustment restores the signed difference of 60 and rebuilds the applicable schedule. A manual row in a second financial book is not evidence of a duplicate posting. Reconcile each book’s purchase cost, residual, accumulated depreciation, posted journals and remaining schedule independently. The [capitalization composition](composite-asset-cost.md) identifies which source values enter a capitalized target.
+
 ## Linked specifications
 
 - **Record definitions** · [Asset](../../schemas/data/record-types/asset.json) · [Asset category](../../schemas/data/record-types/asset_category.json) · [Asset financial book](../../schemas/data/record-types/asset_finance_book.json) · [Asset depreciation schedule](../../schemas/data/record-types/asset_depreciation_schedule.json) · [Depreciation row](../../schemas/data/record-types/depreciation_schedule.json) · [Asset capitalization](../../schemas/data/record-types/asset_capitalization.json) · [Asset repair](../../schemas/data/record-types/asset_repair.json) · [Asset value adjustment](../../schemas/data/record-types/asset_value_adjustment.json)

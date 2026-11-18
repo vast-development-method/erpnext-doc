@@ -33,6 +33,8 @@ The [extension transaction chapters](../rebuild/extensions/README.md) connect sa
 
 Each English worked decision links to the profile that documents its implementation evidence, source-specific variations and unresolved questions. The [declaration catalog](../rebuild/marketplace-model/README.md) locates record fields, permissions, services and reports. The [event and language catalog](../rebuild/marketplace-workflows/README.md) locates handlers for each record event and the available message resources.
 
+The [provider evidence register](../rebuild/marketplace-guides/provider-evidence.md) links each of the 69 worked cases to the available evidence and identifies a concrete question about the corresponding product.
+
 ## Scope of the contracts
 
 The 69 worked cases specify outcomes for a selected configuration. Record-event entries identify possible interaction points. A shared event does not establish which optional functions are enabled, their execution order or whether an external organization accepted a transaction. Distinguish document submission, financial posting, remote acknowledgement and final settlement using their own identities and states. Regional capabilities require jurisdiction-specific rule profiles, reporting periods and the applicable authority’s acceptance conditions.

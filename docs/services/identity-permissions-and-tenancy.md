@@ -79,7 +79,7 @@ The [privacy boundaries](#privacy-boundaries-for-business-records) require separ
 
 **Required retry policy.** Capture the initiating tenant and actor on the work record. On every attempt reestablish that identity, check current permissions, and stop if the actor is no longer authorized. Retries of the same business event use the same duplicate-detection key.
 
-**Qualification.** The inspected retry path did not establish preservation of the original user on every attempt. Record the effective tenant and actor for each attempt when verifying this requirement.
+**Current worker behavior.** The internal retry reopens the site and omits the original user. A fresh connection defaults to the administrative identity. The worker receipt and any business authorization must distinguish this retry actor from the actor of the initial queued attempt.
 
 ## Permission decision inputs
 
@@ -105,7 +105,7 @@ The decision must be reproducible for read, select, list, count, print, export, 
 3. A user may access only Company North. A parent referring to Company North and a child referring to Company South must be evaluated against both relevant linked restrictions. Display filtering only on the parent company is insufficient.
 4. A permitted field is masked. Reading then saving the masked representation preserves the real value. A new secret updates protected storage; an explicit empty secret clears it under the secret helper; omitting the field during an overlay leaves the loaded value.
 5. A principal can read a report's reference type but lacks export permission. Viewing and exporting can produce different authorization outcomes. A queued export must retain the requesting identity.
-6. A progress subscriber without a grant on the associated task cannot read its activity, even when the subscriber knows its identifier.
+6. A job progress update confers no read permission on its source document or private result. Access to the underlying transaction or report requires its own authorization.
 
 ## Credential and permission change boundaries
 
@@ -122,3 +122,7 @@ Retain the initiating user on every retry and apply the effective field grants t
 ## Linked specifications
 
 - **Related decisions** · [domain model](../governance/domain-model.md#identity-and-relationship-decision-table) · [normalization table](persistence-identity-and-values.md#absence-empty-values-and-normalization)
+
+## Task progress and record visibility
+
+Document subscriptions check authority on their record or record type. A task's progress channel is addressed by job identity and has a different admission boundary. A progress notification records that work started, advanced or ended. It grants no authority to read the source order, payroll figures, private report attachment or another operator's result. Keep progress payloads limited to information appropriate to the recipient and resolve the result through its own owner, tenant and record permissions. For example, completion of a payroll export can inform the requester without placing employee amounts or the export file on a shared progress message.

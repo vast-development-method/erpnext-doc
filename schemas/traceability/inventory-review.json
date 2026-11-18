@@ -14,7 +14,8 @@
     "../../docs/domains/inventory-and-valuation.md",
     "../../docs/domains/procurement-and-fulfilment.md",
     "../../docs/domains/manufacturing-and-subcontracting.md",
-    "../../docs/domains/quality-and-maintenance.md"
+    "../../docs/domains/quality-and-maintenance.md",
+    "../../docs/operations/traceable-stock-and-service.md"
   ],
   "calculation_catalogs": [
     "../mathematics/inventory-calculations.json"
@@ -22,7 +23,7 @@
   "acceptance_catalogs": [
     "../mathematics/inventory-acceptance-cases.json"
   ],
-  "reviewed_rule_count": 67,
+  "reviewed_rule_count": 75,
   "reviewed_rules": [
     {
       "rule_identifier": "products-units-and-packaging--contract-boundary",
@@ -890,7 +891,7 @@
       "specification_reference": "../../docs/domains/quality-and-maintenance.md#asset-maintenance-and-due-date-records",
       "business_rule_summary": [
         "Asset maintenance is a separate recurring obligation from customer service visits. It assigns maintenance or calibration tasks to team members, associates completion and due dates, and creates or updates planned or overdue log records. The inspected due-date helper uses daily and weekly day increments, monthly/quarterly/half-yearly month increments, and yearly/two-yearly/three-yearly year increments. It chooses the last completion date as the base when that is later than the start date.",
-        "There is an observed source anomaly in the final end-date condition: a supplied end date combined with a nonempty calculated next due date clears that due date, even if it is earlier than the end date. This specification does not silently recast that expression as the usual 'next due date after end date' rule. Reproduction of the observed result and adoption of the likely intended bounded recurrence are different acceptance decisions. Record this as an unresolved compatibility question until an executable reference fixture establishes the required product decision."
+        "Initial and completion recurrence enforce the same end-date limit. A candidate on the end date is valid while its base is earlier. A later candidate, or a base or last completion at the end, clears the next due date."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -917,8 +918,8 @@
       "name": "Customer visit completion and cancellation",
       "specification_reference": "../../docs/domains/quality-and-maintenance.md#customer-visit-completion-and-cancellation",
       "business_rule_summary": [
-        "A maintenance visit requires at least one purpose row. Any serial identity entered in a purpose row must exist. A Scheduled visit with a linked schedule detail must fall inclusively within the start and end dates of the corresponding schedule item. When no header detail is selected, perform the equivalent date check for each linked purpose-row schedule detail. Unscheduled and Breakdown visits do not use this particular scheduled-date restriction.",
-        "On submission, set the visit document state to Submitted and update linked schedule details with the visit's Partially Completed or Fully Completed state and actual visit date. On cancellation, restore those schedule details to Pending and clear the actual date. This procedure writes the selected status directly; it is not an aggregation over every visit ever associated with the schedule detail."
+        "A maintenance visit requires at least one purpose row. A supplied serial must exist and meet the customer or delivery-history checks. When schedule details are linked, require a submitted schedule for the visit’s customer and company and validate the item on each referenced detail. The header detail takes precedence, otherwise inspect the details on the purpose rows. For any linked detail with a schedule-item reference, the visit date must be inside that item’s start and end dates inclusively.",
+        "On submit or cancellation, recompute each affected schedule detail from its remaining submitted visits under lock. Prefer the newest Fully Completed visit, then the newest other visit, using maintenance date and creation order. Write its completion status and date. When there is no remaining visit, set Pending and clear actual date. The visit itself receives its own Submitted or Cancelled lifecycle status."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -932,7 +933,7 @@
       "specification_reference": "../../docs/domains/quality-and-maintenance.md#asset-maintenance-completion-and-certificates",
       "business_rule_summary": [
         "A maintenance log whose due date is earlier than the current date becomes Overdue unless its state is already Completed or Cancelled. A Completed log must have a completion date. A noncompleted log must not carry a completion date. Submission permits only Completed or Cancelled maintenance state.",
-        "Completing a log updates the underlying maintenance task's last completion date, calculates its next due date from that completion date when changed, and resets the task to Planned. Cancelling through the log's maintenance state marks the task Cancelled. The completion recurrence call does not pass the task's end date into the due-date helper; it therefore differs from the end-date anomaly described above. After updating the task, the enclosing asset-maintenance record is saved and its future log maintenance runs."
+        "Completing a log passes the task end date when calculating next due date. Cancelling the driving completed log restores the latest surviving completion and the cancelled log’s due date. A later completed record with the same completion date and later creation protects the current schedule."
       ],
       "review_status": "Documented behavioral contract; runtime acceptance not implied",
       "review_boundary": "The linked local section contains the full ordered procedure, exceptions and record consequences. This register summary does not override that contract.",
@@ -952,6 +953,94 @@
       "chapter_acceptance_catalogs": [
         "../mathematics/inventory-acceptance-cases.json"
       ]
+    },
+    {
+      "rule_identifier": "traceable-stock-and-service--select-batches-at-the-effective-business-time",
+      "name": "Select batches at the effective business time",
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#select-batches-at-the-effective-business-time",
+      "business_rule_summary": [
+        "Expiry uses the selection date independently of ledger cutoff, reservations and valuation."
+      ],
+      "review_status": "Reviewed against the implementation and its persisted record declarations.",
+      "review_boundary": "The worked scenario describes expected decisions and effects. Concurrent application execution and live provider outcomes require their own observations.",
+      "acceptance_status": "Worked input, decision and outcome are recorded in the referenced section."
+    },
+    {
+      "rule_identifier": "traceable-stock-and-service--return-the-original-serial-or-batch",
+      "name": "Return the original serial or batch",
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#return-the-original-serial-or-batch",
+      "business_rule_summary": [
+        "Resolve submitted original voucher/detail, accepted or rejected warehouse and packed or supplied-material provenance before selecting a serial or batch cost."
+      ],
+      "review_status": "Reviewed against the implementation and its persisted record declarations.",
+      "review_boundary": "The worked scenario describes expected decisions and effects. Concurrent application execution and live provider outcomes require their own observations.",
+      "acceptance_status": "Worked input, decision and outcome are recorded in the referenced section."
+    },
+    {
+      "rule_identifier": "traceable-stock-and-service--check-dimension-specific-stock-before-and-after-a-movement",
+      "name": "Check dimension-specific stock before and after a movement",
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#check-dimension-specific-stock-before-and-after-a-movement",
+      "business_rule_summary": [
+        "Validate simultaneous dimension values, serial last-inward custody, and negative future voucher balances."
+      ],
+      "review_status": "Reviewed against the implementation and its persisted record declarations.",
+      "review_boundary": "The worked scenario describes expected decisions and effects. Concurrent application execution and live provider outcomes require their own observations.",
+      "acceptance_status": "Worked input, decision and outcome are recorded in the referenced section."
+    },
+    {
+      "rule_identifier": "traceable-stock-and-service--receive-an-internal-transfer-against-the-correct-row",
+      "name": "Receive an internal transfer against the correct row",
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#receive-an-internal-transfer-against-the-correct-row",
+      "business_rule_summary": [
+        "Validate source/target warehouse, currency, transferred row, returns and aggregate receiving quantity with its allowance."
+      ],
+      "review_status": "Reviewed against the implementation and its persisted record declarations.",
+      "review_boundary": "The worked scenario describes expected decisions and effects. Concurrent application execution and live provider outcomes require their own observations.",
+      "acceptance_status": "Worked input, decision and outcome are recorded in the referenced section."
+    },
+    {
+      "rule_identifier": "traceable-stock-and-service--allocate-a-production-window",
+      "name": "Allocate a production window",
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#allocate-a-production-window",
+      "business_rule_summary": [
+        "Resolve workstation capacity by distinct overlapping cards and split remaining minutes over holiday-adjusted work windows."
+      ],
+      "review_status": "Reviewed against the implementation and its persisted record declarations.",
+      "review_boundary": "The worked scenario describes expected decisions and effects. Concurrent application execution and live provider outcomes require their own observations.",
+      "acceptance_status": "Worked input, decision and outcome are recorded in the referenced section."
+    },
+    {
+      "rule_identifier": "traceable-stock-and-service--quote-book-and-cancel-a-consignment",
+      "name": "Quote, book and cancel a consignment",
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#quote-book-and-cancel-a-consignment",
+      "business_rule_summary": [
+        "Preserve parcel counts, quoted currency and price basis, confirmed booking total and carrier cancellation status."
+      ],
+      "review_status": "Reviewed against the implementation and its persisted record declarations.",
+      "review_boundary": "The worked scenario describes expected decisions and effects. Concurrent application execution and live provider outcomes require their own observations.",
+      "acceptance_status": "Worked input, decision and outcome are recorded in the referenced section."
+    },
+    {
+      "rule_identifier": "traceable-stock-and-service--evaluate-inspection-readings-across-number-formats",
+      "name": "Evaluate inspection readings across number formats",
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#evaluate-inspection-readings-across-number-formats",
+      "business_rule_summary": [
+        "Validate changed numeric text with the entering user’s format, preserve raw text and distinguish evaluation by a second operator."
+      ],
+      "review_status": "Reviewed against the implementation and its persisted record declarations.",
+      "review_boundary": "The worked scenario describes expected decisions and effects. Concurrent application execution and live provider outcomes require their own observations.",
+      "acceptance_status": "Worked input, decision and outcome are recorded in the referenced section."
+    },
+    {
+      "rule_identifier": "traceable-stock-and-service--recompute-service-and-calibration-due-dates",
+      "name": "Recompute service and calibration due dates",
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#recompute-service-and-calibration-due-dates",
+      "business_rule_summary": [
+        "Bound recurrence by inclusive end date, rewind only the schedule-driving completion, and select the controlling customer visit independently."
+      ],
+      "review_status": "Reviewed against the implementation and its persisted record declarations.",
+      "review_boundary": "The worked scenario describes expected decisions and effects. Concurrent application execution and live provider outcomes require their own observations.",
+      "acceptance_status": "Worked input, decision and outcome are recorded in the referenced section."
     }
   ],
   "acceptance_sections": [
@@ -990,50 +1079,51 @@
     {
       "name": "Batch expiry and automatic selection precedence",
       "required_verification": "Exercise the complete decision, edge cases, persistence and relevant external contract before claiming full conformance.",
-      "specification_reference": "../../docs/domains/inventory-and-valuation.md#serial-and-batch-allocations",
-      "status": "Current-date expiry filtering and serial/batch precedence are now specified; complete persisted selection and concurrency acceptance remain outstanding"
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#select-batches-at-the-effective-business-time",
+      "status": "Expiry uses the selection date independently of ledger cutoff, reservations and valuation. Specification reviewed. Complete runtime qualification remains open."
     },
     {
       "name": "Serial-specific return cost across every reference combination",
       "required_verification": "Exercise the complete decision, edge cases, persistence and relevant external contract before claiming full conformance.",
-      "specification_reference": "../../docs/domains/inventory-and-valuation.md#serial-and-batch-allocations",
-      "status": "Documented requirement or discrepancy; complete runtime validation outstanding"
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#return-the-original-serial-or-batch",
+      "status": "Resolve submitted original voucher/detail, accepted or rejected warehouse and packed or supplied-material provenance before selecting a serial or batch cost. Specification reviewed. Complete runtime qualification remains open."
     },
     {
       "name": "Inventory dimension valuation and every inter-company transfer combination",
       "required_verification": "Exercise the complete decision, edge cases, persistence and relevant external contract before claiming full conformance.",
-      "specification_reference": "../../docs/domains/inventory-and-valuation.md#posting-procedure-and-account-reconciliation",
-      "status": "Documented requirement or discrepancy; complete runtime validation outstanding"
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#check-dimension-specific-stock-before-and-after-a-movement",
+      "status": "Validate simultaneous dimension values, serial last-inward custody, and negative future voucher balances. Specification reviewed. Complete runtime qualification remains open.",
+      "related_specification_reference": "../../docs/operations/traceable-stock-and-service.md#receive-an-internal-transfer-against-the-correct-row"
     },
     {
       "name": "Carrier booking and provider-specific charges",
       "required_verification": "Exercise the complete decision, edge cases, persistence and relevant external contract before claiming full conformance.",
-      "specification_reference": "../../docs/domains/products-units-and-packaging.md#shipment-parcels-and-dimensions",
-      "status": "Documented requirement or discrepancy; complete runtime validation outstanding"
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#quote-book-and-cancel-a-consignment",
+      "status": "Preserve parcel counts, quoted currency and price basis, confirmed booking total and carrier cancellation status. Specification reviewed. Complete runtime qualification remains open."
     },
     {
       "name": "Workstation capacity across every shift, holiday and simultaneous scheduling combination",
       "required_verification": "Exercise the complete decision, edge cases, persistence and relevant external contract before claiming full conformance.",
-      "specification_reference": "../../docs/domains/manufacturing-and-subcontracting.md#operating-costs-and-capacity",
-      "status": "Documented requirement or discrepancy; complete runtime validation outstanding"
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#allocate-a-production-window",
+      "status": "Resolve workstation capacity by distinct overlapping cards and split remaining minutes over holiday-adjusted work windows. Specification reviewed. Complete runtime qualification remains open."
     },
     {
       "name": "All calibration and customer maintenance completion policies",
       "required_verification": "Exercise the complete decision, edge cases, persistence and relevant external contract before claiming full conformance.",
-      "specification_reference": "../../docs/domains/quality-and-maintenance.md#customer-visit-completion-and-cancellation",
-      "status": "Documented requirement or discrepancy; complete runtime validation outstanding"
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#recompute-service-and-calibration-due-dates",
+      "status": "Bound recurrence by inclusive end date, rewind only the schedule-driving completion, and select the controlling customer visit independently. Specification reviewed. Complete runtime qualification remains open."
     },
     {
       "name": "Cross-locale inspection evaluation stability",
       "required_verification": "Exercise the complete decision, edge cases, persistence and relevant external contract before claiming full conformance.",
-      "specification_reference": "../../docs/domains/quality-and-maintenance.md#numerical-formulas-and-measurement-precision",
-      "status": "Documented requirement or discrepancy; complete runtime validation outstanding"
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#evaluate-inspection-readings-across-number-formats",
+      "status": "Validate changed numeric text with the entering user’s format, preserve raw text and distinguish evaluation by a second operator. Specification reviewed. Complete runtime qualification remains open."
     },
     {
-      "name": "Asset maintenance end-date anomaly",
+      "name": "Asset maintenance end-date and completion-reversal boundaries",
       "required_verification": "Exercise the complete decision, edge cases, persistence and relevant external contract before claiming full conformance.",
-      "specification_reference": "../../docs/domains/quality-and-maintenance.md#asset-maintenance-completion-and-certificates",
-      "status": "Documented requirement or discrepancy; complete runtime validation outstanding"
+      "specification_reference": "../../docs/operations/traceable-stock-and-service.md#recompute-service-and-calibration-due-dates",
+      "status": "Bound recurrence by inclusive end date, rewind only the schedule-driving completion, and select the controlling customer visit independently. Specification reviewed. Complete runtime qualification remains open."
     }
   ],
   "conformance_gate_register": "conformance-gates.json"

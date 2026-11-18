@@ -25,6 +25,8 @@ In the [assessment guide](apps/frappe_pcat_exam.md), a historical scorer looks u
 
 The [shared language contract](languages/README.md) covers the reader, party and recipient language, script-aware fallback, original text, translation revisions, document issuance, job retries, right-to-left output and stable service identifiers. The [reference run](languages/observed.json) exercises actual server-rendered print views for one posted invoice in five languages. The [message fixture](languages/notice.json) specifies separate acceptance outcomes for sending, replay and a missing approved translation.
 
+The [provider evidence register](provider-evidence.md) gives all 69 workflows, their strongest material, a product-specific decision awaiting confirmation and the evidence that would settle it. It connects each product-specific observation to its independent business contract.
+
 ## How to read the evidence
 
 The cohort is exactly the 69 records with `head_status = unresolved` in the [398-listing snapshot](../extensions/marketplace.json). At the recorded observation date, all 69 exact repository metadata lookups returned HTTP 404 to the research client. That result leaves the reason for unavailability open. Each profile starts from the publisher’s product page. Some publishers also expose manuals, screenshots, alternate repositories or downloadable distributions. The underlying [source inventory](../marketplace-model/README.md) retains its original denominator and revision history.

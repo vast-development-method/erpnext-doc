@@ -1,0 +1,533 @@
+[
+  {
+    "id": "asset-activity",
+    "report": "Asset Activity",
+    "reference_record": "Asset Activity",
+    "mode": "Report Builder",
+    "definition": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/assets/report/asset_activity/asset_activity.json",
+    "enabled_in_declaration": true,
+    "saved_layout": {},
+    "schema_roles": [
+      "System Manager",
+      "Accounts User",
+      "Quality Manager"
+    ]
+  },
+  {
+    "id": "asset-maintenance",
+    "report": "Asset Maintenance",
+    "reference_record": "Asset Maintenance",
+    "mode": "Report Builder",
+    "definition": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/assets/report/asset_maintenance/asset_maintenance.json",
+    "enabled_in_declaration": true,
+    "saved_layout": {
+      "add_total_row": 0,
+      "sort_by": "Asset Maintenance.modified",
+      "add_totals_row": 0,
+      "sort_order": "desc",
+      "sort_by_next": null,
+      "filters": [],
+      "sort_order_next": "desc",
+      "columns": [
+        [
+          "name",
+          "Asset Maintenance"
+        ],
+        [
+          "asset_name",
+          "Asset Maintenance"
+        ],
+        [
+          "item_code",
+          "Asset Maintenance"
+        ],
+        [
+          "maintenance_type",
+          "Asset Maintenance Task"
+        ],
+        [
+          "maintenance_task",
+          "Asset Maintenance Task"
+        ],
+        [
+          "description",
+          "Asset Maintenance Task"
+        ],
+        [
+          "assign_to_name",
+          "Asset Maintenance Task"
+        ],
+        [
+          "maintenance_status",
+          "Asset Maintenance Task"
+        ],
+        [
+          "next_due_date",
+          "Asset Maintenance Task"
+        ],
+        [
+          "last_completion_date",
+          "Asset Maintenance Task"
+        ]
+      ]
+    },
+    "schema_roles": [
+      "Quality Manager",
+      "Manufacturing User"
+    ]
+  },
+  {
+    "id": "fixed-asset-register",
+    "report": "Fixed Asset Register",
+    "reference_record": "Asset",
+    "mode": "Script Report",
+    "definition": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/assets/report/fixed_asset_register/fixed_asset_register.json",
+    "enabled_in_declaration": true,
+    "inputs": {
+      "record": [],
+      "form": [
+        {
+          "field": "company",
+          "fieldtype": "Link",
+          "label": "Company",
+          "options": "Company",
+          "reqd": 1,
+          "default_dynamic": true
+        },
+        {
+          "field": "status",
+          "fieldtype": "Select",
+          "label": "Status",
+          "options": "\nIn Location\nDisposed",
+          "default": "In Location"
+        },
+        {
+          "field": "asset_category",
+          "fieldtype": "Link",
+          "label": "Asset Category",
+          "options": "Asset Category"
+        },
+        {
+          "field": "cost_center",
+          "fieldtype": "Link",
+          "label": "Cost Center",
+          "options": "Cost Center"
+        },
+        {
+          "field": "group_by",
+          "fieldtype": "Select",
+          "label": "Group By",
+          "options": [
+            "--Select a group--",
+            "Asset Category",
+            "Location"
+          ],
+          "reqd": 1,
+          "default": "--Select a group--"
+        },
+        {
+          "field": "only_existing_assets",
+          "fieldtype": "Check",
+          "label": "Only existing assets"
+        },
+        {
+          "field": "finance_book",
+          "fieldtype": "Link",
+          "label": "Finance Book",
+          "options": "Finance Book"
+        },
+        {
+          "field": "include_default_book_assets",
+          "fieldtype": "Check",
+          "label": "Include Default FB Assets",
+          "default": 1
+        },
+        {
+          "field": "filter_based_on",
+          "fieldtype": "Select",
+          "label": "Period Based On",
+          "options": [
+            "--Select a period--",
+            "Fiscal Year",
+            "Date Range"
+          ],
+          "default": "--Select a period--"
+        },
+        {
+          "field": "from_date",
+          "fieldtype": "Date",
+          "label": "Start Date",
+          "depends_on": "eval: doc.filter_based_on == 'Date Range'",
+          "default_dynamic": true
+        },
+        {
+          "field": "to_date",
+          "fieldtype": "Date",
+          "label": "End Date",
+          "depends_on": "eval: doc.filter_based_on == 'Date Range'",
+          "default_dynamic": true
+        },
+        {
+          "field": "from_fiscal_year",
+          "fieldtype": "Link",
+          "label": "Start Year",
+          "options": "Fiscal Year",
+          "depends_on": "eval: doc.filter_based_on == 'Fiscal Year'",
+          "default_dynamic": true
+        },
+        {
+          "field": "to_fiscal_year",
+          "fieldtype": "Link",
+          "label": "End Year",
+          "options": "Fiscal Year",
+          "depends_on": "eval: doc.filter_based_on == 'Fiscal Year'",
+          "default_dynamic": true
+        },
+        {
+          "field": "date_based_on",
+          "fieldtype": "Select",
+          "label": "Date Based On",
+          "options": [
+            "Purchase Date",
+            "Available For Use Date"
+          ],
+          "default": "Purchase Date",
+          "depends_on": "eval: doc.filter_based_on == 'Date Range' || doc.filter_based_on == 'Fiscal Year'"
+        }
+      ]
+    },
+    "column_constructions": [
+      {
+        "builder": "get_columns",
+        "line": 497,
+        "under": [
+          {
+            "when": {
+              "compare": {
+                "read": "filters",
+                "key": "group_by"
+              },
+              "relations": [
+                "In"
+              ],
+              "with": [
+                {
+                  "collection": [
+                    "Asset Category",
+                    "Location"
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "fieldname": {
+          "call": "frappe.scrub",
+          "arguments": [
+            {
+              "read": "filters",
+              "key": "group_by"
+            }
+          ],
+          "named": {}
+        },
+        "label": {
+          "read": "filters",
+          "key": "group_by"
+        },
+        "fieldtype": "Link",
+        "options": {
+          "read": "filters",
+          "key": "group_by"
+        }
+      },
+      {
+        "builder": "get_columns",
+        "line": 504,
+        "under": [
+          {
+            "when": {
+              "compare": {
+                "read": "filters",
+                "key": "group_by"
+              },
+              "relations": [
+                "In"
+              ],
+              "with": [
+                {
+                  "collection": [
+                    "Asset Category",
+                    "Location"
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "fieldname": "net_purchase_amount",
+        "label": "Net Purchase Amount",
+        "fieldtype": "Currency",
+        "options": "Company:company:default_currency"
+      },
+      {
+        "builder": "get_columns",
+        "line": 511,
+        "under": [
+          {
+            "when": {
+              "compare": {
+                "read": "filters",
+                "key": "group_by"
+              },
+              "relations": [
+                "In"
+              ],
+              "with": [
+                {
+                  "collection": [
+                    "Asset Category",
+                    "Location"
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "fieldname": "opening_accumulated_depreciation",
+        "label": "Opening Accumulated Depreciation",
+        "fieldtype": "Currency",
+        "options": "Company:company:default_currency"
+      },
+      {
+        "builder": "get_columns",
+        "line": 518,
+        "under": [
+          {
+            "when": {
+              "compare": {
+                "read": "filters",
+                "key": "group_by"
+              },
+              "relations": [
+                "In"
+              ],
+              "with": [
+                {
+                  "collection": [
+                    "Asset Category",
+                    "Location"
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "fieldname": "depreciated_amount",
+        "label": "Depreciated Amount",
+        "fieldtype": "Currency",
+        "options": "Company:company:default_currency"
+      },
+      {
+        "builder": "get_columns",
+        "line": 525,
+        "under": [
+          {
+            "when": {
+              "compare": {
+                "read": "filters",
+                "key": "group_by"
+              },
+              "relations": [
+                "In"
+              ],
+              "with": [
+                {
+                  "collection": [
+                    "Asset Category",
+                    "Location"
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "fieldname": "asset_value",
+        "label": "Asset Value",
+        "fieldtype": "Currency",
+        "options": "Company:company:default_currency"
+      },
+      {
+        "builder": "get_columns",
+        "line": 532,
+        "under": [
+          {
+            "when": {
+              "compare": {
+                "read": "filters",
+                "key": "group_by"
+              },
+              "relations": [
+                "In"
+              ],
+              "with": [
+                {
+                  "collection": [
+                    "Asset Category",
+                    "Location"
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "fieldname": "company",
+        "label": "Company",
+        "fieldtype": "Link",
+        "options": "Company"
+      },
+      {
+        "builder": "get_columns",
+        "line": 542,
+        "fieldname": "asset_id",
+        "label": "Asset ID",
+        "fieldtype": "Link",
+        "options": "Asset"
+      },
+      {
+        "builder": "get_columns",
+        "line": 549,
+        "fieldname": "asset_name",
+        "label": "Asset Name",
+        "fieldtype": "Data"
+      },
+      {
+        "builder": "get_columns",
+        "line": 550,
+        "fieldname": "asset_category",
+        "label": "Asset Category",
+        "fieldtype": "Link",
+        "options": "Asset Category"
+      },
+      {
+        "builder": "get_columns",
+        "line": 557,
+        "fieldname": "status",
+        "label": "Status",
+        "fieldtype": "Data"
+      },
+      {
+        "builder": "get_columns",
+        "line": 558,
+        "fieldname": "purchase_date",
+        "label": "Purchase Date",
+        "fieldtype": "Date"
+      },
+      {
+        "builder": "get_columns",
+        "line": 559,
+        "fieldname": "available_for_use_date",
+        "label": "Available For Use Date",
+        "fieldtype": "Date"
+      },
+      {
+        "builder": "get_columns",
+        "line": 565,
+        "fieldname": "net_purchase_amount",
+        "label": "Net Purchase Amount",
+        "fieldtype": "Currency",
+        "options": "Company:company:default_currency"
+      },
+      {
+        "builder": "get_columns",
+        "line": 572,
+        "fieldname": "asset_value",
+        "label": "Asset Value",
+        "fieldtype": "Currency",
+        "options": "Company:company:default_currency"
+      },
+      {
+        "builder": "get_columns",
+        "line": 579,
+        "fieldname": "opening_accumulated_depreciation",
+        "label": "Opening Accumulated Depreciation",
+        "fieldtype": "Currency",
+        "options": "Company:company:default_currency"
+      },
+      {
+        "builder": "get_columns",
+        "line": 586,
+        "fieldname": "depreciated_amount",
+        "label": "Depreciated Amount",
+        "fieldtype": "Currency",
+        "options": "Company:company:default_currency"
+      },
+      {
+        "builder": "get_columns",
+        "line": 593,
+        "fieldname": "cost_center",
+        "label": "Cost Center",
+        "fieldtype": "Link",
+        "options": "Cost Center"
+      },
+      {
+        "builder": "get_columns",
+        "line": 600,
+        "fieldname": "department",
+        "label": "Department",
+        "fieldtype": "Link",
+        "options": "Department"
+      },
+      {
+        "builder": "get_columns",
+        "line": 607,
+        "fieldname": "vendor_name",
+        "label": "Vendor Name",
+        "fieldtype": "Data"
+      },
+      {
+        "builder": "get_columns",
+        "line": 608,
+        "fieldname": "location",
+        "label": "Location",
+        "fieldtype": "Link",
+        "options": "Location"
+      },
+      {
+        "builder": "get_columns",
+        "line": 615,
+        "fieldname": "company",
+        "label": "Company",
+        "fieldtype": "Link",
+        "options": "Company"
+      }
+    ],
+    "row_procedure": {
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/assets/report/fixed_asset_register/fixed_asset_register.py#L22",
+      "operation_identifier": "operation_enterprise_assets_report_fixed_asset_register_business_behavior_execute"
+    },
+    "result_builders": [
+      {
+        "action": "get data",
+        "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/assets/report/fixed_asset_register/fixed_asset_register.py#L35"
+      },
+      {
+        "action": "get columns",
+        "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/assets/report/fixed_asset_register/fixed_asset_register.py#L494"
+      }
+    ],
+    "direct_result_positions": [
+      [
+        "columns",
+        "data",
+        "absent",
+        "chart"
+      ]
+    ],
+    "schema_roles": [
+      "Accounts User",
+      "Quality Manager"
+    ],
+    "local_dispatch_guide": "../../../../schemas/operations/business-reading/enterprise/assets/operations-019.md#op-a280c9080d9c6f"
+  }
+]

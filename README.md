@@ -13,7 +13,8 @@ This specification follows the records and decisions that connect a business. A 
 | Which amount, quantity, tax, exchange rate or rounding rule drives a posting? | [Calculation contracts and worked examples](docs/calculations/README.md) and [decision tables](docs/decisions/README.md) |
 | What do authorization, tenant isolation, service calls and queued work guarantee? | [Shared services](docs/services/README.md) and [governance](docs/governance/README.md) |
 | What can an optional capability contribute? Which languages can be used for an issued document? | [Capabilities and integrations](docs/capabilities/README.md) and [language and issuance](docs/capabilities/language-and-issuance.md) |
-| Where are the individual decisions and machine-readable records? | [Detailed catalogs](schemas/README.md), [operation applicability and lookup](schemas/operations/current-decisions/README.md), [record and field dictionary](schema/README.md) |
+| Where are the individual decisions and machine-readable records? | [Detailed catalogs](schemas/README.md), [operation decisions by business subject](schemas/operations/business-reading/README.md), [operation applicability](schemas/operations/current-decisions/README.md), [record and field dictionary](schema/README.md) |
+| Where are the business questions raised in the domain reviews answered? | [51 questions and their documented decisions](docs/references/business-rule-coverage.md) |
 | What has actually been exercised? | [Coverage by business area](docs/rebuild/coverage-review/README.md), [implementation examples and observations](docs/rebuild/README.md), [qualification register](docs/rebuild/qualification.json) |
 
 The [documentation index](docs/README.md) covers the business chapters, interface and runtime details, implementation sequence and acceptance procedures. The [documentation rules](docs/references/documentation-rules.md) define how to specify a decision.

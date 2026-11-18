@@ -78,6 +78,18 @@ The corresponding expense direction starts with deferred-expense debit and suppl
 
 Recognition run cancellation must identify direct postings reversed and generated journals still requiring their own lifecycle action. After a partially completed run, retry only intervals lacking a durable completed or draft-reserved result. The present specification's cutoff-final-marker behavior remains an observed compatibility rule; the acceptance case `deferred_final_month_cutoff_boundary` records its early residual separately from a proposed daily-through-cutoff alternative.
 
+## Overlapping budgets on one account
+
+The transaction budget controller expands a group dimension into descendant keys. A key combines the dimension kind, member and expense account. A subsequent fetched budget replaces the prior value for an identical key. The query supplies no ordering that guarantees child priority, the tightest limit or the largest limit. A group ceiling of 1,000 and a child ceiling of 600 on the same expense account are not a combined ceiling of 1,600. A charge of 700 can cross the child ceiling while staying under the group ceiling. To produce a reproducible approval outcome, configure distinct keys or identify and resolve collisions before relying on the budget check.
+
+## Fiscal date of a proposed ledger batch
+
+For a ledger map the controller chooses the company and posting date from its first line. It obtains that fiscal year and selects budget records effective on that date, then builds keys for the proposed lines. It does not repartition a map at a financial year boundary. A 31 March/1 April pair crossing the company’s year end therefore has no independent second-year budget comparison in that invocation. Submit or validate homogeneous posting-date batches when the two limits must be enforced independently. Purchase commitments instead use their own document date.
+
+## Final service date and reserved intervals
+
+Select the next unbooked service interval using both posted recognition and relevant linked journals. At service end or effective stop, the final installment consumes the remaining unbooked amount. A one-day service reaching its normal final date uses the final residual branch. Do not use an intermediate month-proration denominator to compute that final installment. If a service worth 300 has an existing applicable booking of 200, the final residual is 100. A generated draft journal can reserve the dates before it posts to the ledger. After a partially failed run, identify the last successful interval for each invoice line, exclude cancelled journals and distinguish a pending draft from a posted amount before generating another entry.
+
 ## Linked specifications
 
 - **Record definitions** · [Recognition run](../../schemas/data/record-types/process_deferred_accounting.json) · [Sales invoice line](../../schemas/data/record-types/sales_invoice_item.json) · [Supplier invoice line](../../schemas/data/record-types/purchase_invoice_item.json) · [Journal](../../schemas/data/record-types/journal_entry.json) · [Journal line](../../schemas/data/record-types/journal_entry_account.json) · [General ledger entry](../../schemas/data/record-types/general_ledger_entry.json) · [Budget](../../schemas/data/record-types/budget.json) · [Budget distribution](../../schemas/data/record-types/budget_distribution.json) · [Financial closing](../../schemas/data/record-types/period_closing_voucher.json) · [Account closing balance](../../schemas/data/record-types/account_closing_balance.json)

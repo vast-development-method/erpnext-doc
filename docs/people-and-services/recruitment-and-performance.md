@@ -100,6 +100,18 @@ Only an assigned interviewer may submit interview feedback for that interview. T
 
 Negative goal progress, referral status reset on save, training-result header completion and opening closure marking requisitions filled are explicit compatibility cases. They are not silently normalized into preferred business behavior. Candidate attachments, peer feedback, grievances and compensation data require record-specific access beyond a public directory or public job advertisement. Concurrent capacity consumption by two offers requires a transaction-level test before claiming the capacity checks prevent all overhiring.
 
+## Training result and participant completion
+
+A result requires a submitted event. Refuse another noncancelled result for the same event, excluding the result being edited. Submitting it sets completion on matched participant rows and saves the event. The result controller assigns a header property named status, while the declared event field and the event’s own propagation logic use event_status. Inspect the persisted header separately from participant rows. Two participants with one named in a result do not establish completion of the entire class. A cancelled previous result no longer blocks a replacement through the duplicate check.
+
+## Referral state after a later edit
+
+Validation checks email identity against other noncancelled referrals and sets this referral to Pending. An applicant may already have advanced the referral. A later validating save can therefore return its displayed status to Pending. Bonus-payment state follows a separate field. Retain the linked application decision and payment as independent facts. A new matching-email referral remains blocked while the original is active.
+
+## Goal progress at and below zero
+
+Validation rejects progress greater than 100. For an active goal, zero maps to Pending, 100 to Completed, and any other value below 100 to In Progress. A value of −5 reaches In Progress through these two routines. Archived and Closed preserve their state. User permission, parent ownership, appraisal cycle and effective field rules are separate guards. The upper-bound check cannot establish a lower bound for every input channel.
+
 ## Linked specifications
 
 - **Related decisions** · [Persistence identity and values](../services/persistence-identity-and-values.md)

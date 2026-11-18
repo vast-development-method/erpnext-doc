@@ -22,6 +22,8 @@ A collection may be rebuilt from selected lines or populated only if the destina
 
 [Worked conversions](worked-conversions.md) follow partial purchasing, installation, production and journal reversal from source row through destination effects.
 
+[Competing commitments](competing-commitments.md) follows the same stock through reservation, delivery, consignment, order closure and return, including the records that must be re-read before a second command.
+
 ## Find a document
 
 | Document | Conversion decisions |

@@ -58,6 +58,8 @@ Kies die verskafferbetalings en magtig die groep met ’n eenmalige kode. Volg d
 
 Verwerk dieselfde bankantwoord twee keer vir ’n goedgekeurde groep van twee verskafferbetalings waarvan een bevestig en een afgekeur is. Slegs die betaalde verskaffer kry ’n Duitse betalingsadvies, die afgekeurde betaling bly uitstaande, en die Hindi- en Engelssprekende personeel sien dieselfde bankverwysings en oorspronklike afkeuringsrede.
 
+Die bank bevestig 600 en weier 400 uit ’n gemagtigde groep van 1 000. Rekonsilieer die bankdebiet van 600 en stuur net daardie betalingsadvies. Die 400 bly oop met sy oorspronklike rede. By ’n verbreekte verbinding word die oorspronklike verwysings nagegaan voordat die opdrag weer gestuur word.
+
 [English](../banking.md#supplier-payment-batch-authorization) · [Bronwaarnemings](../../../rebuild/marketplace-guides/editions/af/banking.md#sanpra-easypay).
 
 ## Vorder ’n betaling aanlyn, met ’n gekoppelde betaalterminaal of vir ’n herhalende betalingsversoek in en rekonsilieer dit met die faktuur

@@ -121,6 +121,10 @@ For a five-calendar-day request containing one excluded full holiday and a half 
 
 Suppose an allocation grants 20 days, approved consumption is 6 and encashment is 3. Its remaining entitlement is 11 before expiry or carry adjustments. Cancelling the 3-day encashment restores those 3 days and reverses its payout route; cancelling the 6-day leave restores 6 days and cancels qualifying full- or half-day leave attendance in the employee’s application interval, even if a different application created that attendance. Reversals retain their distinct originating records. Carry-forward first expires the transferable unused balance in the earlier period and records the admitted quantity in the new period; cancelling one side must not leave both periods spendable for the same quantity.
 
+## Unpaid leave around submitted payroll
+
+For unpaid leave, find submitted slips for the same employee and reject when either leave endpoint falls within the inclusive pay interval. Against a 10–20 March slip, 9–10 March, 12–14 March and 20–21 March match. A 9–21 March application encloses the entire slip and does not match this query. A 21–22 March request also lies outside it. Other overlap, balance, date and approval checks still apply. A cancelled slip drops out of this submitted-slip selection.
+
 ## Linked specifications
 
 - **Calculation and acceptance cases** · [workforce calculations](../../schemas/mathematics/workforce-calculations.json) · [workforce acceptance cases](../../schemas/mathematics/workforce-acceptance-cases.json)

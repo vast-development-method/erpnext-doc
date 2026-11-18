@@ -8,6 +8,8 @@ Rechnungen sowie Gutschriften und Belastungsanzeigen lassen sich einzeln oder ge
 
 Antwortet der Testdienst auf eine signierte Sammelübermittlung mit HTTP 202, einer externen Kennung für INV-001 und einem Strukturfehler für INV-002, wartet nur INV-001 auf die abschließende Prüfung. INV-002 muss korrigiert werden, keiner der Belege gilt als endgültig genehmigt, und beide Sprachfassungen bewahren Kennungen, Fehlercode und signierte Anfrage.
 
+Die Sammelreferenz und die Ergebnisse der einzelnen Rechnungen getrennt speichern. Eine Korrektur verweist auf die zurückgewiesene Position. Scheitert eine zunächst angenommene Rechnung später an der Prüfung, bleiben beide Ereignisse mit Zeitstempeln erhalten. Die erneute Einreichung der anderen Rechnung verändert keine frühere Buchung.
+
 [English](../accounting.md#egyptian-electronic-tax-submission) · [Quellenbelege](../../../rebuild/marketplace-guides/editions/de/accounting.md#e-invoice-egypt).
 
 ## Ordnen Sie Zahlungen einem Devisentermingeschäft zu und buchen Sie den Gewinn oder Verlust aus der Auflösung des ungenutzten Teils

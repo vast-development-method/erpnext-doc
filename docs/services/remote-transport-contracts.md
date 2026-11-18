@@ -181,3 +181,7 @@ The example preserves the document contract's batch field spellings while using 
 ## Client adapter mappings
 
 For each existing client, record the exact route, accepted method, field names and response envelope it uses. Map those literals to the business operation and verify its accepted input, permission result and serialized output through the adapter.
+
+## Completion of a multi-part attachment
+
+A successful intermediate part leaves an assembly in progress and produces no durable attachment identity. Finalization requires the declared final part and an assembled position reaching the expected size. The transport then reads the content, removes the temporary assembly, optionally transforms an image and passes the result to its attachment operation. A later rejection can occur after temporary assembly has been removed. The reliable completion evidence is the saved attachment linked to the intended record and privacy context. This interface does not publish a resumable upload identity, accepted byte ranges, or an independent isolation guarantee for concurrent same-name uploads. A retry after an ambiguous final response must reconcile the linked attachment before submitting a new complete upload.

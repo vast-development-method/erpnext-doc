@@ -18,6 +18,8 @@
 
 允许温度范围为 2 至 8 °C，含两端。操作员用德语输入 8,1 °C 后，使用南非荷兰语的主管应看到同一地点和执行人名下的一条 8.1 °C 超限记录。
 
+截至 10:00 应完成三项检查。第一项为 8.0 °C，符合含边界的 8.0 °C 上限；第二项为 8.1 °C，已超限；第三项缺少读数。完成率为 2/3，已完成项中的合格率为 1/2。重复通知不会再次创建纠正任务。
+
 [English](../operations.md#facility-inspection-measurements) · [来源说明](../../../rebuild/marketplace-guides/editions/zh-Hans/operations.md#green-checklist).
 
 ## 记录事故、指定处理人，并跟踪调查和预防措施的落实情况

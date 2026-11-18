@@ -62,9 +62,9 @@
 
 ## Issue resolution target hold extension
 
-`resolution_deadline = calendar_deadline + round_to_configured_precision(total_hold_seconds) wall-clock seconds`
+`resolution_deadline = add_working_seconds(calendar_deadline, previous_extension_seconds + eligible_resumed_hold_seconds, working_calendar)`
 
-- Accumulated hold is not consumed through the business calendar again.
+- Measure each eligible resumed hold within nonholiday working windows. Preserve prior working-time extensions when recalculating the deadline. The audit hold counter measures wall-clock seconds.
 
 ## Regional charge on charge
 
@@ -150,7 +150,7 @@
 
 ## Issue first response outside window
 
-`issue_metric = one second when equal day-of-month branch finds neither timestamp inside support hours`
+`issue_metric = one second when same local calendar date branch finds neither timestamp inside support hours`
 
 - Issue helper includes closing and ignores holiday dates in its weekday-window branches.
 
@@ -160,11 +160,9 @@
 
 - A difference greater than the first installment can make that installment negative under the compatibility routine.
 
-## Supplier import carried quantity
+## Supplier import line quantity
 
-`quantity remains previous quantity when current line_total / unit_rate equals one; prepared_amount = carried_quantity * absolute(unit_rate)`
-
-- This is a documented compatibility defect, not a recommended independent-row import design.
+Each line starts with its supplied quantity and unit or their independent defaults of one and the configured stock unit. Credit headers and lines with both negative price and negative total use negative absolute quantity. For a line with a discount or surcharge component and nonzero quantity, the absolute unit rate is the magnitude of line total divided by quantity. Otherwise use absolute quoted unit rate. Signed quantity multiplied by that rate gives the prepared amount. A missing line tax rate is zero.
 
 ## Regional tax inclusive export price
 
