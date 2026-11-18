@@ -1,0 +1,206 @@
+{
+  "erpnextRevision": "886ab6ae187244e7f1b852393384ab6019d56264",
+  "frappeRevision": "199a0385c00e572664a099a57a00be6ce7404eeb",
+  "cases": [
+    {
+      "module": "erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle",
+      "class": "TestSerialandBatchBundle",
+      "method": "test_stock_queue_for_return_entry_with_non_batchwise_valuation",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/serial_and_batch_bundle/test_serial_and_batch_bundle.py#L1588-L1672",
+      "execution": "document-workflow",
+      "scenario": "Build a FIFO queue with 10 at 100 and 20 at 200 on a non-batchwise-valued batch. Receive five at 300 and submit a linked purchase return.",
+      "assertion": "The receipt appends [5,300]. The return restores [[10,100],[20,200]].",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle",
+      "class": "TestSerialandBatchBundle",
+      "method": "test_lifo_purchase_return_from_non_batchwise_batch",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/serial_and_batch_bundle/test_serial_and_batch_bundle.py#L1674-L1718",
+      "execution": "document-workflow",
+      "scenario": "Receive two lots of 10 in one batch with batchwise valuation off, the first at 100 and the second at 200. Return five against the first receipt.",
+      "assertion": "The active ledger row carries a stock value of 2500 and layers [[5,100],[10,200]].",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle",
+      "class": "TestSerialandBatchBundle",
+      "method": "test_lifo_issue_from_non_batchwise_batch",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/serial_and_batch_bundle/test_serial_and_batch_bundle.py#L1720-L1760",
+      "execution": "document-workflow",
+      "scenario": "Receive 10 units into batch A at 100 and 10 into batch B at 200 with a LIFO item and batchwise valuation disabled. Issue 5 explicitly from batch A.",
+      "assertion": "With A explicitly selected, the active ledger value falls by 1000 and the remaining queue is [[10,100],[5,200]].",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle",
+      "class": "TestSerialandBatchBundle",
+      "method": "test_expiry_picks_serials_of_the_batch_that_expires_first",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/serial_and_batch_bundle/test_serial_and_batch_bundle.py#L2481-L2518",
+      "execution": "database-selector",
+      "scenario": "Receive two serials each in batches expiring in 60 and five days. Request two serials using the Expiry selector.",
+      "assertion": "The set of batch IDs of all returned serials is exactly the five-day batch.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.stock_reservation_entry.test_stock_reservation_entry",
+      "class": "TestStockReservationEntry",
+      "method": "test_batch_shared_across_sales_orders_can_be_delivered",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/stock_reservation_entry/test_stock_reservation_entry.py#L1331-L1362",
+      "execution": "document-workflow",
+      "scenario": "Receive two units of one batch. Two sales orders reserve one each. Explicitly assign that batch to each mapped delivery row.",
+      "assertion": "Both delivery notes submit with document status 1.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.stock_reservation_entry.test_stock_reservation_entry",
+      "class": "TestStockReservationEntry",
+      "method": "test_delivery_draining_a_batch_reserved_for_another_sales_order_is_blocked",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/stock_reservation_entry/test_stock_reservation_entry.py#L1364-L1389",
+      "execution": "document-workflow",
+      "scenario": "Receive two batches of two. Reserve two for order A. Assign the reserved batch to an unreserved delivery for order B.",
+      "assertion": "Submission raises the reservation validation error even with stock available in the other batch.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.stock_reservation_entry.test_stock_reservation_entry",
+      "class": "TestStockReservationEntryValidation",
+      "method": "test_returned_serial_from_partly_delivered_reservation_can_be_reserved_again",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/stock_reservation_entry/test_stock_reservation_entry.py#L1910-L1950",
+      "execution": "document-workflow",
+      "scenario": "An order reserves two serials. Deliver one from the reservation and return the delivery. Create and reserve a new one-unit order.",
+      "assertion": "The new submitted reservation has exactly the returned serial in its child rows.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.stock_reservation_entry.test_stock_reservation_entry",
+      "class": "TestStockReservationEntryValidation",
+      "method": "test_partial_reservation_reserves_whole_sales_units",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/stock_reservation_entry/test_stock_reservation_entry.py#L1952-L1976",
+      "execution": "document-workflow",
+      "scenario": "Request three whole boxes of 12 against 25 available stock units with partial reservation enabled.",
+      "assertion": "The reservation records 24 stock units.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.repost_item_valuation.test_repost_item_valuation",
+      "class": "TestRepostItemValuation",
+      "method": "test_repost_queued_after_start_is_not_skipped",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/repost_item_valuation/test_repost_item_valuation.py#L111-L121",
+      "execution": "controlled-ordering",
+      "scenario": "Submit two item/warehouse rebuild requests with auto-run held. Set the earlier request’s in-memory start time to 60 seconds before creation of the later request and call deduplication.",
+      "assertion": "The later request remains Queued in the database.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.repost_item_valuation.test_repost_item_valuation",
+      "class": "TestRepostItemValuation",
+      "method": "test_restart_only_failed_reposts",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/repost_item_valuation/test_repost_item_valuation.py#L175-L183",
+      "execution": "controlled-ordering",
+      "scenario": "Set a submitted rebuild to Completed and request restart. Repeat with its saved state set to Failed.",
+      "assertion": "The first request raises a validation error. The failed rebuild restarts with status Queued.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.repost_item_valuation.test_repost_item_valuation",
+      "class": "TestRepostItemValuation",
+      "method": "test_repost_uses_allow_zero_rate",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/repost_item_valuation/test_repost_item_valuation.py#L197-L216",
+      "execution": "synchronous-job",
+      "scenario": "Receive 10 at 100, issue five later and cancel the original receipt. With negative stock enabled for the item, execute its pending voucher rebuild with allow_zero_rate set.",
+      "assertion": "The rebuild reaches Completed.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.repost_item_valuation.test_repost_item_valuation",
+      "class": "TestRepostItemValuation",
+      "method": "test_transfer_target_queued_before_the_transfer_is_reposted_once",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/repost_item_valuation/test_repost_item_valuation.py#L1203-L1243",
+      "execution": "synchronous-job",
+      "scenario": "Receive 10 at 100, move five to another warehouse, then issue two there. Insert 10 at 200 before the transfer. Queue overlapping item/warehouse rebuilds on the source and destination.",
+      "assertion": "Executing the source request gives statuses Completed and Skipped. A forwarding call recorder counts one replay per destination row. Destination stock values become 750 and 450.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.stock_entry.test_stock_entry",
+      "class": "TestStockEntry",
+      "method": "test_material_transfer_gl_entry",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/stock_entry/test_stock_entry.py#L534-L597",
+      "execution": "document-workflow",
+      "scenario": "Transfer 45 units from stores to finished goods. Read each warehouse inventory account, inspect the applicable posting branch, then cancel the voucher.",
+      "assertion": "Stock ledger quantities are −45 and +45. The test checks absence of GL rows for a shared account or a source credit and matching target debit for distinct accounts. The result records success for the executed branch.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.stock_entry.test_stock_entry",
+      "class": "TestStockEntry",
+      "method": "test_secondary_item_allocation_uses_consumption_entry_cost",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/stock_entry/test_stock_entry.py#L4649-L4708",
+      "execution": "document-workflow",
+      "scenario": "Submit component consumption of 10 at 100. On a work order for 10 finished units, allocate 25 percent of component costs to a five-unit scrap output and save the manufacture draft.",
+      "assertion": "Posted consumption totals 1000. The draft carries 750 for finished goods and 250 for scrap, with 1000 total incoming value.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.stock_entry.test_stock_entry",
+      "class": "TestStockEntry",
+      "method": "test_disassembly_after_material_transfer_returns_consumed_batches",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/stock_entry/test_stock_entry.py#L4878-L4920",
+      "execution": "document-workflow",
+      "scenario": "Receive five each into two material batches, transfer 10 to work in progress, submit two manufactures of five, then submit two disassemblies of five.",
+      "assertion": "The multiset of the two returned material batch IDs equals the multiset of the original receipts.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.stock_entry.test_stock_entry",
+      "class": "TestStockEntry",
+      "method": "test_manufacture_refuses_an_output_that_is_neither_finished_good_nor_secondary",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/stock_entry/test_stock_entry.py#L5830-L5844",
+      "execution": "document-workflow",
+      "scenario": "Prepare a manufacture using two units of a raw item, one designated finished output, and an additional one-unit target row with neither output classification.",
+      "assertion": "The manufacture command raises a validation error.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.stock_closing_entry.test_stock_closing_entry",
+      "class": "TestStockClosingEntry",
+      "method": "test_chained_closing_does_not_double_count_batch_rows",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/stock_closing_entry/test_stock_closing_entry.py#L339-L376",
+      "execution": "synchronous-job",
+      "scenario": "Receive a batched quantity of 10 at 100, submit the first closing with enqueue held, call its balance builder, and calculate the next closing opening.",
+      "assertion": "The first closing reaches Completed. The subsequent item/warehouse total is 10 units and 1000 in value.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.stock_closing_entry.test_stock_closing_entry",
+      "class": "TestStockClosingEntryDates",
+      "method": "test_closing_cancelled_while_job_runs_is_not_completed",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/stock_closing_entry/test_stock_closing_entry.py#L499-L515",
+      "execution": "controlled-ordering",
+      "scenario": "Start the closing balance builder. After it creates balance rows, a wrapper sets the document cancelled at that explicit point and lets the worker finish.",
+      "assertion": "The wrapper confirms provisional balance rows existed. The completed call leaves state Cancelled and removes all balance rows linked to that closing.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.stock_closing_entry.test_stock_closing_entry",
+      "class": "TestStockClosingEntryDates",
+      "method": "test_closing_balance_waits_for_pending_reposts",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/stock_closing_entry/test_stock_closing_entry.py#L558-L572",
+      "execution": "controlled-ordering",
+      "scenario": "Submit an item/warehouse rebuild in March with test auto-execution held. Attempt a closing through March 31 in the same company.",
+      "assertion": "Closing submission raises PendingRepostingError.",
+      "outcome": "passed"
+    },
+    {
+      "module": "erpnext.stock.doctype.stock_closing_entry.test_stock_closing_entry",
+      "class": "TestStockClosingEntryDates",
+      "method": "test_backdated_entry_outdates_open_closing_for_reports",
+      "source": "https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/stock_closing_entry/test_stock_closing_entry.py#L594-L611",
+      "execution": "synchronous-job",
+      "scenario": "Receive 10 at 100, build a closing, then insert five more units at 100 before its date. Run the Stock Balance report after the closing.",
+      "assertion": "The closing becomes Outdated. Both the report opening and balance quantities are 15.",
+      "outcome": "passed"
+    }
+  ]
+}
