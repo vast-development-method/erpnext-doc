@@ -1,0 +1,704 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Typed platform acceptance cases",
+  "type": "object",
+  "required": [
+    "revision",
+    "cases"
+  ],
+  "properties": {
+    "revision": {
+      "const": "199a0385c00e572664a099a57a00be6ce7404eeb"
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "contract",
+          "input",
+          "expected"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contract": {
+            "type": "string",
+            "enum": [
+              "maintenance-admission",
+              "site-time-budget",
+              "child-record-access",
+              "edit-transition",
+              "bulk-approval",
+              "self-approval",
+              "queue-deduplication",
+              "worker-retry",
+              "automation-depth",
+              "event-claim",
+              "automation-stale-claim",
+              "automation-queue-settlement",
+              "report-stall",
+              "private-reference-reuse",
+              "extension-action-name"
+            ]
+          },
+          "input": {
+            "type": "object"
+          },
+          "expected": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "maintenance-admission"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "maintenance",
+                    "allow_reads",
+                    "use_replica"
+                  ],
+                  "properties": {
+                    "maintenance": {
+                      "type": "boolean"
+                    },
+                    "allow_reads": {
+                      "type": "boolean"
+                    },
+                    "use_replica": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "normal",
+                    "stop",
+                    "read-replica",
+                    "read-only-transaction"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "site-time-budget"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "consumed",
+                    "limit"
+                  ],
+                  "properties": {
+                    "consumed": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "limit": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "throttle",
+                    "admit"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "child-record-access"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "valid_parent_type",
+                    "valid_parent_field",
+                    "field_level",
+                    "level_granted",
+                    "parent_allows"
+                  ],
+                  "properties": {
+                    "valid_parent_type": {
+                      "type": "boolean"
+                    },
+                    "valid_parent_field": {
+                      "type": "boolean"
+                    },
+                    "field_level": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "level_granted": {
+                      "type": "boolean"
+                    },
+                    "parent_allows": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "deny",
+                    "allow"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "edit-transition"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "revision_matches",
+                    "stored",
+                    "requested"
+                  ],
+                  "properties": {
+                    "revision_matches": {
+                      "type": "boolean"
+                    },
+                    "stored": {
+                      "type": "string",
+                      "enum": [
+                        "draft",
+                        "submitted",
+                        "cancelled"
+                      ]
+                    },
+                    "requested": {
+                      "type": "string",
+                      "enum": [
+                        "draft",
+                        "submitted",
+                        "cancelled"
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "stale",
+                    "closed",
+                    "save",
+                    "submit",
+                    "restricted-update",
+                    "cancel",
+                    "illegal-transition"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "bulk-approval"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "count"
+                  ],
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "inline",
+                    "enqueue",
+                    "reject"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "self-approval"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "administrator",
+                    "self_approval_enabled",
+                    "actor_is_owner"
+                  ],
+                  "properties": {
+                    "administrator": {
+                      "type": "boolean"
+                    },
+                    "self_approval_enabled": {
+                      "type": "boolean"
+                    },
+                    "actor_is_owner": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "allow",
+                    "deny"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "queue-deduplication"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "deduplicate",
+                    "stable_id",
+                    "previous"
+                  ],
+                  "properties": {
+                    "deduplicate": {
+                      "type": "boolean"
+                    },
+                    "stable_id": {
+                      "type": "boolean"
+                    },
+                    "previous": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "queued",
+                        "started",
+                        "terminal"
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "enqueue",
+                    "reject",
+                    "suppress",
+                    "remove-old-and-enqueue"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "worker-retry"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "eligible_failure",
+                    "retry_number"
+                  ],
+                  "properties": {
+                    "eligible_failure": {
+                      "type": "boolean"
+                    },
+                    "retry_number": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "rollback-and-retry",
+                    "rollback-and-fail"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "automation-depth"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "depth",
+                    "maximum"
+                  ],
+                  "properties": {
+                    "depth": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "maximum": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "refuse",
+                    "queue"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "event-claim"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "now",
+                    "expires"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "waiting",
+                        "matched",
+                        "timed-out",
+                        "cancelled"
+                      ]
+                    },
+                    "now": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "expires": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "no-change",
+                    "match-and-wake",
+                    "timeout-and-wake"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "automation-stale-claim"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "age_seconds",
+                    "cutoff_seconds"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "running",
+                        "pending",
+                        "scheduled",
+                        "failed",
+                        "skipped"
+                      ]
+                    },
+                    "age_seconds": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "cutoff_seconds": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "release-to-pending",
+                    "retain"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "automation-queue-settlement"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "run_status"
+                  ],
+                  "properties": {
+                    "run_status": {
+                      "type": "string",
+                      "enum": [
+                        "success",
+                        "partially-failed",
+                        "waiting",
+                        "failed",
+                        "skipped"
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "retain-failed",
+                    "retain-skipped",
+                    "remove-processed-row"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "report-stall"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "age_seconds"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "queued",
+                        "started",
+                        "completed",
+                        "error",
+                        "cancelled"
+                      ]
+                    },
+                    "age_seconds": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "mark-error-and-notify",
+                    "retain"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "private-reference-reuse"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "matching_records",
+                    "administrator",
+                    "owns_any",
+                    "read_any"
+                  ],
+                  "properties": {
+                    "matching_records": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "administrator": {
+                      "type": "boolean"
+                    },
+                    "owns_any": {
+                      "type": "boolean"
+                    },
+                    "read_any": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "continue",
+                    "deny"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "contract": {
+                  "const": "extension-action-name"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "input": {
+                  "type": "object",
+                  "required": [
+                    "already_registered"
+                  ],
+                  "properties": {
+                    "already_registered": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "expected": {
+                  "type": "string",
+                  "enum": [
+                    "reject-registry",
+                    "register"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}

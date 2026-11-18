@@ -1,0 +1,673 @@
+{
+  "revision": "199a0385c00e572664a099a57a00be6ce7404eeb",
+  "cases": [
+    {
+      "id": "maintenance-admission-normal",
+      "contract": "maintenance-admission",
+      "input": {
+        "maintenance": false,
+        "allow_reads": false,
+        "use_replica": false
+      },
+      "expected": "normal"
+    },
+    {
+      "id": "maintenance-admission-maintenance-stop",
+      "contract": "maintenance-admission",
+      "input": {
+        "maintenance": true,
+        "allow_reads": false,
+        "use_replica": true
+      },
+      "expected": "stop"
+    },
+    {
+      "id": "maintenance-admission-replica",
+      "contract": "maintenance-admission",
+      "input": {
+        "maintenance": true,
+        "allow_reads": true,
+        "use_replica": true
+      },
+      "expected": "read-replica"
+    },
+    {
+      "id": "maintenance-admission-primary",
+      "contract": "maintenance-admission",
+      "input": {
+        "maintenance": true,
+        "allow_reads": true,
+        "use_replica": false
+      },
+      "expected": "read-only-transaction"
+    },
+    {
+      "id": "site-time-budget-below",
+      "contract": "site-time-budget",
+      "input": {
+        "consumed": 499999,
+        "limit": 500000
+      },
+      "expected": "admit"
+    },
+    {
+      "id": "site-time-budget-equal",
+      "contract": "site-time-budget",
+      "input": {
+        "consumed": 500000,
+        "limit": 500000
+      },
+      "expected": "admit"
+    },
+    {
+      "id": "site-time-budget-above",
+      "contract": "site-time-budget",
+      "input": {
+        "consumed": 500001,
+        "limit": 500000
+      },
+      "expected": "throttle"
+    },
+    {
+      "id": "child-record-access-missing-type",
+      "contract": "child-record-access",
+      "input": {
+        "valid_parent_type": false,
+        "valid_parent_field": false,
+        "field_level": 0,
+        "level_granted": true,
+        "parent_allows": true
+      },
+      "expected": "deny"
+    },
+    {
+      "id": "child-record-access-missing-field",
+      "contract": "child-record-access",
+      "input": {
+        "valid_parent_type": true,
+        "valid_parent_field": false,
+        "field_level": 0,
+        "level_granted": true,
+        "parent_allows": true
+      },
+      "expected": "deny"
+    },
+    {
+      "id": "child-record-access-higher-level",
+      "contract": "child-record-access",
+      "input": {
+        "valid_parent_type": true,
+        "valid_parent_field": true,
+        "field_level": 1,
+        "level_granted": false,
+        "parent_allows": true
+      },
+      "expected": "deny"
+    },
+    {
+      "id": "child-record-access-parent-denies",
+      "contract": "child-record-access",
+      "input": {
+        "valid_parent_type": true,
+        "valid_parent_field": true,
+        "field_level": 1,
+        "level_granted": true,
+        "parent_allows": false
+      },
+      "expected": "deny"
+    },
+    {
+      "id": "child-record-access-accessible-zero",
+      "contract": "child-record-access",
+      "input": {
+        "valid_parent_type": true,
+        "valid_parent_field": true,
+        "field_level": 0,
+        "level_granted": false,
+        "parent_allows": true
+      },
+      "expected": "allow"
+    },
+    {
+      "id": "child-record-access-accessible-elevated",
+      "contract": "child-record-access",
+      "input": {
+        "valid_parent_type": true,
+        "valid_parent_field": true,
+        "field_level": 2,
+        "level_granted": true,
+        "parent_allows": true
+      },
+      "expected": "allow"
+    },
+    {
+      "id": "edit-transition-stale",
+      "contract": "edit-transition",
+      "input": {
+        "revision_matches": false,
+        "stored": "submitted",
+        "requested": "cancelled"
+      },
+      "expected": "stale"
+    },
+    {
+      "id": "edit-transition-cancelled",
+      "contract": "edit-transition",
+      "input": {
+        "revision_matches": true,
+        "stored": "cancelled",
+        "requested": "draft"
+      },
+      "expected": "closed"
+    },
+    {
+      "id": "edit-transition-draft",
+      "contract": "edit-transition",
+      "input": {
+        "revision_matches": true,
+        "stored": "draft",
+        "requested": "draft"
+      },
+      "expected": "save"
+    },
+    {
+      "id": "edit-transition-submit",
+      "contract": "edit-transition",
+      "input": {
+        "revision_matches": true,
+        "stored": "draft",
+        "requested": "submitted"
+      },
+      "expected": "submit"
+    },
+    {
+      "id": "edit-transition-amend-in-place",
+      "contract": "edit-transition",
+      "input": {
+        "revision_matches": true,
+        "stored": "submitted",
+        "requested": "draft"
+      },
+      "expected": "illegal-transition"
+    },
+    {
+      "id": "edit-transition-invalid-cancel",
+      "contract": "edit-transition",
+      "input": {
+        "revision_matches": true,
+        "stored": "draft",
+        "requested": "cancelled"
+      },
+      "expected": "illegal-transition"
+    },
+    {
+      "id": "edit-transition-restricted",
+      "contract": "edit-transition",
+      "input": {
+        "revision_matches": true,
+        "stored": "submitted",
+        "requested": "submitted"
+      },
+      "expected": "restricted-update"
+    },
+    {
+      "id": "edit-transition-cancel",
+      "contract": "edit-transition",
+      "input": {
+        "revision_matches": true,
+        "stored": "submitted",
+        "requested": "cancelled"
+      },
+      "expected": "cancel"
+    },
+    {
+      "id": "bulk-approval-empty",
+      "contract": "bulk-approval",
+      "input": {
+        "count": 0
+      },
+      "expected": "inline"
+    },
+    {
+      "id": "bulk-approval-nineteen",
+      "contract": "bulk-approval",
+      "input": {
+        "count": 19
+      },
+      "expected": "inline"
+    },
+    {
+      "id": "bulk-approval-twenty",
+      "contract": "bulk-approval",
+      "input": {
+        "count": 20
+      },
+      "expected": "enqueue"
+    },
+    {
+      "id": "bulk-approval-five-hundred",
+      "contract": "bulk-approval",
+      "input": {
+        "count": 500
+      },
+      "expected": "enqueue"
+    },
+    {
+      "id": "bulk-approval-too-many",
+      "contract": "bulk-approval",
+      "input": {
+        "count": 501
+      },
+      "expected": "reject"
+    },
+    {
+      "id": "self-approval-admin",
+      "contract": "self-approval",
+      "input": {
+        "administrator": true,
+        "self_approval_enabled": false,
+        "actor_is_owner": true
+      },
+      "expected": "allow"
+    },
+    {
+      "id": "self-approval-owner-enabled",
+      "contract": "self-approval",
+      "input": {
+        "administrator": false,
+        "self_approval_enabled": true,
+        "actor_is_owner": true
+      },
+      "expected": "allow"
+    },
+    {
+      "id": "self-approval-another-reviewer",
+      "contract": "self-approval",
+      "input": {
+        "administrator": false,
+        "self_approval_enabled": false,
+        "actor_is_owner": false
+      },
+      "expected": "allow"
+    },
+    {
+      "id": "self-approval-self-disabled",
+      "contract": "self-approval",
+      "input": {
+        "administrator": false,
+        "self_approval_enabled": false,
+        "actor_is_owner": true
+      },
+      "expected": "deny"
+    },
+    {
+      "id": "queue-deduplication-ordinary",
+      "contract": "queue-deduplication",
+      "input": {
+        "deduplicate": false,
+        "stable_id": false,
+        "previous": "none"
+      },
+      "expected": "enqueue"
+    },
+    {
+      "id": "queue-deduplication-no-key",
+      "contract": "queue-deduplication",
+      "input": {
+        "deduplicate": true,
+        "stable_id": false,
+        "previous": "none"
+      },
+      "expected": "reject"
+    },
+    {
+      "id": "queue-deduplication-queued",
+      "contract": "queue-deduplication",
+      "input": {
+        "deduplicate": true,
+        "stable_id": true,
+        "previous": "queued"
+      },
+      "expected": "suppress"
+    },
+    {
+      "id": "queue-deduplication-running",
+      "contract": "queue-deduplication",
+      "input": {
+        "deduplicate": true,
+        "stable_id": true,
+        "previous": "started"
+      },
+      "expected": "suppress"
+    },
+    {
+      "id": "queue-deduplication-old",
+      "contract": "queue-deduplication",
+      "input": {
+        "deduplicate": true,
+        "stable_id": true,
+        "previous": "terminal"
+      },
+      "expected": "remove-old-and-enqueue"
+    },
+    {
+      "id": "queue-deduplication-new",
+      "contract": "queue-deduplication",
+      "input": {
+        "deduplicate": true,
+        "stable_id": true,
+        "previous": "none"
+      },
+      "expected": "enqueue"
+    },
+    {
+      "id": "worker-retry-first",
+      "contract": "worker-retry",
+      "input": {
+        "eligible_failure": true,
+        "retry_number": 0
+      },
+      "expected": "rollback-and-retry"
+    },
+    {
+      "id": "worker-retry-fifth-attempt",
+      "contract": "worker-retry",
+      "input": {
+        "eligible_failure": true,
+        "retry_number": 4
+      },
+      "expected": "rollback-and-retry"
+    },
+    {
+      "id": "worker-retry-sixth-attempt",
+      "contract": "worker-retry",
+      "input": {
+        "eligible_failure": true,
+        "retry_number": 5
+      },
+      "expected": "rollback-and-fail"
+    },
+    {
+      "id": "worker-retry-other-error",
+      "contract": "worker-retry",
+      "input": {
+        "eligible_failure": false,
+        "retry_number": 0
+      },
+      "expected": "rollback-and-fail"
+    },
+    {
+      "id": "automation-depth-root",
+      "contract": "automation-depth",
+      "input": {
+        "depth": 0,
+        "maximum": 3
+      },
+      "expected": "queue"
+    },
+    {
+      "id": "automation-depth-last-slot",
+      "contract": "automation-depth",
+      "input": {
+        "depth": 2,
+        "maximum": 3
+      },
+      "expected": "queue"
+    },
+    {
+      "id": "automation-depth-exhausted",
+      "contract": "automation-depth",
+      "input": {
+        "depth": 3,
+        "maximum": 3
+      },
+      "expected": "refuse"
+    },
+    {
+      "id": "automation-depth-above",
+      "contract": "automation-depth",
+      "input": {
+        "depth": 4,
+        "maximum": 3
+      },
+      "expected": "refuse"
+    },
+    {
+      "id": "event-claim-before",
+      "contract": "event-claim",
+      "input": {
+        "status": "waiting",
+        "now": 299,
+        "expires": 300
+      },
+      "expected": "match-and-wake"
+    },
+    {
+      "id": "event-claim-exact",
+      "contract": "event-claim",
+      "input": {
+        "status": "waiting",
+        "now": 300,
+        "expires": 300
+      },
+      "expected": "timeout-and-wake"
+    },
+    {
+      "id": "event-claim-late",
+      "contract": "event-claim",
+      "input": {
+        "status": "waiting",
+        "now": 301,
+        "expires": 300
+      },
+      "expected": "timeout-and-wake"
+    },
+    {
+      "id": "event-claim-duplicate",
+      "contract": "event-claim",
+      "input": {
+        "status": "matched",
+        "now": 299,
+        "expires": 300
+      },
+      "expected": "no-change"
+    },
+    {
+      "id": "event-claim-late-duplicate",
+      "contract": "event-claim",
+      "input": {
+        "status": "timed-out",
+        "now": 310,
+        "expires": 300
+      },
+      "expected": "no-change"
+    },
+    {
+      "id": "event-claim-cancelled",
+      "contract": "event-claim",
+      "input": {
+        "status": "cancelled",
+        "now": 290,
+        "expires": 300
+      },
+      "expected": "no-change"
+    },
+    {
+      "id": "automation-stale-claim-boundary",
+      "contract": "automation-stale-claim",
+      "input": {
+        "status": "running",
+        "age_seconds": 1800,
+        "cutoff_seconds": 1800
+      },
+      "expected": "retain"
+    },
+    {
+      "id": "automation-stale-claim-stale",
+      "contract": "automation-stale-claim",
+      "input": {
+        "status": "running",
+        "age_seconds": 1801,
+        "cutoff_seconds": 1800
+      },
+      "expected": "release-to-pending"
+    },
+    {
+      "id": "automation-stale-claim-future-work",
+      "contract": "automation-stale-claim",
+      "input": {
+        "status": "scheduled",
+        "age_seconds": 9000,
+        "cutoff_seconds": 1800
+      },
+      "expected": "retain"
+    },
+    {
+      "id": "automation-queue-settlement-success",
+      "contract": "automation-queue-settlement",
+      "input": {
+        "run_status": "success"
+      },
+      "expected": "remove-processed-row"
+    },
+    {
+      "id": "automation-queue-settlement-partial",
+      "contract": "automation-queue-settlement",
+      "input": {
+        "run_status": "partially-failed"
+      },
+      "expected": "remove-processed-row"
+    },
+    {
+      "id": "automation-queue-settlement-wait",
+      "contract": "automation-queue-settlement",
+      "input": {
+        "run_status": "waiting"
+      },
+      "expected": "remove-processed-row"
+    },
+    {
+      "id": "automation-queue-settlement-error",
+      "contract": "automation-queue-settlement",
+      "input": {
+        "run_status": "failed"
+      },
+      "expected": "retain-failed"
+    },
+    {
+      "id": "automation-queue-settlement-gone",
+      "contract": "automation-queue-settlement",
+      "input": {
+        "run_status": "skipped"
+      },
+      "expected": "retain-skipped"
+    },
+    {
+      "id": "report-stall-old-queued",
+      "contract": "report-stall",
+      "input": {
+        "status": "queued",
+        "age_seconds": 30000
+      },
+      "expected": "retain"
+    },
+    {
+      "id": "report-stall-exact",
+      "contract": "report-stall",
+      "input": {
+        "status": "started",
+        "age_seconds": 21600
+      },
+      "expected": "retain"
+    },
+    {
+      "id": "report-stall-expired",
+      "contract": "report-stall",
+      "input": {
+        "status": "started",
+        "age_seconds": 21601
+      },
+      "expected": "mark-error-and-notify"
+    },
+    {
+      "id": "report-stall-finished",
+      "contract": "report-stall",
+      "input": {
+        "status": "completed",
+        "age_seconds": 30000
+      },
+      "expected": "retain"
+    },
+    {
+      "id": "private-reference-reuse-new",
+      "contract": "private-reference-reuse",
+      "input": {
+        "matching_records": 0,
+        "administrator": false,
+        "owns_any": false,
+        "read_any": false
+      },
+      "expected": "continue"
+    },
+    {
+      "id": "private-reference-reuse-owned",
+      "contract": "private-reference-reuse",
+      "input": {
+        "matching_records": 2,
+        "administrator": false,
+        "owns_any": true,
+        "read_any": false
+      },
+      "expected": "continue"
+    },
+    {
+      "id": "private-reference-reuse-shared",
+      "contract": "private-reference-reuse",
+      "input": {
+        "matching_records": 2,
+        "administrator": false,
+        "owns_any": false,
+        "read_any": true
+      },
+      "expected": "continue"
+    },
+    {
+      "id": "private-reference-reuse-admin",
+      "contract": "private-reference-reuse",
+      "input": {
+        "matching_records": 2,
+        "administrator": true,
+        "owns_any": false,
+        "read_any": false
+      },
+      "expected": "continue"
+    },
+    {
+      "id": "private-reference-reuse-unauthorized",
+      "contract": "private-reference-reuse",
+      "input": {
+        "matching_records": 2,
+        "administrator": false,
+        "owns_any": false,
+        "read_any": false
+      },
+      "expected": "deny"
+    },
+    {
+      "id": "extension-action-name-distinct",
+      "contract": "extension-action-name",
+      "input": {
+        "already_registered": false
+      },
+      "expected": "register"
+    },
+    {
+      "id": "extension-action-name-collision",
+      "contract": "extension-action-name",
+      "input": {
+        "already_registered": true
+      },
+      "expected": "reject-registry"
+    }
+  ]
+}
