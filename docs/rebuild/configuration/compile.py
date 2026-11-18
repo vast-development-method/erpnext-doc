@@ -129,7 +129,13 @@ def check_compatibility():
         file = MODEL.parents[2] / "schemas/data/record-types" / (case["baseline_record"] + ".json")
         old = read(file)
         key = sha256(json.dumps(case["field"]).encode()).hexdigest()
-        old_field = next((f for f in old["fields"] if f["source_name_digest"] == key), {})
+        # The full September checkpoint uses neutral field identities. The curated
+        # catalog additionally carries source-name digests for exact upstream lookup.
+        identity = "name"
+        expected = case.get("baseline_field", case["field"])
+        if any("source_name_digest" in f for f in old["fields"]):
+            identity, expected = "source_name_digest", key
+        old_field = next((f for f in old["fields"] if f.get(identity) == expected), {})
         new_field = next((f for f in record_for(case["record"])["fields"] if f["name"] == case["field"]), {})
         if (old_field.get("value_type"), new_field.get("type")) != (
                 case["expected_september"], case["expected_november"]):
