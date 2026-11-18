@@ -1,0 +1,19 @@
+# LumenPDF Studio
+
+Mahmood Husam lists ERP document and report design for versions 14–16. System Managers design formats, and document or report readers choose a format, preview a PDF and print, download or email it. The publisher describes standard read-only templates, editable copies, autosaved drafts, bulk output and per-company defaults. The gallery includes sales and purchasing documents, payment vouchers, delivery notes and financial reports. Designs can bind ordinary fields, child rows and a field on a linked record. The listing specifically describes Arabic-only and bilingual templates, embedded Arabic and Latin fonts, and currency-aware amount wording in Arabic or English. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/lumenpdf)
+
+The publisher also describes site-hosted image assets, permission checks on protected fields and reports, private temporary outputs and filtering of branded reports. A Gemini-assisted design can start with an instruction or an image/PDF. The advertised validation and undo step operate on the format draft. A signed invoice QR comes from the invoicing integration and is consumed as document data. [Publisher description](https://cloud.frappe.io/marketplace/apps/lumenpdf)
+
+## Proposed rebuild contract
+
+Give each format a document/report type, revision, company scope, layout tree, allowed binding paths, translatable literal keys and supported output languages. Preserve an immutable revision for a sent artifact. A manager can fork a standard format, edit a draft and publish it after validating fields, image references and locale assets. A reader requests a render using a format revision, document identity or report filters, and recipient language. Recheck the reader's rights when resolving linked fields, child rows, attachments and report data. The author of a template cannot confer those rights on its reader. Validate suggested AI edits through the same draft path and leave the last valid revision available for undo.
+
+Resolve the output language from the explicit recipient choice or recipient preference and record the effective language. Store the author's editor language separately. A bilingual layout assigns direction and language per block. Layout direction may change column order on the page, while numerical columns remain bound to the same field keys. Include the currency from the posted document when spelling out amounts. Render original names and signed QR bytes verbatim. Make an unavailable required translation visible to the sender before sending an external document.
+
+| Proposed acceptance case | Expected result |
+|---|---|
+| An English-speaking clerk prints a bilingual invoice with a mixed-script customer name, two tax rows and a signed QR. | The heading appears in both languages, Arabic shapes correctly, each tax line uses the source amount and a scanner recovers the original QR content. |
+| A format binds a protected field on a linked customer. Two users render the same invoice. | The restricted user's preview, PDF and email attachment omit the protected value. An artifact cached for the privileged user cannot satisfy the restricted request. |
+| A report filtered to one company has Arabic labels exceeding one line. | Headers wrap, amounts and filter scope agree with the on-screen report and the company identity survives pagination. |
+
+A public executable app revision, its precise permission handling, template schema and renderer/version equivalence remain unverified. The named documentation branch and the pinned framework print service identify two different evidence sources. [Named app branch](https://github.com/ma7mod7osam/LumenPDF-Studio/tree/lumenpdf) · [Framework print service](https://github.com/frappe/frappe/blob/199a0385c00e572664a099a57a00be6ce7404eeb/frappe/www/printview.py)
