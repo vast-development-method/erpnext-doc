@@ -4,7 +4,7 @@ A supplier delivers raw material in two lots at different prices. The company co
 
 ## Effective configuration
 
-One company, one supplier, one customer and one bank account use NAD. The company uses perpetual inventory, FIFO, two stock accounts mapped through separate warehouses and a single cost centre. The company converts 15 raw units into five identical finished units using a Repack stock entry. The receiving and delivery documents move quantities. The subsequent purchase invoice, sales invoice and credit note have stock updating disabled. Input tax is wholly recoverable. The example uses an exclusive 15% charge on the net amount, no additional costs, zero opening stock and no currency translation. The rate is a fixture parameter. The credit note reduces the original sales invoice's outstanding amount. Configure two-decimal monetary precision and choose values with no fractional-cent rounding in this profile.
+One company, one supplier, one customer and one bank account use NAD. The company uses perpetual inventory, FIFO, two stock accounts mapped through separate warehouses and a single cost centre. The company converts 15 raw units into five identical finished units using a Repack stock entry. The receiving and delivery documents move quantities. The subsequent purchase invoice, sales invoice and credit note have stock updating disabled. Input tax is wholly recoverable. The example uses an exclusive 15% charge on the net amount, no additional costs, zero opening stock and no currency translation. The rate is a fixture parameter. After setting the mapped credit quantity to one returned unit, recalculate the draft taxes and totals before saving or submitting it. This gives the allocation check the intended credit of 69.00 against 96.00 still outstanding. The credit note then reduces the original sales invoice's balance. Configure two-decimal monetary precision and choose values with no fractional-cent rounding in this profile.
 
 ## Expected postings
 
@@ -59,7 +59,9 @@ The verifier recalculates consumption from FIFO layers, billing from receipt val
 python3 docs/rebuild/integrated/reference-stock.py /path/to/erpnext /path/to/frappe
 ```
 
-The pure valuation code agreed with all six physical movements. The linked document submissions, authorizations, database commits, payable allocations and financial report reads require separate site execution. A passing independent fixture proves the arithmetic and the consistency of the specified example.
+The pure valuation code agreed with all six physical movements. A separate [live reference exercise](../live/README.md) submitted the twelve vouchers to the pinned ERPNext and Frappe site. With the partial credit recalculated before submission, all journal and stock movements and the 15 closing controls matched. The original invoice went from 276.00 to 96.00 after the first receipt, to 27.00 after the credit, and to zero after the second receipt. The fixture records the expected open amount by original invoice after every event.
+
+The live run also exposed a meaningful difference between a customer's net balance and their open invoices. If a program maps the full sales invoice to a draft credit, changes its quantity to one and retains its old full-document totals, the allocation guard reads those stale totals before the general recalculation. It can direct the credit to its own open item. On this fixture the original invoice still has 69.00 outstanding after the second receipt, while the customer control account nets to zero. Preserve the voucher-level allocation and the effective flag when reproducing this path. [Allocation guard](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/controllers/accounts_controller.py#L243-L270) · [Validation order](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/controllers/accounts_controller.py#L335-L355)
 
 ## Reference decisions
 
