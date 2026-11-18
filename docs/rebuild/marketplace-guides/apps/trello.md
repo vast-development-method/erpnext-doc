@@ -1,6 +1,6 @@
 # trello
 
-Suneet Sharma's listing describes an ERPNext 14 connector for Trello. Its setup sends the user to Trello to authorize an application identified by an API key and returns a token. The operator creates a Trello Board, maps Trello usernames from ERP users, configures Board Lists and represents a card with an Issue. Members, due dates and card moves are part of the advertised workflow. The listing does not specify event direction, polling frequency or conflict handling. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/trello) · [Publisher's integration guide](https://docs.google.com/document/d/1luNOmhcBy6IjmZspmyaXULk_Ez8ZbgLRh0Vgl-I0dpo/edit)
+Suneet Sharma's listing describes an ERPNext 14 connector for Trello. Its setup sends the user to Trello to authorize an application identified by an API key and returns a token. The operator creates a Trello Board, maps Trello usernames from ERP users, configures Board Lists and represents a card with an Issue. Members, due dates and card moves are part of the advertised workflow. The publisher's illustrated guide describes a manual board synchronization and board webhook registration. A new card in Trello creates an Issue with its subject, board, list, dates and label. A card checklist becomes a group Task linked to the Issue, and its entries become child tasks linked to the parent and its dependency table. [Marketplace listing](https://cloud.frappe.io/marketplace/apps/trello) · [Publisher's integration guide](https://docs.google.com/document/d/1luNOmhcBy6IjmZspmyaXULk_Ez8ZbgLRh0Vgl-I0dpo/mobilebasic)
 
 ## Replacement mapping
 
@@ -19,4 +19,6 @@ An operator's create command carries an issue ID, connection ID and revision. Se
 - If a remote list was deleted and another list has since acquired the same title, leave the issue in synchronization conflict. Require an authorized user to remap the ID before retrying. A revoked token similarly stops the update without recording a successful move.
 - Retry the same creation after a lost acknowledgement. Recover the prior mapping or show an unresolved creation. Do not create a second card solely because the operator changed interface language.
 
-The publisher advertises stage tracking; source revision, automatic inbound synchronization, archive/delete semantics and supplied language packs remain unverified.
+- Receive a card containing an Arabic checklist with two entries. Create one Issue, one group Task and two child tasks with stable remote IDs. Replaying the webhook preserves all links and original titles.
+
+Source revision, field-level conflict precedence, archive/delete propagation, exact webhook coverage and supplied language packs remain unverified.
