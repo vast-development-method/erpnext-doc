@@ -2,7 +2,7 @@
 
 A business transaction can enter through a document method, an HTTP service, a schedule, an installed application hook, a browser action or an event emitted by another document. These declarations identify where to look for that behavior. Use the [qualification ledger](qualification.json) to see which individual gates in this inventory also carry a reviewed or executed observation.
 
-The scan covers the complete tracked source trees of [ERPNext 16.60.0](https://github.com/frappe/erpnext/tree/886ab6ae187244e7f1b852393384ab6019d56264) and [Frappe 16.60.1](https://github.com/frappe/frappe/tree/199a0385c00e572664a099a57a00be6ce7404eeb). The [manifest](coverage.json) lists every shard, record count, SHA-256 and source URL prefix. The table links the first shard for each family. Later numbered shards continue the same ordering.
+The [live platform exercise](../platform-live/README.md) qualifies selected HTTP resource and bulk-operation paths. The scan covers the complete tracked source trees of [ERPNext 16.60.0](https://github.com/frappe/erpnext/tree/886ab6ae187244e7f1b852393384ab6019d56264) and [Frappe 16.60.1](https://github.com/frappe/frappe/tree/199a0385c00e572664a099a57a00be6ce7404eeb). The [manifest](coverage.json) lists every shard, record count, SHA-256 and source URL prefix. The table links the first shard for each family. Later numbered shards continue the same ordering.
 
 | Declaration family | ERPNext | Foundation | What a row establishes |
 |---|---:|---:|---|
