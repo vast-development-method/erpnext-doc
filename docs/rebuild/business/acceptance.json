@@ -1,0 +1,848 @@
+{
+  "baseline": "886ab6ae187244e7f1b852393384ab6019d56264",
+  "cases": [
+    {
+      "id": "ORD-SHRINK",
+      "operation": "resize-delivery-promises",
+      "input": {
+        "promised": [
+          4,
+          3,
+          2
+        ],
+        "revised": 6,
+        "stockFactor": 12
+      },
+      "expected": {
+        "kept": [
+          4,
+          2
+        ],
+        "stock": [
+          48,
+          24
+        ]
+      }
+    },
+    {
+      "id": "ORD-GROW",
+      "operation": "resize-delivery-promises",
+      "input": {
+        "promised": [
+          2,
+          3
+        ],
+        "revised": 8,
+        "stockFactor": 6
+      },
+      "expected": {
+        "kept": [
+          2,
+          3
+        ],
+        "stock": [
+          12,
+          18
+        ]
+      }
+    },
+    {
+      "id": "ORD-EMPTY-BUDGET",
+      "operation": "resize-delivery-promises",
+      "input": {
+        "promised": [
+          2,
+          3
+        ],
+        "revised": 0,
+        "stockFactor": 6
+      },
+      "expected": {
+        "kept": [],
+        "stock": []
+      }
+    },
+    {
+      "id": "INV-RETURNS",
+      "operation": "remaining-invoice-quantity",
+      "input": {
+        "ordered": 10,
+        "returned": 3,
+        "qualifiedCredit": 2,
+        "delivered": 8,
+        "netBilled": 5,
+        "mapped": 1
+      },
+      "expected": {
+        "ceiling": 9,
+        "pending": 3
+      }
+    },
+    {
+      "id": "INV-REDELIVERY",
+      "operation": "remaining-invoice-quantity",
+      "input": {
+        "ordered": 10,
+        "returned": 4,
+        "qualifiedCredit": 0,
+        "delivered": 9,
+        "netBilled": 8,
+        "mapped": 0
+      },
+      "expected": {
+        "ceiling": 9,
+        "pending": 1
+      }
+    },
+    {
+      "id": "INV-CAP",
+      "operation": "remaining-invoice-quantity",
+      "input": {
+        "ordered": 10,
+        "returned": 1,
+        "qualifiedCredit": 1,
+        "delivered": 12,
+        "netBilled": 11,
+        "mapped": 1
+      },
+      "expected": {
+        "ceiling": 10,
+        "pending": 0
+      }
+    },
+    {
+      "id": "PRO-FREIGHT",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": true,
+        "originalTotalCents": 100000,
+        "qty": 5,
+        "lineCents": 25000,
+        "freightCents": 8000,
+        "discountCents": 0
+      },
+      "expected": {
+        "totalCents": 27000,
+        "issued": true,
+        "ledgerRows": 0
+      }
+    },
+    {
+      "id": "PRO-FIXED-DISCOUNT",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": true,
+        "originalTotalCents": 100000,
+        "qty": 5,
+        "lineCents": 50000,
+        "freightCents": 50000,
+        "discountCents": 20000
+      },
+      "expected": {
+        "totalCents": 65000,
+        "issued": true,
+        "ledgerRows": 0
+      }
+    },
+    {
+      "id": "PRO-ZERO-ORIGINAL",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": true,
+        "originalTotalCents": 0,
+        "qty": 3,
+        "lineCents": 10000,
+        "freightCents": 100,
+        "discountCents": 500
+      },
+      "expected": {
+        "totalCents": 9600,
+        "issued": true,
+        "ledgerRows": 0
+      }
+    },
+    {
+      "id": "PRO-FEATURE",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": false,
+        "submitted": true,
+        "originalTotalCents": 10000,
+        "qty": 1,
+        "lineCents": 1000,
+        "freightCents": 0,
+        "discountCents": 0
+      },
+      "expected": {
+        "error": "feature-disabled"
+      }
+    },
+    {
+      "id": "PRO-ORDER-DRAFT",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": false,
+        "originalTotalCents": 10000,
+        "qty": 1,
+        "lineCents": 1000,
+        "freightCents": 0,
+        "discountCents": 0
+      },
+      "expected": {
+        "error": "order-unsubmitted"
+      }
+    },
+    {
+      "id": "PRO-QTY",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": true,
+        "originalTotalCents": 10000,
+        "qty": 0,
+        "lineCents": 1000,
+        "freightCents": 0,
+        "discountCents": 0
+      },
+      "expected": {
+        "error": "invalid-quantity"
+      }
+    },
+    {
+      "id": "PRO-AMT",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": true,
+        "originalTotalCents": 10000,
+        "qty": 1,
+        "lineCents": 0,
+        "freightCents": 0,
+        "discountCents": 0
+      },
+      "expected": {
+        "error": "invalid-amount"
+      }
+    },
+    {
+      "id": "PRO-NEGATIVE",
+      "operation": "issue-proforma",
+      "input": {
+        "enabled": true,
+        "submitted": true,
+        "originalTotalCents": 0,
+        "qty": 1,
+        "lineCents": 1000,
+        "freightCents": 0,
+        "discountCents": 1100
+      },
+      "expected": {
+        "error": "negative-total"
+      }
+    },
+    {
+      "id": "SUB-ARREARS",
+      "operation": "price-fixed-plan",
+      "input": {
+        "unitCents": 31000,
+        "qty": 2,
+        "days": 31,
+        "elapsedDays": 10,
+        "prepaid": false
+      },
+      "expected": {
+        "rateCents": 10000,
+        "extendedCents": 20000
+      }
+    },
+    {
+      "id": "SUB-PREPAID",
+      "operation": "price-fixed-plan",
+      "input": {
+        "unitCents": 31000,
+        "qty": 2,
+        "days": 31,
+        "elapsedDays": 10,
+        "prepaid": true
+      },
+      "expected": {
+        "rateCents": 31000,
+        "extendedCents": 62000
+      }
+    },
+    {
+      "id": "SUB-LATE",
+      "operation": "price-fixed-plan",
+      "input": {
+        "unitCents": 3000,
+        "qty": 1,
+        "days": 30,
+        "elapsedDays": 33,
+        "prepaid": false
+      },
+      "expected": {
+        "rateCents": 3300,
+        "extendedCents": 3300
+      }
+    },
+    {
+      "id": "POS-SHORT",
+      "operation": "session-cash",
+      "input": {
+        "floatCents": 10000,
+        "cashCents": 8000,
+        "cardCents": 5000,
+        "changeCents": 1000,
+        "signedCashRefund": -2000,
+        "countedCash": 14800
+      },
+      "expected": {
+        "expectedCash": 15000,
+        "expectedCard": 5000,
+        "difference": -200
+      }
+    },
+    {
+      "id": "POS-EXACT",
+      "operation": "session-cash",
+      "input": {
+        "floatCents": 0,
+        "cashCents": 1000,
+        "cardCents": 0,
+        "changeCents": 100,
+        "signedCashRefund": 0,
+        "countedCash": 900
+      },
+      "expected": {
+        "expectedCash": 900,
+        "expectedCard": 0,
+        "difference": 0
+      }
+    },
+    {
+      "id": "POS-NEW-RECEIPT",
+      "operation": "close-session-membership",
+      "input": {
+        "included": [
+          "R1"
+        ],
+        "eligibleNow": [
+          "R1",
+          "R2"
+        ]
+      },
+      "expected": {
+        "error": "receipt-missing"
+      }
+    },
+    {
+      "id": "POS-ALL",
+      "operation": "close-session-membership",
+      "input": {
+        "included": [
+          "R1",
+          "R2"
+        ],
+        "eligibleNow": [
+          "R1",
+          "R2"
+        ]
+      },
+      "expected": {
+        "complete": true
+      }
+    },
+    {
+      "id": "FREE-BLOCKS",
+      "operation": "repeat-free-units",
+      "input": {
+        "paid": 26,
+        "threshold": 10,
+        "minimum": 10,
+        "block": 5,
+        "reward": 2
+      },
+      "expected": {
+        "free": 8
+      }
+    },
+    {
+      "id": "FREE-BASE",
+      "operation": "repeat-free-units",
+      "input": {
+        "paid": 10,
+        "threshold": 10,
+        "minimum": 10,
+        "block": 5,
+        "reward": 2
+      },
+      "expected": {
+        "free": 2
+      }
+    },
+    {
+      "id": "FREE-DIFFERENT-THRESHOLD",
+      "operation": "repeat-free-units",
+      "input": {
+        "paid": 26,
+        "threshold": 10,
+        "minimum": 5,
+        "block": 5,
+        "reward": 2
+      },
+      "expected": {
+        "free": 6
+      }
+    },
+    {
+      "id": "LOY-CENT-TRUNCATION",
+      "operation": "earn-points",
+      "input": {
+        "grandCents": 20675,
+        "redeemedCents": 575,
+        "returnsCents": 1175,
+        "centsPerPoint": 1000
+      },
+      "expected": {
+        "eligibleCents": 19000,
+        "points": 19
+      }
+    },
+    {
+      "id": "LOY-NO-ROUND-UP",
+      "operation": "earn-points",
+      "input": {
+        "grandCents": 999,
+        "redeemedCents": 0,
+        "returnsCents": 0,
+        "centsPerPoint": 1000
+      },
+      "expected": {
+        "eligibleCents": 999,
+        "points": 0
+      }
+    },
+    {
+      "id": "LOY-SIGNED-LOT",
+      "operation": "allocate-redeemed-lots",
+      "input": {
+        "first": 10,
+        "second": 10,
+        "priorFirst": -4,
+        "request": 8
+      },
+      "expected": {
+        "firstAllocation": 8,
+        "secondAllocation": 0
+      }
+    },
+    {
+      "id": "LOY-GLOBAL-LIMIT",
+      "operation": "allocate-redeemed-lots",
+      "input": {
+        "first": 10,
+        "second": 10,
+        "priorFirst": -4,
+        "request": 17
+      },
+      "expected": {
+        "error": "insufficient-points"
+      }
+    },
+    {
+      "id": "LOY-SPREAD",
+      "operation": "allocate-redeemed-lots",
+      "input": {
+        "first": 4,
+        "second": 10,
+        "priorFirst": 0,
+        "request": 7
+      },
+      "expected": {
+        "firstAllocation": 4,
+        "secondAllocation": 3
+      }
+    },
+    {
+      "id": "TIME-REMAINDER",
+      "operation": "service-invoice",
+      "input": {
+        "billableHours": 8,
+        "billedHours": 3,
+        "billableCents": 100000,
+        "billedCents": 30000
+      },
+      "expected": {
+        "hours": 5,
+        "rateCents": 14000,
+        "amountCents": 70000
+      }
+    },
+    {
+      "id": "TIME-EMPTY",
+      "operation": "service-invoice",
+      "input": {
+        "billableHours": 0,
+        "billedHours": 0,
+        "billableCents": 0,
+        "billedCents": 0
+      },
+      "expected": {
+        "error": "no-billable-hours"
+      }
+    },
+    {
+      "id": "TIME-FULL",
+      "operation": "service-invoice",
+      "input": {
+        "billableHours": 3,
+        "billedHours": 3,
+        "billableCents": 30000,
+        "billedCents": 30000
+      },
+      "expected": {
+        "error": "hours-fully-billed"
+      }
+    },
+    {
+      "id": "APPT-PENDING",
+      "operation": "admit-appointment",
+      "input": {
+        "capacity": 1,
+        "start": 600,
+        "duration": 30,
+        "existing": [
+          {
+            "start": 600,
+            "status": "Unverified"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "APPT-LAST-SLOT",
+      "operation": "admit-appointment",
+      "input": {
+        "capacity": 1,
+        "start": 600,
+        "duration": 30,
+        "existing": [
+          {
+            "start": 600,
+            "status": "Open"
+          }
+        ]
+      },
+      "expected": {
+        "error": "capacity-full"
+      }
+    },
+    {
+      "id": "APPT-ADJACENT",
+      "operation": "admit-appointment",
+      "input": {
+        "capacity": 1,
+        "start": 630,
+        "duration": 30,
+        "existing": [
+          {
+            "start": 600,
+            "status": "Open"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "APPT-PARTIAL-OVERLAP",
+      "operation": "admit-appointment",
+      "input": {
+        "capacity": 1,
+        "start": 615,
+        "duration": 30,
+        "existing": [
+          {
+            "start": 600,
+            "status": "Open"
+          }
+        ]
+      },
+      "expected": {
+        "error": "capacity-full"
+      }
+    },
+    {
+      "id": "APPT-UNLIMITED",
+      "operation": "admit-appointment",
+      "input": {
+        "capacity": 0,
+        "start": 600,
+        "duration": 30,
+        "existing": [
+          {
+            "start": 600,
+            "status": "Open"
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "SLA-RETAIN",
+      "operation": "select-service-agreement",
+      "input": {
+        "eligible": [
+          "C",
+          "D"
+        ],
+        "already": "D"
+      },
+      "expected": {
+        "selected": "D"
+      }
+    },
+    {
+      "id": "SLA-FIRST",
+      "operation": "select-service-agreement",
+      "input": {
+        "eligible": [
+          "C",
+          "D"
+        ],
+        "already": "EXPIRED"
+      },
+      "expected": {
+        "selected": "C"
+      }
+    },
+    {
+      "id": "SLA-NONE",
+      "operation": "select-service-agreement",
+      "input": {
+        "eligible": [],
+        "already": null
+      },
+      "expected": {
+        "selected": null
+      }
+    },
+    {
+      "id": "BULK-SUPERSEDED",
+      "operation": "retry-bulk-conversion",
+      "input": {
+        "laterSuccess": true,
+        "workerSucceeds": true
+      },
+      "expected": {
+        "tasksStarted": 0,
+        "status": "Failed",
+        "retried": true
+      }
+    },
+    {
+      "id": "BULK-RETRY-OK",
+      "operation": "retry-bulk-conversion",
+      "input": {
+        "laterSuccess": false,
+        "workerSucceeds": true
+      },
+      "expected": {
+        "tasksStarted": 1,
+        "status": "Success",
+        "retried": true
+      }
+    },
+    {
+      "id": "BULK-RETRY-FAIL",
+      "operation": "retry-bulk-conversion",
+      "input": {
+        "laterSuccess": false,
+        "workerSucceeds": false
+      },
+      "expected": {
+        "tasksStarted": 1,
+        "status": "Failed",
+        "retried": true
+      }
+    },
+    {
+      "id": "EDI-NATURAL-VERSION",
+      "operation": "resolve-code-version",
+      "input": {
+        "versions": [
+          "3",
+          "10"
+        ],
+        "pinned": null
+      },
+      "expected": {
+        "version": "10"
+      }
+    },
+    {
+      "id": "EDI-PIN",
+      "operation": "resolve-code-version",
+      "input": {
+        "versions": [
+          "3",
+          "10"
+        ],
+        "pinned": "3"
+      },
+      "expected": {
+        "version": "3"
+      }
+    },
+    {
+      "id": "EDI-EMPTY",
+      "operation": "resolve-code-version",
+      "input": {
+        "versions": [],
+        "pinned": null
+      },
+      "expected": {
+        "version": null
+      }
+    },
+    {
+      "id": "CRM-COHORT",
+      "operation": "campaign-efficiency",
+      "input": {
+        "leads": 2,
+        "opportunities": 3,
+        "submittedQuotes": 2,
+        "orderedQuotes": 1
+      },
+      "expected": {
+        "opportunitiesPerLeadPct": 150,
+        "quotesPerLeadPct": 100,
+        "orderedQuotesPct": 50
+      }
+    },
+    {
+      "id": "CRM-NO-QUOTES",
+      "operation": "campaign-efficiency",
+      "input": {
+        "leads": 2,
+        "opportunities": 1,
+        "submittedQuotes": 0,
+        "orderedQuotes": 0
+      },
+      "expected": {
+        "opportunitiesPerLeadPct": 50,
+        "quotesPerLeadPct": 0,
+        "orderedQuotesPct": 0
+      }
+    },
+    {
+      "id": "AUTH-WEIGHTED",
+      "operation": "weighted-approval-discount",
+      "input": {
+        "lines": [
+          {
+            "qty": 2,
+            "listCents": 10000,
+            "actualCents": 9000
+          },
+          {
+            "qty": 1,
+            "listCents": 5000,
+            "actualCents": 5000
+          }
+        ],
+        "extraDiscountCents": 500
+      },
+      "expected": {
+        "discountBasisPoints": 1000
+      }
+    },
+    {
+      "id": "AUTH-BASE-FALLBACK",
+      "operation": "weighted-approval-discount",
+      "input": {
+        "lines": [
+          {
+            "qty": 1,
+            "listCents": 0,
+            "actualCents": 9000
+          }
+        ],
+        "extraDiscountCents": 0
+      },
+      "expected": {
+        "discountBasisPoints": 0
+      }
+    },
+    {
+      "id": "QUOTE-NOTHING",
+      "operation": "quote-choice-set",
+      "input": {
+        "mainQty": 1,
+        "mainOrdered": 0,
+        "alternativeQty": 1,
+        "alternativeOrdered": 0,
+        "serviceQty": 1,
+        "serviceOrdered": 0
+      },
+      "expected": {
+        "status": "Open"
+      }
+    },
+    {
+      "id": "QUOTE-ALT-AND-SERVICE",
+      "operation": "quote-choice-set",
+      "input": {
+        "mainQty": 1,
+        "mainOrdered": 0,
+        "alternativeQty": 1,
+        "alternativeOrdered": 1,
+        "serviceQty": 1,
+        "serviceOrdered": 1
+      },
+      "expected": {
+        "status": "Ordered"
+      }
+    },
+    {
+      "id": "QUOTE-ALT-MISSING-SERVICE",
+      "operation": "quote-choice-set",
+      "input": {
+        "mainQty": 1,
+        "mainOrdered": 0,
+        "alternativeQty": 1,
+        "alternativeOrdered": 1,
+        "serviceQty": 1,
+        "serviceOrdered": 0
+      },
+      "expected": {
+        "status": "Partially Ordered"
+      }
+    },
+    {
+      "id": "QUOTE-SET-UNTOUCHED",
+      "operation": "quote-choice-set",
+      "input": {
+        "mainQty": 1,
+        "mainOrdered": 0,
+        "alternativeQty": 1,
+        "alternativeOrdered": 0,
+        "serviceQty": 1,
+        "serviceOrdered": 1
+      },
+      "expected": {
+        "status": "Partially Ordered"
+      }
+    }
+  ]
+}
