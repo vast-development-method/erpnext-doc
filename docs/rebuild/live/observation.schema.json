@@ -1,0 +1,472 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Live integrated FIFO and settlement observation",
+  "description": "Compound witness for the reference adapter with amounts in two-decimal account currency and signed physical movements.",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "FIFO-linked-delivery-v1"
+    },
+    "reference_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "fixture_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "database_read": {
+      "enum": [
+        "new connection after each commit",
+        "submitted inside rolled-back transaction"
+      ]
+    },
+    "erpnext": {
+      "type": "string",
+      "minLength": 1
+    },
+    "frappe": {
+      "type": "string",
+      "minLength": 1
+    },
+    "commits": {
+      "type": "object",
+      "properties": {
+        "frappe": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{40}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "erpnext": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{40}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "frappe",
+        "erpnext"
+      ],
+      "additionalProperties": false
+    },
+    "python": {
+      "type": "string",
+      "minLength": 1
+    },
+    "database": {
+      "type": "object",
+      "properties": {
+        "engine": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "engine",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "rejected": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/reject"
+      },
+      "minItems": 2,
+      "maxItems": 3
+    },
+    "credit_mode": {
+      "enum": [
+        "recalculate",
+        "stale-mapped"
+      ]
+    },
+    "credit_draft": {
+      "type": "object",
+      "properties": {
+        "after_partial_quantity_edit": {
+          "$ref": "#/$defs/totals"
+        },
+        "before_submit": {
+          "$ref": "#/$defs/totals"
+        }
+      },
+      "required": [
+        "after_partial_quantity_edit",
+        "before_submit"
+      ],
+      "additionalProperties": false
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/doc"
+      },
+      "minItems": 12,
+      "maxItems": 12
+    },
+    "receivables": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/checkpoint"
+      },
+      "minItems": 6,
+      "maxItems": 6
+    },
+    "closing": {
+      "type": "object",
+      "properties": {
+        "bank": {
+          "$ref": "#/$defs/amount"
+        },
+        "raw_quantity": {
+          "$ref": "#/$defs/amount"
+        },
+        "raw_value": {
+          "$ref": "#/$defs/amount"
+        },
+        "packed_quantity": {
+          "$ref": "#/$defs/amount"
+        },
+        "packed_value": {
+          "$ref": "#/$defs/amount"
+        },
+        "unbilled_receipts": {
+          "$ref": "#/$defs/amount"
+        },
+        "customer_outstanding": {
+          "$ref": "#/$defs/amount"
+        },
+        "supplier_outstanding": {
+          "$ref": "#/$defs/amount"
+        },
+        "net_sales": {
+          "$ref": "#/$defs/amount"
+        },
+        "cost_of_sales": {
+          "$ref": "#/$defs/amount"
+        },
+        "gross_profit": {
+          "$ref": "#/$defs/amount"
+        },
+        "input_tax": {
+          "$ref": "#/$defs/amount"
+        },
+        "output_tax": {
+          "$ref": "#/$defs/amount"
+        },
+        "assets": {
+          "$ref": "#/$defs/amount"
+        },
+        "liabilities_and_equity": {
+          "$ref": "#/$defs/amount"
+        }
+      },
+      "required": [
+        "bank",
+        "raw_quantity",
+        "raw_value",
+        "packed_quantity",
+        "packed_value",
+        "unbilled_receipts",
+        "customer_outstanding",
+        "supplier_outstanding",
+        "net_sales",
+        "cost_of_sales",
+        "gross_profit",
+        "input_tax",
+        "output_tax",
+        "assets",
+        "liabilities_and_equity"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "profile",
+    "reference_date",
+    "fixture_sha256",
+    "database_read",
+    "erpnext",
+    "frappe",
+    "commits",
+    "python",
+    "database",
+    "rejected",
+    "credit_mode",
+    "credit_draft",
+    "steps",
+    "receivables",
+    "closing"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "amount": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{2}$"
+    },
+    "quantity": {
+      "type": "string",
+      "pattern": "^-?\\d+(\\.\\d+)?$"
+    },
+    "stepId": {
+      "enum": [
+        "OPEN",
+        "GR1",
+        "GR2",
+        "BILL",
+        "PACK",
+        "SHIP",
+        "SALE",
+        "PAY1",
+        "RET",
+        "CREDIT",
+        "PAY2",
+        "REMIT"
+      ]
+    },
+    "accountMap": {
+      "type": "object",
+      "propertyNames": {
+        "enum": [
+          "bank",
+          "capital",
+          "cost_of_sales",
+          "input_tax",
+          "output_tax",
+          "packed_inventory",
+          "payables",
+          "raw_inventory",
+          "receipt_clearing",
+          "receivables",
+          "sales"
+        ]
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/amount"
+      }
+    },
+    "itemEffect": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/quantity"
+        },
+        {
+          "$ref": "#/$defs/amount"
+        }
+      ],
+      "items": false,
+      "minItems": 2
+    },
+    "invoiceMap": {
+      "type": "object",
+      "properties": {
+        "SALE": {
+          "$ref": "#/$defs/amount"
+        },
+        "BILL": {
+          "$ref": "#/$defs/amount"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "totals": {
+      "type": "object",
+      "properties": {
+        "qty": {
+          "$ref": "#/$defs/quantity"
+        },
+        "grand_total": {
+          "$ref": "#/$defs/amount"
+        },
+        "rounded_total": {
+          "$ref": "#/$defs/amount"
+        },
+        "update_outstanding_for_self": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "qty",
+        "grand_total",
+        "rounded_total",
+        "update_outstanding_for_self"
+      ],
+      "additionalProperties": false
+    },
+    "doc": {
+      "type": "object",
+      "properties": {
+        "step": {
+          "$ref": "#/$defs/stepId"
+        },
+        "voucher_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "voucher": {
+          "type": "string",
+          "minLength": 1
+        },
+        "invoice_outstanding": {
+          "$ref": "#/$defs/invoiceMap"
+        },
+        "gl": {
+          "$ref": "#/$defs/accountMap"
+        },
+        "stock": {
+          "type": "object",
+          "properties": {
+            "raw": {
+              "$ref": "#/$defs/itemEffect"
+            },
+            "packed": {
+              "$ref": "#/$defs/itemEffect"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "step",
+        "voucher_type",
+        "voucher",
+        "invoice_outstanding",
+        "gl",
+        "stock"
+      ],
+      "additionalProperties": false
+    },
+    "payment": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/stepId"
+        },
+        "against": {
+          "enum": [
+            "SALE",
+            "CREDIT"
+          ]
+        },
+        "amount": {
+          "$ref": "#/$defs/amount"
+        }
+      },
+      "required": [
+        "source",
+        "against",
+        "amount"
+      ],
+      "additionalProperties": false
+    },
+    "checkpoint": {
+      "type": "object",
+      "properties": {
+        "step": {
+          "$ref": "#/$defs/stepId"
+        },
+        "original_invoice": {
+          "$ref": "#/$defs/amount"
+        },
+        "party_total": {
+          "$ref": "#/$defs/amount"
+        },
+        "payment_ledger": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/payment"
+          },
+          "minItems": 1
+        },
+        "credit_outstanding": {
+          "$ref": "#/$defs/amount"
+        },
+        "update_outstanding_for_self": {
+          "type": "boolean"
+        },
+        "return_against": {
+          "const": "SALE"
+        }
+      },
+      "required": [
+        "step",
+        "original_invoice",
+        "party_total",
+        "payment_ledger"
+      ],
+      "additionalProperties": false
+    },
+    "reject": {
+      "type": "object",
+      "properties": {
+        "case": {
+          "enum": [
+            "excess-return-1-rows",
+            "excess-return-2-rows",
+            "allocate-28-against-27"
+          ]
+        },
+        "exception": {
+          "enum": [
+            "StockOverReturnError",
+            "ValidationError"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ledger_counts_after_rollback": {
+          "type": "object",
+          "properties": {
+            "GL Entry": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "Stock Ledger Entry": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "Payment Ledger Entry": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "GL Entry",
+            "Stock Ledger Entry",
+            "Payment Ledger Entry"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "case",
+        "exception",
+        "message",
+        "ledger_counts_after_rollback"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
