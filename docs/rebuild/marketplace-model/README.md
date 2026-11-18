@@ -2,6 +2,8 @@
 
 The [marketplace directory](../extensions/marketplace.json) identifies 398 publisher listings observed on November 18, 2026. This catalog inspects every publicly pinned listing outside the [core](../model/README.md) and the [18 curated extension profiles](../extensions/README.md). It covers 313 listings, including 101 that declare ERPNext as a dependency and another 111 with a production import, hook, record operation, customization or field link to an ERPNext record. The inspected sources provide 3,143 DocTypes, 29,401 declared non-layout fields, 4,099 custom-field contributions and 8,207 whitelisted service declarations. The [101-app directory](declared-apps.md) links each explicit dependency to its source. [Three worked integrations](integration-examples.md) trace invoice-to-payment mapping, property-specific cost center allocation and two-warehouse stock validation.
 
+The [multilingual marketplace guides](../marketplace-guides/README.md) follow every one of the 69 rows whose original repository link lacked a verified revision. The guides add publisher manuals, attributed alternate sources, worked rebuild cases and the evidence still needed to verify each commercial release. The 398-listing declaration inventory below retains its original source basis.
+
 ## Reading the coverage
 
 The classification uses the strongest evidence found for each listing. Every positive criterion observed also has a path, line and matched operand in that listing’s evidence map. A zero line identifies a whole declarative file. The owner of a record name is taken from the [pinned ERPNext record index](../model/record-index.json). The version column records the publisher's marketplace claim. A publisher's default branch can target a different version.

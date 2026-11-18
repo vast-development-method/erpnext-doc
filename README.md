@@ -27,6 +27,7 @@ A transaction can change operational progress, inventory value, financial balanc
 | Purpose | Reading path |
 |---|---|
 | Build from the November research | [Release profile, reading order and qualifications](docs/rebuild/README.md) |
+| Design a multilingual ERP with optional applications | [69 marketplace extension guides in four languages](docs/rebuild/marketplace-guides/README.md) · [Language selection and document rendering](docs/rebuild/marketplace-guides/languages/README.md) |
 | Follow physical and financial records together | [Supplier receipt through repack, sale, return and cash](docs/rebuild/integrated/README.md) |
 | Understand the full boundary | [Scope and source baseline](docs/overview/scope-and-baseline.md), then [business compatibility map](docs/overview/business-compatibility-map.md) |
 | Understand the architecture | [Application architecture](docs/overview/application-architecture.md), then [cross-domain transactions](docs/domains/cross-domain-transactions.md) |
