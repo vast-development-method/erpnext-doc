@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Publisher translation files and document event source bindings",
+  "type": "array",
+  "items": {
+    "$ref": "#/$defs/listing"
+  },
+  "$defs": {
+    "listing": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "archive_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "snapshot_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "catalogs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/catalog"
+          }
+        },
+        "document_events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "repository",
+        "revision",
+        "archive_sha256",
+        "snapshot_class",
+        "catalogs",
+        "document_events"
+      ],
+      "additionalProperties": false
+    },
+    "catalog": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "language": {
+          "type": "string",
+          "minLength": 1
+        },
+        "format": {
+          "enum": [
+            "po",
+            "csv"
+          ]
+        },
+        "entries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "populated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "parse_status": {
+          "enum": [
+            "unparsed",
+            "size-limit"
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "language",
+        "format"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "entries",
+            "populated"
+          ],
+          "not": {
+            "required": [
+              "parse_status"
+            ]
+          }
+        },
+        {
+          "required": [
+            "parse_status"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "entries"
+                ]
+              },
+              {
+                "required": [
+                  "populated"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "event": {
+      "type": "object",
+      "properties": {
+        "record": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event": {
+          "type": "string",
+          "minLength": 1
+        },
+        "callback": {
+          "type": "string",
+          "minLength": 1
+        },
+        "binding_file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "binding_line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "handler_file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "handler_line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "core_operations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/coreOperation"
+          }
+        }
+      },
+      "required": [
+        "record",
+        "event",
+        "callback",
+        "binding_file",
+        "binding_line"
+      ],
+      "additionalProperties": false,
+      "dependentRequired": {
+        "handler_file": [
+          "handler_line"
+        ],
+        "handler_line": [
+          "handler_file"
+        ],
+        "core_operations": [
+          "handler_line",
+          "handler_file"
+        ]
+      }
+    },
+    "coreOperation": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "operation",
+        "record",
+        "line"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,33 @@
+# Translating invoice item text
+
+The Item Translation extension copies product text into an editable transaction row according to that document's print language. A user can work in Afrikaans, keep a German-language item master and prepare an invoice for a customer in another language. The user-interface catalogs in the extension have a different job from these stored product translations. The publisher binds item and language changes for quotations, purchase orders, purchase invoices, sales orders, sales invoices and delivery notes. [Form registrations](https://github.com/alyf-de/item_translation/blob/44ad682c58403706ee8ef04ab58bbcbdaa265011/item_translation/hooks.py#L30-L38) · [Invoice event handlers](https://github.com/alyf-de/item_translation/blob/44ad682c58403706ee8ef04ab58bbcbdaa265011/item_translation/public/js/sales_invoice.js#L1-L12)
+
+| Decision | Observed source behavior |
+|---|---|
+| Set up the item | The translation record requires an Item and a Language link. Its generated name combines the two. Item name and description are separately optional. The settings record identifies the master language and whether to warn about missing translations. The shipped defaults are German and warnings enabled. [Translation record](https://github.com/alyf-de/item_translation/blob/44ad682c58403706ee8ef04ab58bbcbdaa265011/item_translation/item_translation/doctype/item_translation/item_translation.json#L5-L62) · [Settings](https://github.com/alyf-de/item_translation/blob/44ad682c58403706ee8ef04ab58bbcbdaa265011/item_translation/item_translation/doctype/item_translation_settings/item_translation_settings.json#L17-L33) |
+| Select an item | For a document language different from the master, look up at most one row by the exact product ID and document language. Set each nonempty translated field on the form row. When the master language already matches, the item-selection handler leaves the row alone. The source schedules application of a fetched result after a short delay. [Lookup and update](https://github.com/alyf-de/item_translation/blob/44ad682c58403706ee8ef04ab58bbcbdaa265011/item_translation/public/js/utils.js#L4-L40) |
+| Change print language | An empty item list or a single row without a code exits early. Otherwise ask whether to refetch. Declining leaves row text untouched. On confirmation, process each row. Switching to the configured master language reloads both text fields from Item. For another language a missing translation can generate a warning and leaves the current text in place. [Refetch decision](https://github.com/alyf-de/item_translation/blob/44ad682c58403706ee8ef04ab58bbcbdaa265011/item_translation/public/js/utils.js#L43-L79) |
+| Maintain translations | System Manager, Stock User and Accounts User have declared create/read/write/delete grants on the translation records. System Manager and Stock Manager can write settings. Stock User and Accounts User have read access to settings. Effective access also depends on site configuration. [Translation roles](https://github.com/alyf-de/item_translation/blob/44ad682c58403706ee8ef04ab58bbcbdaa265011/item_translation/item_translation/doctype/item_translation/item_translation.json#L71-L101) · [Settings roles](https://github.com/alyf-de/item_translation/blob/44ad682c58403706ee8ef04ab58bbcbdaa265011/item_translation/item_translation/doctype/item_translation_settings/item_translation_settings.json#L40-L68) |
+
+## Eight isolated client observations
+
+Two unmodified publisher files, the shared lookup helper and Sales Invoice form binding, ran with fixture-backed replacements for the form store, database reads, confirmation dialog, timer and message display. The fixture master for `FLOUR-01` is `Mehl` / `Weizenmehl`. Its available Afrikaans record is `Meel` / `Koringmeel`. Each row begins at quantity 2 and unit rate 35. The event adapter recorded reads, writes and warnings. It made no network calls or posting requests. The [observations](item-language-observations.json) include input variants, source file hashes and observed outcomes.
+
+| Event and fixture | Observed item name / description | Warnings |
+|---|---|---:|
+| Select the item on an Afrikaans document | Meel / Koringmeel | 0 |
+| Confirm a switch to Afrikaans | Meel / Koringmeel | 0 |
+| Decline the switch's refetch prompt | Mehl / Weizenmehl | 0 |
+| Confirm using an Afrikaans translation with an empty description | Meel / Weizenmehl | 0 |
+| Confirm `zh-Hans` with no matching translation and warnings enabled | Mehl / Weizenmehl | 1 |
+| Repeat the missing translation with warnings disabled | Mehl / Weizenmehl | 0 |
+| Return to the master language from a translated row | Mehl / Weizenmehl | 0 |
+| Select in the master language on a row with local text “Manual / Edited” | Manual / Edited | 0 |
+
+All eight retained the product ID, quantity and rate. These executions establish the behavior of the selected client handlers for the supplied fixtures. They do not exercise concurrent edits, browser timing, database authorization, server validation, print output or accounting. A missing description can leave the invoice row in two languages without warning because a translation record did exist. A missing regional translation also leaves existing text in place: the inspected lookup compares the exact document language key.
+
+## Rebuild acceptance
+
+For an issued invoice, preserve the resolved item text alongside the stable item ID and selected document language. Rendering a new language preview or editing the item master later must preserve the originally issued representation. Run this through the API/import path as well as the interactive form if those entry points promise equivalent language resolution. The inspected app wires the six client forms. The blueprint's issuer determines the server-side contract.
+
+Prepare one row with a translated product name and an empty translated description, then reissue the preview with a complete translation. The acceptance record should say whether the issuer allowed mixed-language output, which source supplied each field and whether the operator approved the result. Keep the stored monetary currency and numeric amount independent of the selected language. Changing a draft from `af` to `zh-Hans` with the same unit rate and quantity must retain the item and underlying line amount of 70 in that document's currency. Exercise overlapping language changes and item reselection before a delayed response returns; the final row must correspond to its current item ID and document language. These are replacement acceptance requirements; the isolated probe above does not establish them.
