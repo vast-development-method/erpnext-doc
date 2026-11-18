@@ -130,7 +130,26 @@ def main():
         }
         if counts != app["counts"]:
             raise ValueError(f"Declaration totals differ for {app['id']}")
-    print(f"Verified {len(cases)} cases and catalog totals for {len(apps)} source profiles.")
+    scenarios = load("workflow-acceptance.json")
+    scenario_ids = {row["id"] for row in scenarios}
+    if len(scenario_ids) != len(scenarios) or any(not (ROOT / row["chapter"]).is_file() for row in scenarios):
+        raise ValueError("Invalid workflow scenario identifiers or chapter references")
+    contributions = load("contributions.json")
+    for app_id, index in contributions.items():
+        rows = load(index["file"])
+        kinds = {key: sum(row["kind"] == key for row in rows) for key in index["counts"]}
+        if app_id not in {app["id"] for app in apps} or len(rows) != index["rows"] or kinds != index["counts"]:
+            raise ValueError(f"Contribution inventory differs for {app_id}")
+    discovery = load("marketplace.json")
+    listings = discovery["listings"]
+    counts = {"listings": len(listings),
+              "supported_major_16_listed": sum(16 in row["listed_versions"] for row in listings),
+              "default_heads_resolved": sum("head_commit" in row for row in listings),
+              "named_source_confirmed": sum(row["source_basis"] == "github_resource" for row in listings)}
+    if counts != discovery["counts"] or len({row["id"] for row in listings}) != len(listings):
+        raise ValueError("Marketplace listing identifiers or counts differ")
+    print(f"Verified {len(cases)} case outcomes and {len(apps)} app catalog totals. "
+          f"Checked {len(scenarios)} scenario references and {len(listings)} discovery rows.")
 
 
 if __name__ == "__main__":

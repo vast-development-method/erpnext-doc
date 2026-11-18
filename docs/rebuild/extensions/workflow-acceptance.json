@@ -1,0 +1,374 @@
+[
+  {
+    "id": "recovery-cancel",
+    "chapter": "workforce-lending.md",
+    "operation": "cancel_employee_recovery",
+    "given": {
+      "slip": "S1",
+      "employee": "E1",
+      "company": "C",
+      "linked_repayments": {
+        "rowA": "R1"
+      },
+      "other_same_date_repayment": "R2"
+    },
+    "command": {
+      "slip": "S1"
+    },
+    "read_back": [
+      "loan_repayment.docstatus",
+      "salary_slip_loan.loan_repayment_entry"
+    ],
+    "expect": {
+      "cancelled_repayments": [
+        "R1"
+      ],
+      "other_repayment_effect": "retain"
+    },
+    "qualification": "Cancellation must target the row reference. Recalculation by employee and date would cancel the wrong loan collection.",
+    "evidence": "source-derived; integrated runtime pending"
+  },
+  {
+    "id": "demand-allocation",
+    "chapter": "workforce-lending.md",
+    "operation": "allocate_normal_repayment",
+    "given": {
+      "term_loan": true,
+      "company_currency_precision": 2,
+      "offset_order": [
+        "Normal",
+        "Principal"
+      ],
+      "demands": [
+        {
+          "id": "I1",
+          "category": "EMI",
+          "subtype": "Interest",
+          "due": "20.00"
+        },
+        {
+          "id": "P1",
+          "category": "EMI",
+          "subtype": "Principal",
+          "due": "100.00"
+        }
+      ]
+    },
+    "command": {
+      "tendered": "70.00",
+      "repayment_type": "Normal Repayment"
+    },
+    "read_back": [
+      "loan_repayment.repayment_details",
+      "loan_demand.paid_amount",
+      "loan_demand.outstanding_amount"
+    ],
+    "expect": {
+      "allocated": {
+        "I1": "20.00",
+        "P1": "50.00"
+      },
+      "unapplied": "0.00",
+      "outstanding": {
+        "I1": "0.00",
+        "P1": "50.00"
+      },
+      "on_cancel_restore": {
+        "I1": "20.00",
+        "P1": "100.00"
+      }
+    },
+    "qualification": "Assume no partner, earlier demands, charges, write-off, shortfall or other allocation stages. Confirm linked ledger and payment voucher balances in addition to the demand table.",
+    "evidence": "source-derived; integrated runtime pending"
+  },
+  {
+    "id": "normal-accrual",
+    "chapter": "workforce-lending.md",
+    "operation": "submit_loan_interest_accrual",
+    "given": {
+      "performing": true,
+      "accounting_enabled": true,
+      "monthly_consolidation": false,
+      "product": {
+        "interest_accrued_account": "ACCRUED",
+        "interest_income_account": "INCOME"
+      },
+      "cost_center": "CENTRAL"
+    },
+    "command": {
+      "type": "Normal Interest",
+      "interest": "100.00",
+      "additional_interest": "0.00"
+    },
+    "read_back": [
+      "loan_interest_accrual",
+      "general_ledger.by_source_accrual"
+    ],
+    "expect": {
+      "debits": {
+        "ACCRUED": "100.00"
+      },
+      "credits": {
+        "INCOME": "100.00"
+      },
+      "cash": "0.00"
+    },
+    "qualification": "Repeat with consolidation enabled; test consolidated ledger effect and cancellation delta at period close.",
+    "evidence": "source-derived; integrated runtime pending"
+  },
+  {
+    "id": "scheduled-fees-draft",
+    "chapter": "education-healthcare.md",
+    "operation": "generate_student_fees",
+    "given": {
+      "students": [
+        "S1",
+        "S2"
+      ],
+      "customer_mapping": {
+        "S1": "C1",
+        "S2": "C2"
+      },
+      "fee_schedule": "FS1",
+      "line_amount": "120.00",
+      "discount_percentage": "0",
+      "create_so": false,
+      "auto_submit_sales_invoice": false
+    },
+    "command": {
+      "fee_schedule": "FS1"
+    },
+    "read_back": [
+      "fee_schedule.status",
+      "sales_invoice[fee_schedule,student].docstatus",
+      "general_ledger.by_invoice"
+    ],
+    "expect": {
+      "schedule_status": "Invoice Created",
+      "invoices": [
+        {
+          "student": "S1",
+          "customer": "C1",
+          "status": "draft"
+        },
+        {
+          "student": "S2",
+          "customer": "C2",
+          "status": "draft"
+        }
+      ],
+      "posted_receivables": "0.00"
+    },
+    "qualification": "Test both synthetic students independently. Simulate one unmappable student, then inspect rollback and progress events.",
+    "evidence": "source-derived; integrated runtime pending"
+  },
+  {
+    "id": "multi-item-consultation",
+    "chapter": "education-healthcare.md",
+    "operation": "cancel_practitioner_appointment",
+    "given": {
+      "appointment": "APT1",
+      "practitioner": "P1",
+      "automated_invoicing": true,
+      "submitted_invoice": "INV1",
+      "invoice_sources": [
+        "APT1",
+        "APT2"
+      ],
+      "insurance": null
+    },
+    "command": {
+      "appointment": "APT1"
+    },
+    "read_back": [
+      "sales_invoice.docstatus",
+      "fee_validity",
+      "calendar_event.status"
+    ],
+    "expect": {
+      "invoice": "INV1",
+      "invoice_cancelled": false,
+      "operator_invoice_review": true
+    },
+    "qualification": "A separate visit still owns the second charge. Validate dowstream accounting independently of the appointment form status.",
+    "evidence": "source-derived; integrated runtime pending"
+  },
+  {
+    "id": "checkout-short-stock",
+    "chapter": "commerce-payments.md",
+    "operation": "place_order",
+    "given": {
+      "cart_party": "C1",
+      "cart_stock_item": "I1",
+      "quantity": "6",
+      "available_web_stock": "5",
+      "web_warehouse": "WEB",
+      "addresses": [
+        "ADDR"
+      ],
+      "allow_items_not_in_stock": false
+    },
+    "command": {
+      "actor": "C1 portal contact"
+    },
+    "read_back": [
+      "sales_order",
+      "quotation.docstatus",
+      "stock_ledger"
+    ],
+    "expect": {
+      "decision": "reject_quantity_exceeds_web_stock",
+      "new_sales_orders": 0
+    },
+    "qualification": "Observe quotation rollback after failed stock check in the served request transaction. Exercise two concurrent accepted lookups for the last units.",
+    "evidence": "source-derived; integrated runtime pending"
+  },
+  {
+    "id": "paid-external-return",
+    "chapter": "commerce-payments.md",
+    "operation": "process_order_cancelled_event",
+    "given": {
+      "source_order": "X1",
+      "submitted_order": "SO1",
+      "sales_invoice": "INV1",
+      "delivery_note": "DN1"
+    },
+    "command": {
+      "external_id": "X1",
+      "financial_status": "refunded"
+    },
+    "read_back": [
+      "sales_order.external_status",
+      "sales_invoice.external_status",
+      "delivery_note.external_status",
+      "stock_ledger",
+      "general_ledger"
+    ],
+    "expect": {
+      "external_status_on": [
+        "SO1",
+        "INV1",
+        "DN1"
+      ],
+      "cancelled_by_handler": [],
+      "automatic_refund_by_handler": false
+    },
+    "qualification": "Compare provider refund event, credit note, stock return and bank transfer separately before declaring the financial return complete.",
+    "evidence": "source-derived; integrated runtime pending"
+  },
+  {
+    "id": "carrier-unpriced",
+    "chapter": "commerce-payments.md",
+    "operation": "book_shipment",
+    "given": {
+      "shipment": "SHIP1",
+      "offer": {
+        "service_provider": "SendCloud",
+        "total_price": null
+      }
+    },
+    "command": {
+      "shipment": "SHIP1",
+      "offer": "selected"
+    },
+    "read_back": [
+      "shipment.status",
+      "shipment.shipment_id",
+      "delivery_note.tracking"
+    ],
+    "expect": {
+      "decision": "reject_missing_price",
+      "downstream_provider_booking_calls": 0
+    },
+    "qualification": "A zero-priced offer passes this particular validation. Exercise remote acceptance followed by local persistence failure separately.",
+    "evidence": "source-derived; integrated runtime pending"
+  },
+  {
+    "id": "irn-existing-different-buyer",
+    "chapter": "regions-donation-operations.md",
+    "operation": "reconcile_duplicate_registration",
+    "given": {
+      "current_buyer": "GST-A",
+      "current_amount": "720.00",
+      "previous_buyer": "GST-B",
+      "previous_amount": "720.00",
+      "current_irn": null
+    },
+    "command": {
+      "provider_response": "duplicate",
+      "fetched_previous_registration": true
+    },
+    "read_back": [
+      "invoice.irn",
+      "e_invoice_log"
+    ],
+    "expect": {
+      "decision": "reject_prior_registration_mismatch",
+      "active_irn": null
+    },
+    "qualification": "Verify credentialed provider retrieval and signature validation independently of the local identity/amount check.",
+    "evidence": "source-derived; integrated runtime pending"
+  },
+  {
+    "id": "irn-waybill-partial",
+    "chapter": "regions-donation-operations.md",
+    "operation": "cancel_e_invoice",
+    "given": {
+      "active_irn": "R1",
+      "active_waybill": "WB1",
+      "within_time_window": true
+    },
+    "command": {
+      "provider_outcomes": [
+        "waybill_cancel_succeeded",
+        "irn_cancel_failed"
+      ]
+    },
+    "read_back": [
+      "external_waybill.status",
+      "external_irn.status",
+      "local_waybill",
+      "local_invoice.irn",
+      "integration_log"
+    ],
+    "expect": {
+      "waybill_remote_effect": "cancelled",
+      "waybill_local_effect": "committed",
+      "irn_remote_effect": "still_active"
+    },
+    "qualification": "Reconcile any ambiguous IRN response with the authority before retrying. The committed waybill event must survive second-step failure.",
+    "evidence": "source-derived; integrated runtime pending"
+  },
+  {
+    "id": "audit-export-permission",
+    "chapter": "regions-donation-operations.md",
+    "operation": "queue_audit_export",
+    "given": {
+      "actor": "U",
+      "selected": [
+        "Sales Invoice",
+        "Payment Entry"
+      ],
+      "rights": {
+        "export Sales Invoice": true,
+        "export Payment Entry": false,
+        "submit GDPdU Export": true
+      }
+    },
+    "command": {
+      "attempt": "retry"
+    },
+    "read_back": [
+      "export.status",
+      "background_job",
+      "private_file"
+    ],
+    "expect": {
+      "decision": "deny",
+      "new_jobs": 0,
+      "new_exports": 0
+    },
+    "qualification": "Repeat after revoking one selected export permission between initial form validation and retry.",
+    "evidence": "source-derived; integrated runtime pending"
+  }
+]
