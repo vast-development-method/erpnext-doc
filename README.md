@@ -42,6 +42,8 @@ A transaction can change operational progress, inventory value, financial balanc
 
 Compatibility means the same supported operation, input, configuration, prior records, identity, and effective time produce the same accept-or-reject decision, persisted facts, state transitions, amounts, quantity consequences, and externally visible completion or failure. Exact source-language identifiers and branded transport paths are replaced with neutral names. Existing clients expecting those literal names require an adapter; this repository specifies semantic compatibility rather than claiming a byte-for-byte reproduction of named routes.
 
+Language forms part of the compatibility profile. Record the language of the operator, recipient and issued document separately. A translated control must invoke the same authorized business operation, and a reprint must identify the language and version issued to the recipient. The [multilingual contract](docs/rebuild/marketplace-guides/languages/README.md) gives the reference behaviour and worked examples.
+
 Each rule distinguishes observed source behaviour, a derived example, and a proposed improvement. An apparent anomaly is retained as a compatibility finding until resolved. Industry convention never silently replaces a contradictory source decision.
 
 ## Evidence and completeness
