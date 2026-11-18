@@ -2,7 +2,7 @@
 
 ## Specification boundary
 
-The [specification baseline](../../schemas/traceability/specification-baseline.json) defines the fixed application boundary. Every business rule must be available as explanatory text, a record definition, an ordered decision, a calculation or an acceptance case within this repository. No external archive or previous conversation is required to interpret these contracts.
+The [September source snapshot](../../schemas/traceability/source-snapshot.json) identifies the four pins for this edition. The [reading guide](../../checkpoints/reading-guide.md) locates its complete catalogs. The [November profile](../rebuild/README.md) records release-specific behaviour and external application pins. Every business rule must be available as explanatory text, a record definition, an ordered decision, a calculation or an acceptance case within this repository. No external archive or previous conversation is required to interpret these contracts.
 
 | Capability group | Responsibility |
 |---|---|

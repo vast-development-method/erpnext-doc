@@ -2,7 +2,7 @@
 
 This repository specifies a unified enterprise application through its observable decisions, records, calculations, permissions, transactions, and business consequences. It is intended for an independent implementation without assuming an implementation language, framework, database product, hosting topology, or prior knowledge of the reference system.
 
-The reference boundary is the four supplied source snapshots, including their shared application foundation. Current accounting, distribution, manufacturing, customer relationships, workforce, payroll, projects, support, and shared administration form one specification. Historical upgrade procedures, deprecated compatibility shims, product deployment recipes, and a prospective implementation platform are outside this boundary. An actively selectable behaviour remains in scope even if it has existed for many years.
+The September reference edition follows four supplied source snapshots, including their shared application foundation. The [November rebuild specification](docs/rebuild/README.md) follows separately pinned ERPNext and Frappe v16 releases and named extension revisions. The [checkpoint reading guide](checkpoints/reading-guide.md) assembles the complete September edition and the current supplements into a single searchable directory. Current accounting, distribution, manufacturing, customer relationships, workforce, payroll, projects, support, and shared administration form one specification. Historical upgrade procedures, deprecated compatibility shims, product deployment recipes, and a prospective implementation platform are outside this boundary. An actively selectable behaviour remains in scope even if it has existed for many years.
 
 ## Architecture at a glance
 
@@ -26,6 +26,8 @@ A transaction can change operational progress, inventory value, financial balanc
 
 | Purpose | Reading path |
 |---|---|
+| Build from the November research | [Release profile, reading order and qualifications](docs/rebuild/README.md) |
+| Follow physical and financial records together | [Supplier receipt through repack, sale, return and cash](docs/rebuild/integrated/README.md) |
 | Understand the full boundary | [Scope and source baseline](docs/overview/scope-and-baseline.md), then [business compatibility map](docs/overview/business-compatibility-map.md) |
 | Understand the architecture | [Application architecture](docs/overview/application-architecture.md), then [cross-domain transactions](docs/domains/cross-domain-transactions.md) |
 | Rebuild records and calculations | [Domain model](docs/data/domain-model.md), [physical data catalog](docs/data/physical-data-catalog.md), then the [mathematical catalog](schemas/mathematics/README.md) |
@@ -43,6 +45,6 @@ Each rule distinguishes observed source behaviour, a derived example, and a prop
 
 ## Evidence and completeness
 
-The structural baseline contains **1,044 record definitions and 16,813 declared fields**, including layout fields, child records, and settings records. Source inventory, field inventory, semantic review, numerical example checks, and execution against a running reference application are separate measures. Consult the coverage report before making an equivalence claim. Cataloging a function or a record does not establish that all of its decisions have been specified or executed.
+The September structural baseline contains **1,044 record definitions and 16,813 declared fields**, including layout fields, child records, and settings records. Source inventory, field inventory, semantic review, numerical example checks, and execution against a running reference application are separate measures. Consult the coverage report before making an equivalence claim. Cataloging a function or a record does not establish that all of its decisions have been specified or executed.
 
 The specification contains original explanatory prose and neutral structured facts. Source archives and source implementation code are not included. The unchanged repository license is [Apache License, Version 2.0](LICENSE).
