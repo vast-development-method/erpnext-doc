@@ -2,6 +2,8 @@
 
 The original blueprint follows four September source archives. This companion follows the named business applications separated from ERPNext in the version 14 and 15 migration guides. It also follows the CRM product/permission bridge from the original scope and the carrier integration used by Shipment. Sixteen of seventeen named split-application repositories were inspectable. The historical KSA link was unavailable, and its profile remains open. The [marketplace snapshot](marketplace.json) separately records the public listing universe observed on 18 November 2026. Field names, choices and callable identifiers are adapter vocabulary. Implementations may use different internals.
 
+The [multilingual marketplace guides](../marketplace-guides/README.md) cover the 69 entries listed without a verified repository head. Each has an individual evidence profile and an acceptance example in four languages.
+
 ## Reading paths
 
 | Business transaction | Trace |
