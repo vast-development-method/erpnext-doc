@@ -4,6 +4,10 @@
 
 Indictrans Tech lists version 13. Its three modules cover physical facilities. The asset register tracks equipment location, breakdowns, maintenance contracts (AMC) and planned maintenance (PPM). The helpdesk records complaints, resolution evidence and costs and sends status emails through a closure workflow. Reception registers visitors, captures a photo at check-in, verifies them by an emailed one-time password and issues a visitor pass. Reports and dashboards support analysis. [Marketplace feature list](https://cloud.frappe.io/marketplace/apps/kf_city_2) · [Listed repository](https://github.com/indictranstech/KF_AHVG)
 
+## Related publisher material
+
+The vendor’s 2019 brochure describes a separate visitor product. It allows hosts to invite or preregister a visitor and describes QR verification and a mobile one-time code. This is evidence for another available design. The Site Management card itself specifies an emailed code and a check-in photograph; the brochure does not establish QR or mobile-code support in this app. [Indictrans brochure, page 4](https://softwaresuggest-cdn.s3.amazonaws.com/brochures/1574420326_Brochure_Indictrans.pdf#page=4)
+
 ## Proposed rebuild contract
 
 | Business operation | Proposed records and transition |

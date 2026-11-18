@@ -4,6 +4,10 @@
 
 Indictrans Tech lists version 13. A user can raise a general complaint or link the complaint to a particular entry in the asset register. The advertised capabilities include ticket attachments, a resolution workflow, email on updates, turnaround-time analysis, a dashboard and reports. The listing describes neither an exact state machine nor which periods contribute to turnaround. [Marketplace description](https://cloud.frappe.io/marketplace/apps/kf_shell) · [Listed repository](https://github.com/indictranstech/KF_Shell)
 
+## Related publisher material
+
+In a separate support-ticket product description, Indictrans lists ticket filtering, assignment, transfer, referral and service-level agreements. These are useful comparison points when specifying reassignment and timing policies. The brochure does not identify KF Shell, so it establishes neither the states in this app nor a service-level calendar for the listing. [Indictrans brochure, page 4](https://softwaresuggest-cdn.s3.amazonaws.com/brochures/1574420326_Brochure_Indictrans.pdf#page=4)
+
 ## Proposed rebuild contract
 
 The intake command requires a facility, requester, original description and complaint kind. For an asset complaint, require an asset visible at the site. A general complaint may omit it. Issue one ticket ID and an opened timestamp. Each update appends actor, time, optional evidence and transition to a versioned history. Distinguish ticket resolution from delivery of the notification, so a mail failure does not reopen a resolved ticket.
