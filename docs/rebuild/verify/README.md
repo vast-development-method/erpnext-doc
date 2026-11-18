@@ -36,6 +36,10 @@ python3 -B docs/rebuild/verify/run.py \
 
 Each `SKIP` for a source replay means the corresponding checkout arguments were omitted. A pinned GitHub location with an unavailable historical object or an unsupplied repository contributes to the reported unresolved repository/revision count. Supplying `--compare-model` makes the four historical model pins mandatory. External documentation URLs, moving branches, external pages and their availability are outside the offline link check. The source checker verifies that an immutable file or directory exists at the given commit and any cited line interval lies inside that file. Interpreting the cited business rule still requires review.
 
+## Multilingual marketplace guides
+
+The same entry point validates the ten [marketplace catalog shards](../marketplace-guides/coverage.json) and the [multilingual notice fixture](../marketplace-guides/languages/notice.json). For a historical third-party source outside the 313 archived app declarations, consult the separate [source-location receipt](../marketplace-guides/source-locations.json). It identifies the public revision, observed file or tree, verification method and any line anchor. The [invoice language observations](../marketplace-guides/languages/observed.json) were captured on the disposable trading site; the documentation audit reads the saved results.
+
 ## Scope of a pass
 
 The 43 operations examples receive schema checks in this entry point. The production and valuation suites additionally have their own optional source replays. The extension workflow integration scenarios are proposed observations. Their schema and reference checks do not execute their workflows.

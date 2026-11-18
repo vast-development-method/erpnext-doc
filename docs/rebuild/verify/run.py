@@ -64,6 +64,7 @@ def schema_targets(schema):
         "model/catalog.schema.json": ["model/catalog/*.json"],
         "live/reports/observation.schema.json": ["live/reports/observed.json"],
         "live/observation.schema.json": ["live/observed.json", "live/stale-credit.json"],
+        "marketplace-guides/guides.schema.json": ["marketplace-guides/catalog/*.json"],
         "marketplace-model/directory.schema.json": ["marketplace-model/catalog/directory-*.json"],
         "marketplace-model/surfaces.schema.json": ["marketplace-model/catalog/surfaces-*.json"],
         "surfaces/shard.schema.json": ["surfaces/shards/*.json"],
