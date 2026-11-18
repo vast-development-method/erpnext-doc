@@ -37,6 +37,8 @@ def verify(path, stale):
     require(actual["database_read"] == read_mode, "Incorrect read mode")
     seen = set()
     customer = {}
+    cumulative = {}
+    expected_customer_legs = {}
     for expected, receipt in zip(profile["steps"], actual["steps"], strict=True):
         step = expected["id"]
         require(receipt["step"] == step and (receipt["voucher_type"], receipt["voucher"]) not in seen, step)
@@ -52,8 +54,11 @@ def verify(path, stale):
         if stale and step in ("CREDIT", "PAY2", "REMIT"):
             due["SALE"] = format(D(due["SALE"]) + 69, ".2f")
         require(receipt["invoice_outstanding"] == due, f"{step} invoice balances")
+        if "receivables" in expected["journal_net_debit"]:
+            cumulative[step] = D(expected["journal_net_debit"]["receivables"])
         if "SALE" in due:
             customer[step] = due["SALE"]
+            expected_customer_legs[step] = dict(cumulative)
     require([r["step"] for r in actual["receivables"]] == list(customer), "Missing receivable checkpoint")
     for row in actual["receivables"]:
         step = row["step"]
@@ -64,14 +69,7 @@ def verify(path, stale):
             by_source[entry["source"]] += D(entry["amount"])
             target = "CREDIT" if stale and entry["source"] == "CREDIT" else "SALE"
             require(entry["against"] == target, f"{step} wrong allocation target {entry}")
-        expected_legs = {
-            r["id"]: D(r["journal_net_debit"]["receivables"])
-            for r in profile["steps"][
-                : next(n + 1 for n, r in enumerate(profile["steps"]) if r["id"] == step)
-            ]
-            if "receivables" in r["journal_net_debit"]
-        }
-        require(dict(by_source) == expected_legs, f"{step} missing or unexpected party entries")
+        require(dict(by_source) == expected_customer_legs[step], f"{step} missing or unexpected party entries")
         require(D(customer[step]) == D(row["original_invoice"]) == by_target["SALE"], f"{step} original")
         require(sum(by_target.values()) == D(row["party_total"]), f"{step} customer account")
         if step in ("CREDIT", "PAY2", "REMIT"):
