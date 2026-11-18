@@ -1,0 +1,29 @@
+# Turning a shortage into an authorised material request
+
+## Scheduled replenishment
+
+Enable automatic requests in stock settings and initialise a company and fiscal year. Each item reorder rule supplies monitored warehouse or group, destination warehouse, stock-unit threshold, reorder quantity and request type. Consider enabled stock items whose end-of-life date is absent or later than today. Exclude disabled destination warehouses. Sum projected bin quantities up the warehouse hierarchy for a group-level comparison and use zero for a missing bin.
+
+Given projected quantity P, reorder level L and configured lot Q, evaluate only when L or Q is nonzero and P ≤ L. Start the request at Q. If P + Q ≤ L, add L − P to Q. This second comparison is inclusive and materially affects orders.
+
+| Projected | Level | Lot | Request in stock units | Reason |
+|---:|---:|---:|---:|---|
+| 11 | 10 | 4 | 0 | Above level |
+| 10 | 10 | 4 | 4 | At level |
+| 7 | 10 | 4 | 4 | Four takes the projection above the level |
+| 6 | 10 | 4 | 8 | Six plus four equals the level; the four-unit deficit is added to the lot |
+| −5 | 10 | 4 | 19 | Clear the 15-unit deficit and add four |
+
+Group rows by company and request type, creating submitted requests marked as automatically generated. A transfer policy maps to a material-transfer request. For a purchase request use the purchase UOM when supplied: stock requirement divided by item-specific conversion factor, rounded up when the UOM requires whole quantities. The inspected scheduler falls back to factor one on missing conversion. For the 19-unit requirement with packs of six it requests four packs, representing 24 stock units. Preserve the original threshold, configured lot and projected-on-hand evidence in the request row. Due date is current date + item lead days; the header takes the latest row date. The request changes expected supply. Receipt, supplier invoicing and settlement remain subsequent operations.
+
+An implementation nuance appears at the variant boundary. The scheduler copies template rule records to eligible variants without their own rows, but later skips rows whose copied record has the template flag for multiple variants. Treat inherited-template automatic reorder as requiring a pinned reference run before claiming that it produces a request. Eligible explicit, non-template variant rows follow the standard path. [Scheduler](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/reorder_item.py) · [Material-request tests](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/stock/doctype/material_request/test_material_request.py)
+
+## Material requests from a production plan
+
+Reload the saved plan, check write access and enforce its open status before creating requests. The caller's submit-now option is retained while item quantities and source references come from the saved plan. Require subcontract flags for rows marked for subcontracting. Group requests by reference sales order and request type. The current grouping key supplies an empty customer segment. Refuse a group warehouse as the receiving destination. Keep the plan and its exact material requirement row on each generated line. The command may save drafts or submit according to its option.
+
+1. Derive required purchase/transfer quantities in stock UOM. For purchase/subcontract rows with a positive quantity, group by item, destination, request type and supplier. Allocate minimums across groups of sales-order rows within that key, processing sales orders in name order. Transfers do not acquire purchase minimums.
+2. First apply surplus from an earlier sales order to the next order's demand. If its positive remainder is below the largest minimum for its rows, add the difference to the first positive row. Carry actual purchased stock quantity minus demand forward, including surplus due to UOM rounding. For two orders needing 3 and 4 pieces with minimum 6, the first buys 6 (surplus 3); the second still needs 1 and buys another 6 (surplus 5). If the second instead needs exactly 3 it buys zero.
+3. Convert to purchase UOM at field precision. When normal rounding would fall below a binding minimum in stock UOM, use the next representable grid value that meets the minimum. With factor 6, two decimal places, minimum 7 stock units and a divisible purchase UOM, 1.17 purchase units covers 7.02 stock units. If the stock UOM is indivisible and that conversion leaves fractional stock, use whole stock UOM quantities instead. Respect separately indivisible purchase UOMs.
+4. For each saved plan row, outstanding request quantity in its transaction UOM = planned quantity − quantity already requested − stock quantity in linked drafts / conversion factor (default one). Round to field precision then round positive requests up for whole UOMs. Ten cases planned, three submitted and 24 stock pieces in drafts at six per case leaves three cases. An immediate repeat after creating those drafts leaves zero. This is a persistent outstanding check; concurrency beyond sequential retries needs a simultaneous-request run.
+5. Closing/reopening reloads the plan and requires a submitted record and write permission. Closing cancels submitted reservations in Reserved or Partially Reserved state and recomputes the affected bins. Derived rollups skip a closed plan. Reopening recomputes status from produced, completed, requested and ordered quantities. Preserve physical issues already performed. [Production plan](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/manufacturing/doctype/production_plan/production_plan.py) · [Minimums, conversions and reservation cases](https://github.com/frappe/erpnext/blob/886ab6ae187244e7f1b852393384ab6019d56264/erpnext/manufacturing/doctype/production_plan/test_production_plan.py)
